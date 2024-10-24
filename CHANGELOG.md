@@ -1,4 +1,10 @@
-## 1.0.1 (2024-10-24)
+## [1.0.2](https://github.com/salesforcecli/plugin-agent/compare/1.0.1...1.0.2) (2024-10-24)
+
+### Bug Fixes
+
+- update readme ([7f933cb](https://github.com/salesforcecli/plugin-agent/commit/7f933cb231ae97dfedf55a8afb081e45ccfecae3))
+
+## [1.0.1](https://github.com/salesforcecli/plugin-agent/compare/7559789c9561e51313d12bd2f4c8979b6e5b1b5b...1.0.1) (2024-10-24)
 
 ### Bug Fixes
 
