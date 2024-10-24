@@ -98,6 +98,6 @@ FLAG DESCRIPTIONS
     This person can be anyone in the world!
 ```
 
-_See code: [src/commands/hello/world.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.24/src/commands/hello/world.ts)_
+_See code: [src/commands/hello/world.ts](https://github.com/salesforcecli/plugin-agent/blob/0.1.0/src/commands/hello/world.ts)_
 
 <!-- commandsstop -->
