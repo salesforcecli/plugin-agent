@@ -61,4 +61,48 @@ sf plugins
 
 <!-- commands -->
 
+- [`sf agent run test`](#sf-agent-run-test)
+
+## `sf agent run test`
+
+Start a test for an Agent.
+
+```
+USAGE
+  $ sf agent run test -o <value> -i <value> [--json] [--flags-dir <value>] [-w <value>] [-d <value>]
+
+FLAGS
+  -d, --output-dir=<value>  Directory in which to store test run files.
+  -i, --id=<value>          (required) The AiEvalDefinitionVersion ID.
+  -o, --target-org=<value>  (required) Username or alias of the target org. Not required if the `target-org`
+                            configuration variable is already set.
+  -w, --wait=<value>        Number of minutes to wait for the command to complete and display results to the terminal
+                            window.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Start a test for an Agent.
+
+  Start a test for an Agent, providing the AiEvalDefinitionVersion ID. Returns the job ID.
+
+EXAMPLES
+  Start a test for an Agent:
+
+    $ sf agent run test --id AiEvalDefVerId
+
+FLAG DESCRIPTIONS
+  -i, --id=<value>  The AiEvalDefinitionVersion ID.
+
+    The AiEvalDefinitionVersion ID.
+
+  -w, --wait=<value>  Number of minutes to wait for the command to complete and display results to the terminal window.
+
+    If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
+```
+
+_See code: [src/commands/agent/run/test.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.0/src/commands/agent/run/test.ts)_
+
 <!-- commandsstop -->
