@@ -1,10 +1,10 @@
 [
   {
     "alias": [],
-    "command": "hello:world",
+    "command": "agent:run:test",
     "flagAliases": [],
-    "flagChars": ["n"],
-    "flags": ["flags-dir", "json", "name"],
+    "flagChars": ["d", "i", "o", "w"],
+    "flags": ["flags-dir", "id", "json", "output-dir", "target-org", "wait"],
     "plugin": "@salesforce/plugin-agent"
   }
 ]
