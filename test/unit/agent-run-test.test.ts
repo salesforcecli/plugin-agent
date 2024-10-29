@@ -23,7 +23,7 @@ describe('agent run test', () => {
   });
 
   it('runs agent run test', async () => {
-    await AgentRunTest.run(['i', 'the-id', '--targetusername', testOrg.username]);
+    await AgentRunTest.run(['-i', 'the-id', '-o', testOrg.username]);
     const output = sfCommandStubs.log
       .getCalls()
       .flatMap((c) => c.args)
