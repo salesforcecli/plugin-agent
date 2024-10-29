@@ -4,13 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { TestContext } from '@salesforce/core/testSetup';
+import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
 import { expect } from 'chai';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
 import AgentRunTest from '../../src/commands/agent/run/test.js';
 
-describe('hello world', () => {
+describe('agent run test', () => {
   const $$ = new TestContext();
+  const testOrg = new MockTestOrgData();
   let sfCommandStubs: ReturnType<typeof stubSfCommandUx>;
 
   beforeEach(() => {
@@ -22,7 +23,7 @@ describe('hello world', () => {
   });
 
   it('runs agent run test', async () => {
-    await AgentRunTest.run(['i', 'the-id']);
+    await AgentRunTest.run(['i', 'the-id', '--targetusername', testOrg.username]);
     const output = sfCommandStubs.log
       .getCalls()
       .flatMap((c) => c.args)
