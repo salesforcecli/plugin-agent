@@ -52,8 +52,8 @@
       "@salesforce/plugin-command-reference"
     ],
     "topics": {
-      "hello": {
-        "description": "Commands to say hello."
+      "agent": {
+        "description": "Commands to work with agents."
       }
     },
     "flexibleTaxonomy": true
