@@ -1,6 +1,33 @@
 [
   {
     "alias": [],
+    "command": "agent:create",
+    "flagAliases": [],
+    "flagChars": ["f", "o", "p"],
+    "flags": ["api-version", "flags-dir", "json", "planner", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:create:spec",
+    "flagAliases": [],
+    "flagChars": ["d", "o"],
+    "flags": [
+      "agent-type",
+      "api-version",
+      "company-description",
+      "company-name",
+      "company-website",
+      "flags-dir",
+      "json",
+      "output-dir",
+      "role",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:run:test",
     "flagAliases": [],
     "flagChars": ["d", "i", "o", "w"],
