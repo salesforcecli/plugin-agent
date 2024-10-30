@@ -9,15 +9,15 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.run.test');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
 
-export type AgentRunTestResult = {
+export type AgentTestRunResult = {
   buildVersion: number;
   jobId: string;
   errorRepresentation?: string;
 };
 
-export default class AgentRunTest extends SfCommand<AgentRunTestResult> {
+export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -50,8 +50,8 @@ export default class AgentRunTest extends SfCommand<AgentRunTestResult> {
     //   ??? api-version or build-version ???
   };
 
-  public async run(): Promise<AgentRunTestResult> {
-    const { flags } = await this.parse(AgentRunTest);
+  public async run(): Promise<AgentTestRunResult> {
+    const { flags } = await this.parse(AgentTestRun);
 
     this.log(`Starting tests for AiEvalDefinitionVersion: ${flags.id}`);
 

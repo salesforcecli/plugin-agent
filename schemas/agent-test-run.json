@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentTestRunResult",
+  "definitions": {
+    "AgentTestRunResult": {
+      "type": "object",
+      "properties": {
+        "buildVersion": {
+          "type": "number"
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "errorRepresentation": {
+          "type": "string"
+        }
+      },
+      "required": ["buildVersion", "jobId"],
+      "additionalProperties": false
+    }
+  }
+}

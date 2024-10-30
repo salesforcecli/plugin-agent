@@ -28,7 +28,7 @@
   },
   {
     "alias": [],
-    "command": "agent:run:test",
+    "command": "agent:test:run",
     "flagAliases": [],
     "flagChars": ["d", "i", "o", "w"],
     "flags": ["flags-dir", "id", "json", "output-dir", "target-org", "wait"],
