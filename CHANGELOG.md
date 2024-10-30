@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/salesforcecli/plugin-agent/compare/1.1.0...1.1.1) (2024-10-30)
+
+### Bug Fixes
+
+- add agent create stubs ([37f1619](https://github.com/salesforcecli/plugin-agent/commit/37f1619df66d3f30c664a61982479dc8b3ab87fc))
+- add agent create stubs ([223704b](https://github.com/salesforcecli/plugin-agent/commit/223704ba0a5bc8d5d6c325149ece90d392e7ef49))
+
 # [1.1.0](https://github.com/salesforcecli/plugin-agent/compare/1.0.2...1.1.0) (2024-10-29)
 
 ### Bug Fixes
