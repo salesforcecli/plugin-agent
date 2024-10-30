@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentCreateSpecResult",
+  "definitions": {
+    "AgentCreateSpecResult": {
+      "type": "object",
+      "properties": {
+        "isSuccess": {
+          "type": "boolean"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "jobSpec": {
+          "type": "string"
+        }
+      },
+      "required": ["isSuccess"],
+      "additionalProperties": false
+    }
+  }
+}
