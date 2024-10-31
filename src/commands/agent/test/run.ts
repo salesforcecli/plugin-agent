@@ -12,9 +12,10 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
 
 export type AgentTestRunResult = {
-  buildVersion: number;
-  jobId: string;
-  errorRepresentation?: string;
+  jobId: string; // AiEvaluation.Id
+  success: boolean;
+  errorCode?: string;
+  message?: string;
 };
 
 export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
@@ -56,10 +57,13 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.log(`Starting tests for AiEvalDefinitionVersion: ${flags.id}`);
 
     // Call SF Eval Connect API passing AiEvalDefinitionVersion.Id
+    // POST to /einstein/ai-evaluations/{aiEvalDefinitionVersionId}/start
+
+    // Returns: AiEvaluation.Id
 
     return {
-      buildVersion: 62.0, // looks like API version
-      jobId: '4KBSM000000003F4AQ', // evaluationJobId; needed for getting status and stopping
+      success: true,
+      jobId: '4KBSM000000003F4AQ', // AiEvaluation.Id; needed for getting status and stopping
     };
   }
 }
