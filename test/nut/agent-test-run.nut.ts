@@ -13,7 +13,15 @@ let testSession: TestSession;
 
 describe('agent test run NUTs', () => {
   before('prepare session', async () => {
-    testSession = await TestSession.create();
+    testSession = await TestSession.create({
+      devhubAuthStrategy: 'AUTO',
+      scratchOrgs: [
+        {
+          edition: 'developer',
+          setDefault: true,
+        },
+      ],
+    });
   });
 
   after(async () => {
