@@ -9,15 +9,16 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.run.test');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
 
-export type AgentRunTestResult = {
-  buildVersion: number;
-  jobId: string;
-  errorRepresentation?: string;
+export type AgentTestRunResult = {
+  jobId: string; // AiEvaluation.Id
+  success: boolean;
+  errorCode?: string;
+  message?: string;
 };
 
-export default class AgentRunTest extends SfCommand<AgentRunTestResult> {
+export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -50,16 +51,19 @@ export default class AgentRunTest extends SfCommand<AgentRunTestResult> {
     //   ??? api-version or build-version ???
   };
 
-  public async run(): Promise<AgentRunTestResult> {
-    const { flags } = await this.parse(AgentRunTest);
+  public async run(): Promise<AgentTestRunResult> {
+    const { flags } = await this.parse(AgentTestRun);
 
     this.log(`Starting tests for AiEvalDefinitionVersion: ${flags.id}`);
 
     // Call SF Eval Connect API passing AiEvalDefinitionVersion.Id
+    // POST to /einstein/ai-evaluations/{aiEvalDefinitionVersionId}/start
+
+    // Returns: AiEvaluation.Id
 
     return {
-      buildVersion: 62.0, // looks like API version
-      jobId: '4KBSM000000003F4AQ', // evaluationJobId; needed for getting status and stopping
+      success: true,
+      jobId: '4KBSM000000003F4AQ', // AiEvaluation.Id; needed for getting status and stopping
     };
   }
 }

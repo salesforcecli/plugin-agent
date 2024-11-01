@@ -28,7 +28,15 @@
   },
   {
     "alias": [],
-    "command": "agent:run:test",
+    "command": "agent:test:cancel",
+    "flagAliases": [],
+    "flagChars": ["i", "o", "r"],
+    "flags": ["flags-dir", "job-id", "json", "target-org", "use-most-recent"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:run",
     "flagAliases": [],
     "flagChars": ["d", "i", "o", "w"],
     "flags": ["flags-dir", "id", "json", "output-dir", "target-org", "wait"],

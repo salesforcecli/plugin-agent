@@ -7,7 +7,7 @@
 import { MockTestOrgData, TestContext } from '@salesforce/core/testSetup';
 import { expect } from 'chai';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
-import AgentRunTest from '../../src/commands/agent/run/test.js';
+import AgentTestRun from '../../src/commands/agent/test/run.js';
 
 describe('agent run test', () => {
   const $$ = new TestContext();
@@ -23,7 +23,7 @@ describe('agent run test', () => {
   });
 
   it('runs agent run test', async () => {
-    await AgentRunTest.run(['-i', 'the-id', '-o', testOrg.username]);
+    await AgentTestRun.run(['-i', 'the-id', '-o', testOrg.username]);
     const output = sfCommandStubs.log
       .getCalls()
       .flatMap((c) => c.args)
