@@ -63,7 +63,8 @@ sf plugins
 
 - [`sf agent create`](#sf-agent-create)
 - [`sf agent create spec`](#sf-agent-create-spec)
-- [`sf agent run test`](#sf-agent-run-test)
+- [`sf agent test cancel`](#sf-agent-test-cancel)
+- [`sf agent test run`](#sf-agent-test-run)
 
 ## `sf agent create`
 
@@ -101,7 +102,7 @@ FLAG DESCRIPTIONS
     command.
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/create.ts)_
 
 ## `sf agent create spec`
 
@@ -143,15 +144,46 @@ EXAMPLES
       --company-description "A meaningful description"
 ```
 
-_See code: [src/commands/agent/create/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.1/src/commands/agent/create/spec.ts)_
+_See code: [src/commands/agent/create/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/create/spec.ts)_
 
-## `sf agent run test`
+## `sf agent test cancel`
+
+Cancel a running test for an Agent.
+
+```
+USAGE
+  $ sf agent test cancel -o <value> -i <value> [--json] [--flags-dir <value>] [-r]
+
+FLAGS
+  -i, --job-id=<value>      (required) The AiEvaluation ID.
+  -o, --target-org=<value>  (required) Username or alias of the target org. Not required if the `target-org`
+                            configuration variable is already set.
+  -r, --use-most-recent     Use the job ID of the most recent test evaluation.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Cancel a running test for an Agent.
+
+  Cancel a running test for an Agent, providing the AiEvaluation ID.
+
+EXAMPLES
+  Cancel a test for an Agent:
+
+    $ sf agent test cancel --id AiEvalId
+```
+
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/test/cancel.ts)_
+
+## `sf agent test run`
 
 Start a test for an Agent.
 
 ```
 USAGE
-  $ sf agent run test -o <value> -i <value> [--json] [--flags-dir <value>] [-w <value>] [-d <value>]
+  $ sf agent test run -o <value> -i <value> [--json] [--flags-dir <value>] [-w <value>] [-d <value>]
 
 FLAGS
   -d, --output-dir=<value>  Directory in which to store test run files.
@@ -173,7 +205,7 @@ DESCRIPTION
 EXAMPLES
   Start a test for an Agent:
 
-    $ sf agent run test --id AiEvalDefVerId
+    $ sf agent test run --id AiEvalDefVerId
 
 FLAG DESCRIPTIONS
   -i, --id=<value>  The AiEvalDefinitionVersion ID.
@@ -185,6 +217,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/run/test.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.1/src/commands/agent/run/test.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

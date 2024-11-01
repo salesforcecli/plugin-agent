@@ -1,3 +1,14 @@
+## [1.1.2](https://github.com/salesforcecli/plugin-agent/compare/1.1.1...1.1.2) (2024-11-01)
+
+### Bug Fixes
+
+- add a nut ([1563e12](https://github.com/salesforcecli/plugin-agent/commit/1563e12031d59f2ef44e3e5281489ec588f9b225))
+- add agent test cancel ([29983c2](https://github.com/salesforcecli/plugin-agent/commit/29983c2f70347aff24ad1b78effe801b15bee9a3))
+- agent test run ([71b85f0](https://github.com/salesforcecli/plugin-agent/commit/71b85f0ed28024a815ad6faba81e4d77842e48fe))
+- agent test run ([d7db1ea](https://github.com/salesforcecli/plugin-agent/commit/d7db1ea7d5b6f5c86dbd3956919e6b722bc10a1c))
+- nut needs an org ([6dddb61](https://github.com/salesforcecli/plugin-agent/commit/6dddb6118c9b529eb2266b7dcd81b53e7c300076))
+- test ([a76728f](https://github.com/salesforcecli/plugin-agent/commit/a76728fe2fea58e5a61383aa9dbb1ab6757e85d6))
+
 ## [1.1.1](https://github.com/salesforcecli/plugin-agent/compare/1.1.0...1.1.1) (2024-10-30)
 
 ### Bug Fixes
