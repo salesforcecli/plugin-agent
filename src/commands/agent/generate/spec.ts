@@ -89,7 +89,8 @@ const FLAGGABLE_PROMPTS = {
   'company-website': {
     message: messages.getMessage('flags.company-website.summary'),
     validate: (d: string): boolean | string => {
-      if (!d.length) return 'Company website cannot be empty';
+      // Allow empty string
+      if (d.length === 0) return true;
 
       try {
         new URL(d);
