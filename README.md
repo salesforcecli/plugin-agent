@@ -72,13 +72,12 @@ Create an Agent from an agent spec.
 
 ```
 USAGE
-  $ sf agent create -o <value> -f <value> -p <value> [--json] [--flags-dir <value>] [--api-version <value>]
+  $ sf agent create -o <value> -f <value> [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
   -f, --spec=<value>         (required) The path to an agent spec file.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
-  -p, --planner=<value>      (required) The path to an agent spec file.
       --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
@@ -93,16 +92,16 @@ DESCRIPTION
 EXAMPLES
   Create an Agent:
 
-    $ sf agent create --planner MyAgentPlanner --spec ./agent-spec.json
+    $ sf agent create --spec ./agent-spec.json
 
 FLAG DESCRIPTIONS
   -f, --spec=<value>  The path to an agent spec file.
 
-    The agent spec file defines job descriptions for the agent and can be created using the `sf agent create spec`
-    command.
+    The agent spec file defines job titles and descriptions for the agent and can be created using the `sf agent create
+    spec` command.
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.3/src/commands/agent/create.ts)_
 
 ## `sf agent create spec`
 
@@ -110,16 +109,17 @@ Create an Agent spec.
 
 ```
 USAGE
-  $ sf agent create spec -o <value> --agent-type customer_facing|employee_facing --role <value> --company-name <value>
+  $ sf agent create spec -o <value> -n <value> -t customer_facing|employee_facing --role <value> --company-name <value>
     --company-description <value> [--json] [--flags-dir <value>] [--api-version <value>] [--company-website <value>] [-d
     <value>]
 
 FLAGS
   -d, --output-dir=<value>           [default: config] The location within the project where the agent spec will be
                                      written.
+  -n, --name=<value>                 (required) The name of the agent to create.
   -o, --target-org=<value>           (required) Username or alias of the target org. Not required if the `target-org`
                                      configuration variable is already set.
-      --agent-type=<option>          (required) The type of agent to create.
+  -t, --type=<option>                (required) The type of agent to create.
                                      <options: customer_facing|employee_facing>
       --api-version=<value>          Override the api version used for api requests made by this command
       --company-description=<value>  (required) The description of the company, containing details to be used when
@@ -135,16 +135,16 @@ GLOBAL FLAGS
 DESCRIPTION
   Create an Agent spec.
 
-  Create an Agent spec, which is a list of job descriptions for the agent.
+  Create an Agent spec, which is a list of job titles and descriptions that the agent performs.
 
 EXAMPLES
   Create an Agent spec in the default location:
 
-    $ sf agent create spec --agent-type customer-facing --role Support --company-name "Coral Cloud" \
-      --company-description "A meaningful description"
+    $ sf agent create spec --type customer_facing --role Support --company-name "Coral Cloud" --company-description \
+      "A meaningful description"
 ```
 
-_See code: [src/commands/agent/create/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/create/spec.ts)_
+_See code: [src/commands/agent/create/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.3/src/commands/agent/create/spec.ts)_
 
 ## `sf agent test cancel`
 
@@ -175,7 +175,7 @@ EXAMPLES
     $ sf agent test cancel --id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.3/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test run`
 
@@ -217,6 +217,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.2/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.1.3/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/salesforcecli/plugin-agent/compare/1.1.2...1.1.3) (2024-11-07)
+
+### Bug Fixes
+
+- some mocking around agent creation ([5546f2a](https://github.com/salesforcecli/plugin-agent/commit/5546f2ab9b7d502d00bc2edb3d6a5fde05acd845))
+
 ## [1.1.2](https://github.com/salesforcecli/plugin-agent/compare/1.1.1...1.1.2) (2024-11-01)
 
 ### Bug Fixes
