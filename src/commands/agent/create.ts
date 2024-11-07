@@ -7,6 +7,7 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
+import { Duration, sleep } from '@salesforce/kit';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create');
@@ -16,7 +17,9 @@ export type AgentCreateResult = {
   errorMessage?: string;
 };
 
-// This is a POST to /services/data/{api-version}/connect/attach-agent-topics
+// There is no API for this yet. It's being planned/built by the Agent Creator team.
+// However, we could possibly use:
+//   /services/data/{api-version}/connect/attach-agent-topics
 
 export default class AgentCreate extends SfCommand<AgentCreateResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -32,11 +35,6 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
       summary: messages.getMessage('flags.spec.summary'),
       description: messages.getMessage('flags.spec.description'),
     }),
-    planner: Flags.string({
-      char: 'p',
-      required: true,
-      summary: messages.getMessage('flags.spec.summary'),
-    }),
   };
 
   public async run(): Promise<AgentCreateResult> {
@@ -45,6 +43,9 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     this.log(`Creating agent from spec: ${flags.spec}`);
 
     // POST to /services/data/{api-version}/connect/attach-agent-topics
+
+    // To simulate time spent on the server generating the spec.
+    await sleep(Duration.seconds(5));
 
     return { isSuccess: true };
   }
