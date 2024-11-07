@@ -4,9 +4,13 @@ Create an Agent spec.
 
 # description
 
-Create an Agent spec, which is a list of job descriptions for the agent.
+Create an Agent spec, which is a list of job titles and descriptions that the agent performs.
 
-# flags.agent-type.summary
+# flags.name.summary
+
+The name of the agent to create.
+
+# flags.type.summary
 
 The type of agent to create.
 
@@ -34,4 +38,4 @@ The location within the project where the agent spec will be written.
 
 - Create an Agent spec in the default location:
 
-  <%= config.bin %> <%= command.id %> --agent-type customer-facing --role Support --company-name "Coral Cloud" --company-description "A meaningful description"
+  <%= config.bin %> <%= command.id %> --type customer_facing --role Support --company-name "Coral Cloud" --company-description "A meaningful description"
