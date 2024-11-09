@@ -1,46 +1,82 @@
 [
-  {
-    "alias": [],
-    "command": "agent:create",
-    "flagAliases": [],
-    "flagChars": ["f", "o"],
-    "flags": ["api-version", "flags-dir", "json", "spec", "target-org"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:create:spec",
-    "flagAliases": [],
-    "flagChars": ["d", "n", "o", "t"],
-    "flags": [
-      "api-version",
-      "company-description",
-      "company-name",
-      "company-website",
-      "flags-dir",
-      "json",
-      "name",
-      "output-dir",
-      "role",
-      "target-org",
-      "type"
-    ],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:test:cancel",
-    "flagAliases": [],
-    "flagChars": ["i", "o", "r"],
-    "flags": ["flags-dir", "job-id", "json", "target-org", "use-most-recent"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:test:run",
-    "flagAliases": [],
-    "flagChars": ["d", "i", "o", "w"],
-    "flags": ["flags-dir", "id", "json", "output-dir", "target-org", "wait"],
-    "plugin": "@salesforce/plugin-agent"
-  }
+    {
+        "alias": [],
+        "command": "agent:create",
+        "flagAliases": [],
+        "flagChars": [
+            "f",
+            "o"
+        ],
+        "flags": [
+            "api-version",
+            "flags-dir",
+            "json",
+            "spec",
+            "target-org"
+        ],
+        "plugin": "@salesforce/plugin-agent"
+    },
+    {
+        "alias": [],
+        "command": "agent:generate:spec",
+        "flagAliases": [],
+        "flagChars": [
+            "d",
+            "n",
+            "o",
+            "t"
+        ],
+        "flags": [
+            "api-version",
+            "company-description",
+            "company-name",
+            "company-website",
+            "flags-dir",
+            "json",
+            "name",
+            "output-dir",
+            "role",
+            "target-org",
+            "type"
+        ],
+        "plugin": "@salesforce/plugin-agent"
+    },
+    {
+        "alias": [],
+        "command": "agent:test:cancel",
+        "flagAliases": [],
+        "flagChars": [
+            "i",
+            "o",
+            "r"
+        ],
+        "flags": [
+            "flags-dir",
+            "job-id",
+            "json",
+            "target-org",
+            "use-most-recent"
+        ],
+        "plugin": "@salesforce/plugin-agent"
+    },
+    {
+        "alias": [],
+        "command": "agent:test:run",
+        "flagAliases": [],
+        "flagChars": [
+            "d",
+            "i",
+            "o",
+            "w"
+        ],
+        "flags": [
+            "flags-dir",
+            "id",
+            "json",
+            "output-dir",
+            "target-org",
+            "wait"
+        ],
+        "plugin": "@salesforce/plugin-agent"
+    }
 ]

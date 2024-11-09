@@ -5,10 +5,14 @@
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
+    "@inquirer/figures": "^1.0.7",
+    "@inquirer/input": "^4.0.1",
+    "@inquirer/select": "^4.0.1",
     "@oclif/core": "^4",
     "@salesforce/core": "^8.5.2",
     "@salesforce/kit": "^3.2.1",
-    "@salesforce/sf-plugins-core": "^11.3.12"
+    "@salesforce/sf-plugins-core": "^12",
+    "ansis": "^3.3.2"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.2.19",
