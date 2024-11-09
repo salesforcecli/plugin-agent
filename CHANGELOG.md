@@ -1,3 +1,13 @@
+# [1.2.0](https://github.com/salesforcecli/plugin-agent/compare/1.1.3...1.2.0) (2024-11-09)
+
+### Bug Fixes
+
+- allow company website to be empty ([78b52cc](https://github.com/salesforcecli/plugin-agent/commit/78b52cc995fff978debd323cdd639b5453559bc9))
+
+### Features
+
+- use inquirer for generating spec ([27d2ebd](https://github.com/salesforcecli/plugin-agent/commit/27d2ebdd9d87dcc25933ddbac7198b05cec17666))
+
 ## [1.1.3](https://github.com/salesforcecli/plugin-agent/compare/1.1.2...1.1.3) (2024-11-07)
 
 ### Bug Fixes
