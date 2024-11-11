@@ -46,26 +46,19 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
 
   public async run(): Promise<AgentCreateResult> {
     const { flags } = await this.parse(AgentCreate);
-    const mso = new MultiStageOutput<{ file?: string }>({
+    const jsonParsingStage = `Parsing ${flags['job-spec']}`;
+    const mso = new MultiStageOutput({
       jsonEnabled: this.jsonEnabled(),
       title: `Creating ${flags.name} Agent`,
       stages: [
-        'Parsing agent spec JSON',
+        jsonParsingStage,
         'Generating GenAiPlanner metadata',
         'Creating agent in org',
         'Retrieving agent metadata',
       ],
-      stageSpecificBlock: [
-        {
-          stage: 'Parsing agent spec JSON',
-          get: (data) => data?.file,
-          type: 'static-key-value',
-          label: 'file',
-        },
-      ],
     });
 
-    mso.goto('Parsing agent spec JSON', { file: flags['job-spec'] });
+    mso.goto(jsonParsingStage);
     await sleep(Duration.milliseconds(200));
 
     mso.goto('Generating GenAiPlanner metadata');
