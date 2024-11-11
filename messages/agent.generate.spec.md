@@ -6,10 +6,6 @@ Create an Agent spec.
 
 Create an Agent spec, which is a list of job titles and descriptions that the agent performs.
 
-# flags.name.summary
-
-The name of the agent to create.
-
 # flags.type.summary
 
 The type of agent to create.
@@ -33,6 +29,10 @@ The website URL for the company.
 # flags.output-dir.summary
 
 The location within the project where the agent spec will be written.
+
+# flags.file-name.summary
+
+The name of the file to write the agent spec to.
 
 # examples
 

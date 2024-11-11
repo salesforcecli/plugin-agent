@@ -5,13 +5,15 @@
         "flagAliases": [],
         "flagChars": [
             "f",
+            "n",
             "o"
         ],
         "flags": [
             "api-version",
             "flags-dir",
+            "job-spec",
             "json",
-            "spec",
+            "name",
             "target-org"
         ],
         "plugin": "@salesforce/plugin-agent"
@@ -22,7 +24,7 @@
         "flagAliases": [],
         "flagChars": [
             "d",
-            "n",
+            "f",
             "o",
             "t"
         ],
@@ -31,9 +33,9 @@
             "company-description",
             "company-name",
             "company-website",
+            "file-name",
             "flags-dir",
             "json",
-            "name",
             "output-dir",
             "role",
             "target-org",
