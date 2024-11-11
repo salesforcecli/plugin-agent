@@ -7,13 +7,13 @@
 import { join } from 'node:path';
 import { writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
-import { Duration, sleep } from '@salesforce/kit';
+import { Messages, SfProject } from '@salesforce/core';
 import { Interfaces } from '@oclif/core';
 import ansis from 'ansis';
 import select from '@inquirer/select';
 import inquirerInput from '@inquirer/input';
 import figures from '@inquirer/figures';
+import { Agent, SfAgent } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create.spec');
@@ -25,24 +25,6 @@ export type AgentCreateSpecResult = {
   // We probably need more than this in the returned JSON like
   // all the parameters used to generate the spec and the spec contents
 };
-
-// This is a GET of '/services/data/v62.0/connect/agent-job-spec?agentType...
-
-// Mocked job spec, which is a list of AI generated jobs to be done
-const jobSpecContent = [
-  {
-    jobTitle: 'My first job title',
-    jobDescription: 'This is what the first job does',
-  },
-  {
-    jobTitle: 'My second job title',
-    jobDescription: 'This is what the second job does',
-  },
-  {
-    jobTitle: 'My third job title',
-    jobDescription: 'This is what the third job does',
-  },
-];
 
 type FlaggablePrompt = {
   message: string;
@@ -130,6 +112,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly requiresProject = true;
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -146,10 +129,6 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
   public async run(): Promise<AgentCreateSpecResult> {
     const { flags } = await this.parse(AgentCreateSpec);
 
-    // We'll need to generate a GenAiPlanner using the name flag and deploy it
-    // as part of this, at least for now. We won't have to do this with the
-    // new API being created for us.
-
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {
       const missingFlags = Object.entries(FLAGGABLE_PROMPTS)
@@ -163,24 +142,25 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 
     this.log();
     this.styledHeader('Agent Details');
-    await this.getFlagOrPrompt(flags.name, FLAGGABLE_PROMPTS.name);
-    await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type);
-    await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
-    await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
-    await this.getFlagOrPrompt(flags['company-description'], FLAGGABLE_PROMPTS['company-description']);
-    await this.getFlagOrPrompt(flags['company-website'], FLAGGABLE_PROMPTS['company-website']);
+    const name = await this.getFlagOrPrompt(flags.name, FLAGGABLE_PROMPTS.name);
+    const type = await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type) as 'customer_facing' | 'employee_facing';
+    const role = await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
+    const companyName = await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
+    const companyDescription = await this.getFlagOrPrompt(flags['company-description'], FLAGGABLE_PROMPTS['company-description']);
+    const companyWebsite = await this.getFlagOrPrompt(flags['company-website'], FLAGGABLE_PROMPTS['company-website']);
 
     this.log();
     this.spinner.start('Creating agent spec');
 
-    // To simulate time spent on the server generating the spec.
-    await sleep(Duration.seconds(2));
-
-    // GET to /services/data/{api-version}/connect/agent-job-spec
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const agent = new Agent(connection, this.project as SfProject) as SfAgent;
+    const agentSpec = await agent.createSpec({
+      name, type, role, companyName, companyDescription, companyWebsite
+    });
 
     // Write a file with the returned job specs
     const filePath = join(flags['output-dir'], 'agentSpec.json');
-    writeFileSync(filePath, JSON.stringify(jobSpecContent, null, 4));
+    writeFileSync(filePath, JSON.stringify(agentSpec, null, 4));
 
     this.spinner.stop();
 
