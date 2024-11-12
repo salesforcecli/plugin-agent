@@ -1,3 +1,14 @@
+# [1.3.0](https://github.com/salesforcecli/plugin-agent/compare/1.2.1...1.3.0) (2024-11-12)
+
+### Bug Fixes
+
+- update success message ([f37d979](https://github.com/salesforcecli/plugin-agent/commit/f37d979937eb7bbc19373bcca470d569facc4a2b))
+- update UX ([10fcd5e](https://github.com/salesforcecli/plugin-agent/commit/10fcd5ed44ecc41316fdb17cc54cf44da6815e2b))
+
+### Features
+
+- add multi-stage-output ([633e484](https://github.com/salesforcecli/plugin-agent/commit/633e4849c304bc54ce3b028497607efd5007299b))
+
 ## [1.2.1](https://github.com/salesforcecli/plugin-agent/compare/1.2.0...1.2.1) (2024-11-12)
 
 ### Bug Fixes
