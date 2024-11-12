@@ -16,7 +16,7 @@ import figures from '@inquirer/figures';
 import { Agent, SfAgent } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create.spec');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.spec');
 
 export type AgentCreateSpecResult = {
   isSuccess: boolean;
@@ -40,12 +40,6 @@ type FlagsOfPrompts<T extends Record<string, FlaggablePrompt>> = Record<
 >;
 
 const FLAGGABLE_PROMPTS = {
-  name: {
-    message: messages.getMessage('flags.name.summary'),
-    validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
-    char: 'n',
-    required: true,
-  },
   type: {
     message: messages.getMessage('flags.type.summary'),
     validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
@@ -124,6 +118,11 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       summary: messages.getMessage('flags.output-dir.summary'),
       default: 'config',
     }),
+    'file-name': Flags.string({
+      char: 'f',
+      summary: messages.getMessage('flags.file-name.summary'),
+      default: 'agentSpec.json',
+    }),
   };
 
   public async run(): Promise<AgentCreateSpecResult> {
@@ -142,11 +141,15 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 
     this.log();
     this.styledHeader('Agent Details');
-    const name = await this.getFlagOrPrompt(flags.name, FLAGGABLE_PROMPTS.name);
-    const type = await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type) as 'customer_facing' | 'employee_facing';
+    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as
+      | 'customer_facing'
+      | 'employee_facing';
     const role = await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
     const companyName = await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
-    const companyDescription = await this.getFlagOrPrompt(flags['company-description'], FLAGGABLE_PROMPTS['company-description']);
+    const companyDescription = await this.getFlagOrPrompt(
+      flags['company-description'],
+      FLAGGABLE_PROMPTS['company-description']
+    );
     const companyWebsite = await this.getFlagOrPrompt(flags['company-website'], FLAGGABLE_PROMPTS['company-website']);
 
     this.log();
@@ -155,11 +158,16 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const agent = new Agent(connection, this.project as SfProject) as SfAgent;
     const agentSpec = await agent.createSpec({
-      name, type, role, companyName, companyDescription, companyWebsite
+      name: flags['file-name'].split('.json')[0],
+      type,
+      role,
+      companyName,
+      companyDescription,
+      companyWebsite,
     });
 
     // Write a file with the returned job specs
-    const filePath = join(flags['output-dir'], 'agentSpec.json');
+    const filePath = join(flags['output-dir'], flags['file-name']);
     writeFileSync(filePath, JSON.stringify(agentSpec, null, 4));
 
     this.spinner.stop();
