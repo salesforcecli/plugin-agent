@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/salesforcecli/plugin-agent/compare/1.2.0...1.2.1) (2024-11-12)
+
+### Bug Fixes
+
+- add salesforce/agents ([ce88c06](https://github.com/salesforcecli/plugin-agent/commit/ce88c06bbdfbff83a8633e00c4f99eb6bd6652e4))
+- use agents library ([d66ff89](https://github.com/salesforcecli/plugin-agent/commit/d66ff89ddcd9bfa453455eeb3bd2826a307354c9))
+
 # [1.2.0](https://github.com/salesforcecli/plugin-agent/compare/1.1.3...1.2.0) (2024-11-09)
 
 ### Bug Fixes
