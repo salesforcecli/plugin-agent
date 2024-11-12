@@ -9,6 +9,7 @@
     "@inquirer/input": "^4.0.1",
     "@inquirer/select": "^4.0.1",
     "@oclif/core": "^4",
+    "@salesforce/agents": "^0.1.2",
     "@salesforce/core": "^8.5.2",
     "@salesforce/kit": "^3.2.1",
     "@salesforce/sf-plugins-core": "^12",
