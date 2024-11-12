@@ -11,7 +11,7 @@
     "@oclif/core": "^4",
     "@salesforce/agents": "^0.1.4",
     "@oclif/multi-stage-output": "^0.7.12",
-    "@salesforce/core": "^8.5.2",
+    "@salesforce/core": "^8.6.4",
     "@salesforce/kit": "^3.2.1",
     "@salesforce/sf-plugins-core": "^12",
     "ansis": "^3.3.2"
