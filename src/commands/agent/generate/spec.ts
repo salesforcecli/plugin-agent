@@ -13,7 +13,6 @@ import ansis from 'ansis';
 import select from '@inquirer/select';
 import inquirerInput from '@inquirer/input';
 import figures from '@inquirer/figures';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Agent, SfAgent } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
