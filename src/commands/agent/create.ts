@@ -82,7 +82,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
         `Successfully created ${flags.name} in ${flags['target-org'].getUsername() ?? 'the target org'}.`
       )
     );
-    this.log(`Use ${colorize('dim', `sf agent open --agent ${flags.name}`)} to view the agent in the browser.`);
+    this.log(`Use ${colorize('dim', `sf org open agent --name ${flags.name}`)} to view the agent in the browser.`);
 
     return { isSuccess: true };
   }
