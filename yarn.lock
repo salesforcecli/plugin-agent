@@ -1365,6 +1365,14 @@
     strip-ansi "^7.1.0"
     wrap-ansi "^9.0.0"
 
+"@oclif/test@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.0.tgz#7935e3707cf07480790139e02973196d18d16822"
+  integrity sha512-2ugir6NhRsWJqHM9d2lMEWNiOTD678Jlx5chF/fg6TCAlc7E6E/6+zt+polrCTnTIpih5P/HxOtDekgtjgARwQ==
+  dependencies:
+    ansis "^3.3.2"
+    debug "^4.3.6"
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -3217,7 +3225,7 @@ dateformat@^4.6.3:
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-4.6.3.tgz#556fa6497e5217fedb78821424f8a1c22fa3f4b5"
   integrity sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==
 
-debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@^4.3.5, debug@^4.3.7:
+debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4, debug@^4.3.5, debug@^4.3.6, debug@^4.3.7:
   version "4.3.7"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.7.tgz#87945b4151a011d76d95a198d7111c865c360a52"
   integrity sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==

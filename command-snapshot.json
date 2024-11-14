@@ -39,8 +39,8 @@
     "alias": [],
     "command": "agent:test:run",
     "flagAliases": [],
-    "flagChars": ["d", "i", "o", "w"],
-    "flags": ["flags-dir", "id", "json", "output-dir", "target-org", "wait"],
+    "flagChars": ["d", "i", "o", "r", "w"],
+    "flags": ["api-version", "flags-dir", "id", "json", "output-dir", "result-format", "target-org", "wait"],
     "plugin": "@salesforce/plugin-agent"
   }
 ]

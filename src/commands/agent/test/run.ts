@@ -5,11 +5,17 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Lifecycle, Messages } from '@salesforce/core';
+import { AgentTester } from '@salesforce/agents';
+import { colorize } from '@oclif/core/ux';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
+
+const isTimeoutError = (e: unknown): e is { name: 'PollingClientTimeout' } =>
+  (e as { name: string })?.name === 'PollingClientTimeout';
 
 export type AgentTestRunResult = {
   jobId: string; // AiEvaluation.Id
@@ -25,6 +31,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
     // AiEvalDefinitionVersion.Id -- This should really be "test-name"
     id: Flags.string({
       char: 'i',
@@ -32,6 +39,8 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       summary: messages.getMessage('flags.id.summary'),
       description: messages.getMessage('flags.id.description'),
     }),
+    // we want to pass `undefined` to the API
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
     wait: Flags.duration({
       char: 'w',
       unit: 'minutes',
@@ -43,27 +52,73 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       char: 'd',
       summary: messages.getMessage('flags.output-dir.summary'),
     }),
+    'result-format': Flags.option({
+      options: ['json', 'human', 'tap', 'junit'],
+      default: 'human',
+      char: 'r',
+      summary: messages.getMessage('flags.result-format.summary'),
+    })(),
     //
     // Future flags:
-    //   result-format [csv, json, table, junit, TAP]
     //   suites [array of suite names]
     //   verbose [boolean]
-    //   ??? api-version or build-version ???
   };
 
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
+    const mso = new MultiStageOutput<{ id: string; status: string }>({
+      jsonEnabled: this.jsonEnabled(),
+      title: `Agent Test Run: ${flags.id}`,
+      stages: ['Starting Tests', 'Polling for Test Results'],
+      stageSpecificBlock: [
+        {
+          stage: 'Polling for Test Results',
+          type: 'dynamic-key-value',
+          label: 'Status',
+          get: (data) => data?.status,
+        },
+      ],
+      postStagesBlock: [
+        {
+          type: 'dynamic-key-value',
+          label: 'Job ID',
+          get: (data) => data?.id,
+        },
+      ],
+    });
+    mso.skipTo('Starting Tests');
+    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
+    const response = await agentTester.start(flags.id);
+    mso.updateData({ id: response.id });
+    if (flags.wait?.minutes) {
+      mso.skipTo('Polling for Test Results');
+      const lifecycle = Lifecycle.getInstance();
+      lifecycle.on('AGENT_TEST_POLLING_EVENT', async (event: { status: string }) =>
+        Promise.resolve(mso.updateData({ status: event?.status }))
+      );
+      try {
+        const { formatted } = await agentTester.poll(response.id, { timeout: flags.wait });
+        mso.stop();
+        this.log(formatted);
+      } catch (e) {
+        if (isTimeoutError(e)) {
+          mso.stop('async');
+          this.log(`Client timed out after ${flags.wait.minutes} minutes.`);
+          this.log(`Run ${colorize('dim', `sf agent test result --id ${response.id}`)} to check status and results.`);
+        } else {
+          mso.error();
+          throw e;
+        }
+      }
+    } else {
+      mso.stop();
+      this.log(`Run ${colorize('dim', `sf agent test result --id ${response.id}`)} to check status and results.`);
+    }
 
-    this.log(`Starting tests for AiEvalDefinitionVersion: ${flags.id}`);
-
-    // Call SF Eval Connect API passing AiEvalDefinitionVersion.Id
-    // POST to /einstein/ai-evaluations/{aiEvalDefinitionVersionId}/start
-
-    // Returns: AiEvaluation.Id
-
+    mso.stop();
     return {
       success: true,
-      jobId: '4KBSM000000003F4AQ', // AiEvaluation.Id; needed for getting status and stopping
+      jobId: response.id, // AiEvaluation.Id; needed for getting status and stopping
     };
   }
 }

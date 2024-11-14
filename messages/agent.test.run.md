@@ -26,6 +26,10 @@ If the command continues to run after the wait period, the CLI returns control o
 
 Directory in which to store test run files.
 
+# flags.result-format.summary
+
+Format of the test run results.
+
 # examples
 
 - Start a test for an Agent:
