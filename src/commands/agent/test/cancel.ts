@@ -28,7 +28,7 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
     'job-id': Flags.string({
       char: 'i',
       required: true,
-      summary: messages.getMessage('flags.id.summary'),
+      summary: messages.getMessage('flags.job-id.summary'),
     }),
     'use-most-recent': Flags.boolean({
       char: 'r',
