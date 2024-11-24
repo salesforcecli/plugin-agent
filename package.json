@@ -9,8 +9,8 @@
     "@inquirer/input": "^4.0.1",
     "@inquirer/select": "^4.0.1",
     "@oclif/core": "^4",
-    "@salesforce/agents": "^0.1.4",
     "@oclif/multi-stage-output": "^0.7.12",
+    "@salesforce/agents": "^0.1.4",
     "@salesforce/core": "^8.5.2",
     "@salesforce/kit": "^3.2.1",
     "@salesforce/sf-plugins-core": "^12",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.2.19",
     "@salesforce/cli-plugins-testkit": "^5.3.35",
-    "@salesforce/dev-scripts": "^10.2.10",
+    "@salesforce/dev-scripts": "^10.2.11",
     "@salesforce/plugin-command-reference": "^3.1.29",
     "eslint-plugin-sf-plugin": "^1.20.9",
     "oclif": "^4.15.12",
