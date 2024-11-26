@@ -10,6 +10,8 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Lifecycle, Messages } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
+import { resultFormatFlag } from '../../../flags.js';
+import { AgentTestCache } from '../../../agentTestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
@@ -17,11 +19,9 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.r
 const isTimeoutError = (e: unknown): e is { name: 'PollingClientTimeout' } =>
   (e as { name: string })?.name === 'PollingClientTimeout';
 
+// TODO: this should include details and status
 export type AgentTestRunResult = {
   jobId: string; // AiEvaluation.Id
-  success: boolean;
-  errorCode?: string;
-  message?: string;
 };
 
 export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
@@ -53,17 +53,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       char: 'd',
       summary: messages.getMessage('flags.output-dir.summary'),
     }),
-    'result-format': Flags.option({
-      options: ['json', 'human', 'tap', 'junit'],
-      default: 'human',
-      char: 'r',
-      summary: messages.getMessage('flags.result-format.summary'),
-    })(),
-    //
-    // Future flags:
-    //   suites [array of suite names]
-    //   verbose [boolean]
-    //   fail-fast [boolean]
+    'result-format': resultFormatFlag(),
   };
 
   public async run(): Promise<AgentTestRunResult> {
@@ -91,7 +81,12 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     mso.skipTo('Starting Tests');
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
     const response = await agentTester.start(flags.id);
+
     mso.updateData({ id: response.id });
+
+    const ttlConfig = await AgentTestCache.create();
+    await ttlConfig.createCacheEntry(response.id);
+
     if (flags.wait?.minutes) {
       mso.skipTo('Polling for Test Results');
       const lifecycle = Lifecycle.getInstance();
@@ -102,12 +97,13 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         const { formatted } = await agentTester.poll(response.id, { timeout: flags.wait });
         mso.stop();
         this.log(formatted);
+        await ttlConfig.removeCacheEntry(response.id);
       } catch (e) {
         if (isTimeoutError(e)) {
           mso.stop('async');
           this.log(`Client timed out after ${flags.wait.minutes} minutes.`);
           this.log(
-            `Run ${colorize('dim', `sf agent test resume --id ${response.id}`)} to resuming watching this test.`
+            `Run ${colorize('dim', `sf agent test resume --job-id ${response.id}`)} to resuming watching this test.`
           );
         } else {
           mso.error();
@@ -115,14 +111,14 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         }
       }
     } else {
-      // TODO: cache jobId in TTL cache so we can use it for resume
       mso.stop();
-      this.log(`Run ${colorize('dim', `sf agent test resume --id ${response.id}`)} to resuming watching this test.`);
+      this.log(
+        `Run ${colorize('dim', `sf agent test resume --job-id ${response.id}`)} to resuming watching this test.`
+      );
     }
 
     mso.stop();
     return {
-      success: true,
       jobId: response.id, // AiEvaluation.Id; needed for getting status and stopping
     };
   }
