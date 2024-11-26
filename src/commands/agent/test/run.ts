@@ -32,7 +32,8 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    // AiEvalDefinitionVersion.Id -- This should really be "test-name"
+    // This should probably be "test-name"
+    // Is it `AiEvaluationDefinition_My_first_test_v1`? or `"My first test v1"`? or `My_first_test_v1`?
     id: Flags.string({
       char: 'i',
       required: true,
@@ -62,6 +63,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     // Future flags:
     //   suites [array of suite names]
     //   verbose [boolean]
+    //   fail-fast [boolean]
   };
 
   public async run(): Promise<AgentTestRunResult> {
@@ -104,15 +106,18 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         if (isTimeoutError(e)) {
           mso.stop('async');
           this.log(`Client timed out after ${flags.wait.minutes} minutes.`);
-          this.log(`Run ${colorize('dim', `sf agent test result --id ${response.id}`)} to check status and results.`);
+          this.log(
+            `Run ${colorize('dim', `sf agent test resume --id ${response.id}`)} to resuming watching this test.`
+          );
         } else {
           mso.error();
           throw e;
         }
       }
     } else {
+      // TODO: cache jobId in TTL cache so we can use it for resume
       mso.stop();
-      this.log(`Run ${colorize('dim', `sf agent test result --id ${response.id}`)} to check status and results.`);
+      this.log(`Run ${colorize('dim', `sf agent test resume --id ${response.id}`)} to resuming watching this test.`);
     }
 
     mso.stop();

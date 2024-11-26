@@ -18,10 +18,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "jobId",
-        "success"
-      ],
+      "required": ["jobId", "success"],
       "additionalProperties": false
     }
   }

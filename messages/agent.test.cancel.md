@@ -6,7 +6,7 @@ Cancel a running test for an Agent.
 
 Cancel a running test for an Agent, providing the AiEvaluation ID.
 
-# flags.id.summary
+# flags.job-id.summary
 
 The AiEvaluation ID.
 

@@ -11,9 +11,9 @@
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.7.12",
     "@salesforce/agents": "^0.1.4",
-    "@salesforce/core": "^8.5.2",
+    "@salesforce/core": "^8.8.0",
     "@salesforce/kit": "^3.2.1",
-    "@salesforce/sf-plugins-core": "^12",
+    "@salesforce/sf-plugins-core": "^12.1.0",
     "ansis": "^3.3.2"
   },
   "devDependencies": {
@@ -60,7 +60,16 @@
     ],
     "topics": {
       "agent": {
-        "description": "Commands to work with agents."
+        "description": "Commands to work with agents.",
+        "external": true,
+        "subtopics": {
+          "test": {
+            "external": true
+          },
+          "generate": {
+            "external": true
+          }
+        }
       }
     },
     "flexibleTaxonomy": true
