@@ -8,7 +8,12 @@
 import { Global, SfError, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 
-export class AgentTestCache extends TTLConfig<TTLConfig.Options, { jobId: string }> {
+type CacheContents = {
+  aiEvaluationId: string;
+  jobId: string;
+};
+
+export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> {
   public static getFileName(): string {
     return 'agent-test-cache.json';
   }
@@ -23,10 +28,10 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, { jobId: string
     };
   }
 
-  public async createCacheEntry(jobId: string): Promise<void> {
+  public async createCacheEntry(jobId: string, aiEvaluationId: string): Promise<void> {
     if (!jobId) throw new SfError('Job ID is required to create a cache entry');
 
-    this.set(jobId, { jobId });
+    this.set(jobId, { aiEvaluationId, jobId });
     await this.write();
   }
 
@@ -37,27 +42,29 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, { jobId: string
     await this.write();
   }
 
-  public resolveFromCache(): { jobId: string } {
+  public resolveFromCache(): CacheContents {
     const key = this.getLatestKey();
     if (!key) throw new SfError('Could not find a job ID to resume');
 
-    const { jobId } = this.get(key);
-    return { jobId };
+    return this.get(key);
   }
 
-  public useIdOrMostRecent(id: string | undefined, useMostRecent: boolean): string {
-    if (id && useMostRecent) {
+  public useIdOrMostRecent(
+    jobId: string | undefined,
+    useMostRecent: boolean
+  ): { jobId: string; aiEvaluationId?: string } {
+    if (jobId && useMostRecent) {
       throw new SfError('Cannot specify both a job ID and use most recent flag');
     }
 
-    if (!id && !useMostRecent) {
+    if (!jobId && !useMostRecent) {
       throw new SfError('Must specify either a job ID or use most recent flag');
     }
 
-    if (id) {
-      return id;
+    if (jobId) {
+      return { jobId };
     }
 
-    return this.resolveFromCache().jobId;
+    return this.resolveFromCache();
   }
 }

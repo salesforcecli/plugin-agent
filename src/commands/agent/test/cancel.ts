@@ -44,20 +44,20 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
     const { flags } = await this.parse(AgentTestCancel);
 
     const agentTestCache = await AgentTestCache.create();
-    const id = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+    const { jobId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
 
-    this.log(`Canceling tests for AiEvaluation Job: ${id}`);
+    this.log(`Canceling tests for AiEvaluation Job: ${jobId}`);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const result = await agentTester.cancel(id);
+    const result = await agentTester.cancel(jobId);
 
     if (result.success) {
-      await agentTestCache.removeCacheEntry(id);
+      await agentTestCache.removeCacheEntry(jobId);
     }
 
     return {
       success: result.success,
-      jobId: id,
+      jobId,
     };
   }
 }

@@ -5,19 +5,16 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { resultFormatFlag } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
+import { TestStages } from '../../../testStages.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
-
-const isTimeoutError = (e: unknown): e is { name: 'PollingClientTimeout' } =>
-  (e as { name: string })?.name === 'PollingClientTimeout';
 
 // TODO: this should include details and status
 export type AgentTestRunResult = {
@@ -58,58 +55,21 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
-    const mso = new MultiStageOutput<{ id: string; status: string }>({
-      jsonEnabled: this.jsonEnabled(),
-      title: `Agent Test Run: ${flags.id}`,
-      stages: ['Starting Tests', 'Polling for Test Results'],
-      stageSpecificBlock: [
-        {
-          stage: 'Polling for Test Results',
-          type: 'dynamic-key-value',
-          label: 'Status',
-          get: (data) => data?.status,
-        },
-      ],
-      postStagesBlock: [
-        {
-          type: 'dynamic-key-value',
-          label: 'Job ID',
-          get: (data) => data?.id,
-        },
-      ],
-    });
-    mso.skipTo('Starting Tests');
+
+    const mso = new TestStages({ title: `Agent Test Run: ${flags.id}`, jsonEnabled: this.jsonEnabled() });
+    mso.start();
+
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
     const response = await agentTester.start(flags.id);
 
-    mso.updateData({ id: response.id });
+    mso.update({ id: response.id });
 
-    const ttlConfig = await AgentTestCache.create();
-    await ttlConfig.createCacheEntry(response.id);
+    const agentTestCache = await AgentTestCache.create();
+    await agentTestCache.createCacheEntry(response.id, flags.id);
 
     if (flags.wait?.minutes) {
-      mso.skipTo('Polling for Test Results');
-      const lifecycle = Lifecycle.getInstance();
-      lifecycle.on('AGENT_TEST_POLLING_EVENT', async (event: { status: string }) =>
-        Promise.resolve(mso.updateData({ status: event?.status }))
-      );
-      try {
-        const { formatted } = await agentTester.poll(response.id, { timeout: flags.wait });
-        mso.stop();
-        this.log(formatted);
-        await ttlConfig.removeCacheEntry(response.id);
-      } catch (e) {
-        if (isTimeoutError(e)) {
-          mso.stop('async');
-          this.log(`Client timed out after ${flags.wait.minutes} minutes.`);
-          this.log(
-            `Run ${colorize('dim', `sf agent test resume --job-id ${response.id}`)} to resuming watching this test.`
-          );
-        } else {
-          mso.error();
-          throw e;
-        }
-      }
+      const completed = await mso.poll(agentTester, response.id, flags.wait);
+      if (completed) await agentTestCache.removeCacheEntry(response.id);
     } else {
       mso.stop();
       this.log(
