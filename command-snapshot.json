@@ -29,6 +29,14 @@
   },
   {
     "alias": [],
+    "command": "agent:preview",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-version", "flags-dir", "name", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:test:cancel",
     "flagAliases": [],
     "flagChars": ["i", "o", "r"],
