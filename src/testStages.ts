@@ -43,6 +43,15 @@ export class TestStages {
         {
           stage: 'Polling for Test Results',
           type: 'dynamic-key-value',
+          label: 'Completed Tests',
+          get: (data): string | undefined =>
+            data?.totalTestCases && data?.passingTestCases && data?.failingTestCases
+              ? `${data?.passingTestCases + data?.failingTestCases}/${data?.totalTestCases}`
+              : undefined,
+        },
+        {
+          stage: 'Polling for Test Results',
+          type: 'dynamic-key-value',
           label: 'Passing Tests',
           get: (data): string | undefined => data?.passingTestCases?.toString(),
         },
