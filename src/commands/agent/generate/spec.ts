@@ -157,6 +157,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     this.spinner.start('Creating agent spec');
 
     const connection = flags['target-org'].getConnection(flags['api-version']);
+    // @ts-expect-error for now
     const agent = new Agent(connection, this.project as SfProject) as SfAgent;
     const agentSpec = await agent.createSpec({
       name: flags['file-name'].split('.json')[0],
