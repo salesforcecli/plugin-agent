@@ -36,7 +36,7 @@ export default class AgentPreview extends SfCommand<void> {
     const { flags } = await this.parse(AgentPreview);
     this.log(`previewing ${flags.name}`);
 
-    const instance = render(<AgentPreviewReact />);
+    const instance = render(React.createElement(AgentPreviewReact, null));
     await instance.waitUntilExit();
   }
 }
