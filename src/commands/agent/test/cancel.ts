@@ -14,7 +14,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.cancel');
 
 export type AgentTestCancelResult = {
-  aiEvaluationId: string; // AiEvaluation.Id
+  aiEvaluationId: string;
   success: boolean;
   errorCode?: string;
   message?: string;
@@ -24,6 +24,7 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

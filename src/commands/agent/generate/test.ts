@@ -19,6 +19,7 @@ export default class AgentGenerateTest extends SfCommand<AgentGenerateTestResult
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     name: Flags.string({
