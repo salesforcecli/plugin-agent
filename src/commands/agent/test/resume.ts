@@ -16,6 +16,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.r
 
 export type AgentTestResumeResult = {
   aiEvaluationId: string;
+  status: string;
 };
 
 export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
@@ -65,6 +66,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
 
     mso.stop();
     return {
+      status: 'COMPLETED',
       aiEvaluationId,
     };
   }

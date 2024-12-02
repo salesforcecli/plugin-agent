@@ -1,18 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentTestRunResult",
+  "$ref": "#/definitions/AgentGenerateTestResult",
   "definitions": {
-    "AgentTestRunResult": {
+    "AgentGenerateTestResult": {
       "type": "object",
       "properties": {
-        "aiEvaluationId": {
-          "type": "string"
-        },
-        "status": {
+        "path": {
           "type": "string"
         }
       },
-      "required": ["aiEvaluationId", "status"],
+      "required": ["path"],
       "additionalProperties": false
     }
   }

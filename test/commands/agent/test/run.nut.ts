@@ -8,10 +8,9 @@ import { resolve } from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { AgentTestRunResult } from '../../../../src/commands/agent/test/run.js';
-import { AgentTestResumeResult } from '../../../../src/commands/agent/test/resume.js';
 import { AgentTestCache } from '../../../../src/agentTestCache.js';
 
-describe('agent test resume NUTs', () => {
+describe('agent test run NUTs', () => {
   let session: TestSession;
   const mockDir = resolve('test/mocks');
 
@@ -26,24 +25,30 @@ describe('agent test resume NUTs', () => {
     await session?.clean();
   });
 
-  it('should resume async test run', async () => {
-    const runResult = execCmd<AgentTestRunResult>(
-      `agent test run --name my_agent_tests --target-org ${session.hubOrg.username} --json`,
-      {
-        ensureExitCode: 0,
-        env: { ...process.env, SF_MOCK_DIR: mockDir },
-      }
-    ).jsonOutput;
+  it('should start async test run', async () => {
+    const name = 'my_agent_tests';
+    const command = `agent test run --name ${name} --target-org ${session.hubOrg.username} --json`;
+    const output = execCmd<AgentTestRunResult>(command, {
+      ensureExitCode: 0,
+      env: { ...process.env, SF_MOCK_DIR: mockDir },
+    }).jsonOutput;
+    expect(output?.result.status).to.equal('NEW');
+    expect(output?.result.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
 
-    expect(runResult?.result.aiEvaluationId).to.be.ok;
+    // check cache for test run entry
+    const cache = await AgentTestCache.create();
+    const testRun = cache.resolveFromCache();
+    expect(testRun.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
+    expect(testRun.name).to.equal(name);
+  });
 
-    const output = execCmd<AgentTestResumeResult>(
-      `agent test resume --job-id ${runResult?.result.aiEvaluationId} --target-org ${session.hubOrg.username} --json`,
-      {
-        ensureExitCode: 0,
-        env: { ...process.env, SF_MOCK_DIR: mockDir },
-      }
-    ).jsonOutput;
+  it('should poll for test run completion when --wait is used', async () => {
+    const name = 'my_agent_tests';
+    const command = `agent test run --name ${name} --target-org ${session.hubOrg.username} --wait 5 --json`;
+    const output = execCmd<AgentTestRunResult>(command, {
+      ensureExitCode: 0,
+      env: { ...process.env, SF_MOCK_DIR: mockDir },
+    }).jsonOutput;
 
     expect(output?.result.status).to.equal('COMPLETED');
     expect(output?.result.aiEvaluationId).to.equal('4KBSM000000003F4AQ');

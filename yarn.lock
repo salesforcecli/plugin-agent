@@ -1360,6 +1360,22 @@
     strip-ansi "^7.1.0"
     wrap-ansi "^9.0.0"
 
+"@oclif/table@^0.3.3":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@oclif/table/-/table-0.3.5.tgz#118149eab364f3485eab5c9fd0d717c56082bacb"
+  integrity sha512-1IjoVz7WAdUdBW5vYIRc6wt9N7Ezwll6AtdmeqLQ8lUmB9gQJVyeb7dqXtUaUvIG7bZMvryfPe6Xibeo5FTCWA==
+  dependencies:
+    "@oclif/core" "^4"
+    "@types/react" "^18.3.12"
+    change-case "^5.4.4"
+    cli-truncate "^4.0.0"
+    ink "^5.0.1"
+    natural-orderby "^3.0.2"
+    object-hash "^3.0.0"
+    react "^18.3.1"
+    strip-ansi "^7.1.0"
+    wrap-ansi "^9.0.0"
+
 "@oclif/test@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.1.0.tgz#7935e3707cf07480790139e02973196d18d16822"
@@ -1373,13 +1389,16 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.1.4.tgz#8a1660dbcf613401ba3a564038611a278b49ac2a"
-  integrity sha512-lUK1h13B93IGI6+mLbFBbM07kI0Yj5qmLuHaguGLU88/tsgLLMq2gpoENNBJXKxtg+0h9uwjt0/i44KwSxc75A==
+"@salesforce/agents@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.2.2.tgz#c32e35e043f60ae6b4192448984342541bb0fc81"
+  integrity sha512-X5HGMHLFqK8rpXrNF4r/dYEdseu//0PnI6oGuWoVwnNPgJ4D0b3iIqTYeznpVEYqOa8wVZdceG2pZXd0GiO+9w==
   dependencies:
-    "@salesforce/core" "^8.5.2"
+    "@oclif/table" "^0.3.3"
+    "@salesforce/core" "^8.8.0"
     "@salesforce/kit" "^3.2.3"
+    "@salesforce/sf-plugins-core" "^12.1.0"
+    nock "^13.5.6"
 
 "@salesforce/cli-plugins-testkit@^5.3.35":
   version "5.3.35"
@@ -1397,7 +1416,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.5.1", "@salesforce/core@^8.5.2", "@salesforce/core@^8.5.7", "@salesforce/core@^8.6.2", "@salesforce/core@^8.6.3", "@salesforce/core@^8.8.0":
+"@salesforce/core@^8.5.1", "@salesforce/core@^8.5.7", "@salesforce/core@^8.6.2", "@salesforce/core@^8.6.3", "@salesforce/core@^8.8.0":
   version "8.8.0"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.8.0.tgz#849c07ea3a2548ca201fc0fe8baef9b36a462194"
   integrity sha512-HWGdRiy/MPCJ2KHz+W+cnqx0O9xhx9+QYvwP8bn9PE27wj0A/NjTi4xrqIWk1M+fE4dXHycE+8qPf4b540euvg==
@@ -5010,6 +5029,11 @@ json-stable-stringify-without-jsonify@^1.0.1:
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
   integrity sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==
 
+json-stringify-safe@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
+  integrity sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==
+
 json5@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.2.tgz#63d98d60f21b313b77c4d6da18bfa69d80e1d593"
@@ -5610,6 +5634,15 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
+nock@^13.5.6:
+  version "13.5.6"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.5.6.tgz#5e693ec2300bbf603b61dae6df0225673e6c4997"
+  integrity sha512-o2zOYiCpzRqSzPj0Zt/dQ/DqZeYoaQ7TUonc/xUPjCGl9WeHpNbxgVvOquXYAaJzI0M9BXV3HTzG0p8IUAbBTQ==
+  dependencies:
+    debug "^4.1.0"
+    json-stringify-safe "^5.0.1"
+    propagate "^2.0.0"
+
 node-fetch@^2.6.1, node-fetch@^2.6.9:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
@@ -6113,6 +6146,11 @@ process@^0.11.10:
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
+
+propagate@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/propagate/-/propagate-2.0.1.tgz#40cdedab18085c792334e64f0ac17256d38f9a45"
+  integrity sha512-vGrhOavPSTz4QVNuBNdcNXePNdNMaO1xj9yBeH1ScQPjk/rhg9sSlCXPhMkFuaNNW/syTvYqsnbIJxMBfRbbag==
 
 proper-lockfile@^4.1.2:
   version "4.1.2"

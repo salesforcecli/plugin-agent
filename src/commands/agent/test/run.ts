@@ -19,6 +19,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.r
 // TODO: this should include details and status
 export type AgentTestRunResult = {
   aiEvaluationId: string;
+  status: string;
 };
 
 export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
@@ -31,7 +32,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     name: Flags.string({
-      char: 'i',
+      char: 'n',
       required: true,
       summary: messages.getMessage('flags.name.summary'),
       description: messages.getMessage('flags.name.description'),
@@ -44,10 +45,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       min: 1,
       summary: messages.getMessage('flags.wait.summary'),
       description: messages.getMessage('flags.wait.description'),
-    }),
-    'output-dir': Flags.directory({
-      char: 'd',
-      summary: messages.getMessage('flags.output-dir.summary'),
     }),
     'result-format': resultFormatFlag(),
   };
@@ -69,6 +66,11 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     if (flags.wait?.minutes) {
       const completed = await mso.poll(agentTester, response.aiEvaluationId, flags.wait);
       if (completed) await agentTestCache.removeCacheEntry(response.aiEvaluationId);
+      mso.stop();
+      return {
+        status: 'COMPLETED',
+        aiEvaluationId: response.aiEvaluationId,
+      };
     } else {
       mso.stop();
       this.log(
@@ -79,9 +81,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       );
     }
 
-    mso.stop();
-    return {
-      aiEvaluationId: response.aiEvaluationId, // AiEvaluation.Id; needed for getting status and stopping
-    };
+    return response;
   }
 }

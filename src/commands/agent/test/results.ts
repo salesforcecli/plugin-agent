@@ -7,13 +7,13 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTester, AgentTestDetailsResponse } from '@salesforce/agents';
 import { resultFormatFlag } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.results');
 
-export type AgentTestResultsResult = Awaited<ReturnType<AgentTester['details']>>['response'];
+export type AgentTestResultsResult = AgentTestDetailsResponse;
 
 export default class AgentTestResults extends SfCommand<AgentTestResultsResult> {
   public static readonly summary = messages.getMessage('summary');

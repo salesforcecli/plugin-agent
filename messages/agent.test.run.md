@@ -22,12 +22,8 @@ Number of minutes to wait for the command to complete and display results to the
 
 If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 
-# flags.output-dir.summary
-
-Directory in which to store test run files.
-
 # examples
 
 - Start a test for an Agent:
 
-  <%= config.bin %> <%= command.id %> --id AiEvalDefVerId
+  <%= config.bin %> <%= command.id %> --name AiEvalDefVerId

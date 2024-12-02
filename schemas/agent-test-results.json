@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentTestResultsResult",
+  "definitions": {
+    "AgentTestResultsResult": {
+      "$ref": "#/definitions/AgentTestDetailsResponse"
+    },
+    "AgentTestDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/TestStatus"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestCaseResult"
+          }
+        }
+      },
+      "required": ["status", "startTime", "testCases"],
+      "additionalProperties": false
+    },
+    "TestStatus": {
+      "type": "string",
+      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR"]
+    },
+    "TestCaseResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/TestStatus"
+        },
+        "number": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "generatedData": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "AGENT"
+            },
+            "actionsSequence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "outcome": {
+              "type": "string",
+              "enum": ["Success", "Failure"]
+            },
+            "topic": {
+              "type": "string"
+            },
+            "inputTokensCount": {
+              "type": "string"
+            },
+            "outputTokensCount": {
+              "type": "string"
+            }
+          },
+          "required": ["type", "actionsSequence", "outcome", "topic", "inputTokensCount", "outputTokensCount"],
+          "additionalProperties": false
+        },
+        "expectationResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "actualValue": {
+                "type": "string"
+              },
+              "expectedValue": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "result": {
+                "type": "string",
+                "enum": ["Passed", "Failed"]
+              },
+              "metricLabel": {
+                "type": "string",
+                "enum": ["Accuracy", "Precision"]
+              },
+              "metricExplainability": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/definitions/TestStatus"
+              },
+              "startTime": {
+                "type": "string"
+              },
+              "endTime": {
+                "type": "string"
+              },
+              "errorCode": {
+                "type": "string"
+              },
+              "errorMessage": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "actualValue",
+              "expectedValue",
+              "score",
+              "result",
+              "metricLabel",
+              "metricExplainability",
+              "status",
+              "startTime"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["status", "number", "startTime", "generatedData", "expectationResults"],
+      "additionalProperties": false
+    }
+  }
+}
