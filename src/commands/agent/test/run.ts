@@ -18,7 +18,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.r
 
 // TODO: this should include details and status
 export type AgentTestRunResult = {
-  jobId: string; // AiEvaluation.Id
+  aiEvaluationId: string;
 };
 
 export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
@@ -29,13 +29,11 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    // This should probably be "test-name"
-    // Is it `AiEvaluationDefinition_My_first_test_v1`? or `"My first test v1"`? or `My_first_test_v1`?
-    id: Flags.string({
+    name: Flags.string({
       char: 'i',
       required: true,
-      summary: messages.getMessage('flags.id.summary'),
-      description: messages.getMessage('flags.id.description'),
+      summary: messages.getMessage('flags.name.summary'),
+      description: messages.getMessage('flags.name.description'),
     }),
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
@@ -56,30 +54,33 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
 
-    const mso = new TestStages({ title: `Agent Test Run: ${flags.id}`, jsonEnabled: this.jsonEnabled() });
+    const mso = new TestStages({ title: `Agent Test Run: ${flags.name}`, jsonEnabled: this.jsonEnabled() });
     mso.start();
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.start(flags.id);
+    const response = await agentTester.start(flags.name);
 
-    mso.update({ id: response.id });
+    mso.update({ id: response.aiEvaluationId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.id, flags.id);
+    await agentTestCache.createCacheEntry(response.aiEvaluationId, flags.name);
 
     if (flags.wait?.minutes) {
-      const completed = await mso.poll(agentTester, response.id, flags.wait);
-      if (completed) await agentTestCache.removeCacheEntry(response.id);
+      const completed = await mso.poll(agentTester, response.aiEvaluationId, flags.wait);
+      if (completed) await agentTestCache.removeCacheEntry(response.aiEvaluationId);
     } else {
       mso.stop();
       this.log(
-        `Run ${colorize('dim', `sf agent test resume --job-id ${response.id}`)} to resuming watching this test.`
+        `Run ${colorize(
+          'dim',
+          `sf agent test resume --job-id ${response.aiEvaluationId}`
+        )} to resuming watching this test.`
       );
     }
 
     mso.stop();
     return {
-      jobId: response.id, // AiEvaluation.Id; needed for getting status and stopping
+      aiEvaluationId: response.aiEvaluationId, // AiEvaluation.Id; needed for getting status and stopping
     };
   }
 }

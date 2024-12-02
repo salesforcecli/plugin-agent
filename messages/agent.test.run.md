@@ -6,13 +6,13 @@ Start a test for an Agent.
 
 Start a test for an Agent, providing the AiEvalDefinitionVersion ID. Returns the job ID.
 
-# flags.id.summary
+# flags.name.summary
 
-The AiEvalDefinitionVersion ID.
+The name of the AiEvaluationDefinition to start.
 
-# flags.id.description
+# flags.name.description
 
-The AiEvalDefinitionVersion ID.
+The name of the AiEvaluationDefinition to start.
 
 # flags.wait.summary
 

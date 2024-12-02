@@ -14,7 +14,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.cancel');
 
 export type AgentTestCancelResult = {
-  jobId: string; // AiEvaluation.Id
+  aiEvaluationId: string; // AiEvaluation.Id
   success: boolean;
   errorCode?: string;
   message?: string;
@@ -44,20 +44,20 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
     const { flags } = await this.parse(AgentTestCancel);
 
     const agentTestCache = await AgentTestCache.create();
-    const { jobId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+    const { aiEvaluationId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
 
-    this.log(`Canceling tests for AiEvaluation Job: ${jobId}`);
+    this.log(`Canceling tests for AiEvaluation Job: ${aiEvaluationId}`);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const result = await agentTester.cancel(jobId);
+    const result = await agentTester.cancel(aiEvaluationId);
 
     if (result.success) {
-      await agentTestCache.removeCacheEntry(jobId);
+      await agentTestCache.removeCacheEntry(aiEvaluationId);
     }
 
     return {
       success: result.success,
-      jobId,
+      aiEvaluationId,
     };
   }
 }

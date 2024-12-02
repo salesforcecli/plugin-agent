@@ -10,7 +10,7 @@ import { Duration } from '@salesforce/kit';
 
 type CacheContents = {
   aiEvaluationId: string;
-  jobId: string;
+  name: string;
 };
 
 export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> {
@@ -28,41 +28,41 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     };
   }
 
-  public async createCacheEntry(jobId: string, aiEvaluationId: string): Promise<void> {
-    if (!jobId) throw new SfError('Job ID is required to create a cache entry');
+  public async createCacheEntry(aiEvaluationId: string, name: string): Promise<void> {
+    if (!aiEvaluationId) throw new SfError('aiEvaluationId is required to create a cache entry');
 
-    this.set(jobId, { aiEvaluationId, jobId });
+    this.set(aiEvaluationId, { aiEvaluationId, name });
     await this.write();
   }
 
-  public async removeCacheEntry(jobId: string): Promise<void> {
-    if (!jobId) throw new SfError('Job ID is required to remove a cache entry');
+  public async removeCacheEntry(aiEvaluationId: string): Promise<void> {
+    if (!aiEvaluationId) throw new SfError('aiEvaluationId is required to remove a cache entry');
 
-    this.unset(jobId);
+    this.unset(aiEvaluationId);
     await this.write();
   }
 
   public resolveFromCache(): CacheContents {
     const key = this.getLatestKey();
-    if (!key) throw new SfError('Could not find a job ID to resume');
+    if (!key) throw new SfError('Could not find an aiEvaluationId to resume');
 
     return this.get(key);
   }
 
   public useIdOrMostRecent(
-    jobId: string | undefined,
+    aiEvaluationId: string | undefined,
     useMostRecent: boolean
-  ): { jobId: string; aiEvaluationId?: string } {
-    if (jobId && useMostRecent) {
-      throw new SfError('Cannot specify both a job ID and use most recent flag');
+  ): { aiEvaluationId: string; name?: string } {
+    if (aiEvaluationId && useMostRecent) {
+      throw new SfError('Cannot specify both an aiEvaluationId and use most recent flag');
     }
 
-    if (!jobId && !useMostRecent) {
-      throw new SfError('Must specify either a job ID or use most recent flag');
+    if (!aiEvaluationId && !useMostRecent) {
+      throw new SfError('Must specify either an aiEvaluationId or use most recent flag');
     }
 
-    if (jobId) {
-      return { jobId };
+    if (aiEvaluationId) {
+      return { aiEvaluationId };
     }
 
     return this.resolveFromCache();
