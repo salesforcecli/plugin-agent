@@ -14,7 +14,9 @@ import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview');
 
-export default class AgentPreview extends SfCommand<void> {
+export type AgentPreviewResult = void;
+
+export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -32,7 +34,7 @@ export default class AgentPreview extends SfCommand<void> {
     }),
   };
 
-  public async run(): Promise<void> {
+  public async run(): Promise<AgentPreviewResult> {
     const { flags } = await this.parse(AgentPreview);
     this.log(`previewing ${flags.name}`);
 
