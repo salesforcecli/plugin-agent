@@ -12,7 +12,13 @@ import { Lifecycle } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Ux } from '@salesforce/sf-plugins-core';
 
-type Data = { id: string; status: string };
+type Data = {
+  id: string;
+  status: string;
+  totalTestCases: number;
+  passingTestCases: number;
+  failingTestCases: number;
+};
 
 const isTimeoutError = (e: unknown): e is { name: 'PollingClientTimeout' } =>
   (e as { name: string })?.name === 'PollingClientTimeout';
@@ -34,6 +40,18 @@ export class TestStages {
           label: 'Status',
           get: (data): string | undefined => data?.status,
         },
+        {
+          stage: 'Polling for Test Results',
+          type: 'dynamic-key-value',
+          label: 'Passing Tests',
+          get: (data): string | undefined => data?.passingTestCases?.toString(),
+        },
+        {
+          stage: 'Polling for Test Results',
+          type: 'dynamic-key-value',
+          label: 'Failing Tests',
+          get: (data): string | undefined => data?.failingTestCases?.toString(),
+        },
       ],
       postStagesBlock: [
         {
@@ -52,8 +70,15 @@ export class TestStages {
   public async poll(agentTester: AgentTester, id: string, wait: Duration): Promise<boolean> {
     this.mso.skipTo('Polling for Test Results');
     const lifecycle = Lifecycle.getInstance();
-    lifecycle.on('AGENT_TEST_POLLING_EVENT', async (event: { status: string }) =>
-      Promise.resolve(this.update({ status: event?.status }))
+    lifecycle.on(
+      'AGENT_TEST_POLLING_EVENT',
+      async (event: {
+        status: string;
+        completedTestCases: number;
+        totalTestCases: number;
+        failingTestCases: number;
+        passingTestCases: number;
+      }) => Promise.resolve(this.update(event))
     );
 
     try {
