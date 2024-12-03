@@ -1,3 +1,9 @@
+## [1.3.4](https://github.com/salesforcecli/plugin-agent/compare/1.3.3...1.3.4) (2024-12-03)
+
+### Bug Fixes
+
+- update agent lib, update enums, update spec file schema ([77a11fc](https://github.com/salesforcecli/plugin-agent/commit/77a11fc90a11081a7b16b82134b02b584252adde))
+
 ## [1.3.3](https://github.com/salesforcecli/plugin-agent/compare/1.3.2...1.3.3) (2024-12-03)
 
 ### Bug Fixes
