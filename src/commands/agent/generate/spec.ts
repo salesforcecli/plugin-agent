@@ -44,7 +44,7 @@ const FLAGGABLE_PROMPTS = {
     message: messages.getMessage('flags.type.summary'),
     validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
     char: 't',
-    options: ['customer_facing', 'employee_facing'],
+    options: ['customer', 'internal'],
     required: true,
   },
   role: {
