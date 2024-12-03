@@ -27,6 +27,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
