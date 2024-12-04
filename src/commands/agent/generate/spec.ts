@@ -13,7 +13,7 @@ import ansis from 'ansis';
 import select from '@inquirer/select';
 import inquirerInput from '@inquirer/input';
 import figures from '@inquirer/figures';
-import { Agent, SfAgent } from '@salesforce/agents';
+import { Agent, AgentCreateConfig, SfAgent } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.spec');
@@ -169,7 +169,11 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     const filePath = join(flags['output-dir'], flags['file-name']);
     writeFileSync(
       filePath,
-      JSON.stringify({ type, role, companyName, companyDescription, companyWebsite, JobSpec: agentSpec }, null, 4)
+      JSON.stringify(
+        { type, role, companyName, companyDescription, companyWebsite, jobSpec: agentSpec } as AgentCreateConfig,
+        null,
+        4
+      )
     );
 
     this.spinner.stop();
