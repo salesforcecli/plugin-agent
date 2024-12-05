@@ -7,9 +7,10 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTester, humanFormat } from '@salesforce/agents';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
+import { resultFormatFlag } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.resume');
@@ -46,6 +47,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
       summary: messages.getMessage('flags.wait.summary'),
       description: messages.getMessage('flags.wait.description'),
     }),
+    'result-format': resultFormatFlag(),
   };
 
   public async run(): Promise<AgentTestResumeResult> {
@@ -61,10 +63,15 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
     mso.start({ id: aiEvaluationId });
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
-    const completed = await mso.poll(agentTester, aiEvaluationId, flags.wait);
+    const { completed, response } = await mso.poll(agentTester, aiEvaluationId, flags.wait);
     if (completed) await agentTestCache.removeCacheEntry(aiEvaluationId);
 
     mso.stop();
+
+    if (response && flags['result-format'] === 'human') {
+      this.log(await humanFormat(name ?? aiEvaluationId, response));
+    }
+
     return {
       status: 'COMPLETED',
       aiEvaluationId,

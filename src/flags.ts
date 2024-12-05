@@ -18,6 +18,5 @@ export const resultFormatFlag = Flags.option({
     // 'junit'
   ] as const,
   default: 'human',
-  char: 'r',
   summary: messages.getMessage('flags.result-format.summary'),
 });

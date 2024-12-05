@@ -142,9 +142,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 
     this.log();
     this.styledHeader('Agent Details');
-    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as
-      | 'customer_facing'
-      | 'employee_facing';
+    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as 'customer' | 'internal';
     const role = await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
     const companyName = await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
     const companyDescription = await this.getFlagOrPrompt(

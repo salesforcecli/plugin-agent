@@ -7,7 +7,7 @@
 
 import { colorize } from '@oclif/core/ux';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTestDetailsResponse, AgentTester } from '@salesforce/agents';
 import { Lifecycle } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -76,7 +76,11 @@ export class TestStages {
     this.mso.skipTo('Starting Tests', data);
   }
 
-  public async poll(agentTester: AgentTester, id: string, wait: Duration): Promise<boolean> {
+  public async poll(
+    agentTester: AgentTester,
+    id: string,
+    wait: Duration
+  ): Promise<{ completed: boolean; response?: AgentTestDetailsResponse }> {
     this.mso.skipTo('Polling for Test Results');
     const lifecycle = Lifecycle.getInstance();
     lifecycle.on(
@@ -91,16 +95,15 @@ export class TestStages {
     );
 
     try {
-      const { formatted } = await agentTester.poll(id, { timeout: wait });
+      const response = await agentTester.poll(id, { timeout: wait });
       this.stop();
-      this.ux.log(formatted);
-      return true;
+      return { completed: true, response };
     } catch (e) {
       if (isTimeoutError(e)) {
         this.stop('async');
         this.ux.log(`Client timed out after ${wait.minutes} minutes.`);
         this.ux.log(`Run ${colorize('dim', `sf agent test resume --job-id ${id}`)} to resuming watching this test.`);
-        return true;
+        return { completed: true };
       } else {
         this.error();
         throw e;

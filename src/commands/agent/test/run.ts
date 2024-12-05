@@ -7,7 +7,7 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTester, humanFormat } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { resultFormatFlag } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
@@ -64,9 +64,14 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     await agentTestCache.createCacheEntry(response.aiEvaluationId, flags.name);
 
     if (flags.wait?.minutes) {
-      const completed = await mso.poll(agentTester, response.aiEvaluationId, flags.wait);
+      const { completed, response: detailsResponse } = await mso.poll(agentTester, response.aiEvaluationId, flags.wait);
       if (completed) await agentTestCache.removeCacheEntry(response.aiEvaluationId);
+
       mso.stop();
+
+      if (detailsResponse && flags['result-format'] === 'human') {
+        this.log(await humanFormat(flags.name, detailsResponse));
+      }
       return {
         status: 'COMPLETED',
         aiEvaluationId: response.aiEvaluationId,

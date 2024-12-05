@@ -1344,23 +1344,7 @@
     http-call "^5.2.2"
     lodash "^4.17.21"
 
-"@oclif/table@^0.3.2":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@oclif/table/-/table-0.3.3.tgz#5dc1c98cfa5415b131d77c85048df187fc241d12"
-  integrity sha512-sz6gGT1JAPP743vxl1491hxboIu0ZFHaP3gyvhz5Prgsuljp2NGyyu7JPEMeVImCnZ9N3K9cy3VXxRFEwRH/ig==
-  dependencies:
-    "@oclif/core" "^4"
-    "@types/react" "^18.3.12"
-    change-case "^5.4.4"
-    cli-truncate "^4.0.0"
-    ink "^5.0.1"
-    natural-orderby "^3.0.2"
-    object-hash "^3.0.0"
-    react "^18.3.1"
-    strip-ansi "^7.1.0"
-    wrap-ansi "^9.0.0"
-
-"@oclif/table@^0.3.3":
+"@oclif/table@^0.3.2", "@oclif/table@^0.3.3":
   version "0.3.5"
   resolved "https://registry.yarnpkg.com/@oclif/table/-/table-0.3.5.tgz#118149eab364f3485eab5c9fd0d717c56082bacb"
   integrity sha512-1IjoVz7WAdUdBW5vYIRc6wt9N7Ezwll6AtdmeqLQ8lUmB9gQJVyeb7dqXtUaUvIG7bZMvryfPe6Xibeo5FTCWA==
@@ -1389,10 +1373,10 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.2.2.tgz#c32e35e043f60ae6b4192448984342541bb0fc81"
-  integrity sha512-X5HGMHLFqK8rpXrNF4r/dYEdseu//0PnI6oGuWoVwnNPgJ4D0b3iIqTYeznpVEYqOa8wVZdceG2pZXd0GiO+9w==
+"@salesforce/agents@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.3.0.tgz#5f58d69eca1dde07daaf88bc2226b1a09e579666"
+  integrity sha512-BV/Fa+WN8IT5n+bsdDI8wga5dxjY9Rhu6eAvU3OCyRQ7F0nFd5uqLe2Ybo+0gLbGCvGCrV9gt8eJ5z4fsgLoDQ==
   dependencies:
     "@oclif/table" "^0.3.3"
     "@salesforce/core" "^8.8.0"
