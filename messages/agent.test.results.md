@@ -1,19 +1,19 @@
 # summary
 
-Summary of a command.
+Get the results of a test evaluation.
 
 # description
 
-More information about a command. Don't repeat the summary.
+Provide the AiEvaluation ID to get the results of a test evaluation.
 
 # flags.job-id.summary
 
-Description of a flag.
+The AiEvaluation ID.
 
-# flags.job-id.description
+# flags.use-most-recent.summary
 
-More information about a flag. Don't repeat the summary.
+Use the job ID of the most recent test evaluation.
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- <%= config.bin %> <%= command.id %> --job-id AiEvalId

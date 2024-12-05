@@ -26,7 +26,6 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     'api-version': Flags.orgApiVersion(),
     'job-id': Flags.string({
       summary: messages.getMessage('flags.job-id.summary'),
-      description: messages.getMessage('flags.job-id.description'),
       char: 'i',
       required: true,
     }),

@@ -18,4 +18,4 @@ Use the job ID of the most recent test evaluation.
 
 - Cancel a test for an Agent:
 
-  <%= config.bin %> <%= command.id %> --id AiEvalId
+  <%= config.bin %> <%= command.id %> --job-id AiEvalId

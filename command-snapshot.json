@@ -29,14 +29,6 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:test",
-    "flagAliases": [],
-    "flagChars": ["n"],
-    "flags": ["flags-dir", "json", "name"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:test:cancel",
     "flagAliases": [],
     "flagChars": ["i", "o", "r"],
