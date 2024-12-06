@@ -64,6 +64,8 @@ sf plugins
 - [`sf agent create`](#sf-agent-create)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
+- [`sf agent test results`](#sf-agent-test-results)
+- [`sf agent test resume`](#sf-agent-test-resume)
 - [`sf agent test run`](#sf-agent-test-run)
 
 ## `sf agent create`
@@ -102,7 +104,7 @@ FLAG DESCRIPTIONS
     spec` command.
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.3.2/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/create.ts)_
 
 ## `sf agent generate spec`
 
@@ -110,9 +112,9 @@ Create an Agent spec.
 
 ```
 USAGE
-  $ sf agent generate spec -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-t
-    customer_facing|employee_facing] [--role <value>] [--company-name <value>] [--company-description <value>]
-    [--company-website <value>] [-d <value>] [-f <value>]
+  $ sf agent generate spec -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-t customer|internal]
+    [--role <value>] [--company-name <value>] [--company-description <value>] [--company-website <value>] [-d <value>]
+    [-f <value>]
 
 FLAGS
   -d, --output-dir=<value>           [default: config] The location within the project where the agent spec will be
@@ -121,7 +123,7 @@ FLAGS
   -o, --target-org=<value>           (required) Username or alias of the target org. Not required if the `target-org`
                                      configuration variable is already set.
   -t, --type=<option>                The type of agent to create.
-                                     <options: customer_facing|employee_facing>
+                                     <options: customer|internal>
       --api-version=<value>          Override the api version used for api requests made by this command
       --company-description=<value>  The description of the company, containing details to be used when generating agent
                                      job descriptions.
@@ -145,7 +147,7 @@ EXAMPLES
       --company-description "A meaningful description"
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.3.2/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent test cancel`
 
@@ -153,13 +155,14 @@ Cancel a running test for an Agent.
 
 ```
 USAGE
-  $ sf agent test cancel -o <value> -i <value> [--json] [--flags-dir <value>] [-r]
+  $ sf agent test cancel -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r]
 
 FLAGS
-  -i, --job-id=<value>      (required) The AiEvaluation ID.
-  -o, --target-org=<value>  (required) Username or alias of the target org. Not required if the `target-org`
-                            configuration variable is already set.
-  -r, --use-most-recent     Use the job ID of the most recent test evaluation.
+  -i, --job-id=<value>       The AiEvaluation ID.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+  -r, --use-most-recent      Use the job ID of the most recent test evaluation.
+      --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -173,10 +176,84 @@ DESCRIPTION
 EXAMPLES
   Cancel a test for an Agent:
 
-    $ sf agent test cancel --id AiEvalId
+    $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.3.2/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/test/cancel.ts)_
+
+## `sf agent test results`
+
+Get the results of a test evaluation.
+
+```
+USAGE
+  $ sf agent test results -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--result-format
+    json|human]
+
+FLAGS
+  -i, --job-id=<value>          (required) The AiEvaluation ID.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --result-format=<option>  [default: human] Format of the test run results.
+                                <options: json|human>
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Get the results of a test evaluation.
+
+  Provide the AiEvaluation ID to get the results of a test evaluation.
+
+EXAMPLES
+  $ sf agent test results --job-id AiEvalId
+```
+
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/test/results.ts)_
+
+## `sf agent test resume`
+
+Resume a running test for an Agent.
+
+```
+USAGE
+  $ sf agent test resume -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r] [-w
+    <value>] [--result-format json|human]
+
+FLAGS
+  -i, --job-id=<value>          The AiEvaluation ID.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
+  -r, --use-most-recent         Use the job ID of the most recent test evaluation.
+  -w, --wait=<value>            [default: 5 minutes] Number of minutes to wait for the command to complete and display
+                                results to the terminal window.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --result-format=<option>  [default: human] Format of the test run results.
+                                <options: json|human>
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Resume a running test for an Agent.
+
+  Resume a running test for an Agent, providing the AiEvaluation ID.
+
+EXAMPLES
+  Resume a test for an Agent:
+
+    $ sf agent test resume --job-id AiEvalId
+
+FLAG DESCRIPTIONS
+  -w, --wait=<value>  Number of minutes to wait for the command to complete and display results to the terminal window.
+
+    If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
+```
+
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -184,15 +261,18 @@ Start a test for an Agent.
 
 ```
 USAGE
-  $ sf agent test run -o <value> -i <value> [--json] [--flags-dir <value>] [-w <value>] [-d <value>]
+  $ sf agent test run -o <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
+    [--result-format json|human]
 
 FLAGS
-  -d, --output-dir=<value>  Directory in which to store test run files.
-  -i, --id=<value>          (required) The AiEvalDefinitionVersion ID.
-  -o, --target-org=<value>  (required) Username or alias of the target org. Not required if the `target-org`
-                            configuration variable is already set.
-  -w, --wait=<value>        Number of minutes to wait for the command to complete and display results to the terminal
-                            window.
+  -n, --name=<value>            (required) The name of the AiEvaluationDefinition to start.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
+  -w, --wait=<value>            Number of minutes to wait for the command to complete and display results to the
+                                terminal window.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --result-format=<option>  [default: human] Format of the test run results.
+                                <options: json|human>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -206,18 +286,18 @@ DESCRIPTION
 EXAMPLES
   Start a test for an Agent:
 
-    $ sf agent test run --id AiEvalDefVerId
+    $ sf agent test run --name AiEvalDefVerId
 
 FLAG DESCRIPTIONS
-  -i, --id=<value>  The AiEvalDefinitionVersion ID.
+  -n, --name=<value>  The name of the AiEvaluationDefinition to start.
 
-    The AiEvalDefinitionVersion ID.
+    The name of the AiEvaluationDefinition to start.
 
   -w, --wait=<value>  Number of minutes to wait for the command to complete and display results to the terminal window.
 
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.3.2/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.4.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

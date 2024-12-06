@@ -7,12 +7,14 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
+import { AgentTester } from '@salesforce/agents';
+import { AgentTestCache } from '../../../agentTestCache.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.cancel');
 
 export type AgentTestCancelResult = {
-  jobId: string; // AiEvaluation.Id
+  aiEvaluationId: string;
   success: boolean;
   errorCode?: string;
   message?: string;
@@ -22,38 +24,41 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static state = 'beta';
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
     'job-id': Flags.string({
       char: 'i',
-      required: true,
       summary: messages.getMessage('flags.job-id.summary'),
+      exactlyOne: ['use-most-recent', 'job-id'],
     }),
     'use-most-recent': Flags.boolean({
       char: 'r',
       summary: messages.getMessage('flags.use-most-recent.summary'),
       exactlyOne: ['use-most-recent', 'job-id'],
     }),
-    //
-    // Future flags:
-    //   ??? api-version ???
   };
 
   public async run(): Promise<AgentTestCancelResult> {
     const { flags } = await this.parse(AgentTestCancel);
 
-    this.log(`Canceling tests for AiEvaluation Job: ${flags['job-id']}`);
+    const agentTestCache = await AgentTestCache.create();
+    const { aiEvaluationId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
 
-    // Call SF Eval Connect API passing AiEvaluation.Id
-    // POST to /einstein/ai-evaluations/{aiEvaluationId}/stop
+    this.log(`Canceling tests for AiEvaluation Job: ${aiEvaluationId}`);
 
-    // Returns: AiEvaluation.Id
+    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
+    const result = await agentTester.cancel(aiEvaluationId);
+
+    if (result.success) {
+      await agentTestCache.removeCacheEntry(aiEvaluationId);
+    }
 
     return {
-      success: true,
-      jobId: '4KBSM000000003F4AQ', // AiEvaluation.Id
+      success: result.success,
+      aiEvaluationId,
     };
   }
 }

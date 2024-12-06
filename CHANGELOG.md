@@ -1,3 +1,29 @@
+# [1.4.0](https://github.com/salesforcecli/plugin-agent/compare/1.3.4...1.4.0) (2024-12-05)
+
+### Bug Fixes
+
+- keep up with agents lib ([75d6403](https://github.com/salesforcecli/plugin-agent/commit/75d6403b466546181db2b697163b5b1b689a2266))
+- messages ([38eef81](https://github.com/salesforcecli/plugin-agent/commit/38eef81f144739596fc696eccb7264d55cffb6e6))
+
+### Features
+
+- add command stubs ([3f942b2](https://github.com/salesforcecli/plugin-agent/commit/3f942b22aed7d532f3243654292809af07dfb592))
+- implement agent test run ([81ec3a3](https://github.com/salesforcecli/plugin-agent/commit/81ec3a3d3fb253e8d721881dfba7fb0036323e84))
+- show completion progress ([4da8b5f](https://github.com/salesforcecli/plugin-agent/commit/4da8b5f667a08f27b300e495be09204770acd7e5))
+- show passing and failing tests ([e422ca5](https://github.com/salesforcecli/plugin-agent/commit/e422ca5436a9dc03fe42c8aef50486be6b8ddfd1))
+
+## [1.3.4](https://github.com/salesforcecli/plugin-agent/compare/1.3.3...1.3.4) (2024-12-03)
+
+### Bug Fixes
+
+- update agent lib, update enums, update spec file schema ([77a11fc](https://github.com/salesforcecli/plugin-agent/commit/77a11fc90a11081a7b16b82134b02b584252adde))
+
+## [1.3.3](https://github.com/salesforcecli/plugin-agent/compare/1.3.2...1.3.3) (2024-12-03)
+
+### Bug Fixes
+
+- update agents lib ([52dbff0](https://github.com/salesforcecli/plugin-agent/commit/52dbff066a851024f0b8ff0691f5307815a155d1))
+
 ## [1.3.2](https://github.com/salesforcecli/plugin-agent/compare/1.3.1...1.3.2) (2024-11-12)
 
 ### Bug Fixes

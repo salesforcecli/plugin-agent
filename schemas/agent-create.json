@@ -12,9 +12,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "isSuccess"
-      ],
+      "required": ["isSuccess"],
       "additionalProperties": false
     }
   }

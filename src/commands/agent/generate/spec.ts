@@ -44,7 +44,7 @@ const FLAGGABLE_PROMPTS = {
     message: messages.getMessage('flags.type.summary'),
     validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
     char: 't',
-    options: ['customer_facing', 'employee_facing'],
+    options: ['customer', 'internal'],
     required: true,
   },
   role: {
@@ -142,9 +142,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 
     this.log();
     this.styledHeader('Agent Details');
-    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as
-      | 'customer_facing'
-      | 'employee_facing';
+    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as 'customer' | 'internal';
     const role = await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
     const companyName = await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
     const companyDescription = await this.getFlagOrPrompt(
@@ -169,7 +167,10 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 
     // Write a file with the returned job specs
     const filePath = join(flags['output-dir'], flags['file-name']);
-    writeFileSync(filePath, JSON.stringify(agentSpec, null, 4));
+    writeFileSync(
+      filePath,
+      JSON.stringify({ type, role, companyName, companyDescription, companyWebsite, JobSpec: agentSpec }, null, 4)
+    );
 
     this.spinner.stop();
 
