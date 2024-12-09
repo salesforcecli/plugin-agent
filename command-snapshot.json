@@ -47,24 +47,34 @@
     "alias": [],
     "command": "agent:test:results",
     "flagAliases": [],
-    "flagChars": ["i", "o"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "result-format", "target-org"],
+    "flagChars": ["f", "i", "o"],
+    "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
     "alias": [],
     "command": "agent:test:resume",
     "flagAliases": [],
-    "flagChars": ["i", "o", "r", "w"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "result-format", "target-org", "use-most-recent", "wait"],
+    "flagChars": ["f", "i", "o", "r", "w"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "job-id",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "use-most-recent",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {
     "alias": [],
     "command": "agent:test:run",
     "flagAliases": [],
-    "flagChars": ["n", "o", "w"],
-    "flags": ["api-version", "flags-dir", "json", "name", "result-format", "target-org", "wait"],
+    "flagChars": ["f", "n", "o", "w"],
+    "flags": ["api-version", "flags-dir", "json", "name", "output-dir", "result-format", "target-org", "wait"],
     "plugin": "@salesforce/plugin-agent"
   }
 ]
