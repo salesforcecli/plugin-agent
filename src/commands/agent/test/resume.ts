@@ -7,10 +7,11 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester, humanFormat } from '@salesforce/agents';
+import { AgentTester } from '@salesforce/agents';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
-import { resultFormatFlag } from '../../../flags.js';
+import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.resume');
@@ -48,6 +49,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
       description: messages.getMessage('flags.wait.description'),
     }),
     'result-format': resultFormatFlag(),
+    'output-dir': testOutputDirFlag(),
   };
 
   public async run(): Promise<AgentTestResumeResult> {
@@ -68,9 +70,13 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
 
     mso.stop();
 
-    if (response && flags['result-format'] === 'human') {
-      this.log(await humanFormat(name ?? aiEvaluationId, response));
-    }
+    await handleTestResults({
+      id: aiEvaluationId,
+      format: flags['result-format'],
+      results: response,
+      jsonEnabled: this.jsonEnabled(),
+      outputDir: flags['output-dir'],
+    });
 
     return {
       status: 'COMPLETED',

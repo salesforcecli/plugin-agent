@@ -7,8 +7,9 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester, AgentTestDetailsResponse, humanFormat } from '@salesforce/agents';
-import { resultFormatFlag } from '../../../flags.js';
+import { AgentTester, AgentTestDetailsResponse } from '@salesforce/agents';
+import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.results');
@@ -30,6 +31,7 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
       required: true,
     }),
     'result-format': resultFormatFlag(),
+    'output-dir': testOutputDirFlag(),
   };
 
   public async run(): Promise<AgentTestResultsResult> {
@@ -37,9 +39,13 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
     const response = await agentTester.details(flags['job-id']);
-    if (flags['result-format'] === 'human') {
-      this.log(await humanFormat(flags['job-id'], response));
-    }
+    await handleTestResults({
+      id: flags['job-id'],
+      format: flags['result-format'],
+      results: response,
+      jsonEnabled: this.jsonEnabled(),
+      outputDir: flags['output-dir'],
+    });
     return response;
   }
 }
