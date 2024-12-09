@@ -14,9 +14,15 @@ export const resultFormatFlag = Flags.option({
   options: [
     'json',
     'human',
+    'junit',
     // 'tap',
-    // 'junit'
   ] as const,
   default: 'human',
   summary: messages.getMessage('flags.result-format.summary'),
+});
+
+export const testOutputDirFlag = Flags.custom<string>({
+  char: 'f',
+  description: messages.getMessage('flags.output-dir.description'),
+  summary: messages.getMessage('flags.output-dir.summary'),
 });
