@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentTestRunResult",
+  "$ref": "#/definitions/AgentTestResumeResult",
   "definitions": {
-    "AgentTestRunResult": {
+    "AgentTestResumeResult": {
       "type": "object",
       "properties": {
         "aiEvaluationId": {

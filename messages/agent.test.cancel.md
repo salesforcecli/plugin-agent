@@ -6,7 +6,7 @@ Cancel a running test for an Agent.
 
 Cancel a running test for an Agent, providing the AiEvaluation ID.
 
-# flags.id.summary
+# flags.job-id.summary
 
 The AiEvaluation ID.
 
@@ -18,4 +18,4 @@ Use the job ID of the most recent test evaluation.
 
 - Cancel a test for an Agent:
 
-  <%= config.bin %> <%= command.id %> --id AiEvalId
+  <%= config.bin %> <%= command.id %> --job-id AiEvalId
