@@ -1389,10 +1389,10 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.4.1.tgz#4c7ae6174be6e2924184301d90c860c3fe5f1211"
-  integrity sha512-MESMq0o+3SHLjXsePgegBoQ/OxmHBHV5rSchdRAM7ixyIdop42rfJir6YNd0VGusAzI1I7OT1l5/sCz1BoddVA==
+"@salesforce/agents@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.4.2.tgz#1caaf6a521cc3385a0411840876b77147aea880a"
+  integrity sha512-oTHEf3Dp6T8sYZzB/6V0HaZg7k/aZfTIFsoqYeewWpEa/KP0oopGHWTO9my15n1Guoq0qif6sWqX+RwWpqGgWw==
   dependencies:
     "@oclif/table" "^0.3.5"
     "@salesforce/core" "^8.8.0"
