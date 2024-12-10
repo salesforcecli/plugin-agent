@@ -1,3 +1,9 @@
+# [1.5.0](https://github.com/salesforcecli/plugin-agent/compare/1.4.0...1.5.0) (2024-12-10)
+
+### Features
+
+- junit result formatter ([af485da](https://github.com/salesforcecli/plugin-agent/commit/af485dada1894756f2b5271e2a0ae01d51acfc78))
+
 # [1.4.0](https://github.com/salesforcecli/plugin-agent/compare/1.3.4...1.4.0) (2024-12-05)
 
 ### Bug Fixes
