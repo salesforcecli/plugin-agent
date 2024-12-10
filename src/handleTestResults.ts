@@ -4,6 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { join } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { AgentTestDetailsResponse, jsonFormat, humanFormat, junitFormat } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
@@ -12,7 +13,7 @@ async function writeFileToDir(outputDir: string, fileName: string, content: stri
   // if directory doesn't exist, create it
   await mkdir(outputDir, { recursive: true });
 
-  await writeFile(`${outputDir}/${fileName}`, content);
+  await writeFile(join(outputDir, fileName), content);
 }
 
 export async function handleTestResults({
