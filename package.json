@@ -9,7 +9,7 @@
     "@inquirer/input": "^4.0.1",
     "@inquirer/select": "^4.0.1",
     "@oclif/core": "^4",
-    "@salesforce/agents": "^0.2.4",
+    "@salesforce/agents": "^0.4.1",
     "@oclif/multi-stage-output": "^0.7.12",
     "@salesforce/core": "^8.5.2",
     "@salesforce/kit": "^3.2.1",
