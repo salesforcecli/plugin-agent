@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/salesforcecli/plugin-agent/compare/1.5.0...1.5.1) (2024-12-10)
+
+### Bug Fixes
+
+- agent.create WIP, fix jobSpec agent spec key ([cd1944c](https://github.com/salesforcecli/plugin-agent/commit/cd1944c8511d8776dcb91a4ad7b04481acff7a74))
+- bump agents version ([dd387bc](https://github.com/salesforcecli/plugin-agent/commit/dd387bcbbb519519cc49e7d7fc801f47840fa81e))
+- use new lifecycle events ([bbe5b43](https://github.com/salesforcecli/plugin-agent/commit/bbe5b437d0360de55ce3b7301fefa6270a8b258d))
+
 # [1.5.0](https://github.com/salesforcecli/plugin-agent/compare/1.4.0...1.5.0) (2024-12-10)
 
 ### Features

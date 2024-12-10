@@ -105,7 +105,7 @@ FLAG DESCRIPTIONS
     spec` command.
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate spec`
 
@@ -148,7 +148,7 @@ EXAMPLES
       --company-description "A meaningful description"
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent preview`
 
@@ -183,7 +183,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -215,7 +215,7 @@ EXAMPLES
     $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -254,7 +254,7 @@ FLAG DESCRIPTIONS
     results will not be written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -302,7 +302,7 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -353,6 +353,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
