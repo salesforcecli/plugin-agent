@@ -7,10 +7,10 @@
 
 import * as fs from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Lifecycle, Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { colorize } from '@oclif/core/ux';
-import { Agent, AgentCreateConfig } from '@salesforce/agents';
+import { Agent, AgentCreateConfig, AgentCreateLifecycleStages } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create');
@@ -19,10 +19,6 @@ export type AgentCreateResult = {
   isSuccess: boolean;
   errorMessage?: string;
 };
-
-// There is no API for this yet. It's being planned/built by the Agent Creator team.
-// However, we could possibly use:
-//   /services/data/{api-version}/connect/attach-agent-topics
 
 export default class AgentCreate extends SfCommand<AgentCreateResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -55,9 +51,10 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
       title: `Creating ${flags.name} Agent`,
       stages: [
         jsonParsingStage,
-        'Generating GenAiPlanner metadata',
-        'Creating agent in org',
-        'Retrieving agent metadata',
+        'Generating local metadata',
+        'Deploying metadata to org',
+        'Creating Agent in org',
+        'Retrieving Agent metadata',
       ],
     });
 
@@ -67,15 +64,21 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
       name: flags.name,
     };
 
-    mso.goto('Generating GenAiPlanner metadata');
-    // make agent.create emit events so we can update MSO?
-    mso.goto('Creating agent in org');
+    // @ts-expect-error not using async method in callback
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.CreatingLocally, () => mso.goto('Generating local metadata'));
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.DeployingMetadata, () =>
+      // @ts-expect-error not using async method in callback
+      mso.goto('Deploying metadata to org')
+    );
+    // @ts-expect-error not using async method in callback
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.CreatingRemotely, () => mso.goto('Creating Agent in org'));
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.RetrievingMetadata, () =>
+      // @ts-expect-error not using async method in callback
+      mso.goto('Retrieving Agent metadata')
+    );
 
     const agent = new Agent(flags['target-org'].getConnection(flags['api-version']), this.project!);
     const created = await agent.create(agentConfig);
-
-    mso.goto('Retrieving agent metadata');
-    // await sleep(Duration.seconds(3));
 
     mso.stop();
 
