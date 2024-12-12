@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
+ * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
@@ -117,7 +117,7 @@ export default class AgentGenerateTestset extends SfCommand<void> {
     const testSetPath = join('force-app', 'main', 'default', 'aiEvaluationTestsets', `${testSetName}.xml`);
     await mkdir(dirname(testSetPath), { recursive: true });
     this.log();
-    this.log(`Writing test set to ${testSetPath}`);
+    this.log(`Writing new AiEvaluationTestSet to ${testSetPath}`);
     await writeFile(testSetPath, constructTestSetXML(testCases));
   }
 }
