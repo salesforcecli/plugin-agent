@@ -11,7 +11,7 @@ import { Messages } from '@salesforce/core';
 import input from '@inquirer/input';
 import select from '@inquirer/select';
 import confirm from '@inquirer/confirm';
-import ansis from 'ansis';
+import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.testset');
@@ -25,9 +25,6 @@ export type TestSetInputs = {
 };
 
 async function promptForTestCase(): Promise<TestSetInputs> {
-  const theme = {
-    prefix: { idle: ansis.blueBright('?') },
-  };
   const utterance = await input({
     message: 'What utterance would you like to test?',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',

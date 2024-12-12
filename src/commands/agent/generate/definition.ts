@@ -10,6 +10,7 @@ import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import select from '@inquirer/select';
 import input from '@inquirer/input';
+import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.definition');
@@ -39,25 +40,30 @@ export default class AgentGenerateDefinition extends SfCommand<void> {
     const testSet = await select<string>({
       message: 'Select the AiEvaluationTestSet to use',
       choices: testSets,
+      theme,
     });
 
     const bot = await select<string>({
       message: 'Select the Bot to run the tests against',
       choices: bots,
+      theme,
     });
 
     const name = await input({
       message: 'Enter a name for the AiEvaluationDefinition',
       validate: (i: string): string | boolean => (i.length > 0 ? true : 'Name cannot be empty'),
+      theme,
     });
 
     const description = await input({
       message: 'Enter a description for the AiEvaluationDefinition',
+      theme,
     });
 
     const subjectType = await select<string>({
       message: 'Select the type for the AiEvaluationDefinition',
       choices: ['AGENT'],
+      theme,
     });
 
     this.log(`Generating AiEvaluationDefinition for ${bot} using ${testSet} AiEvaluationTestSet`);

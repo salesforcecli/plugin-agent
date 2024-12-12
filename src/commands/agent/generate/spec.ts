@@ -14,6 +14,7 @@ import select from '@inquirer/select';
 import inquirerInput from '@inquirer/input';
 import figures from '@inquirer/figures';
 import { Agent, AgentCreateConfig, SfAgent } from '@salesforce/agents';
+import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.spec');
@@ -206,18 +207,14 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       return select({
         choices: flagDef.options.map((o) => ({ name: o, value: o })),
         message,
-        theme: {
-          prefix: { idle: ansis.blueBright('?') },
-        },
+        theme,
       });
     }
 
     return inquirerInput({
       message,
       validate: flagDef.validate,
-      theme: {
-        prefix: { idle: ansis.blueBright('?') },
-      },
+      theme,
     });
   }
 }
