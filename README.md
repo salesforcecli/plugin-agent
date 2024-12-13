@@ -62,7 +62,9 @@ sf plugins
 <!-- commands -->
 
 - [`sf agent create`](#sf-agent-create)
+- [`sf agent generate definition`](#sf-agent-generate-definition)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
+- [`sf agent generate testset`](#sf-agent-generate-testset)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
 - [`sf agent test results`](#sf-agent-test-results)
@@ -109,7 +111,32 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --job-spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/create.ts)_
+
+## `sf agent generate definition`
+
+Interactively generate a new AiEvaluationDefinition.
+
+```
+USAGE
+  $ sf agent generate definition [--flags-dir <value>]
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+
+DESCRIPTION
+  Interactively generate a new AiEvaluationDefinition.
+
+  This command will prompt you for the necessary information to create a new AiEvaluationDefinition. The definition will
+  be saved to the `aiEvaluationDefinitions` directory in the project.
+
+  You must have the `Bots` and `AiEvaluationTestSets` metadata types present in your project to use this command.
+
+EXAMPLES
+  $ sf agent generate definition
+```
+
+_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/definition.ts)_
 
 ## `sf agent generate spec`
 
@@ -170,7 +197,30 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/spec.ts)_
+
+## `sf agent generate testset`
+
+Interactively generate an AiEvaluationTestSet.
+
+```
+USAGE
+  $ sf agent generate testset [--flags-dir <value>]
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+
+DESCRIPTION
+  Interactively generate an AiEvaluationTestSet.
+
+  Answer the prompts to generate an AiEvaluationTestSet that will be written to a file. You can then run "sf agent
+  generate definition" to generate the AiEvaluationDefinition that can be used to evaluate the test set.
+
+EXAMPLES
+  $ sf agent generate testset
+```
+
+_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/testset.ts)_
 
 ## `sf agent preview`
 
@@ -205,7 +255,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -237,7 +287,7 @@ EXAMPLES
     $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -276,7 +326,7 @@ FLAG DESCRIPTIONS
     results will not be written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -324,7 +374,7 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -375,6 +425,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

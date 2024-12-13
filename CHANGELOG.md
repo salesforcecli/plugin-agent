@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/salesforcecli/plugin-agent/compare/1.5.2...1.6.0) (2024-12-13)
+
+### Features
+
+- add generate definition ([935d770](https://github.com/salesforcecli/plugin-agent/commit/935d770e7f51e6cc56c1128f4d6a704f39754064))
+- add generate testset ([3ccdd38](https://github.com/salesforcecli/plugin-agent/commit/3ccdd386649557ff1f78f444d5e92ec78c9dfdc7))
+
 ## [1.5.2](https://github.com/salesforcecli/plugin-agent/compare/1.5.1...1.5.2) (2024-12-13)
 
 ### Bug Fixes
