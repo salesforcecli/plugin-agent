@@ -1,3 +1,9 @@
+## [1.5.2](https://github.com/salesforcecli/plugin-agent/compare/1.5.1...1.5.2) (2024-12-13)
+
+### Bug Fixes
+
+- edit messages for agent create and agent generte spec ([031ff27](https://github.com/salesforcecli/plugin-agent/commit/031ff27253aa60e570632b5bab78a80621886d6d))
+
 ## [1.5.1](https://github.com/salesforcecli/plugin-agent/compare/1.5.0...1.5.1) (2024-12-10)
 
 ### Bug Fixes

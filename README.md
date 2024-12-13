@@ -71,15 +71,15 @@ sf plugins
 
 ## `sf agent create`
 
-Create an Agent from an agent spec.
+Create an agent in your org from a local agent spec file.
 
 ```
 USAGE
   $ sf agent create -o <value> -f <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
-  -f, --job-spec=<value>     (required) The path to an agent spec file.
-  -n, --name=<value>         (required) The name of the agent.
+  -f, --job-spec=<value>     (required) Path to an agent spec file.
+  -n, --name=<value>         (required) API name of the new agent.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
@@ -89,27 +89,31 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Create an Agent from an agent spec.
+  Create an agent in your org from a local agent spec file.
 
-  Create an Agent from an agent spec. Agent metadata is created in the target org and retrieved to the local project.
+  To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a JSON file with the list of
+  jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --job-spec flag of
+  this command, along with the name of the new agent.
+
+  When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new
+  agent already has a list of topics and actions that were automatically created from the list of jobs in the provided
+  agent spec file. This command also retrieves all the metadata files associated with the new agent to your local DX
+  project.
+
+  To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name
+  <api-name-of-your-agent>".
 
 EXAMPLES
-  Create an Agent:
+  Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
 
-    $ sf agent create --spec ./agent-spec.json
-
-FLAG DESCRIPTIONS
-  -f, --job-spec=<value>  The path to an agent spec file.
-
-    The agent spec file defines job titles and descriptions for the agent and can be created using the `sf agent create
-    spec` command.
+    $ sf agent create --name CustomerSupportAgent --job-spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/create.ts)_
 
 ## `sf agent generate spec`
 
-Create an Agent spec.
+Generate an agent spec, which is the list of jobs that the agent performs.
 
 ```
 USAGE
@@ -118,37 +122,55 @@ USAGE
     [-f <value>]
 
 FLAGS
-  -d, --output-dir=<value>           [default: config] The location within the project where the agent spec will be
-                                     written.
-  -f, --file-name=<value>            [default: agentSpec.json] The name of the file to write the agent spec to.
+  -d, --output-dir=<value>           [default: config] Directory where the agent spec file is written; can be an
+                                     absolute or relative path.
+  -f, --file-name=<value>            [default: agentSpec.json] Name of the generated agent spec file.
   -o, --target-org=<value>           (required) Username or alias of the target org. Not required if the `target-org`
                                      configuration variable is already set.
-  -t, --type=<option>                The type of agent to create.
+  -t, --type=<option>                Type of agent to create.
                                      <options: customer|internal>
       --api-version=<value>          Override the api version used for api requests made by this command
-      --company-description=<value>  The description of the company, containing details to be used when generating agent
-                                     job descriptions.
-      --company-name=<value>         The name of the company.
-      --company-website=<value>      The website URL for the company.
-      --role=<value>                 The role of the agent.
+      --company-description=<value>  Description of your company.
+      --company-name=<value>         Name of your company.
+      --company-website=<value>      Website URL of your company.
+      --role=<value>                 Role of the agent.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
   --json               Format output as json.
 
 DESCRIPTION
-  Create an Agent spec.
+  Generate an agent spec, which is the list of jobs that the agent performs.
 
-  Create an Agent spec, which is a list of job titles and descriptions that the agent performs.
+  When using Salesforce CLI to create an agent in your org, the first step is to generate the local JSON-formatted agent
+  spec file with this command.
+
+  An agent spec is a list of jobs and descriptions that capture what the agent can do. Use flags such as --role and
+  --company-description to provide details about your company and the role that the agent plays in your company; you can
+  also enter the information interactively if you prefer. When you then execute this command, the large language model
+  (LLM) associated with your org uses the information to generate the list of jobs that the agent most likely performs.
+  We recommend that you provide good details for --role, --company-description, etc, so that the LLM can generate the
+  best and most relevant list of jobs and descriptions. Once generated, you can edit the spec file; for example, you can
+  remove jobs that don't apply to your agent.
+
+  When your agent spec is ready, you then create the agent in your org by specifying the agent spec file to the
+  --job-spec flag of the "agent create" CLI command.
 
 EXAMPLES
-  Create an Agent spec in the default location:
+  Create an agent spec for your default org in the default location and use flags to specify the agent's role and your
+  company details:
 
-    $ sf agent generate spec --type customer_facing --role Support --company-name "Coral Cloud" \
-      --company-description "A meaningful description"
+    $ sf agent generate spec --type customer --role "Assist users in navigating and managing bookings" \
+      --company-name "Coral Cloud" --company-description "Resort that manages guests and their reservations and \
+      experiences"
+
+  Create an agent spec by being prompted for role and company details interactively; write the generated file to the
+  "specs" directory and use the org with alias "my-org":
+
+    $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent preview`
 
@@ -183,7 +205,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -215,7 +237,7 @@ EXAMPLES
     $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -254,7 +276,7 @@ FLAG DESCRIPTIONS
     results will not be written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -302,7 +324,7 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -353,6 +375,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.5.2/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
