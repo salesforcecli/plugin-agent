@@ -9,6 +9,14 @@
   },
   {
     "alias": [],
+    "command": "agent:generate:definition",
+    "flagAliases": [],
+    "flagChars": [],
+    "flags": ["flags-dir"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:spec",
     "flagAliases": [],
     "flagChars": ["d", "f", "o", "t"],
@@ -25,6 +33,14 @@
       "target-org",
       "type"
     ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:testset",
+    "flagAliases": [],
+    "flagChars": [],
+    "flags": ["flags-dir"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
