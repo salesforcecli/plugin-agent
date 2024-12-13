@@ -20,6 +20,12 @@
         "errorMessage": {
           "type": "string"
         },
+        "subjectName": {
+          "type": "string"
+        },
+        "testSetName": {
+          "type": "string"
+        },
         "testCases": {
           "type": "array",
           "items": {
@@ -27,7 +33,7 @@
           }
         }
       },
-      "required": ["status", "startTime", "testCases"],
+      "required": ["status", "startTime", "subjectName", "testSetName", "testCases"],
       "additionalProperties": false
     },
     "TestStatus": {
