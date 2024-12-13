@@ -34,7 +34,6 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
       char: 'f',
       required: true,
       summary: messages.getMessage('flags.job-spec.summary'),
-      description: messages.getMessage('flags.job-spec.description'),
     }),
     name: Flags.string({
       char: 'n',
