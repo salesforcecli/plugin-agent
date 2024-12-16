@@ -36,7 +36,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       char: 'n',
       required: true,
       summary: messages.getMessage('flags.name.summary'),
-      description: messages.getMessage('flags.name.description'),
     }),
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
@@ -45,7 +44,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       unit: 'minutes',
       min: 1,
       summary: messages.getMessage('flags.wait.summary'),
-      description: messages.getMessage('flags.wait.description'),
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
