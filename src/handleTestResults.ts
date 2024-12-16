@@ -6,7 +6,7 @@
  */
 import { join } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestDetailsResponse, jsonFormat, humanFormat, junitFormat } from '@salesforce/agents';
+import { AgentTestDetailsResponse, jsonFormat, humanFormat, junitFormat, tapFormat } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
@@ -24,7 +24,7 @@ export async function handleTestResults({
   outputDir,
 }: {
   id: string;
-  format: 'human' | 'json' | 'junit';
+  format: 'human' | 'json' | 'junit' | 'tap';
   results: AgentTestDetailsResponse | undefined;
   jsonEnabled: boolean;
   outputDir?: string;
@@ -57,6 +57,14 @@ export async function handleTestResults({
     ux.log(formatted);
     if (outputDir) {
       await writeFileToDir(outputDir, `test-result-${id}.xml`, formatted);
+    }
+  }
+
+  if (format === 'tap') {
+    const formatted = await tapFormat(results);
+    ux.log(formatted);
+    if (outputDir) {
+      await writeFileToDir(outputDir, `test-result-${id}.txt`, formatted);
     }
   }
 }

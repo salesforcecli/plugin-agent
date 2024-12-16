@@ -11,12 +11,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'shared');
 
 export const resultFormatFlag = Flags.option({
-  options: [
-    'json',
-    'human',
-    'junit',
-    // 'tap',
-  ] as const,
+  options: ['json', 'human', 'junit', 'tap'] as const,
   default: 'human',
   summary: messages.getMessage('flags.result-format.summary'),
 });

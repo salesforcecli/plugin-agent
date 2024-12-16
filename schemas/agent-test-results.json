@@ -20,14 +20,27 @@
         "errorMessage": {
           "type": "string"
         },
-        "testCases": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TestCaseResult"
-          }
+        "subjectName": {
+          "type": "string"
+        },
+        "testSet": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "testCases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TestCaseResult"
+              }
+            }
+          },
+          "required": ["name", "testCases"],
+          "additionalProperties": false
         }
       },
-      "required": ["status", "startTime", "testCases"],
+      "required": ["status", "startTime", "subjectName", "testSet"],
       "additionalProperties": false
     },
     "TestStatus": {
