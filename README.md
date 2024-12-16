@@ -80,7 +80,7 @@ USAGE
   $ sf agent create -o <value> -f <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
-  -f, --job-spec=<value>     (required) Path to an agent spec file.
+  -f, --spec=<value>         (required) Path to an agent spec file.
   -n, --name=<value>         (required) API name of the new agent.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
@@ -94,8 +94,8 @@ DESCRIPTION
   Create an agent in your org from a local agent spec file.
 
   To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a JSON file with the list of
-  jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --job-spec flag of
-  this command, along with the name of the new agent.
+  jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --spec flag of this
+  command, along with the name of the new agent.
 
   When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new
   agent already has a list of topics and actions that were automatically created from the list of jobs in the provided
@@ -108,10 +108,10 @@ DESCRIPTION
 EXAMPLES
   Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
 
-    $ sf agent create --name CustomerSupportAgent --job-spec ./config/agentSpec.json --target-org my-org
+    $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate definition`
 
@@ -136,7 +136,7 @@ EXAMPLES
   $ sf agent generate definition
 ```
 
-_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/definition.ts)_
+_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/definition.ts)_
 
 ## `sf agent generate spec`
 
@@ -197,7 +197,7 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent generate testset`
 
@@ -220,7 +220,7 @@ EXAMPLES
   $ sf agent generate testset
 ```
 
-_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/generate/testset.ts)_
+_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/testset.ts)_
 
 ## `sf agent preview`
 
@@ -255,7 +255,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -287,7 +287,7 @@ EXAMPLES
     $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -326,7 +326,7 @@ FLAG DESCRIPTIONS
     results will not be written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -374,7 +374,7 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -425,6 +425,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

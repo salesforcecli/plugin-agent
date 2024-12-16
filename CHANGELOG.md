@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/salesforcecli/plugin-agent/compare/1.6.0...1.6.1) (2024-12-16)
+
+### Bug Fixes
+
+- change from --job-spec to --spec [skip-validate-pr] ([6234021](https://github.com/salesforcecli/plugin-agent/commit/62340217eb629cdc7098d95ad72ad0f4873f2b1a))
+
 # [1.6.0](https://github.com/salesforcecli/plugin-agent/compare/1.5.2...1.6.0) (2024-12-13)
 
 ### Features
