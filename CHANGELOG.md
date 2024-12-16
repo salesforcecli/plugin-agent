@@ -1,3 +1,9 @@
+# [1.7.0](https://github.com/salesforcecli/plugin-agent/compare/1.6.1...1.7.0) (2024-12-16)
+
+### Features
+
+- add TAP format ([aff7b5b](https://github.com/salesforcecli/plugin-agent/commit/aff7b5b77aa403a3f4d309304122ebae7f774408))
+
 ## [1.6.1](https://github.com/salesforcecli/plugin-agent/compare/1.6.0...1.6.1) (2024-12-16)
 
 ### Bug Fixes

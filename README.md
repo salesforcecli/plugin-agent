@@ -111,7 +111,7 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/create.ts)_
 
 ## `sf agent generate definition`
 
@@ -136,7 +136,7 @@ EXAMPLES
   $ sf agent generate definition
 ```
 
-_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/definition.ts)_
+_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/definition.ts)_
 
 ## `sf agent generate spec`
 
@@ -197,7 +197,7 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent generate testset`
 
@@ -220,7 +220,7 @@ EXAMPLES
   $ sf agent generate testset
 ```
 
-_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/generate/testset.ts)_
+_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/testset.ts)_
 
 ## `sf agent preview`
 
@@ -255,7 +255,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -287,7 +287,7 @@ EXAMPLES
     $ sf agent test cancel --job-id AiEvalId
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -296,7 +296,7 @@ Get the results of a test evaluation.
 ```
 USAGE
   $ sf agent test results -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--result-format
-    json|human|junit] [-f <value>]
+    json|human|junit|tap] [-f <value>]
 
 FLAGS
   -f, --output-dir=<value>      Directory to write the test results to.
@@ -305,7 +305,7 @@ FLAGS
                                 configuration variable is already set.
       --api-version=<value>     Override the api version used for api requests made by this command
       --result-format=<option>  [default: human] Format of the test run results.
-                                <options: json|human|junit>
+                                <options: json|human|junit|tap>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -326,7 +326,7 @@ FLAG DESCRIPTIONS
     results will not be written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -335,7 +335,7 @@ Resume a running test for an Agent.
 ```
 USAGE
   $ sf agent test resume -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r] [-w
-    <value>] [--result-format json|human|junit] [-f <value>]
+    <value>] [--result-format json|human|junit|tap] [-f <value>]
 
 FLAGS
   -f, --output-dir=<value>      Directory to write the test results to.
@@ -347,7 +347,7 @@ FLAGS
                                 results to the terminal window.
       --api-version=<value>     Override the api version used for api requests made by this command
       --result-format=<option>  [default: human] Format of the test run results.
-                                <options: json|human|junit>
+                                <options: json|human|junit|tap>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -374,7 +374,7 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -383,7 +383,7 @@ Start a test for an Agent.
 ```
 USAGE
   $ sf agent test run -o <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
-    [--result-format json|human|junit] [-f <value>]
+    [--result-format json|human|junit|tap] [-f <value>]
 
 FLAGS
   -f, --output-dir=<value>      Directory to write the test results to.
@@ -394,7 +394,7 @@ FLAGS
                                 terminal window.
       --api-version=<value>     Override the api version used for api requests made by this command
       --result-format=<option>  [default: human] Format of the test run results.
-                                <options: json|human|junit>
+                                <options: json|human|junit|tap>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -425,6 +425,6 @@ FLAG DESCRIPTIONS
     If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.6.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
