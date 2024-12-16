@@ -30,10 +30,10 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'job-spec': Flags.file({
+    spec: Flags.file({
       char: 'f',
       required: true,
-      summary: messages.getMessage('flags.job-spec.summary'),
+      summary: messages.getMessage('flags.spec.summary'),
     }),
     name: Flags.string({
       char: 'n',
@@ -44,7 +44,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
 
   public async run(): Promise<AgentCreateResult> {
     const { flags } = await this.parse(AgentCreate);
-    const jsonParsingStage = `Parsing ${flags['job-spec']}`;
+    const jsonParsingStage = `Parsing ${flags.spec}`;
     const mso = new MultiStageOutput({
       jsonEnabled: this.jsonEnabled(),
       title: `Creating ${flags.name} Agent`,
@@ -59,7 +59,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
 
     mso.goto(jsonParsingStage);
     const agentConfig = {
-      ...(JSON.parse(fs.readFileSync(flags['job-spec'], 'utf8')) as AgentCreateConfig),
+      ...(JSON.parse(fs.readFileSync(flags.spec, 'utf8')) as AgentCreateConfig),
       name: flags.name,
     };
 

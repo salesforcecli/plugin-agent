@@ -4,7 +4,7 @@
     "command": "agent:create",
     "flagAliases": [],
     "flagChars": ["f", "n", "o"],
-    "flags": ["api-version", "flags-dir", "job-spec", "json", "name", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "name", "spec", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
