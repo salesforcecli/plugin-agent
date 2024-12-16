@@ -47,7 +47,7 @@ describe('agent test results NUTs', () => {
     ).jsonOutput;
 
     expect(output?.result.status).to.equal('COMPLETED');
-    expect(output?.result.testCases.length).to.equal(2);
+    expect(output?.result.testSet.testCases.length).to.equal(2);
 
     // check that cache does not have an entry
     const cache = await AgentTestCache.create();
