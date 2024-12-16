@@ -22,4 +22,4 @@ API name of the new agent.
 
 - Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
 
-  <%= config.bin %> <%= command.id %> --name CustomerSupportAgent --job-spec ./config/agentSpec.json --target-org my-org
+  <%= config.bin %> <%= command.id %> --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
