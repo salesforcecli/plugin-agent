@@ -46,7 +46,6 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
       min: 1,
       defaultValue: 5,
       summary: messages.getMessage('flags.wait.summary'),
-      description: messages.getMessage('flags.wait.description'),
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
