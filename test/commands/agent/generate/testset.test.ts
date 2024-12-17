@@ -12,18 +12,21 @@ describe('constructTestSetXML', () => {
     const testCases = [
       {
         utterance: 'hello',
-        expectationType: 'topic_sequence_match',
-        expectedValue: 'greeting',
+        actionSequenceExpectedValue: 'foo,bar',
+        botRatingExpectedValue: 'baz',
+        topicSequenceExpectedValue: 'qux',
       },
       {
         utterance: 'goodbye',
-        expectationType: 'action_sequence_match',
-        expectedValue: 'farewell,seeya',
+        actionSequenceExpectedValue: 'foo,bar',
+        botRatingExpectedValue: 'baz',
+        topicSequenceExpectedValue: 'qux',
       },
       {
         utterance: 'how are you',
-        expectationType: 'bot_response_rating',
-        expectedValue: '.5',
+        actionSequenceExpectedValue: 'foo,bar',
+        botRatingExpectedValue: 'baz',
+        topicSequenceExpectedValue: 'qux',
       },
     ] satisfies TestSetInputs[];
 
@@ -40,7 +43,15 @@ describe('constructTestSetXML', () => {
     <expectations>
       <expectation>
         <name>topic_sequence_match</name>
-        <expectedValue>greeting</expectedValue>
+        <expectedValue>qux</expectedValue>
+      </expectation>
+      <expectation>
+        <name>action_sequence_match</name>
+        <expectedValue>["foo","bar"]</expectedValue>
+      </expectation>
+      <expectation>
+        <name>bot_response_rating</name>
+        <expectedValue>baz</expectedValue>
       </expectation>
     </expectations>
   </testCase>
@@ -51,8 +62,16 @@ describe('constructTestSetXML', () => {
     </inputs>
     <expectations>
       <expectation>
+        <name>topic_sequence_match</name>
+        <expectedValue>qux</expectedValue>
+      </expectation>
+      <expectation>
         <name>action_sequence_match</name>
-        <expectedValue>["farewell","seeya"]</expectedValue>
+        <expectedValue>["foo","bar"]</expectedValue>
+      </expectation>
+      <expectation>
+        <name>bot_response_rating</name>
+        <expectedValue>baz</expectedValue>
       </expectation>
     </expectations>
   </testCase>
@@ -63,8 +82,16 @@ describe('constructTestSetXML', () => {
     </inputs>
     <expectations>
       <expectation>
+        <name>topic_sequence_match</name>
+        <expectedValue>qux</expectedValue>
+      </expectation>
+      <expectation>
+        <name>action_sequence_match</name>
+        <expectedValue>["foo","bar"]</expectedValue>
+      </expectation>
+      <expectation>
         <name>bot_response_rating</name>
-        <expectedValue>.5</expectedValue>
+        <expectedValue>baz</expectedValue>
       </expectation>
     </expectations>
   </testCase>
