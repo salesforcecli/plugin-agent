@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/salesforcecli/plugin-agent/compare/1.7.0...1.7.1) (2024-12-17)
+
+### Bug Fixes
+
+- quick edit of "agent test" commands ([9e4daac](https://github.com/salesforcecli/plugin-agent/commit/9e4daacefd0cbf8c3cefc5e4e9ab6ed9d12bb35a))
+
 # [1.7.0](https://github.com/salesforcecli/plugin-agent/compare/1.6.1...1.7.0) (2024-12-16)
 
 ### Features

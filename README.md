@@ -111,7 +111,7 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate definition`
 
@@ -136,7 +136,7 @@ EXAMPLES
   $ sf agent generate definition
 ```
 
-_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/definition.ts)_
+_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/generate/definition.ts)_
 
 ## `sf agent generate spec`
 
@@ -197,7 +197,7 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent generate testset`
 
@@ -220,7 +220,7 @@ EXAMPLES
   $ sf agent generate testset
 ```
 
-_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/generate/testset.ts)_
+_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/generate/testset.ts)_
 
 ## `sf agent preview`
 
@@ -255,21 +255,21 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
-Cancel a running test for an Agent.
+Cancel an agent test that's currently running in your org.
 
 ```
 USAGE
   $ sf agent test cancel -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r]
 
 FLAGS
-  -i, --job-id=<value>       The AiEvaluation ID.
+  -i, --job-id=<value>       Job ID of the running agent test that you want to cancel.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
-  -r, --use-most-recent      Use the job ID of the most recent test evaluation.
+  -r, --use-most-recent      Use the job ID of the most recently-run agent test.
       --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
@@ -277,21 +277,26 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Cancel a running test for an Agent.
+  Cancel an agent test that's currently running in your org.
 
-  Cancel a running test for an Agent, providing the AiEvaluation ID.
+  This command requires a job ID, which the original "agent test run" command displays when it completes. You can also
+  use the --use-most-recent flag to see results for the most recently run agent test.
 
 EXAMPLES
-  Cancel a test for an Agent:
+  Cancel an agent test currently running in your default org using a job ID:
 
-    $ sf agent test cancel --job-id AiEvalId
+    $ sf agent test cancel --job-id 4KBfake0000003F4AQ
+
+  Cancel the most recently run agent test in the org with alias "my-org":
+
+    $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
-Get the results of a test evaluation.
+Get the results of a completed agent test run.
 
 ```
 USAGE
@@ -299,12 +304,12 @@ USAGE
     json|human|junit|tap] [-f <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the test results to.
-  -i, --job-id=<value>          (required) The AiEvaluation ID.
+  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -i, --job-id=<value>          (required) Job ID of the completed agent test run.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
       --api-version=<value>     Override the api version used for api requests made by this command
-      --result-format=<option>  [default: human] Format of the test run results.
+      --result-format=<option>  [default: human] Format of the agent test run results.
                                 <options: json|human|junit|tap>
 
 GLOBAL FLAGS
@@ -312,25 +317,42 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Get the results of a test evaluation.
+  Get the results of a completed agent test run.
 
-  Provide the AiEvaluation ID to get the results of a test evaluation.
+  This command requires a job ID, which the original "agent test run" command displays when it completes. You can also
+  use the --use-most-recent flag to see results for the most recently run agent test.
+
+  By default, this command outputs test results in human-readable tables for each test case. The tables show whether the
+  test case passed, the expected and actual values, the test score, how long the test took, and more. Use the
+  --result-format to display the test results in JSON or Junit format. Use the --output-dir flag to write the results to
+  a file rather than to the terminal.
 
 EXAMPLES
-  $ sf agent test results --job-id AiEvalId
+  Get the results of an agent test run in your default org using its job ID:
+
+    $ sf agent test results --job-id 4KBfake0000003F4AQ
+
+  Get the results of the most recently run agent test in an org with alias "my-org":
+
+    $ sf agent test results --use-most-recent --target-org my-org
+
+  Get the results of the most recently run agent test in your default org, and write the JSON-formatted results into a
+  directory called "test-results":
+
+    $ sf agent test results --use-most-recent --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the test results to.
+  -f, --output-dir=<value>  Directory to write the agent test results into.
 
-    If test run is complete, write the results to the specified directory. If the tests are still running, the test
-    results will not be written.
+    If the agent test run completes, write the results to the specified directory. If the test is still running, the
+    test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
-Resume a running test for an Agent.
+Resume an agent test that you previously started in your org so you can view the test results.
 
 ```
 USAGE
@@ -338,15 +360,15 @@ USAGE
     <value>] [--result-format json|human|junit|tap] [-f <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the test results to.
-  -i, --job-id=<value>          The AiEvaluation ID.
+  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -i, --job-id=<value>          Job ID of the original agent test run.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
-  -r, --use-most-recent         Use the job ID of the most recent test evaluation.
+  -r, --use-most-recent         Use the job ID of the most recent agent test run.
   -w, --wait=<value>            [default: 5 minutes] Number of minutes to wait for the command to complete and display
                                 results to the terminal window.
       --api-version=<value>     Override the api version used for api requests made by this command
-      --result-format=<option>  [default: human] Format of the test run results.
+      --result-format=<option>  [default: human] Format of the agent test run results.
                                 <options: json|human|junit|tap>
 
 GLOBAL FLAGS
@@ -354,31 +376,46 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Resume a running test for an Agent.
+  Resume an agent test that you previously started in your org so you can view the test results.
 
-  Resume a running test for an Agent, providing the AiEvaluation ID.
+  This command requires a job ID, which the original "agent test run" command displays when it completes. You can also
+  use the --use-most-recent flag to see results for the most recently run agent test.
+
+  Use the --wait flag to specify the number of minutes for this command to wait for the agent test to complete; if the
+  test completes by the end of the wait time, the command displays the test results. If not, the CLI returns control of
+  the terminal to you, and you must run "agent test resume" again.
+
+  By default, this command outputs test results in human-readable tables for each test case. The tables show whether the
+  test case passed, the expected and actual values, the test score, how long the test took, and more. Use the
+  --result-format to display the test results in JSON or Junit format. Use the --output-dir flag to write the results to
+  a file rather than to the terminal.
 
 EXAMPLES
-  Resume a test for an Agent:
+  Resume an agent test in your default org using a job ID:
 
-    $ sf agent test resume --job-id AiEvalId
+    $ sf agent test resume --job-id 4KBfake0000003F4AQ
+
+  Resume the most recently-run agent test in an org with alias "my-org" org; wait 10 minutes for the tests to finish:
+
+    $ sf agent test resume --use-most-recent --wait 10 --target-org my-org
+
+  Resume the most recent agent test in your default org, and write the JSON-formatted results into a directory called
+  "test-results":
+
+    $ sf agent test resume --use-most-recent --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the test results to.
+  -f, --output-dir=<value>  Directory to write the agent test results into.
 
-    If test run is complete, write the results to the specified directory. If the tests are still running, the test
-    results will not be written.
-
-  -w, --wait=<value>  Number of minutes to wait for the command to complete and display results to the terminal window.
-
-    If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
+    If the agent test run completes, write the results to the specified directory. If the test is still running, the
+    test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
-Start a test for an Agent.
+Start an agent test in your org.
 
 ```
 USAGE
@@ -386,14 +423,14 @@ USAGE
     [--result-format json|human|junit|tap] [-f <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the test results to.
-  -n, --name=<value>            (required) The name of the AiEvaluationDefinition to start.
+  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -n, --name=<value>            (required) Name of the agent test to start.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
   -w, --wait=<value>            Number of minutes to wait for the command to complete and display results to the
                                 terminal window.
       --api-version=<value>     Override the api version used for api requests made by this command
-      --result-format=<option>  [default: human] Format of the test run results.
+      --result-format=<option>  [default: human] Format of the agent test run results.
                                 <options: json|human|junit|tap>
 
 GLOBAL FLAGS
@@ -401,30 +438,42 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Start a test for an Agent.
+  Start an agent test in your org.
 
-  Start a test for an Agent, providing the AiEvalDefinitionVersion ID. Returns the job ID.
+  Use the --name flag to specify the name of the agent test you want to run; find the agent test's name in the Testing
+  Center page in the Setup UI of your org.
+
+  This command starts the agent test in your org, but doesn't by default wait for it to finish. Instead, it displays the
+  "agent test resume" command, with a job ID, that you execute to see the results of the test run, and then returns
+  control of the terminal window to you. Use the --wait flag to specify the number of minutes for the command to wait
+  for the agent test to complete; if the test completes by the end of the wait time, the command displays the test
+  results. If not, run "agent test resume".
+
+  By default, this command outputs test results in human-readable tables for each test case, if the test completes in
+  time. The tables show whether the test case passed, the expected and actual values, the test score, how long the test
+  took, and more. Use the --result-format to display the test results in JSON or Junit format. Use the --output-dir flag
+  to write the results to a file rather than to the terminal.
 
 EXAMPLES
-  Start a test for an Agent:
+  Start a test called MyAgentTest for an agent in your default org, don't wait for the test to finish:
 
-    $ sf agent test run --name AiEvalDefVerId
+    $ sf agent test run --name MyAgentTest
+
+  Start a test for an agent in an org with alias "my-org" and wait for 10 minutes for the test to finish:
+
+    $ sf agent test run --name MyAgentTest --wait 10 --target-org my-org
+
+  Start a test and write the JSON-formatted results into a directory called "test-results":
+
+    $ sf agent test run --name MyAgentTest --wait 10 --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the test results to.
+  -f, --output-dir=<value>  Directory to write the agent test results into.
 
-    If test run is complete, write the results to the specified directory. If the tests are still running, the test
-    results will not be written.
-
-  -n, --name=<value>  The name of the AiEvaluationDefinition to start.
-
-    The name of the AiEvaluationDefinition to start.
-
-  -w, --wait=<value>  Number of minutes to wait for the command to complete and display results to the terminal window.
-
-    If the command continues to run after the wait period, the CLI returns control of the terminal window to you.
+    If the agent test run completes, write the results to the specified directory. If the test is still running, the
+    test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
