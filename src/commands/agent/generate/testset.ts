@@ -59,7 +59,7 @@ async function promptForTestCase(): Promise<TestSetInputs> {
         return 'expected value cannot be empty';
       }
 
-      return (Number(d) >= 0 && Number(d) <= 5) || 'expected value must be a number between 0 and 5';
+      return true;
     },
     theme,
   });
