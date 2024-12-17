@@ -46,8 +46,7 @@ async function promptForTestCase(): Promise<TestSetInputs> {
       if (!d.length) {
         return 'expected value cannot be empty';
       }
-
-      return d.split(',').length > 1 || 'expected value must be a comma-separated list of actions';
+      return true;
     },
     theme,
   });
