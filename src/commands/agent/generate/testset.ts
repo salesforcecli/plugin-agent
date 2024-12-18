@@ -9,19 +9,17 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import input from '@inquirer/input';
-import select from '@inquirer/select';
 import confirm from '@inquirer/confirm';
 import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.testset');
 
-type ExpectationType = 'topic_sequence_match' | 'action_sequence_match' | 'bot_response_rating';
-
 export type TestSetInputs = {
   utterance: string;
-  expectationType: ExpectationType;
-  expectedValue: string;
+  actionSequenceExpectedValue: string;
+  botRatingExpectedValue: string;
+  topicSequenceExpectedValue: string;
 };
 
 async function promptForTestCase(): Promise<TestSetInputs> {
@@ -31,21 +29,33 @@ async function promptForTestCase(): Promise<TestSetInputs> {
     theme,
   });
 
-  const expectationType = await select<ExpectationType>({
-    message: 'What type of expectation would you like to test for the utterance?',
-    choices: ['topic_sequence_match', 'action_sequence_match', 'bot_response_rating'],
-    theme,
-  });
-
-  const expectedValue = await input({
-    message: 'What is the expected value for the expectation?',
+  const topicSequenceExpectedValue = await input({
+    message: 'What is the expected value for the topic expectation?',
     validate: (d: string): boolean | string => {
       if (!d.length) {
         return 'expected value cannot be empty';
       }
+      return true;
+    },
+    theme,
+  });
 
-      if (expectationType === 'action_sequence_match') {
-        return d.split(',').length > 1 || 'expected value must be a comma-separated list of actions';
+  const actionSequenceExpectedValue = await input({
+    message: 'What is the expected value for the action expectation?',
+    validate: (d: string): boolean | string => {
+      if (!d.length) {
+        return 'expected value cannot be empty';
+      }
+      return true;
+    },
+    theme,
+  });
+
+  const botRatingExpectedValue = await input({
+    message: 'What is the expected value for the bot rating expectation?',
+    validate: (d: string): boolean | string => {
+      if (!d.length) {
+        return 'expected value cannot be empty';
       }
 
       return true;
@@ -55,8 +65,9 @@ async function promptForTestCase(): Promise<TestSetInputs> {
 
   return {
     utterance,
-    expectationType,
-    expectedValue,
+    actionSequenceExpectedValue,
+    botRatingExpectedValue,
+    topicSequenceExpectedValue,
   };
 }
 
@@ -64,13 +75,6 @@ export function constructTestSetXML(testCases: TestSetInputs[]): string {
   const tab = '  ';
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<AiEvaluationTestSet>\n${tab}<subjectType>AGENT</subjectType>\n`;
   testCases.forEach((testCase, i) => {
-    const expectedValue =
-      testCase.expectationType === 'action_sequence_match'
-        ? `[${testCase.expectedValue
-            .split(',')
-            .map((v) => `"${v}"`)
-            .join(',')}]`
-        : testCase.expectedValue;
     xml += `  <testCase>
     <number>${i + 1}</number>
     <inputs>
@@ -78,8 +82,19 @@ export function constructTestSetXML(testCases: TestSetInputs[]): string {
     </inputs>
     <expectations>
       <expectation>
-        <name>${testCase.expectationType}</name>
-        <expectedValue>${expectedValue}</expectedValue>
+        <name>topic_sequence_match</name>
+        <expectedValue>${testCase.topicSequenceExpectedValue}</expectedValue>
+      </expectation>
+      <expectation>
+        <name>action_sequence_match</name>
+        <expectedValue>${`[${testCase.actionSequenceExpectedValue
+          .split(',')
+          .map((v) => `"${v}"`)
+          .join(',')}]`}</expectedValue>
+      </expectation>
+      <expectation>
+        <name>bot_response_rating</name>
+        <expectedValue>${testCase.botRatingExpectedValue}</expectedValue>
       </expectation>
     </expectations>
   </testCase>\n`;

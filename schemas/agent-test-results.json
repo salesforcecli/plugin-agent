@@ -56,6 +56,9 @@
         "number": {
           "type": "string"
         },
+        "utterance": {
+          "type": "string"
+        },
         "startTime": {
           "type": "string"
         },
@@ -151,7 +154,7 @@
           }
         }
       },
-      "required": ["status", "number", "startTime", "generatedData", "expectationResults"],
+      "required": ["status", "number", "utterance", "startTime", "generatedData", "expectationResults"],
       "additionalProperties": false
     }
   }
