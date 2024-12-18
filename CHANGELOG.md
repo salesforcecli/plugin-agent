@@ -1,3 +1,22 @@
+## [1.7.2](https://github.com/salesforcecli/plugin-agent/compare/1.7.2-dev.1...1.7.2) (2024-12-18)
+
+### Bug Fixes
+
+- update language in testing MSO ([0eefc95](https://github.com/salesforcecli/plugin-agent/commit/0eefc955463f52ef35a5c2f56c43b1f4ebad0e1d))
+
+## [1.7.2-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.7.2-dev.0...1.7.2-dev.1) (2024-12-17)
+
+### Bug Fixes
+
+- validate action sequence ([aea5668](https://github.com/salesforcecli/plugin-agent/commit/aea56685aac0c7da759a9ddd9854f11f072d439d))
+
+## [1.7.2-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.7.1...1.7.2-dev.0) (2024-12-17)
+
+### Bug Fixes
+
+- bot rating is a string ([558dbfd](https://github.com/salesforcecli/plugin-agent/commit/558dbfd706b05f49ec7b0db45341eff4a9b3d571))
+- require all expectations ([bfde4f5](https://github.com/salesforcecli/plugin-agent/commit/bfde4f55d84c26ee0b129d8b91d48ba4663c3055))
+
 ## [1.7.1](https://github.com/salesforcecli/plugin-agent/compare/1.7.0...1.7.1) (2024-12-17)
 
 ### Bug Fixes
