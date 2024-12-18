@@ -1422,16 +1422,17 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.5.1.tgz#b6de16004505432c226c02f612c6b0b7b6227f6f"
-  integrity sha512-FGpCQ3PVzZunoaQVPAJG05eqafOvf2P7fx2w5aZYVg9yqwM/UnBpTBKVvkmdZDsBRTUYaExr6tvboaMc5Hsfzw==
+"@salesforce/agents@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.5.2.tgz#b60e7227a78e3c4431565ba6e3862aa97c65306f"
+  integrity sha512-Khr24nZlV875PPwrmFjfDBSMi7Hqfrb6+Y+d8I4OHMU7iP+U9lnvRAwczD9o+WB5gq6WSCkhgQY89QmAA55dKw==
   dependencies:
     "@oclif/table" "^0.3.5"
     "@salesforce/core" "^8.8.0"
     "@salesforce/kit" "^3.2.3"
     "@salesforce/sf-plugins-core" "^12.1.0"
     "@salesforce/source-deploy-retrieve" "^12.10.3"
+    ansis "^3.4.0"
     fast-xml-parser "^4"
     nock "^13.5.6"
 
@@ -2630,6 +2631,11 @@ ansis@^3.3.1, ansis@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.3.2.tgz#15adc36fea112da95c74d309706e593618accac3"
   integrity sha512-cFthbBlt+Oi0i9Pv/j6YdVWJh54CtjGACaMPCIrEV4Ha7HWsIjXDwseYV79TIL0B4+KfSwD5S70PeQDkPUd1rA==
+
+ansis@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/ansis/-/ansis-3.4.0.tgz#d49ebb72f228aa122733a585c600dcba4f5f0838"
+  integrity sha512-zVESKSQhWaPhGaWiKj1k+UqvpC7vPBBgG3hjQEeIx2YGzylWt8qA3ziAzRuUtm0OnaGsZKjIvfl8D/sJTt/I0w==
 
 anymatch@~3.1.2:
   version "3.1.2"
