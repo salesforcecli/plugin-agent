@@ -12,19 +12,19 @@ describe('constructTestSetXML', () => {
     const testCases = [
       {
         utterance: 'hello',
-        actionSequenceExpectedValue: 'foo,bar',
+        actionSequenceExpectedValue: ['foo', 'bar'],
         botRatingExpectedValue: 'baz',
         topicSequenceExpectedValue: 'qux',
       },
       {
         utterance: 'goodbye',
-        actionSequenceExpectedValue: 'foo,bar',
+        actionSequenceExpectedValue: ['foo', 'bar'],
         botRatingExpectedValue: 'baz',
         topicSequenceExpectedValue: 'qux',
       },
       {
         utterance: 'how are you',
-        actionSequenceExpectedValue: 'foo,bar',
+        actionSequenceExpectedValue: ['foo', 'bar'],
         botRatingExpectedValue: 'baz',
         topicSequenceExpectedValue: 'qux',
       },
