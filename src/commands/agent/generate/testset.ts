@@ -8,51 +8,81 @@ import { dirname, join } from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import input from '@inquirer/input';
-import confirm from '@inquirer/confirm';
+import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
+import { readDir } from '../../../read-dir.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.testset');
 
+export const FORTY_CHAR_API_NAME_REGEX =
+  /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
+export const EIGHTY_CHAR_API_NAME_REGEX =
+  /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
+
 export type TestSetInputs = {
   utterance: string;
-  actionSequenceExpectedValue: string;
+  actionSequenceExpectedValue: string[];
   botRatingExpectedValue: string;
   topicSequenceExpectedValue: string;
 };
 
-async function promptForTestCase(): Promise<TestSetInputs> {
+async function promptForTestCase({ topics, actions }: { topics: string[]; actions: string[] }): Promise<TestSetInputs> {
   const utterance = await input({
-    message: 'What utterance would you like to test?',
+    message: 'Utterance',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
     theme,
   });
 
-  const topicSequenceExpectedValue = await input({
-    message: 'What is the expected value for the topic expectation?',
-    validate: (d: string): boolean | string => {
-      if (!d.length) {
-        return 'expected value cannot be empty';
-      }
-      return true;
-    },
+  const customKey = '<OTHER>';
+
+  let topicSequenceExpectedValue = await select<string>({
+    message: 'Expected topic',
+    choices: [...topics, customKey],
     theme,
   });
 
-  const actionSequenceExpectedValue = await input({
-    message: 'What is the expected value for the action expectation?',
-    validate: (d: string): boolean | string => {
-      if (!d.length) {
-        return 'expected value cannot be empty';
-      }
-      return true;
-    },
+  if (topicSequenceExpectedValue === customKey) {
+    topicSequenceExpectedValue = await input({
+      message: 'Expected topic',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'expected value cannot be empty';
+        }
+        return true;
+      },
+      theme,
+    });
+  }
+
+  let actionSequenceExpectedValue = await checkbox<string>({
+    message: 'Expected action(s)',
+    choices: [...actions, customKey],
     theme,
+    required: true,
   });
+
+  if (actionSequenceExpectedValue.includes(customKey)) {
+    const additional = (
+      await input({
+        message: 'Expected action(s)',
+        validate: (d: string): boolean | string => {
+          if (!d.length) {
+            return 'expected value cannot be empty';
+          }
+          return true;
+        },
+        theme,
+      })
+    )
+      .split(',')
+      .map((a) => a.trim());
+
+    actionSequenceExpectedValue = [...actionSequenceExpectedValue.filter((a) => a !== customKey), ...additional];
+  }
 
   const botRatingExpectedValue = await input({
-    message: 'What is the expected value for the bot rating expectation?',
+    message: 'Expected response',
     validate: (d: string): boolean | string => {
       if (!d.length) {
         return 'expected value cannot be empty';
@@ -87,10 +117,7 @@ export function constructTestSetXML(testCases: TestSetInputs[]): string {
       </expectation>
       <expectation>
         <name>action_sequence_match</name>
-        <expectedValue>${`[${testCase.actionSequenceExpectedValue
-          .split(',')
-          .map((v) => `"${v}"`)
-          .join(',')}]`}</expectedValue>
+        <expectedValue>${`[${testCase.actionSequenceExpectedValue.map((v) => `"${v}"`).join(',')}]`}</expectedValue>
       </expectation>
       <expectation>
         <name>bot_response_rating</name>
@@ -112,25 +139,49 @@ export default class AgentGenerateTestset extends SfCommand<void> {
 
   public async run(): Promise<void> {
     const testSetName = await input({
-      message: 'What is the name of the test set?',
+      message: 'What is the name of the test set',
+      validate(d: string): boolean | string {
+        // check against FORTY_CHAR_API_NAME_REGEX
+        if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
+          return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
+        }
+        return true;
+      },
     });
+
+    const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
+    const genAiPlugins = (await readDir(genAiPluginDir)).map((genAiPlugin) =>
+      genAiPlugin.replace('.genAiPlugin-meta.xml', '')
+    );
+
+    const genAiFunctionsDir = join('force-app', 'main', 'default', 'genAiFunctions');
+    const genAiFunctions = (await readDir(genAiFunctionsDir)).map((genAiFunction) =>
+      genAiFunction.replace('.genAiFunction-meta.xml', '')
+    );
+
     const testCases = [];
     do {
       this.log();
       this.styledHeader(`Adding test case #${testCases.length + 1}`);
       // eslint-disable-next-line no-await-in-loop
-      testCases.push(await promptForTestCase());
+      testCases.push(await promptForTestCase({ topics: genAiPlugins, actions: genAiFunctions }));
     } while ( // eslint-disable-next-line no-await-in-loop
       await confirm({
-        message: 'Would you like to add another test case?',
+        message: 'Would you like to add another test case',
         default: true,
       })
     );
 
-    const testSetPath = join('force-app', 'main', 'default', 'aiEvaluationTestsets', `${testSetName}.xml`);
+    const testSetPath = join(
+      'force-app',
+      'main',
+      'default',
+      'aiEvaluationTestSets',
+      `${testSetName}.aiEvaluationTestSet-meta.xml`
+    );
     await mkdir(dirname(testSetPath), { recursive: true });
     this.log();
-    this.log(`Writing new AiEvaluationTestSet to ${testSetPath}`);
+    this.log(`Created ${testSetPath}`);
     await writeFile(testSetPath, constructTestSetXML(testCases));
   }
 }
