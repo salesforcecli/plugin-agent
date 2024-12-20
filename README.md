@@ -63,8 +63,8 @@ sf plugins
 
 - [`sf agent create`](#sf-agent-create)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
+- [`sf agent generate test-cases`](#sf-agent-generate-test-cases)
 - [`sf agent generate test-definition`](#sf-agent-generate-test-definition)
-- [`sf agent generate test-set`](#sf-agent-generate-test-set)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
 - [`sf agent test results`](#sf-agent-test-results)
@@ -111,7 +111,7 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/create.ts)_
 
 ## `sf agent generate spec`
 
@@ -172,7 +172,30 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/generate/spec.ts)_
+
+## `sf agent generate test-cases`
+
+Interactively generate a new Set of AI Evaluation test cases.
+
+```
+USAGE
+  $ sf agent generate test-cases [--flags-dir <value>]
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+
+DESCRIPTION
+  Interactively generate a new Set of AI Evaluation test cases.
+
+  Answer the prompts to generate an AiEvaluationTestSet that will be written to a file. You can then run "sf agent
+  generate definition" to generate the AiEvaluationDefinition that can be used to evaluate the test set.
+
+EXAMPLES
+  $ sf agent generate test-cases
+```
+
+_See code: [src/commands/agent/generate/test-cases.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/generate/test-cases.ts)_
 
 ## `sf agent generate test-definition`
 
@@ -197,30 +220,7 @@ EXAMPLES
   $ sf agent generate test-definition
 ```
 
-_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/generate/test-definition.ts)_
-
-## `sf agent generate test-set`
-
-Interactively generate a new Set of AI Evaluation test cases.
-
-```
-USAGE
-  $ sf agent generate test-set [--flags-dir <value>]
-
-GLOBAL FLAGS
-  --flags-dir=<value>  Import flag values from a directory.
-
-DESCRIPTION
-  Interactively generate a new Set of AI Evaluation test cases.
-
-  Answer the prompts to generate an AiEvaluationTestSet that will be written to a file. You can then run "sf agent
-  generate definition" to generate the AiEvaluationDefinition that can be used to evaluate the test set.
-
-EXAMPLES
-  $ sf agent generate test-set
-```
-
-_See code: [src/commands/agent/generate/test-set.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/generate/test-set.ts)_
+_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/generate/test-definition.ts)_
 
 ## `sf agent preview`
 
@@ -255,7 +255,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -292,7 +292,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -348,7 +348,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -411,7 +411,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -474,6 +474,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.2/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.3/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
