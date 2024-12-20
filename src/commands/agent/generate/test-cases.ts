@@ -13,7 +13,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { theme } from '../../../inquirer-theme.js';
 import { readDir } from '../../../read-dir.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-set');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-cases');
 
 // TODO: add these back once we refine the regex
 // export const FORTY_CHAR_API_NAME_REGEX =
@@ -154,7 +154,7 @@ export function constructTestSetXML(testCases: TestSetInputs[]): string {
   return xml;
 }
 
-export default class AgentGenerateTestset extends SfCommand<void> {
+export default class AgentGenerateTestCases extends SfCommand<void> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');

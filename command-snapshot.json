@@ -29,7 +29,7 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:test-definition",
+    "command": "agent:generate:test-cases",
     "flagAliases": [],
     "flagChars": [],
     "flags": ["flags-dir"],
@@ -37,7 +37,7 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:test-set",
+    "command": "agent:generate:test-definition",
     "flagAliases": [],
     "flagChars": [],
     "flags": ["flags-dir"],

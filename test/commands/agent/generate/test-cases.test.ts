@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { expect } from 'chai';
-import { type TestSetInputs, constructTestSetXML } from '../../../../src/commands/agent/generate/test-set.js';
+import { type TestSetInputs, constructTestSetXML } from '../../../../src/commands/agent/generate/test-cases.js';
 
 describe('constructTestSetXML', () => {
   it('should return a valid test set XML', () => {
