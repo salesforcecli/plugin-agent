@@ -62,9 +62,9 @@ sf plugins
 <!-- commands -->
 
 - [`sf agent create`](#sf-agent-create)
-- [`sf agent generate definition`](#sf-agent-generate-definition)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
-- [`sf agent generate testset`](#sf-agent-generate-testset)
+- [`sf agent generate test-definition`](#sf-agent-generate-test-definition)
+- [`sf agent generate test-set`](#sf-agent-generate-test-set)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
 - [`sf agent test results`](#sf-agent-test-results)
@@ -111,32 +111,7 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/create.ts)_
-
-## `sf agent generate definition`
-
-Interactively generate a new AiEvaluationDefinition.
-
-```
-USAGE
-  $ sf agent generate definition [--flags-dir <value>]
-
-GLOBAL FLAGS
-  --flags-dir=<value>  Import flag values from a directory.
-
-DESCRIPTION
-  Interactively generate a new AiEvaluationDefinition.
-
-  This command will prompt you for the necessary information to create a new AiEvaluationDefinition. The definition will
-  be saved to the `aiEvaluationDefinitions` directory in the project.
-
-  You must have the `Bots` and `AiEvaluationTestSets` metadata types present in your project to use this command.
-
-EXAMPLES
-  $ sf agent generate definition
-```
-
-_See code: [src/commands/agent/generate/definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/generate/definition.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate spec`
 
@@ -197,30 +172,55 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/generate/spec.ts)_
 
-## `sf agent generate testset`
+## `sf agent generate test-definition`
 
-Interactively generate an AiEvaluationTestSet.
+Interactively generate a new AI Evaluation Test Definition.
 
 ```
 USAGE
-  $ sf agent generate testset [--flags-dir <value>]
+  $ sf agent generate test-definition [--flags-dir <value>]
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
 
 DESCRIPTION
-  Interactively generate an AiEvaluationTestSet.
+  Interactively generate a new AI Evaluation Test Definition.
+
+  This command will prompt you for the necessary information to create a new AiEvaluationDefinition. The definition will
+  be saved to the `aiEvaluationDefinitions` directory in the project.
+
+  You must have the `Bots` and `AiEvaluationTestSets` metadata types present in your project to use this command.
+
+EXAMPLES
+  $ sf agent generate test-definition
+```
+
+_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/generate/test-definition.ts)_
+
+## `sf agent generate test-set`
+
+Interactively generate a new Set of AI Evaluation test cases.
+
+```
+USAGE
+  $ sf agent generate test-set [--flags-dir <value>]
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+
+DESCRIPTION
+  Interactively generate a new Set of AI Evaluation test cases.
 
   Answer the prompts to generate an AiEvaluationTestSet that will be written to a file. You can then run "sf agent
   generate definition" to generate the AiEvaluationDefinition that can be used to evaluate the test set.
 
 EXAMPLES
-  $ sf agent generate testset
+  $ sf agent generate test-set
 ```
 
-_See code: [src/commands/agent/generate/testset.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/generate/testset.ts)_
+_See code: [src/commands/agent/generate/test-set.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/generate/test-set.ts)_
 
 ## `sf agent preview`
 
@@ -255,7 +255,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -292,7 +292,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -301,10 +301,10 @@ Get the results of a completed agent test run.
 ```
 USAGE
   $ sf agent test results -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--result-format
-    json|human|junit|tap] [-f <value>]
+    json|human|junit|tap] [-d <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -d, --output-dir=<value>      Directory to write the agent test results into.
   -i, --job-id=<value>          (required) Job ID of the completed agent test run.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
@@ -342,13 +342,13 @@ EXAMPLES
     $ sf agent test results --use-most-recent --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the agent test results into.
+  -d, --output-dir=<value>  Directory to write the agent test results into.
 
     If the agent test run completes, write the results to the specified directory. If the test is still running, the
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -357,10 +357,10 @@ Resume an agent test that you previously started in your org so you can view the
 ```
 USAGE
   $ sf agent test resume -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r] [-w
-    <value>] [--result-format json|human|junit|tap] [-f <value>]
+    <value>] [--result-format json|human|junit|tap] [-d <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -d, --output-dir=<value>      Directory to write the agent test results into.
   -i, --job-id=<value>          Job ID of the original agent test run.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
@@ -405,13 +405,13 @@ EXAMPLES
     $ sf agent test resume --use-most-recent --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the agent test results into.
+  -d, --output-dir=<value>  Directory to write the agent test results into.
 
     If the agent test run completes, write the results to the specified directory. If the test is still running, the
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -420,10 +420,10 @@ Start an agent test in your org.
 ```
 USAGE
   $ sf agent test run -o <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
-    [--result-format json|human|junit|tap] [-f <value>]
+    [--result-format json|human|junit|tap] [-d <value>]
 
 FLAGS
-  -f, --output-dir=<value>      Directory to write the agent test results into.
+  -d, --output-dir=<value>      Directory to write the agent test results into.
   -n, --name=<value>            (required) Name of the agent test to start.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
@@ -468,12 +468,12 @@ EXAMPLES
     $ sf agent test run --name MyAgentTest --wait 10 --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
-  -f, --output-dir=<value>  Directory to write the agent test results into.
+  -d, --output-dir=<value>  Directory to write the agent test results into.
 
     If the agent test run completes, write the results to the specified directory. If the test is still running, the
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.7.3-dev.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
