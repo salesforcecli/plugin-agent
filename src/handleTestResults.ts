@@ -38,33 +38,45 @@ export async function handleTestResults({
 
   if (format === 'human') {
     const formatted = await humanFormat(results);
-    ux.log(formatted);
     if (outputDir) {
-      await writeFileToDir(outputDir, `test-result-${id}.txt`, formatted);
+      const file = `test-result-${id}.txt`;
+      await writeFileToDir(outputDir, file, formatted);
+      ux.log(`Created human-readable file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
     }
   }
 
   if (format === 'json') {
     const formatted = await jsonFormat(results);
-    ux.log(formatted);
     if (outputDir) {
-      await writeFileToDir(outputDir, `test-result-${id}.json`, formatted);
+      const file = `test-result-${id}.json`;
+      await writeFileToDir(outputDir, file, formatted);
+      ux.log(`Created JSON file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
     }
   }
 
   if (format === 'junit') {
     const formatted = await junitFormat(results);
-    ux.log(formatted);
     if (outputDir) {
-      await writeFileToDir(outputDir, `test-result-${id}.xml`, formatted);
+      const file = `test-result-${id}.xml`;
+      await writeFileToDir(outputDir, file, formatted);
+      ux.log(`Created JUnit file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
     }
   }
 
   if (format === 'tap') {
     const formatted = await tapFormat(results);
-    ux.log(formatted);
     if (outputDir) {
-      await writeFileToDir(outputDir, `test-result-${id}.txt`, formatted);
+      const file = `test-result-${id}.txt`;
+      await writeFileToDir(outputDir, file, formatted);
+      ux.log(`Created TAP file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
     }
   }
 }

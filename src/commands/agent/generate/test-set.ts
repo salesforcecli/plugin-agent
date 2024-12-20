@@ -5,20 +5,21 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { dirname, join } from 'node:path';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
+import { XMLParser } from 'fast-xml-parser';
 import { theme } from '../../../inquirer-theme.js';
 import { readDir } from '../../../read-dir.js';
-
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.testset');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-set');
 
-export const FORTY_CHAR_API_NAME_REGEX =
-  /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
-export const EIGHTY_CHAR_API_NAME_REGEX =
-  /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
+// TODO: add these back once we refine the regex
+// export const FORTY_CHAR_API_NAME_REGEX =
+//   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
+// export const EIGHTY_CHAR_API_NAME_REGEX =
+//   /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
 
 export type TestSetInputs = {
   utterance: string;
@@ -27,7 +28,7 @@ export type TestSetInputs = {
   topicSequenceExpectedValue: string;
 };
 
-async function promptForTestCase({ topics, actions }: { topics: string[]; actions: string[] }): Promise<TestSetInputs> {
+async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestSetInputs> {
   const utterance = await input({
     message: 'Utterance',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
@@ -36,34 +37,10 @@ async function promptForTestCase({ topics, actions }: { topics: string[]; action
 
   const customKey = '<OTHER>';
 
-  let topicSequenceExpectedValue = await select<string>({
-    message: 'Expected topic',
-    choices: [...topics, customKey],
-    theme,
-  });
+  const topics = Object.keys(genAiPlugins);
 
-  if (topicSequenceExpectedValue === customKey) {
-    topicSequenceExpectedValue = await input({
-      message: 'Expected topic',
-      validate: (d: string): boolean | string => {
-        if (!d.length) {
-          return 'expected value cannot be empty';
-        }
-        return true;
-      },
-      theme,
-    });
-  }
-
-  let actionSequenceExpectedValue = await checkbox<string>({
-    message: 'Expected action(s)',
-    choices: [...actions, customKey],
-    theme,
-    required: true,
-  });
-
-  if (actionSequenceExpectedValue.includes(customKey)) {
-    const additional = (
+  const askForOtherActions = async (): Promise<string[]> =>
+    (
       await input({
         message: 'Expected action(s)',
         validate: (d: string): boolean | string => {
@@ -78,20 +55,63 @@ async function promptForTestCase({ topics, actions }: { topics: string[]; action
       .split(',')
       .map((a) => a.trim());
 
+  const askForBotRating = async (): Promise<string> =>
+    input({
+      message: 'Expected response',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'expected value cannot be empty';
+        }
+
+        return true;
+      },
+      theme,
+    });
+
+  const topicSequenceExpectedValue = await select<string>({
+    message: 'Expected topic',
+    choices: [...topics, customKey],
+    theme,
+  });
+
+  if (topicSequenceExpectedValue === customKey) {
+    return {
+      utterance,
+      topicSequenceExpectedValue: await input({
+        message: 'Expected topic',
+        validate: (d: string): boolean | string => {
+          if (!d.length) {
+            return 'expected value cannot be empty';
+          }
+          return true;
+        },
+        theme,
+      }),
+      // If the user selects OTHER for the topic, then we don't have a genAiPlugin to get actions from so we ask for them for custom input
+      actionSequenceExpectedValue: await askForOtherActions(),
+      botRatingExpectedValue: await askForBotRating(),
+    };
+  }
+
+  const genAiPluginXml = await readFile(genAiPlugins[topicSequenceExpectedValue], 'utf-8');
+  const parser = new XMLParser();
+  const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
+  const actions = parsed.GenAiPlugin.genAiFunctions.map((f) => f.functionName);
+
+  let actionSequenceExpectedValue = await checkbox<string>({
+    message: 'Expected action(s)',
+    choices: [...actions, customKey],
+    theme,
+    required: true,
+  });
+
+  if (actionSequenceExpectedValue.includes(customKey)) {
+    const additional = await askForOtherActions();
+
     actionSequenceExpectedValue = [...actionSequenceExpectedValue.filter((a) => a !== customKey), ...additional];
   }
 
-  const botRatingExpectedValue = await input({
-    message: 'Expected response',
-    validate: (d: string): boolean | string => {
-      if (!d.length) {
-        return 'expected value cannot be empty';
-      }
-
-      return true;
-    },
-    theme,
-  });
+  const botRatingExpectedValue = await askForBotRating();
 
   return {
     utterance,
@@ -139,24 +159,23 @@ export default class AgentGenerateTestset extends SfCommand<void> {
 
   public async run(): Promise<void> {
     const testSetName = await input({
-      message: 'What is the name of the test set',
-      validate(d: string): boolean | string {
-        // check against FORTY_CHAR_API_NAME_REGEX
-        if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-          return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
-        }
-        return true;
-      },
+      message: 'What is the name of this set of test cases',
+      // TODO: add back validation once we refine the regex
+      // validate(d: string): boolean | string {
+      //   // check against FORTY_CHAR_API_NAME_REGEX
+      //   if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
+      //     return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
+      //   }
+      //   return true;
+      // },
     });
 
     const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
-    const genAiPlugins = (await readDir(genAiPluginDir)).map((genAiPlugin) =>
-      genAiPlugin.replace('.genAiPlugin-meta.xml', '')
-    );
-
-    const genAiFunctionsDir = join('force-app', 'main', 'default', 'genAiFunctions');
-    const genAiFunctions = (await readDir(genAiFunctionsDir)).map((genAiFunction) =>
-      genAiFunction.replace('.genAiFunction-meta.xml', '')
+    const genAiPlugins = Object.fromEntries(
+      (await readDir(genAiPluginDir)).map((genAiPlugin) => [
+        genAiPlugin.replace('.genAiPlugin-meta.xml', ''),
+        join(genAiPluginDir, genAiPlugin),
+      ])
     );
 
     const testCases = [];
@@ -164,7 +183,7 @@ export default class AgentGenerateTestset extends SfCommand<void> {
       this.log();
       this.styledHeader(`Adding test case #${testCases.length + 1}`);
       // eslint-disable-next-line no-await-in-loop
-      testCases.push(await promptForTestCase({ topics: genAiPlugins, actions: genAiFunctions }));
+      testCases.push(await promptForTestCase(genAiPlugins));
     } while ( // eslint-disable-next-line no-await-in-loop
       await confirm({
         message: 'Would you like to add another test case',

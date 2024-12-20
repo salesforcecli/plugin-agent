@@ -1,6 +1,6 @@
 # summary
 
-Interactively generate a new AiEvaluationDefinition.
+Interactively generate a new AI Evaluation Test Definition.
 
 # description
 

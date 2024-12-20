@@ -13,9 +13,9 @@ import { theme } from '../../../inquirer-theme.js';
 import { readDir } from '../../../read-dir.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.definition');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-definition');
 
-export default class AgentGenerateDefinition extends SfCommand<void> {
+export default class AgentGenerateTestDefinition extends SfCommand<void> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');

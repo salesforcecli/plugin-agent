@@ -1,6 +1,6 @@
 # summary
 
-Interactively generate an AiEvaluationTestSet.
+Interactively generate a new Set of AI Evaluation test cases.
 
 # description
 
