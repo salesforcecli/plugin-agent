@@ -28,6 +28,10 @@ export type TestSetInputs = {
   topicSequenceExpectedValue: string;
 };
 
+function castArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
 async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestSetInputs> {
   const utterance = await input({
     message: 'Utterance',
@@ -96,7 +100,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
   const genAiPluginXml = await readFile(genAiPlugins[topicSequenceExpectedValue], 'utf-8');
   const parser = new XMLParser();
   const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-  const actions = parsed.GenAiPlugin.genAiFunctions.map((f) => f.functionName);
+  const actions = castArray(parsed.GenAiPlugin.genAiFunctions).map((f) => f.functionName);
 
   let actionSequenceExpectedValue = await checkbox<string>({
     message: 'Expected action(s)',
@@ -160,14 +164,22 @@ export default class AgentGenerateTestset extends SfCommand<void> {
   public async run(): Promise<void> {
     const testSetName = await input({
       message: 'What is the name of this set of test cases',
-      // TODO: add back validation once we refine the regex
-      // validate(d: string): boolean | string {
-      //   // check against FORTY_CHAR_API_NAME_REGEX
-      //   if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-      //     return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
-      //   }
-      //   return true;
-      // },
+
+      validate(d: string): boolean | string {
+        // ensure that it's not empty
+        if (!d.length) {
+          return 'Name cannot be empty';
+        }
+
+        return true;
+
+        // TODO: add back validation once we refine the regex
+        // check against FORTY_CHAR_API_NAME_REGEX
+        // if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
+        //   return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
+        // }
+        // return true;
+      },
     });
 
     const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
