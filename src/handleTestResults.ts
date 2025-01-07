@@ -6,7 +6,7 @@
  */
 import { join } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestDetailsResponse, jsonFormat, humanFormat, junitFormat, tapFormat } from '@salesforce/agents';
+import { AgentTestResultsResponse, jsonFormat, humanFormat, junitFormat, tapFormat } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
@@ -25,7 +25,7 @@ export async function handleTestResults({
 }: {
   id: string;
   format: 'human' | 'json' | 'junit' | 'tap';
-  results: AgentTestDetailsResponse | undefined;
+  results: AgentTestResultsResponse | undefined;
   jsonEnabled: boolean;
   outputDir?: string;
 }): Promise<void> {

@@ -3,9 +3,9 @@
   "$ref": "#/definitions/AgentTestResultsResult",
   "definitions": {
     "AgentTestResultsResult": {
-      "$ref": "#/definitions/AgentTestDetailsResponse"
+      "$ref": "#/definitions/AgentTestResultsResponse"
     },
-    "AgentTestDetailsResponse": {
+    "AgentTestResultsResponse": {
       "type": "object",
       "properties": {
         "status": {

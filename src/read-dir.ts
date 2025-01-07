@@ -6,5 +6,9 @@
  */
 import { readdir } from 'node:fs/promises';
 export async function readDir(path: string): Promise<string[]> {
-  return (await readdir(path)).filter((bot) => !bot.startsWith('.'));
+  try {
+    return (await readdir(path)).filter((bot) => !bot.startsWith('.'));
+  } catch {
+    return [];
+  }
 }

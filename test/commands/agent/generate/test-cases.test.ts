@@ -40,60 +40,54 @@ describe('constructTestSetXML', () => {
     <inputs>
       <utterance>hello</utterance>
     </inputs>
-    <expectations>
-      <expectation>
-        <name>topic_sequence_match</name>
-        <expectedValue>qux</expectedValue>
-      </expectation>
-      <expectation>
-        <name>action_sequence_match</name>
-        <expectedValue>["foo","bar"]</expectedValue>
-      </expectation>
-      <expectation>
-        <name>bot_response_rating</name>
-        <expectedValue>baz</expectedValue>
-      </expectation>
-    </expectations>
+    <expectation>
+      <name>topic_sequence_match</name>
+      <expectedValue>qux</expectedValue>
+    </expectation>
+    <expectation>
+      <name>action_sequence_match</name>
+      <expectedValue>["foo","bar"]</expectedValue>
+    </expectation>
+    <expectation>
+      <name>bot_response_rating</name>
+      <expectedValue>baz</expectedValue>
+    </expectation>
   </testCase>
   <testCase>
     <number>2</number>
     <inputs>
       <utterance>goodbye</utterance>
     </inputs>
-    <expectations>
-      <expectation>
-        <name>topic_sequence_match</name>
-        <expectedValue>qux</expectedValue>
-      </expectation>
-      <expectation>
-        <name>action_sequence_match</name>
-        <expectedValue>["foo","bar"]</expectedValue>
-      </expectation>
-      <expectation>
-        <name>bot_response_rating</name>
-        <expectedValue>baz</expectedValue>
-      </expectation>
-    </expectations>
+    <expectation>
+      <name>topic_sequence_match</name>
+      <expectedValue>qux</expectedValue>
+    </expectation>
+    <expectation>
+      <name>action_sequence_match</name>
+      <expectedValue>["foo","bar"]</expectedValue>
+    </expectation>
+    <expectation>
+      <name>bot_response_rating</name>
+      <expectedValue>baz</expectedValue>
+    </expectation>
   </testCase>
   <testCase>
     <number>3</number>
     <inputs>
       <utterance>how are you</utterance>
     </inputs>
-    <expectations>
-      <expectation>
-        <name>topic_sequence_match</name>
-        <expectedValue>qux</expectedValue>
-      </expectation>
-      <expectation>
-        <name>action_sequence_match</name>
-        <expectedValue>["foo","bar"]</expectedValue>
-      </expectation>
-      <expectation>
-        <name>bot_response_rating</name>
-        <expectedValue>baz</expectedValue>
-      </expectation>
-    </expectations>
+    <expectation>
+      <name>topic_sequence_match</name>
+      <expectedValue>qux</expectedValue>
+    </expectation>
+    <expectation>
+      <name>action_sequence_match</name>
+      <expectedValue>["foo","bar"]</expectedValue>
+    </expectation>
+    <expectation>
+      <name>bot_response_rating</name>
+      <expectedValue>baz</expectedValue>
+    </expectation>
   </testCase>
 </AiEvaluationTestSet>`);
   });

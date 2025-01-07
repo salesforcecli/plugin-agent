@@ -7,14 +7,14 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { AgentTester, AgentTestDetailsResponse } from '@salesforce/agents';
+import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
 import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.results');
 
-export type AgentTestResultsResult = AgentTestDetailsResponse;
+export type AgentTestResultsResult = AgentTestResultsResponse;
 
 export default class AgentTestResults extends SfCommand<AgentTestResultsResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -38,7 +38,7 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     const { flags } = await this.parse(AgentTestResults);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.details(flags['job-id']);
+    const response = await agentTester.results(flags['job-id']);
     await handleTestResults({
       id: flags['job-id'],
       format: flags['result-format'],

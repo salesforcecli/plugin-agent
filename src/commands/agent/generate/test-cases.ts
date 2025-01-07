@@ -134,20 +134,18 @@ export function constructTestSetXML(testCases: TestSetInputs[]): string {
     <inputs>
       <utterance>${testCase.utterance}</utterance>
     </inputs>
-    <expectations>
-      <expectation>
-        <name>topic_sequence_match</name>
-        <expectedValue>${testCase.topicSequenceExpectedValue}</expectedValue>
-      </expectation>
-      <expectation>
-        <name>action_sequence_match</name>
-        <expectedValue>${`[${testCase.actionSequenceExpectedValue.map((v) => `"${v}"`).join(',')}]`}</expectedValue>
-      </expectation>
-      <expectation>
-        <name>bot_response_rating</name>
-        <expectedValue>${testCase.botRatingExpectedValue}</expectedValue>
-      </expectation>
-    </expectations>
+    <expectation>
+      <name>topic_sequence_match</name>
+      <expectedValue>${testCase.topicSequenceExpectedValue}</expectedValue>
+    </expectation>
+    <expectation>
+      <name>action_sequence_match</name>
+      <expectedValue>${`[${testCase.actionSequenceExpectedValue.map((v) => `"${v}"`).join(',')}]`}</expectedValue>
+    </expectation>
+    <expectation>
+      <name>bot_response_rating</name>
+      <expectedValue>${testCase.botRatingExpectedValue}</expectedValue>
+    </expectation>
   </testCase>\n`;
   });
   xml += '</AiEvaluationTestSet>';
