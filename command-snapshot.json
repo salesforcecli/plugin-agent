@@ -37,6 +37,29 @@
   },
   {
     "alias": [],
+    "command": "agent:generate:spec-v2",
+    "flagAliases": [],
+    "flagChars": ["o", "t"],
+    "flags": [
+      "api-version",
+      "company-description",
+      "company-name",
+      "company-website",
+      "flags-dir",
+      "grounding-context",
+      "json",
+      "max-topics",
+      "output-file",
+      "prompt-template",
+      "role",
+      "spec",
+      "target-org",
+      "type"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:testset",
     "flagAliases": [],
     "flagChars": [],
