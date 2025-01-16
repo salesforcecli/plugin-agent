@@ -4,16 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { join } from 'node:path';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfProject } from '@salesforce/core';
 import { Interfaces } from '@oclif/core';
-import ansis from 'ansis';
 import YAML from 'yaml';
 import select from '@inquirer/select';
 import inquirerInput from '@inquirer/input';
-import figures from '@inquirer/figures';
 import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/agents';
 import { theme } from '../../../inquirer-theme.js';
 
@@ -113,15 +111,13 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     ...makeFlags(FLAGGABLE_PROMPTS),
-    'output-dir': Flags.directory({
-      char: 'd',
-      summary: messages.getMessage('flags.output-dir.summary'),
-      default: 'config',
+    spec: Flags.file({
+      summary: messages.getMessage('flags.spec.summary'),
+      exists: true,
     }),
-    'file-name': Flags.string({
-      char: 'f',
-      summary: messages.getMessage('flags.file-name.summary'),
-      default: 'agentSpec.yaml',
+    'output-file': Flags.file({
+      summary: messages.getMessage('flags.output-file.summary'),
+      default: join('config', 'agentSpec.yaml'),
     }),
     'max-topics': Flags.integer({
       summary: messages.getMessage('flags.max-topics.summary'),
@@ -136,6 +132,7 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
     }),
   };
 
+  // eslint-disable-next-line complexity
   public async run(): Promise<AgentCreateSpecResult> {
     const { flags } = await this.parse(AgentCreateSpecV2);
 
@@ -146,20 +143,32 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
         .map(([key]) => key);
 
       if (missingFlags.length) {
-        throw new Error(`Missing required flags: ${missingFlags.join(', ')}`);
+        throw messages.createError('error.missingRequiredFlags', [missingFlags.join(', ')]);
       }
     }
 
     this.log();
     this.styledHeader('Agent Details');
-    const type = (await this.getFlagOrPrompt(flags.type, FLAGGABLE_PROMPTS.type)) as 'customer' | 'internal';
-    const role = await this.getFlagOrPrompt(flags.role, FLAGGABLE_PROMPTS.role);
-    const companyName = await this.getFlagOrPrompt(flags['company-name'], FLAGGABLE_PROMPTS['company-name']);
-    const companyDescription = await this.getFlagOrPrompt(
-      flags['company-description'],
-      FLAGGABLE_PROMPTS['company-description']
-    );
-    const companyWebsite = await this.getFlagOrPrompt(flags['company-website'], FLAGGABLE_PROMPTS['company-website']);
+
+    // If spec is provided, read it first
+    let inputSpec: Partial<AgentJobSpecV2> = {};
+    if (flags.spec) {
+      inputSpec = YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as Partial<AgentJobSpecV2>;
+    }
+
+    // Flags override inputSpec values.  Prompt if neither is set.
+    const type = flags.type ?? validateAgentType(inputSpec?.agentType) ?? (await promptForFlag(FLAGGABLE_PROMPTS.type));
+    const role = flags.role ?? inputSpec?.role ?? (await promptForFlag(FLAGGABLE_PROMPTS.role));
+    const companyName =
+      flags['company-name'] ?? inputSpec?.companyName ?? (await promptForFlag(FLAGGABLE_PROMPTS['company-name']));
+    const companyDescription =
+      flags['company-description'] ??
+      inputSpec?.companyDescription ??
+      (await promptForFlag(FLAGGABLE_PROMPTS['company-description']));
+    const companyWebsite =
+      flags['company-website'] ??
+      inputSpec?.companyWebsite ??
+      (await promptForFlag(FLAGGABLE_PROMPTS['company-website']));
 
     this.log();
     this.spinner.start('Creating agent spec');
@@ -167,7 +176,7 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const agent = new Agent(connection, this.project as SfProject);
     const specConfig: AgentJobSpecCreateConfigV2 = {
-      agentType: type,
+      agentType: type as 'customer' | 'internal',
       role,
       companyName,
       companyDescription,
@@ -175,59 +184,76 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
     if (companyWebsite) {
       specConfig.companyWebsite = companyWebsite;
     }
-    if (flags['prompt-template']) {
-      specConfig.promptTemplateName = flags['prompt-template'];
-      if (flags['grounding-context']) {
-        specConfig.groundingContext = flags['grounding-context'];
+    const promptTemplateName = flags['prompt-template'] ?? inputSpec?.promptTemplateName;
+    if (promptTemplateName) {
+      specConfig.promptTemplateName = promptTemplateName;
+      const groundingContext = flags['grounding-context'] ?? inputSpec?.groundingContext;
+      if (groundingContext) {
+        specConfig.groundingContext = groundingContext;
       }
     }
-    if (flags['max-topics']) {
-      specConfig.maxNumOfTopics = flags['max-topics'];
+    const maxNumOfTopics = flags['max-topics'] ?? validateMaxTopics(inputSpec?.maxNumOfTopics);
+    if (maxNumOfTopics) {
+      specConfig.maxNumOfTopics = maxNumOfTopics;
     }
+    // Should we log the specConfig being used?  It's returned in the JSON and the generated spec.
+    // this.log(`${ansis.green(figures.tick)} ${ansis.bold(message)} ${ansis.cyan(valueFromFlag)}`);
     const agentSpec = await agent.createSpecV2(specConfig);
 
-    // create the directory if not already created
-    mkdirSync(join(flags['output-dir']), { recursive: true });
-
-    // Write a yaml file with the returned job specs
-    const filePath = join(flags['output-dir'], flags['file-name']);
-    writeFileSync(filePath, YAML.stringify(agentSpec));
+    const outputFilePath = writeSpecFile(flags['output-file'], agentSpec);
 
     this.spinner.stop();
 
-    this.log(`\nSaved agent spec: ${filePath}`);
+    this.log(`\nSaved agent spec: ${outputFilePath}`);
 
-    return { ...{ isSuccess: true, specPath: filePath }, ...agentSpec };
+    return { ...{ isSuccess: true, specPath: outputFilePath }, ...agentSpec };
   }
+}
 
-  /**
-   * Get a flag value or prompt the user for a value.
-   *
-   * Resolution order:
-   * - Flag value provided by the user
-   * - Prompt the user for a value
-   */
-  public async getFlagOrPrompt(valueFromFlag: string | undefined, flagDef: FlaggablePrompt): Promise<string> {
-    const message = flagDef.message.replace(/\.$/, '');
-
-    if (valueFromFlag) {
-      this.log(`${ansis.green(figures.tick)} ${ansis.bold(message)} ${ansis.cyan(valueFromFlag)}`);
-
-      return valueFromFlag;
-    }
-
-    if (flagDef.options) {
-      return select({
-        choices: flagDef.options.map((o) => ({ name: o, value: o })),
-        message,
-        theme,
-      });
-    }
-
-    return inquirerInput({
+const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
+  const message = flagDef.message.replace(/\.$/, '');
+  if (flagDef.options) {
+    return select({
+      choices: flagDef.options.map((o) => ({ name: o, value: o })),
       message,
-      validate: flagDef.validate,
       theme,
     });
   }
-}
+
+  return inquirerInput({
+    message,
+    validate: flagDef.validate,
+    theme,
+  });
+};
+
+const validateAgentType = (agentType?: string): string | undefined => {
+  if (agentType) {
+    if (!['customer', 'internal'].includes(agentType.trim())) {
+      throw messages.createError('error.invalidAgentType', [agentType]);
+    }
+    return agentType.trim();
+  }
+};
+
+const validateMaxTopics = (maxTopics?: number): number | undefined => {
+  if (maxTopics) {
+    if (!isNaN(maxTopics) && isFinite(maxTopics)) {
+      if (maxTopics > 0) {
+        return maxTopics;
+      }
+    }
+    throw messages.createError('error.invalidMaxTopics', [maxTopics]);
+  }
+};
+
+const writeSpecFile = (outputFile: string, agentSpec: AgentJobSpecV2): string => {
+  // create the directory if not already created
+  const outputFilePath = resolve(outputFile);
+  mkdirSync(dirname(outputFilePath), { recursive: true });
+
+  // Write a yaml file with the returned job specs
+  writeFileSync(outputFilePath, YAML.stringify(agentSpec));
+
+  return outputFilePath;
+};

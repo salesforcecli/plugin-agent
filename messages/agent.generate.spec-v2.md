@@ -30,13 +30,9 @@ Description of your company.
 
 Website URL of your company.
 
-# flags.output-dir.summary
+# flags.output-file.summary
 
-Directory where the agent spec file is written; can be an absolute or relative path.
-
-# flags.file-name.summary
-
-Name of the generated agent spec file (yaml).
+Path for the generated agent spec file (yaml); can be an absolute or relative path.
 
 # flags.max-topics.summary
 
@@ -50,6 +46,10 @@ Developer name of a customized prompt template to use instead of the default.
 
 Context information to be used with the customized prompt template.
 
+# flags.spec.summary
+
+Spec file (yaml) to use as input to the command.
+
 # examples
 
 - Create an agent spec for your default org in the default location and use flags to specify the agent's role and your company details:
@@ -59,3 +59,15 @@ Context information to be used with the customized prompt template.
 - Create an agent spec by being prompted for role and company details interactively; write the generated file to the "specs" directory and use the org with alias "my-org":
 
   <%= config.bin %> <%= command.id %> --output-dir specs --target-org my-org
+
+# error.invalidAgentType
+
+agentType must be either "customer" or "internal". Found: [%s]
+
+# error.invalidMaxTopics
+
+maxNumOfTopics must be a number greater than 0. Found: [%s]
+
+# error.missingRequiredFlags
+
+Missing required flags: %s
