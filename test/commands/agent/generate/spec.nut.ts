@@ -38,7 +38,7 @@ describe('agent generate spec NUTs', () => {
       env: { ...process.env, SF_MOCK_DIR: mockDir },
     }).jsonOutput;
 
-    const expectedFilePath = join('config', 'agentSpec.yaml');
+    const expectedFilePath = resolve(session.project.dir, 'config', 'agentSpec.yaml');
     expect(output?.result.isSuccess).to.be.true;
     expect(output?.result.specPath).to.equal(expectedFilePath);
     expect(output?.result.agentType).to.equal(type);
@@ -46,7 +46,7 @@ describe('agent generate spec NUTs', () => {
     expect(output?.result.companyName).to.equal(companyName);
     expect(output?.result.companyDescription).to.equal(companyDescription);
     expect(output?.result.topics).to.be.an('array').with.lengthOf(10);
-    const fileStat = statSync(join(session.project.dir, expectedFilePath));
+    const fileStat = statSync(expectedFilePath);
     expect(fileStat.isFile()).to.be.true;
     expect(fileStat.size).to.be.greaterThan(0);
   });
