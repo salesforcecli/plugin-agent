@@ -27,7 +27,7 @@ export default class AgentGenerateTestDefinition extends SfCommand<void> {
     const testSets = (await readDir(testSetDir)).map((testSet) => testSet.replace('.aiEvaluationTestSet-meta.xml', ''));
     if (testSets.length === 0) {
       throw new SfError(`No test sets found in ${testSetDir}`, 'NoTestSetsFoundError', [
-        'Run the "sf agent generate testset" command to create a test set',
+        'Run the "sf agent generate test-cases" command to create a test set',
       ]);
     }
 

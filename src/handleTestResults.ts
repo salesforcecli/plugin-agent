@@ -6,7 +6,7 @@
  */
 import { join } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, jsonFormat, humanFormat, junitFormat, tapFormat } from '@salesforce/agents';
+import { AgentTestResultsResponse, convertTestResultsToFormat } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
@@ -37,7 +37,7 @@ export async function handleTestResults({
   const ux = new Ux({ jsonEnabled });
 
   if (format === 'human') {
-    const formatted = await humanFormat(results);
+    const formatted = await convertTestResultsToFormat(results, 'human');
     if (outputDir) {
       const file = `test-result-${id}.txt`;
       await writeFileToDir(outputDir, file, formatted);
@@ -48,7 +48,7 @@ export async function handleTestResults({
   }
 
   if (format === 'json') {
-    const formatted = await jsonFormat(results);
+    const formatted = await convertTestResultsToFormat(results, 'json');
     if (outputDir) {
       const file = `test-result-${id}.json`;
       await writeFileToDir(outputDir, file, formatted);
@@ -59,7 +59,7 @@ export async function handleTestResults({
   }
 
   if (format === 'junit') {
-    const formatted = await junitFormat(results);
+    const formatted = await convertTestResultsToFormat(results, 'junit');
     if (outputDir) {
       const file = `test-result-${id}.xml`;
       await writeFileToDir(outputDir, file, formatted);
@@ -70,7 +70,7 @@ export async function handleTestResults({
   }
 
   if (format === 'tap') {
-    const formatted = await tapFormat(results);
+    const formatted = await convertTestResultsToFormat(results, 'tap');
     if (outputDir) {
       const file = `test-result-${id}.txt`;
       await writeFileToDir(outputDir, file, formatted);

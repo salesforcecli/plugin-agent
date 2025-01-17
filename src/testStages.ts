@@ -45,7 +45,7 @@ export class TestStages {
           type: 'dynamic-key-value',
           label: 'Completed Test Cases',
           get: (data): string | undefined =>
-            data?.totalTestCases && data?.passingTestCases && data?.failingTestCases
+            data?.totalTestCases && data?.passingTestCases >= 0 && data?.failingTestCases >= 0
               ? `${data?.passingTestCases + data?.failingTestCases}/${data?.totalTestCases}`
               : undefined,
         },
