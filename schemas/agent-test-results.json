@@ -45,16 +45,13 @@
     },
     "TestStatus": {
       "type": "string",
-      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR"]
+      "enum": ["New", "InProgress", "Completed", "Error"]
     },
     "TestCaseResult": {
       "type": "object",
       "properties": {
         "status": {
           "$ref": "#/definitions/TestStatus"
-        },
-        "number": {
-          "type": "string"
         },
         "utterance": {
           "type": "string"
@@ -79,8 +76,7 @@
               }
             },
             "outcome": {
-              "type": "string",
-              "enum": ["Success", "Failure"]
+              "type": "string"
             },
             "topic": {
               "type": "string"
@@ -114,7 +110,7 @@
               },
               "result": {
                 "type": "string",
-                "enum": ["Passed", "Failed"]
+                "enum": ["PASS", "FAILURE"]
               },
               "metricLabel": {
                 "type": "string",
@@ -154,7 +150,7 @@
           }
         }
       },
-      "required": ["status", "number", "utterance", "startTime", "generatedData", "expectationResults"],
+      "required": ["status", "utterance", "startTime", "generatedData", "expectationResults"],
       "additionalProperties": false
     }
   }
