@@ -1,0 +1,57 @@
+# summary
+
+Create an agent in your org from a local agent spec file.
+
+# description
+
+To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a YAML file with the list of jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --spec flag of this command, along with the name of the new agent.
+
+When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new agent already has a list of topics and actions that were automatically created from the list of jobs in the provided agent spec file. This command also retrieves all the metadata files associated with the new agent to your local DX project.
+
+To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name <api-name-of-your-agent>".
+
+# flags.spec.summary
+
+Path to an agent spec file.
+
+# flags.preview.summary
+
+Preview the agent without saving in your org.
+
+# flags.agent-name.summary
+
+Name for the new agent.
+
+# flags.agent-api-name.summary
+
+API name for the new agent.
+
+# flags.user-id.summary
+
+Custom user ID for the agent.
+
+# flags.enrich-logs.summary
+
+Adds agent conversation data to event logs.
+
+# flags.tone.summary
+
+Conversational style of agent responses.
+
+# flags.primary-language.summary
+
+Language the agent uses in conversations.
+
+# flags.planner-id.summary
+
+The GenAiPlanner ID to associate with the agent.
+
+# error.missingRequiredFlags
+
+Missing required flags: %s
+
+# examples
+
+- Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
+
+  <%= config.bin %> <%= command.id %> --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org

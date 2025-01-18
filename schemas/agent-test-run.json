@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["aiEvaluationId", "status"],
+      "required": [
+        "aiEvaluationId",
+        "status"
+      ],
       "additionalProperties": false
     }
   }

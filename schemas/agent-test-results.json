@@ -36,16 +36,29 @@
               }
             }
           },
-          "required": ["name", "testCases"],
+          "required": [
+            "name",
+            "testCases"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["status", "startTime", "subjectName", "testSet"],
+      "required": [
+        "status",
+        "startTime",
+        "subjectName",
+        "testSet"
+      ],
       "additionalProperties": false
     },
     "TestStatus": {
       "type": "string",
-      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR"]
+      "enum": [
+        "NEW",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "ERROR"
+      ]
     },
     "TestCaseResult": {
       "type": "object",
@@ -80,7 +93,10 @@
             },
             "outcome": {
               "type": "string",
-              "enum": ["Success", "Failure"]
+              "enum": [
+                "Success",
+                "Failure"
+              ]
             },
             "topic": {
               "type": "string"
@@ -92,7 +108,14 @@
               "type": "string"
             }
           },
-          "required": ["type", "actionsSequence", "outcome", "topic", "inputTokensCount", "outputTokensCount"],
+          "required": [
+            "type",
+            "actionsSequence",
+            "outcome",
+            "topic",
+            "inputTokensCount",
+            "outputTokensCount"
+          ],
           "additionalProperties": false
         },
         "expectationResults": {
@@ -114,11 +137,17 @@
               },
               "result": {
                 "type": "string",
-                "enum": ["Passed", "Failed"]
+                "enum": [
+                  "Passed",
+                  "Failed"
+                ]
               },
               "metricLabel": {
                 "type": "string",
-                "enum": ["Accuracy", "Precision"]
+                "enum": [
+                  "Accuracy",
+                  "Precision"
+                ]
               },
               "metricExplainability": {
                 "type": "string"
@@ -154,7 +183,14 @@
           }
         }
       },
-      "required": ["status", "number", "utterance", "startTime", "generatedData", "expectationResults"],
+      "required": [
+        "status",
+        "number",
+        "utterance",
+        "startTime",
+        "generatedData",
+        "expectationResults"
+      ],
       "additionalProperties": false
     }
   }
