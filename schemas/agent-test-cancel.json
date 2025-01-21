@@ -18,7 +18,10 @@
           "type": "string"
         }
       },
-      "required": ["aiEvaluationId", "success"],
+      "required": [
+        "aiEvaluationId",
+        "success"
+      ],
       "additionalProperties": false
     }
   }

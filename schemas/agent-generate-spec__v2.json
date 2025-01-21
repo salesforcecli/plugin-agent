@@ -11,7 +11,10 @@
         },
         "agentType": {
           "type": "string",
-          "enum": ["customer", "internal"],
+          "enum": [
+            "customer",
+            "internal"
+          ],
           "description": "Internal type is copilots; used by customers' employees. Customer type is agents; used by customers' customers."
         },
         "role": {
@@ -48,7 +51,14 @@
           "type": "string"
         }
       },
-      "required": ["agentType", "companyDescription", "companyName", "isSuccess", "role", "topics"]
+      "required": [
+        "agentType",
+        "companyDescription",
+        "companyName",
+        "isSuccess",
+        "role",
+        "topics"
+      ]
     },
     "DraftAgentTopics": {
       "type": "array",
@@ -62,7 +72,10 @@
             "type": "string"
           }
         },
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "additionalProperties": false
       },
       "minItems": 1,

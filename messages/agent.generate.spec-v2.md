@@ -10,26 +10,6 @@ An agent spec is a list of jobs and descriptions that capture what the agent can
 
 When your agent spec is ready, you then create the agent in your org by specifying the agent spec file to the --job-spec flag of the "agent create" CLI command.
 
-# flags.type.summary
-
-Type of agent to create.
-
-# flags.role.summary
-
-Role of the agent.
-
-# flags.company-name.summary
-
-Name of your company.
-
-# flags.company-description.summary
-
-Description of your company.
-
-# flags.company-website.summary
-
-Website URL of your company.
-
 # flags.output-file.summary
 
 Path for the generated agent spec file (yaml); can be an absolute or relative path.
@@ -59,14 +39,6 @@ Spec file (yaml) to use as input to the command.
 - Create an agent spec by being prompted for role and company details interactively; write the generated file to the "specs" directory and use the org with alias "my-org":
 
   <%= config.bin %> <%= command.id %> --output-dir specs --target-org my-org
-
-# error.invalidAgentType
-
-agentType must be either "customer" or "internal". Found: [%s]
-
-# error.invalidMaxTopics
-
-maxNumOfTopics must be a number greater than 0. Found: [%s]
 
 # error.missingRequiredFlags
 

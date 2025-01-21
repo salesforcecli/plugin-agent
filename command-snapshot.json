@@ -9,6 +9,28 @@
   },
   {
     "alias": [],
+    "command": "agent:create-v2",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": [
+      "agent-api-name",
+      "agent-name",
+      "api-version",
+      "enrich-logs",
+      "flags-dir",
+      "json",
+      "planner-id",
+      "preview",
+      "primary-language",
+      "spec",
+      "target-org",
+      "tone",
+      "user-id"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:spec",
     "flagAliases": [],
     "flagChars": ["d", "f", "o", "t"],
