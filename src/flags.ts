@@ -8,8 +8,7 @@
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import select from '@inquirer/select';
-import inquirerInput from '@inquirer/input';
+import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -36,7 +35,7 @@ export const resultFormatFlag = Flags.option({
 });
 
 export const testOutputDirFlag = Flags.custom<string>({
-  char: 'f',
+  char: 'd',
   description: messages.getMessage('flags.output-dir.description'),
   summary: messages.getMessage('flags.output-dir.summary'),
 });
@@ -107,7 +106,7 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.message.replace(/\.$/, '');
   if (flagDef.options) {
-    return select({
+    return select<string>({
       choices: flagDef.options.map((o) => ({ name: o, value: o })),
       message,
       theme,

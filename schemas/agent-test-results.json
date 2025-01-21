@@ -3,9 +3,9 @@
   "$ref": "#/definitions/AgentTestResultsResult",
   "definitions": {
     "AgentTestResultsResult": {
-      "$ref": "#/definitions/AgentTestDetailsResponse"
+      "$ref": "#/definitions/AgentTestResultsResponse"
     },
-    "AgentTestDetailsResponse": {
+    "AgentTestResultsResponse": {
       "type": "object",
       "properties": {
         "status": {
@@ -36,38 +36,22 @@
               }
             }
           },
-          "required": [
-            "name",
-            "testCases"
-          ],
+          "required": ["name", "testCases"],
           "additionalProperties": false
         }
       },
-      "required": [
-        "status",
-        "startTime",
-        "subjectName",
-        "testSet"
-      ],
+      "required": ["status", "startTime", "subjectName", "testSet"],
       "additionalProperties": false
     },
     "TestStatus": {
       "type": "string",
-      "enum": [
-        "NEW",
-        "IN_PROGRESS",
-        "COMPLETED",
-        "ERROR"
-      ]
+      "enum": ["New", "InProgress", "Completed", "Error"]
     },
     "TestCaseResult": {
       "type": "object",
       "properties": {
         "status": {
           "$ref": "#/definitions/TestStatus"
-        },
-        "number": {
-          "type": "string"
         },
         "utterance": {
           "type": "string"
@@ -92,11 +76,7 @@
               }
             },
             "outcome": {
-              "type": "string",
-              "enum": [
-                "Success",
-                "Failure"
-              ]
+              "type": "string"
             },
             "topic": {
               "type": "string"
@@ -108,14 +88,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "actionsSequence",
-            "outcome",
-            "topic",
-            "inputTokensCount",
-            "outputTokensCount"
-          ],
+          "required": ["type", "actionsSequence", "outcome", "topic", "inputTokensCount", "outputTokensCount"],
           "additionalProperties": false
         },
         "expectationResults": {
@@ -137,17 +110,11 @@
               },
               "result": {
                 "type": "string",
-                "enum": [
-                  "Passed",
-                  "Failed"
-                ]
+                "enum": ["PASS", "FAILURE"]
               },
               "metricLabel": {
                 "type": "string",
-                "enum": [
-                  "Accuracy",
-                  "Precision"
-                ]
+                "enum": ["Accuracy", "Precision"]
               },
               "metricExplainability": {
                 "type": "string"
@@ -183,14 +150,7 @@
           }
         }
       },
-      "required": [
-        "status",
-        "number",
-        "utterance",
-        "startTime",
-        "generatedData",
-        "expectationResults"
-      ],
+      "required": ["status", "utterance", "startTime", "generatedData", "expectationResults"],
       "additionalProperties": false
     }
   }

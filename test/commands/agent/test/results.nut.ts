@@ -36,7 +36,7 @@ describe('agent test results NUTs', () => {
     ).jsonOutput;
 
     expect(runResult?.result.aiEvaluationId).to.be.ok;
-    expect(runResult?.result.status).to.equal('COMPLETED');
+    expect(runResult?.result.status.toLowerCase()).to.equal('completed');
 
     const output = execCmd<AgentTestResultsResult>(
       `agent test results --job-id ${runResult?.result.aiEvaluationId} --target-org ${session.hubOrg.username} --json`,
@@ -46,7 +46,7 @@ describe('agent test results NUTs', () => {
       }
     ).jsonOutput;
 
-    expect(output?.result.status).to.equal('COMPLETED');
+    expect(output?.result.status.toLowerCase()).to.equal('completed');
     expect(output?.result.testSet.testCases.length).to.equal(2);
 
     // check that cache does not have an entry

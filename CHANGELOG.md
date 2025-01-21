@@ -1,3 +1,9 @@
+# [1.9.0](https://github.com/salesforcecli/plugin-agent/compare/1.8.0...1.9.0) (2025-01-21)
+
+### Features
+
+- improvements to `generate testset|definition` ([1de7e90](https://github.com/salesforcecli/plugin-agent/commit/1de7e9036751c0ba0fc30723ffc6cee94e6397cc))
+
 # [1.8.0](https://github.com/salesforcecli/plugin-agent/compare/1.7.2...1.8.0) (2025-01-16)
 
 ### Features
