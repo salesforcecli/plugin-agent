@@ -61,15 +61,22 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf agent create`](#sf-agent-create)
-- [`sf agent generate spec`](#sf-agent-generate-spec)
-- [`sf agent generate test-cases`](#sf-agent-generate-test-cases)
-- [`sf agent generate test-definition`](#sf-agent-generate-test-definition)
-- [`sf agent preview`](#sf-agent-preview)
-- [`sf agent test cancel`](#sf-agent-test-cancel)
-- [`sf agent test results`](#sf-agent-test-results)
-- [`sf agent test resume`](#sf-agent-test-resume)
-- [`sf agent test run`](#sf-agent-test-run)
+- [plugin-agent - PREVIEW](#plugin-agent---preview)
+  - [THIS PLUGIN IS A PREVIEW VERSION AND IS NOT MEANT FOR PRODUCTION USAGE UNTIL ANNOUNCED.](#this-plugin-is-a-preview-version-and-is-not-meant-for-production-usage-until-announced)
+  - [Install](#install)
+  - [Contributing](#contributing)
+    - [CLA](#cla)
+    - [Build](#build)
+  - [Commands](#commands)
+  - [`sf agent create`](#sf-agent-create)
+  - [`sf agent generate spec`](#sf-agent-generate-spec)
+  - [`sf agent generate test-cases`](#sf-agent-generate-test-cases)
+  - [`sf agent generate test-definition`](#sf-agent-generate-test-definition)
+  - [`sf agent preview`](#sf-agent-preview)
+  - [`sf agent test cancel`](#sf-agent-test-cancel)
+  - [`sf agent test results`](#sf-agent-test-results)
+  - [`sf agent test resume`](#sf-agent-test-resume)
+  - [`sf agent test run`](#sf-agent-test-run)
 
 ## `sf agent create`
 

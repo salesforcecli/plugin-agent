@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/salesforcecli/plugin-agent/compare/1.7.2...1.8.0) (2025-01-16)
+
+### Features
+
+- add ability to create a spec from a spec ([4805a2f](https://github.com/salesforcecli/plugin-agent/commit/4805a2f66acb2984375d863276b05f91a51f8709))
+- add generate spec v2 command and tests ([3d5261b](https://github.com/salesforcecli/plugin-agent/commit/3d5261bffca3386e742ab8127f766cfc5c5adf88))
+
 ## [1.7.2](https://github.com/salesforcecli/plugin-agent/compare/1.7.2-dev.1...1.7.2) (2024-12-18)
 
 ### Bug Fixes
