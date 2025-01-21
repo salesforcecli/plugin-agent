@@ -62,6 +62,7 @@ sf plugins
 <!-- commands -->
 
 - [`sf agent create`](#sf-agent-create)
+- [`sf agent create-v2`](#sf-agent-create-v2)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
 - [`sf agent generate spec-v2`](#sf-agent-generate-spec-v2)
 - [`sf agent generate test-cases`](#sf-agent-generate-test-cases)
@@ -112,7 +113,58 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/create.ts)_
+
+## `sf agent create-v2`
+
+Create an agent in your org from a local agent spec file.
+
+```
+USAGE
+  $ sf agent create-v2 -o <value> --spec <value> [--json] [--flags-dir <value>] [--api-version <value>] [--agent-name
+    <value>] [--user-id <value>] [--enrich-logs true|false] [--tone formal|casual|neutral] [--preview] [--planner-id
+    <value>]
+
+FLAGS
+  -o, --target-org=<value>    (required) Username or alias of the target org. Not required if the `target-org`
+                              configuration variable is already set.
+      --agent-name=<value>    Name for the new agent.
+      --api-version=<value>   Override the api version used for api requests made by this command
+      --enrich-logs=<option>  Adds agent conversation data to event logs.
+                              <options: true|false>
+      --planner-id=<value>    The GenAiPlanner ID to associate with the agent.
+      --preview               Preview the agent without saving in your org.
+      --spec=<value>          (required) Path to an agent spec file.
+      --tone=<option>         Conversational style of agent responses.
+                              <options: formal|casual|neutral>
+      --user-id=<value>       Custom user ID for the agent.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Create an agent in your org from a local agent spec file.
+
+  To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a YAML file with the list of
+  jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --spec flag of this
+  command, along with the name of the new agent.
+
+  When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new
+  agent already has a list of topics and actions that were automatically created from the list of jobs in the provided
+  agent spec file. This command also retrieves all the metadata files associated with the new agent to your local DX
+  project.
+
+  To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name
+  <api-name-of-your-agent>".
+
+EXAMPLES
+  Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
+
+    $ sf agent create-v2 --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
+```
+
+_See code: [src/commands/agent/create-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/create-v2.ts)_
 
 ## `sf agent generate spec`
 
@@ -173,7 +225,7 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent generate spec-v2`
 
@@ -237,7 +289,7 @@ EXAMPLES
     $ sf agent generate spec-v2 --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/generate/spec-v2.ts)_
+_See code: [src/commands/agent/generate/spec-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/generate/spec-v2.ts)_
 
 ## `sf agent generate test-cases`
 
@@ -260,7 +312,7 @@ EXAMPLES
   $ sf agent generate test-cases
 ```
 
-_See code: [src/commands/agent/generate/test-cases.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/generate/test-cases.ts)_
+_See code: [src/commands/agent/generate/test-cases.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/generate/test-cases.ts)_
 
 ## `sf agent generate test-definition`
 
@@ -285,7 +337,7 @@ EXAMPLES
   $ sf agent generate test-definition
 ```
 
-_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/generate/test-definition.ts)_
+_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/generate/test-definition.ts)_
 
 ## `sf agent preview`
 
@@ -320,7 +372,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -357,7 +409,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test results`
 
@@ -413,7 +465,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -476,7 +528,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -539,6 +591,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.9.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

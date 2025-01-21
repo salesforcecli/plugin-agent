@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/salesforcecli/plugin-agent/compare/1.9.0...1.9.1) (2025-01-21)
+
+### Bug Fixes
+
+- bump version of core to 8.8.2 ([480466d](https://github.com/salesforcecli/plugin-agent/commit/480466df7cced048aedfe588b1599509b620539d))
+
 # [1.9.0](https://github.com/salesforcecli/plugin-agent/compare/1.8.0...1.9.0) (2025-01-21)
 
 ### Features
