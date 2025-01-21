@@ -17,7 +17,7 @@ export const resultFormatFlag = Flags.option({
 });
 
 export const testOutputDirFlag = Flags.custom<string>({
-  char: 'f',
+  char: 'd',
   description: messages.getMessage('flags.output-dir.description'),
   summary: messages.getMessage('flags.output-dir.summary'),
 });

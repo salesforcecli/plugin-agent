@@ -9,14 +9,6 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:definition",
-    "flagAliases": [],
-    "flagChars": [],
-    "flags": ["flags-dir"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:generate:spec",
     "flagAliases": [],
     "flagChars": ["d", "f", "o", "t"],
@@ -60,7 +52,15 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:testset",
+    "command": "agent:generate:test-cases",
+    "flagAliases": [],
+    "flagChars": [],
+    "flags": ["flags-dir"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:test-definition",
     "flagAliases": [],
     "flagChars": [],
     "flags": ["flags-dir"],
@@ -86,7 +86,7 @@
     "alias": [],
     "command": "agent:test:results",
     "flagAliases": [],
-    "flagChars": ["f", "i", "o"],
+    "flagChars": ["d", "i", "o"],
     "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
@@ -94,7 +94,7 @@
     "alias": [],
     "command": "agent:test:resume",
     "flagAliases": [],
-    "flagChars": ["f", "i", "o", "r", "w"],
+    "flagChars": ["d", "i", "o", "r", "w"],
     "flags": [
       "api-version",
       "flags-dir",
@@ -112,7 +112,7 @@
     "alias": [],
     "command": "agent:test:run",
     "flagAliases": [],
-    "flagChars": ["f", "n", "o", "w"],
+    "flagChars": ["d", "n", "o", "w"],
     "flags": ["api-version", "flags-dir", "json", "name", "output-dir", "result-format", "target-org", "wait"],
     "plugin": "@salesforce/plugin-agent"
   }

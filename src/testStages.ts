@@ -7,7 +7,7 @@
 
 import { colorize } from '@oclif/core/ux';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { AgentTestDetailsResponse, AgentTester } from '@salesforce/agents';
+import { AgentTestResultsResponse, AgentTester } from '@salesforce/agents';
 import { Lifecycle } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -45,7 +45,7 @@ export class TestStages {
           type: 'dynamic-key-value',
           label: 'Completed Test Cases',
           get: (data): string | undefined =>
-            data?.totalTestCases && data?.passingTestCases && data?.failingTestCases
+            data?.totalTestCases && data?.passingTestCases >= 0 && data?.failingTestCases >= 0
               ? `${data?.passingTestCases + data?.failingTestCases}/${data?.totalTestCases}`
               : undefined,
         },
@@ -80,7 +80,7 @@ export class TestStages {
     agentTester: AgentTester,
     id: string,
     wait: Duration
-  ): Promise<{ completed: boolean; response?: AgentTestDetailsResponse }> {
+  ): Promise<{ completed: boolean; response?: AgentTestResultsResponse }> {
     this.mso.skipTo('Polling for Test Results');
     const lifecycle = Lifecycle.getInstance();
     lifecycle.on(

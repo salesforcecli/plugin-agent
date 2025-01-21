@@ -10,8 +10,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfProject } from '@salesforce/core';
 import { Interfaces } from '@oclif/core';
 import YAML from 'yaml';
-import select from '@inquirer/select';
-import inquirerInput from '@inquirer/input';
+import { select, input as inquirerInput } from '@inquirer/prompts';
 import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/agents';
 import { theme } from '../../../inquirer-theme.js';
 
