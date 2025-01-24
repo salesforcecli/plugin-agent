@@ -47,7 +47,7 @@ const FLAGGABLE_PROMPTS = {
         }
       }
       return 'Please enter a valid User ID (005 prefix)';
-    }
+    },
   },
   'enrich-logs': {
     message: messages.getMessage('flags.enrich-logs.summary'),
@@ -130,14 +130,14 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
 
     let title: string;
     const stages = [MSO_STAGES.parse];
-     if (flags.preview) {
+    if (flags.preview) {
       title = 'Previewing Agent Creation';
       stages.push(MSO_STAGES.preview);
-     } else {
+    } else {
       title = `Creating ${agentName as string} Agent`;
       stages.push(MSO_STAGES.create);
       stages.push(MSO_STAGES.retrieve);
-     }
+    }
 
     const mso = new MultiStageOutput({
       jsonEnabled: this.jsonEnabled(),
@@ -164,10 +164,10 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
           companyName: inputSpec.companyName!,
           companyDescription: inputSpec.companyDescription!,
           preDefinedTopics: inputSpec.topics,
-        }
+        },
       },
       generationSettings: {},
-    }
+    };
     if (inputSpec?.companyWebsite) {
       agentConfig.generationInfo.defaultInfo.companyWebsite = inputSpec?.companyWebsite;
     }
@@ -175,7 +175,7 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
       agentConfig.saveAgent = true;
       agentConfig.agentSettings = {
         agentName: agentName!,
-      }
+      };
       if (flags['agent-api-name']) {
         agentConfig.agentSettings.agentApiName = flags['agent-api-name'];
       }
@@ -194,11 +194,15 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
 
     if (response.isSuccess) {
       if (!flags.preview) {
-        this.log(colorize(
-          'green',
-          `Successfully created ${agentName as string} in ${flags['target-org'].getUsername() ?? 'the target org'}.`
-        ));
-        this.log(`Use ${colorize('dim', `sf org open agent --name ${agentName as string}`)} to view the agent in the browser.`);
+        this.log(
+          colorize(
+            'green',
+            `Successfully created ${agentName as string} in ${flags['target-org'].getUsername() ?? 'the target org'}.`
+          )
+        );
+        this.log(
+          `Use ${colorize('dim', `sf org open agent --name ${agentName as string}`)} to view the agent in the browser.`
+        );
       } else {
         const previewFileName = `agentPreview_${new Date().toISOString()}.json`;
         writeFileSync(previewFileName, JSON.stringify(response, null, 2));
@@ -207,7 +211,7 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
     } else {
       this.log(colorize('red', `failed to create agent: ${response.errorMessage ?? ''}`));
     }
-    
+
     return response;
   }
 }
@@ -215,12 +219,17 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
 // The spec must define: agentType, role, companyName, companyDescription, and topics.
 // Agent type must be 'customer' or 'internal'.
 const validateSpec = (spec: Partial<AgentJobSpecV2>): void => {
-  const requiredSpecValues: Array<'agentType' | 'role' | 'companyName' | 'companyDescription' | 'topics'> =
-    ['agentType', 'role', 'companyName', 'companyDescription', 'topics'];
-  const missingFlags = requiredSpecValues.filter(f => !spec[f]);
+  const requiredSpecValues: Array<'agentType' | 'role' | 'companyName' | 'companyDescription' | 'topics'> = [
+    'agentType',
+    'role',
+    'companyName',
+    'companyDescription',
+    'topics',
+  ];
+  const missingFlags = requiredSpecValues.filter((f) => !spec[f]);
   if (missingFlags.length) {
     throw messages.createError('error.missingRequiredFlags', [missingFlags.join(', ')]);
   }
 
   validateAgentType(spec.agentType, true);
-}
+};

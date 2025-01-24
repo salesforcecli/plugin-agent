@@ -10,7 +10,13 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import YAML from 'yaml';
 import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/agents';
-import { FLAGGABLE_SPEC_PROMPTS, makeFlags, promptForFlag, validateAgentType, validateMaxTopics } from '../../../flags.js';
+import {
+  FLAGGABLE_SPEC_PROMPTS,
+  makeFlags,
+  promptForFlag,
+  validateAgentType,
+  validateMaxTopics,
+} from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.spec-v2');
@@ -78,7 +84,8 @@ export default class AgentCreateSpecV2 extends SfCommand<AgentCreateSpecResult> 
     }
 
     // Flags override inputSpec values.  Prompt if neither is set.
-    const type = flags.type ?? validateAgentType(inputSpec?.agentType) ?? (await promptForFlag(FLAGGABLE_SPEC_PROMPTS.type));
+    const type =
+      flags.type ?? validateAgentType(inputSpec?.agentType) ?? (await promptForFlag(FLAGGABLE_SPEC_PROMPTS.type));
     const role = flags.role ?? inputSpec?.role ?? (await promptForFlag(FLAGGABLE_SPEC_PROMPTS.role));
     const companyName =
       flags['company-name'] ?? inputSpec?.companyName ?? (await promptForFlag(FLAGGABLE_SPEC_PROMPTS['company-name']));
