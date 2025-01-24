@@ -1,3 +1,9 @@
+## [1.9.2](https://github.com/salesforcecli/plugin-agent/compare/1.9.1...1.9.2) (2025-01-24)
+
+### Bug Fixes
+
+- bump agents lib to 0.7.1 ([2f2955a](https://github.com/salesforcecli/plugin-agent/commit/2f2955ad5b9bfa13a8b372895692954cf7bb3df3))
+
 ## [1.9.1](https://github.com/salesforcecli/plugin-agent/compare/1.9.0...1.9.1) (2025-01-21)
 
 ### Bug Fixes
