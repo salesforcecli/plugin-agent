@@ -106,6 +106,14 @@
   },
   {
     "alias": [],
+    "command": "agent:test:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:test:results",
     "flagAliases": [],
     "flagChars": ["d", "i", "o"],
