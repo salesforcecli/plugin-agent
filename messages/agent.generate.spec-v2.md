@@ -16,7 +16,7 @@ When your agent spec is ready, you then create the agent in your org by running 
 
 # flags.output-file.summary
 
-Pathname for the generated YAML agent spec file; can be an absolute or relative path.
+Path for the generated YAML agent spec file; can be an absolute or relative path.
 
 # flags.max-topics.summary
 
