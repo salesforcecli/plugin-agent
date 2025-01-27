@@ -14,7 +14,7 @@ To open the new agent in your org's Agent Builder UI, run this command: "sf org 
 
 # flags.spec.summary
 
-Pathname to an agent spec file.
+Path to an agent spec file.
 
 # flags.preview.summary
 
