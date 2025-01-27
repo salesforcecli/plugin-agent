@@ -1,3 +1,9 @@
+# [1.10.0](https://github.com/salesforcecli/plugin-agent/compare/1.9.2...1.10.0) (2025-01-27)
+
+### Features
+
+- **W-17669110:** add list command ([#63](https://github.com/salesforcecli/plugin-agent/issues/63)) ([a8b39fb](https://github.com/salesforcecli/plugin-agent/commit/a8b39fb514ac588ba0166ac6ffdc497edf52e2c9))
+
 ## [1.9.2](https://github.com/salesforcecli/plugin-agent/compare/1.9.1...1.9.2) (2025-01-24)
 
 ### Bug Fixes
