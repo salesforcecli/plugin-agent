@@ -1,42 +1,44 @@
 # summary
 
-Create an agent in your org from a local agent spec file.
+Create an agent in your org using a local agent spec file.
 
 # description
 
-To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a YAML file with the list of jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --spec flag of this command, along with the name of the new agent.
+Before you run this command, you must first generate an agent spec file by running the "agent generate spec" CLI command, which outputs a YAML file with the agent properties and list of AI-generated topics. Topics define the range of jobs the agent can handle. Then specify the generated agent spec file to this command using the --spec flag, along with the name (label) of the new agent using the --agent-name flag.
 
-When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new agent already has a list of topics and actions that were automatically created from the list of jobs in the provided agent spec file. This command also retrieves all the metadata files associated with the new agent to your local DX project.
+When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new agent's topics are the same as the ones listed in the agent spec file. The agent might also have some AI-generated actions. This command also retrieves all the metadata files associated with the new agent to your local Salesforce DX project.
+
+Use the --preview flag to review what the agent looks like without actually saving it in your org. Rather, the command creates a JSON file with all the agent details in the current directory.
 
 To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name <api-name-of-your-agent>".
 
 # flags.spec.summary
 
-Path to an agent spec file.
+Pathname to an agent spec file.
 
 # flags.preview.summary
 
-Preview the agent without saving in your org.
+Preview the agent without saving it in your org.
 
 # flags.agent-name.summary
 
-Name for the new agent.
+Name (label) of the new agent.
 
 # flags.agent-api-name.summary
 
-API name for the new agent.
+API name of the new agent; if not specified, the API name is derived from the agent name (label); the API name must not exist in the org.
 
 # flags.user-id.summary
 
-Custom user ID for the agent.
+ID of a user in your org that is assigned to your agent; determines what your agent can access and do.
 
 # flags.enrich-logs.summary
 
-Adds agent conversation data to event logs.
+Adds agent conversation data to event logs so you can view all agent session activity in one place.
 
 # flags.tone.summary
 
-Conversational style of agent responses.
+Conversational style of the agent, such as how it expresses your brand personality in its messages through word choice, punctuation, and sentence structure.
 
 # flags.primary-language.summary
 
@@ -52,6 +54,10 @@ Missing required flags: %s
 
 # examples
 
-- Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
+- Create an agent called "ResortManager" in an org with alias "my-org" using the specified agent spec file:
 
-  <%= config.bin %> <%= command.id %> --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
+  <%= config.bin %> <%= command.id %> --agent-name ResortManager --spec specs/resortManagerAgent.yaml --target-org my-org
+
+- Preview the creation of an agent called "ResortManager" and use your default org:
+
+  <%= config.bin %> <%= command.id %> --agent-name ResortManager --spec specs/resortManagerAgent.yaml --preview
