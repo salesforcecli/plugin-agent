@@ -45,7 +45,7 @@
     },
     "TestStatus": {
       "type": "string",
-      "enum": ["New", "InProgress", "Completed", "Error"]
+      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR", "TERMINATED"]
     },
     "TestCaseResult": {
       "type": "object",
@@ -53,22 +53,25 @@
         "status": {
           "$ref": "#/definitions/TestStatus"
         },
-        "utterance": {
-          "type": "string"
-        },
         "startTime": {
           "type": "string"
         },
         "endTime": {
           "type": "string"
         },
+        "inputs": {
+          "type": "object",
+          "properties": {
+            "utterance": {
+              "type": "string"
+            }
+          },
+          "required": ["utterance"],
+          "additionalProperties": false
+        },
         "generatedData": {
           "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "const": "AGENT"
-            },
             "actionsSequence": {
               "type": "array",
               "items": {
@@ -80,18 +83,12 @@
             },
             "topic": {
               "type": "string"
-            },
-            "inputTokensCount": {
-              "type": "string"
-            },
-            "outputTokensCount": {
-              "type": "string"
             }
           },
-          "required": ["type", "actionsSequence", "outcome", "topic", "inputTokensCount", "outputTokensCount"],
+          "required": ["actionsSequence", "outcome", "topic"],
           "additionalProperties": false
         },
-        "expectationResults": {
+        "testResults": {
           "type": "array",
           "items": {
             "type": "object",
@@ -150,7 +147,7 @@
           }
         }
       },
-      "required": ["status", "utterance", "startTime", "generatedData", "expectationResults"],
+      "required": ["status", "startTime", "inputs", "generatedData", "testResults"],
       "additionalProperties": false
     }
   }
