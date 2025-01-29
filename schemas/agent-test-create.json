@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentTestCreateResult",
+  "definitions": {
+    "AgentTestCreateResult": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "contents": {
+          "type": "string"
+        }
+      },
+      "required": ["path", "contents"],
+      "additionalProperties": false
+    }
+  }
+}

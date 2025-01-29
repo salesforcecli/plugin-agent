@@ -13,6 +13,7 @@
     "@salesforce/core": "^8.8.0",
     "@salesforce/kit": "^3.2.1",
     "@salesforce/sf-plugins-core": "^12.1.0",
+    "@salesforce/source-deploy-retrieve": "^12.14.0",
     "ansis": "^3.3.2",
     "fast-xml-parser": "^4.5.1",
     "ink": "^5.0.1",
@@ -76,6 +77,9 @@
             "external": true
           },
           "generate": {
+            "external": true
+          },
+          "create": {
             "external": true
           }
         }
