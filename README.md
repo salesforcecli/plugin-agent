@@ -65,10 +65,10 @@ sf plugins
 - [`sf agent create-v2`](#sf-agent-create-v2)
 - [`sf agent generate spec`](#sf-agent-generate-spec)
 - [`sf agent generate spec-v2`](#sf-agent-generate-spec-v2)
-- [`sf agent generate test-cases`](#sf-agent-generate-test-cases)
-- [`sf agent generate test-definition`](#sf-agent-generate-test-definition)
+- [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
+- [`sf agent test create`](#sf-agent-test-create)
 - [`sf agent test list`](#sf-agent-test-list)
 - [`sf agent test results`](#sf-agent-test-results)
 - [`sf agent test resume`](#sf-agent-test-resume)
@@ -114,11 +114,11 @@ EXAMPLES
     $ sf agent create --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/create.ts)_
 
 ## `sf agent create-v2`
 
-Create an agent in your org from a local agent spec file.
+Create an agent in your org using a local agent spec file.
 
 ```
 USAGE
@@ -129,43 +129,54 @@ USAGE
 FLAGS
   -o, --target-org=<value>    (required) Username or alias of the target org. Not required if the `target-org`
                               configuration variable is already set.
-      --agent-name=<value>    Name for the new agent.
+      --agent-name=<value>    Name (label) of the new agent.
       --api-version=<value>   Override the api version used for api requests made by this command
-      --enrich-logs=<option>  Adds agent conversation data to event logs.
+      --enrich-logs=<option>  Adds agent conversation data to event logs so you can view all agent session activity in
+                              one place.
                               <options: true|false>
       --planner-id=<value>    The GenAiPlanner ID to associate with the agent.
-      --preview               Preview the agent without saving in your org.
+      --preview               Preview the agent without saving it in your org.
       --spec=<value>          (required) Path to an agent spec file.
-      --tone=<option>         Conversational style of agent responses.
+      --tone=<option>         Conversational style of the agent, such as how it expresses your brand personality in its
+                              messages through word choice, punctuation, and sentence structure.
                               <options: formal|casual|neutral>
-      --user-id=<value>       Custom user ID for the agent.
+      --user-id=<value>       ID of a user in your org that is assigned to your agent; determines what your agent can
+                              access and do.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
   --json               Format output as json.
 
 DESCRIPTION
-  Create an agent in your org from a local agent spec file.
+  Create an agent in your org using a local agent spec file.
 
-  To generate an agent spec file, run the "agent generate spec" CLI command, which outputs a YAML file with the list of
-  jobs and descriptions that the new agent can perform. Then specify this generated spec file to the --spec flag of this
-  command, along with the name of the new agent.
+  Before you run this command, you must first generate an agent spec file by running the "agent generate spec" CLI
+  command, which outputs a YAML file with the agent properties and list of AI-generated topics. Topics define the range
+  of jobs the agent can handle. Then specify the generated agent spec file to this command using the --spec flag, along
+  with the name (label) of the new agent using the --agent-name flag.
 
   When this command finishes, your org contains the new agent, which you can then edit in the Agent Builder UI. The new
-  agent already has a list of topics and actions that were automatically created from the list of jobs in the provided
-  agent spec file. This command also retrieves all the metadata files associated with the new agent to your local DX
+  agent's topics are the same as the ones listed in the agent spec file. The agent might also have some AI-generated
+  actions. This command also retrieves all the metadata files associated with the new agent to your local Salesforce DX
   project.
+
+  Use the --preview flag to review what the agent looks like without actually saving it in your org. Rather, the command
+  creates a JSON file with all the agent details in the current directory.
 
   To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name
   <api-name-of-your-agent>".
 
 EXAMPLES
-  Create an agent called "CustomerSupportAgent" in an org with alias "my-org" using the specified agent spec file:
+  Create an agent called "ResortManager" in an org with alias "my-org" using the specified agent spec file:
 
-    $ sf agent create-v2 --name CustomerSupportAgent --spec ./config/agentSpec.json --target-org my-org
+    $ sf agent create-v2 --agent-name ResortManager --spec specs/resortManagerAgent.yaml --target-org my-org
+
+  Preview the creation of an agent called "ResortManager" and use your default org:
+
+    $ sf agent create-v2 --agent-name ResortManager --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/create-v2.ts)_
+_See code: [src/commands/agent/create-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/create-v2.ts)_
 
 ## `sf agent generate spec`
 
@@ -226,11 +237,11 @@ EXAMPLES
     $ sf agent generate spec --output-dir specs --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/generate/spec.ts)_
 
 ## `sf agent generate spec-v2`
 
-Generate an agent spec, which is the list of jobs that the agent performs.
+Generate an agent spec, which is a YAML file that captures what an agent can do.
 
 ```
 USAGE
@@ -247,98 +258,91 @@ FLAGS
       --company-description=<value>  Description of your company.
       --company-name=<value>         Name of your company.
       --company-website=<value>      Website URL of your company.
-      --grounding-context=<value>    Context information to be used with the customized prompt template.
-      --max-topics=<value>           Maximum number of agent job topics to generate in the spec; default is 10.
-      --output-file=<value>          [default: config/agentSpec.yaml] Path for the generated agent spec file (yaml); can
+      --grounding-context=<value>    Context information and personalization that's added to your prompts when using a
+                                     custom prompt template.
+      --max-topics=<value>           Maximum number of topics to generate in the agent spec; default is 10.
+      --output-file=<value>          [default: config/agentSpec.yaml] Path for the generated YAML agent spec file; can
                                      be an absolute or relative path.
-      --prompt-template=<value>      Developer name of a customized prompt template to use instead of the default.
+      --prompt-template=<value>      API name of a customized prompt template to use instead of the default prompt
+                                     template.
       --role=<value>                 Role of the agent.
-      --spec=<value>                 Spec file (yaml) to use as input to the command.
+      --spec=<value>                 Agent spec file, in YAML format, to use as input to the command.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
   --json               Format output as json.
 
 DESCRIPTION
-  Generate an agent spec, which is the list of jobs that the agent performs.
+  Generate an agent spec, which is a YAML file that captures what an agent can do.
 
-  When using Salesforce CLI to create an agent in your org, you can choose to generate a YAML-formatted agent spec file
-  with this command as a first step.
+  Before you use Salesforce CLI to create an agent in your org, you must first generate an agent spec with this command.
+  An agent spec is a YAML-formatted file that contains information about the agent, such as its role and company
+  description, and then an AI-generated list of topics based on this information. Topics define the range of jobs your
+  agent can handle.
 
-  An agent spec is a list of jobs and descriptions that capture what the agent can do. Use flags such as --role and
-  --company-description to provide details about your company and the role that the agent plays in your company; you can
-  also enter the information interactively if you prefer. When you then execute this command, the large language model
-  (LLM) associated with your org uses the information to generate the list of jobs that the agent most likely performs.
-  We recommend that you provide good details for --role, --company-description, etc, so that the LLM can generate the
-  best and most relevant list of jobs and descriptions. Once generated, you can edit the spec file; for example, you can
-  remove jobs that don't apply to your agent.
+  Use flags, such as --role and --company-description, to provide details about your company and the role that the agent
+  plays in your company. If you prefer, you can also be prompted for the information. Upon command execution, the large
+  language model (LLM) associated with your org uses the information you provided to generate a list of topics for the
+  agent. Because the LLM uses the company and role information to generate the topics, we recommend that you provide
+  accurate and specific details so the LLM generates the best and most relevant topics. Once generated, you can edit the
+  spec file; for example, you can remove topics that don't apply to your agent or change the description of a particular
+  topic.
 
-  When your agent spec is ready, you then create the agent in your org by specifying the agent spec file to the
-  --job-spec flag of the "agent create" CLI command.
+  You can iterate the spec generation process by using the --spec flag to pass an existing agent spec file to this
+  command, and then using the --role, --company-description, etc, flags to refine your agent properties. Iteratively
+  improving the description of your agent allows the LLM to generate progressively better topics.
+
+  You can also specify a custom prompt template that the agent uses, and ground the prompt template to add context and
+  personalization to the agent's prompts.
+
+  When your agent spec is ready, you then create the agent in your org by running the "agent create" CLI command and
+  specifying the spec with the --spec flag.
 
 EXAMPLES
-  Create an agent spec for your default org in the default location and use flags to specify the agent's role and your
-  company details:
+  Generate an agent spec in the default location and use flags to specify the agent properties, such as its role and
+  your company details; use your default org:
 
-    $ sf agent generate spec-v2 --type customer --role "Assist users in navigating and managing bookings" \
-      --company-name "Coral Cloud" --company-description "Resort that manages guests and their reservations and \
-      experiences"
+    $ sf agent generate spec-v2 --type customer --role "Field customer complaints and manage employee schedules." \
+      --company-name "Coral Cloud Resorts" --company-description "Provide customers with exceptional destination \
+      activities, unforgettable experiences, and reservation services."
 
-  Create an agent spec by being prompted for role and company details interactively; write the generated file to the
-  "specs" directory and use the org with alias "my-org":
+  Generate an agent spec by being prompted for the required agent properties and generate a maxiumum of 5 topics;
+  write the generated file to the "specs/resortManagerSpec.yaml" file and use the org with alias "my-org":
 
-    $ sf agent generate spec-v2 --output-dir specs --target-org my-org
+    $ sf agent generate spec-v2 --max-topics 5 --output-file specs/resortManagerAgent.yaml --target-org my-org
+
+  Specify an existing agent spec file called "specs/resortManagerAgent.yaml", and then overwrite it with a new version
+  that contains newly AI-generated topics based on the updated role information passed in with the --role flag:
+
+    $ sf agent generate spec-v2 --spec specs/resortManagerAgent.yaml --output-file specs/resortManagerAgent.yaml \
+      --role "Field customer complaints, manage employee schedules, and ensure all resort operations are running \
+      smoothly" --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/generate/spec-v2.ts)_
+_See code: [src/commands/agent/generate/spec-v2.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/generate/spec-v2.ts)_
 
-## `sf agent generate test-cases`
+## `sf agent generate test-spec`
 
-Interactively generate a new Set of AI Evaluation test cases.
+Interactively generate a specification file for a AI evaluation test.
 
 ```
 USAGE
-  $ sf agent generate test-cases [--flags-dir <value>]
+  $ sf agent generate test-spec [--flags-dir <value>]
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
 
 DESCRIPTION
-  Interactively generate a new Set of AI Evaluation test cases.
+  Interactively generate a specification file for a AI evaluation test.
 
-  Answer the prompts to generate an AiEvaluationTestSet that will be written to a file. You can then run "sf agent
-  generate definition" to generate the AiEvaluationDefinition that can be used to evaluate the test set.
-
-EXAMPLES
-  $ sf agent generate test-cases
-```
-
-_See code: [src/commands/agent/generate/test-cases.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/generate/test-cases.ts)_
-
-## `sf agent generate test-definition`
-
-Interactively generate a new AI Evaluation Test Definition.
-
-```
-USAGE
-  $ sf agent generate test-definition [--flags-dir <value>]
-
-GLOBAL FLAGS
-  --flags-dir=<value>  Import flag values from a directory.
-
-DESCRIPTION
-  Interactively generate a new AI Evaluation Test Definition.
-
-  This command will prompt you for the necessary information to create a new AiEvaluationDefinition. The definition will
-  be saved to the `aiEvaluationDefinitions` directory in the project.
-
-  You must have the `Bots` and `AiEvaluationTestSets` metadata types present in your project to use this command.
+  This command will prompt you for the necessary information to create a new spec file (in yaml format). You can then
+  create a new AI evaluation using "sf agent test create --spec <spec-file>".
 
 EXAMPLES
-  $ sf agent generate test-definition
+  $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-definition.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/generate/test-definition.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -373,7 +377,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -410,7 +414,43 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/cancel.ts)_
+
+## `sf agent test create`
+
+Summary of a command.
+
+```
+USAGE
+  $ sf agent test create -s <value> -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--preview] [-p]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+  -p, --no-prompt            Don't prompt for confirmation when overwriting an existing test.
+  -s, --spec=<value>         (required) Description of a flag.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --preview              Preview the test metadata without deploying to your org.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Summary of a command.
+
+  More information about a command. Don't repeat the summary.
+
+EXAMPLES
+  $ sf agent test create
+
+FLAG DESCRIPTIONS
+  -s, --spec=<value>  Description of a flag.
+
+    More information about a flag. Don't repeat the summary.
+```
+
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -439,7 +479,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -495,7 +535,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -558,7 +598,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -621,6 +661,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.10.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.11.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
