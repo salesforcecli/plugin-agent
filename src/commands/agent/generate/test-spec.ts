@@ -4,16 +4,18 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { dirname, join } from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
+import { generateTestSpec } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { theme } from '../../../inquirer-theme.js';
 import { readDir } from '../../../read-dir.js';
+
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-cases');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
 
 // TODO: add these back once we refine the regex
 // export const FORTY_CHAR_API_NAME_REGEX =
@@ -21,18 +23,18 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.genera
 // export const EIGHTY_CHAR_API_NAME_REGEX =
 //   /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
 
-export type TestSetInputs = {
+type TestCase = {
   utterance: string;
-  actionSequenceExpectedValue: string[];
-  botRatingExpectedValue: string;
-  topicSequenceExpectedValue: string;
+  expectedActions: string[];
+  expectedTopic: string;
+  expectedOutcome: string;
 };
 
 function castArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
-async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestSetInputs> {
+async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestCase> {
   const utterance = await input({
     message: 'Utterance',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
@@ -72,16 +74,16 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
       theme,
     });
 
-  const topicSequenceExpectedValue = await select<string>({
+  const expectedTopic = await select<string>({
     message: 'Expected topic',
     choices: [...topics, customKey],
     theme,
   });
 
-  if (topicSequenceExpectedValue === customKey) {
+  if (expectedTopic === customKey) {
     return {
       utterance,
-      topicSequenceExpectedValue: await input({
+      expectedTopic: await input({
         message: 'Expected topic',
         validate: (d: string): boolean | string => {
           if (!d.length) {
@@ -92,67 +94,40 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
         theme,
       }),
       // If the user selects OTHER for the topic, then we don't have a genAiPlugin to get actions from so we ask for them for custom input
-      actionSequenceExpectedValue: await askForOtherActions(),
-      botRatingExpectedValue: await askForBotRating(),
+      expectedActions: await askForOtherActions(),
+      expectedOutcome: await askForBotRating(),
     };
   }
 
-  const genAiPluginXml = await readFile(genAiPlugins[topicSequenceExpectedValue], 'utf-8');
+  const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
   const parser = new XMLParser();
   const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
   const actions = castArray(parsed.GenAiPlugin.genAiFunctions).map((f) => f.functionName);
 
-  let actionSequenceExpectedValue = await checkbox<string>({
+  let expectedActions = await checkbox<string>({
     message: 'Expected action(s)',
     choices: [...actions, customKey],
     theme,
     required: true,
   });
 
-  if (actionSequenceExpectedValue.includes(customKey)) {
+  if (expectedActions.includes(customKey)) {
     const additional = await askForOtherActions();
 
-    actionSequenceExpectedValue = [...actionSequenceExpectedValue.filter((a) => a !== customKey), ...additional];
+    expectedActions = [...expectedActions.filter((a) => a !== customKey), ...additional];
   }
 
-  const botRatingExpectedValue = await askForBotRating();
+  const expectedOutcome = await askForBotRating();
 
   return {
     utterance,
-    actionSequenceExpectedValue,
-    botRatingExpectedValue,
-    topicSequenceExpectedValue,
+    expectedActions,
+    expectedOutcome,
+    expectedTopic,
   };
 }
 
-export function constructTestSetXML(testCases: TestSetInputs[]): string {
-  const tab = '  ';
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<AiEvaluationTestSet>\n${tab}<subjectType>AGENT</subjectType>\n`;
-  testCases.forEach((testCase, i) => {
-    xml += `  <testCase>
-    <number>${i + 1}</number>
-    <inputs>
-      <utterance>${testCase.utterance}</utterance>
-    </inputs>
-    <expectation>
-      <name>topic_sequence_match</name>
-      <expectedValue>${testCase.topicSequenceExpectedValue}</expectedValue>
-    </expectation>
-    <expectation>
-      <name>action_sequence_match</name>
-      <expectedValue>${`[${testCase.actionSequenceExpectedValue.map((v) => `"${v}"`).join(',')}]`}</expectedValue>
-    </expectation>
-    <expectation>
-      <name>bot_response_rating</name>
-      <expectedValue>${testCase.botRatingExpectedValue}</expectedValue>
-    </expectation>
-  </testCase>\n`;
-  });
-  xml += '</AiEvaluationTestSet>';
-  return xml;
-}
-
-export default class AgentGenerateTestCases extends SfCommand<void> {
+export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -160,9 +135,26 @@ export default class AgentGenerateTestCases extends SfCommand<void> {
   public static readonly state = 'beta';
 
   public async run(): Promise<void> {
-    const testSetName = await input({
-      message: 'What is the name of this set of test cases',
+    const botsDir = join('force-app', 'main', 'default', 'bots');
+    const bots = await readDir(botsDir);
+    if (bots.length === 0) {
+      throw new SfError(`No agents found in ${botsDir}`, 'NoAgentsFoundError');
+    }
 
+    const subjectType = await select<string>({
+      message: 'What are you testing',
+      choices: ['AGENT'],
+      theme,
+    });
+
+    const subjectName = await select<string>({
+      message: 'Select the Agent to test',
+      choices: bots,
+      theme,
+    });
+
+    const name = await input({
+      message: 'Enter a name for the test definition',
       validate(d: string): boolean | string {
         // ensure that it's not empty
         if (!d.length) {
@@ -178,6 +170,12 @@ export default class AgentGenerateTestCases extends SfCommand<void> {
         // }
         // return true;
       },
+      theme,
+    });
+
+    const description = await input({
+      message: 'Enter a description for test definition (optional)',
+      theme,
     });
 
     const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
@@ -201,16 +199,18 @@ export default class AgentGenerateTestCases extends SfCommand<void> {
       })
     );
 
-    const testSetPath = join(
-      'force-app',
-      'main',
-      'default',
-      'aiEvaluationTestSets',
-      `${testSetName}.aiEvaluationTestSet-meta.xml`
-    );
-    await mkdir(dirname(testSetPath), { recursive: true });
     this.log();
-    this.log(`Created ${testSetPath}`);
-    await writeFile(testSetPath, constructTestSetXML(testCases));
+
+    await generateTestSpec(
+      {
+        name,
+        description,
+        subjectType,
+        subjectName,
+        testCases,
+      },
+      `${name}-test-spec.yaml`
+    );
+    this.log(`Created ${name}-test-spec.yaml`);
   }
 }

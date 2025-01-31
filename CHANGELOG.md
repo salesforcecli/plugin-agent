@@ -1,3 +1,13 @@
+# [1.11.0](https://github.com/salesforcecli/plugin-agent/compare/1.10.0...1.11.0) (2025-01-29)
+
+### Bug Fixes
+
+- update api responses ([3f6c144](https://github.com/salesforcecli/plugin-agent/commit/3f6c144b787887ca43d281b981016b59b08c5bfd))
+
+### Features
+
+- use spec for tests ([fa2ac45](https://github.com/salesforcecli/plugin-agent/commit/fa2ac45283df196bf93a335194eba9627a33e23a))
+
 # [1.10.0](https://github.com/salesforcecli/plugin-agent/compare/1.9.2...1.10.0) (2025-01-27)
 
 ### Features

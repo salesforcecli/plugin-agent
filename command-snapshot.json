@@ -75,15 +75,7 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:test-cases",
-    "flagAliases": [],
-    "flagChars": [],
-    "flags": ["flags-dir"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:generate:test-definition",
+    "command": "agent:generate:test-spec",
     "flagAliases": [],
     "flagChars": [],
     "flags": ["flags-dir"],
@@ -103,6 +95,14 @@
     "flagAliases": [],
     "flagChars": ["i", "o", "r"],
     "flags": ["api-version", "flags-dir", "job-id", "json", "target-org", "use-most-recent"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:create",
+    "flagAliases": [],
+    "flagChars": ["o", "p", "s"],
+    "flags": ["api-version", "flags-dir", "json", "no-prompt", "preview", "spec", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
