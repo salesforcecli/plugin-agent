@@ -19,9 +19,9 @@
   },
   {
     "alias": [],
-    "command": "agent:generate:spec",
+    "command": "agent:generate:agent-spec",
     "flagAliases": [],
-    "flagChars": ["o", "t"],
+    "flagChars": ["o", "p"],
     "flags": [
       "agent-user",
       "api-version",

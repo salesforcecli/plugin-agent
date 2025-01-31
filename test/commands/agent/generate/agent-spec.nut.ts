@@ -8,7 +8,7 @@ import { join, resolve } from 'node:path';
 import { statSync } from 'node:fs';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { AgentCreateSpecResult } from '../../../../src/commands/agent/generate/spec.js';
+import { AgentCreateSpecResult } from '../../../../src/commands/agent/generate/agent-spec.js';
 
 describe('agent generate spec NUTs', () => {
   let session: TestSession;
@@ -32,13 +32,13 @@ describe('agent generate spec NUTs', () => {
     const companyName = 'Test Company Name';
     const companyDescription = 'Test Company Description';
     const companyWebsite = 'https://test-company-website.org';
-    const command = `agent generate spec ${targetOrg} --type ${type} --role "${role}" --company-name "${companyName}" --company-description "${companyDescription}" --company-website ${companyWebsite} --json`;
+    const command = `agent generate agent-spec ${targetOrg} --type ${type} --role "${role}" --company-name "${companyName}" --company-description "${companyDescription}" --company-website ${companyWebsite} --json`;
     const output = execCmd<AgentCreateSpecResult>(command, {
       ensureExitCode: 0,
       env: { ...process.env, SF_MOCK_DIR: mockDir },
     }).jsonOutput;
 
-    const expectedFilePath = resolve(session.project.dir, 'config', 'agentSpec.yaml');
+    const expectedFilePath = resolve(session.project.dir, 'specs', 'agentSpec.yaml');
     expect(output?.result.isSuccess).to.be.true;
     expect(output?.result.specPath).to.equal(expectedFilePath);
     expect(output?.result.agentType).to.equal(type);

@@ -13,7 +13,7 @@ import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/a
 import { FlaggablePrompt, makeFlags, promptForFlag, validateAgentType, validateMaxTopics } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.spec');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.agent-spec');
 
 // The JSON response returned by the command.
 export type AgentCreateSpecResult = {
@@ -34,7 +34,6 @@ export const FLAGGABLE_PROMPTS = {
   type: {
     message: messages.getMessage('flags.type.summary'),
     validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
-    char: 't',
     options: ['customer', 'internal'],
     required: true,
   },
@@ -122,7 +121,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     }),
     'output-file': Flags.file({
       summary: messages.getMessage('flags.output-file.summary'),
-      default: join('config', 'agentSpec.yaml'),
+      default: join('specs', 'agentSpec.yaml'),
     }),
     'full-interview': Flags.boolean({
       summary: messages.getMessage('flags.full-interview.summary'),
@@ -136,6 +135,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     }),
     'no-prompt': Flags.boolean({
       summary: messages.getMessage('flags.no-prompt.summary'),
+      char: 'p',
     }),
   };
 
@@ -275,8 +275,25 @@ const buildSpecFile = (
   propertyOrder.map((prop) => {
     // @ts-expect-error need better typing of the array.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const val = specResponse[prop] ?? extraProps[prop];
+    let val = specResponse[prop] ?? extraProps[prop];
     if (val != null || (typeof val === 'string' && val.length > 0)) {
+      if (prop === 'topics') {
+        // Ensure topics are [{name, description}]
+        val = (val as string[]).map((t) =>
+          Object.keys(t)
+            .sort()
+            .reverse()
+            .reduce(
+              (acc, key) => ({
+                ...acc,
+                // @ts-expect-error need better typing of the array.
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                [key]: t[key],
+              }),
+              {}
+            )
+        );
+      }
       // @ts-expect-error need better typing of the array.
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       specFileContents[prop] = val;
