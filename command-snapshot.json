@@ -3,14 +3,6 @@
     "alias": [],
     "command": "agent:create",
     "flagAliases": [],
-    "flagChars": ["f", "n", "o"],
-    "flags": ["api-version", "flags-dir", "json", "name", "spec", "target-org"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:create-v2",
-    "flagAliases": [],
     "flagChars": ["o"],
     "flags": [
       "agent-api-name",
@@ -28,26 +20,6 @@
   {
     "alias": [],
     "command": "agent:generate:spec",
-    "flagAliases": [],
-    "flagChars": ["d", "f", "o", "t"],
-    "flags": [
-      "api-version",
-      "company-description",
-      "company-name",
-      "company-website",
-      "file-name",
-      "flags-dir",
-      "json",
-      "output-dir",
-      "role",
-      "target-org",
-      "type"
-    ],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:generate:spec-v2",
     "flagAliases": [],
     "flagChars": ["o", "t"],
     "flags": [

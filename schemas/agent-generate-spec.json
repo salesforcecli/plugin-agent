@@ -4,21 +4,69 @@
   "definitions": {
     "AgentCreateSpecResult": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "topics": {
+          "$ref": "#/definitions/DraftAgentTopics"
+        },
+        "agentType": {
+          "type": "string",
+          "enum": ["customer", "internal"],
+          "description": "Internal type is copilots; used by customers' employees. Customer type is agents; used by customers' customers."
+        },
+        "role": {
+          "type": "string"
+        },
+        "companyName": {
+          "type": "string"
+        },
+        "companyDescription": {
+          "type": "string"
+        },
+        "companyWebsite": {
+          "type": "string"
+        },
+        "maxNumOfTopics": {
+          "type": "number",
+          "description": "The maximum number of topics to create in the spec. Default is 10."
+        },
+        "promptTemplateName": {
+          "type": "string",
+          "description": "Developer name of the prompt template."
+        },
+        "groundingContext": {
+          "type": "string",
+          "description": "Context info to be used in customized prompt template"
+        },
         "isSuccess": {
           "type": "boolean"
         },
         "errorMessage": {
           "type": "string"
         },
-        "jobSpec": {
+        "specPath": {
           "type": "string"
         }
       },
-      "required": [
-        "isSuccess"
-      ],
-      "additionalProperties": false
+      "required": ["agentType", "companyDescription", "companyName", "isSuccess", "role", "topics"]
+    },
+    "DraftAgentTopics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "description"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 1
     }
   }
 }
