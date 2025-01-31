@@ -11,15 +11,23 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Lifecycle, Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { colorize } from '@oclif/core/ux';
-import { Agent, AgentJobSpecV2, AgentCreateConfigV2, AgentCreateLifecycleStagesV2 } from '@salesforce/agents';
-import { makeFlags, promptForFlag, validateAgentType } from '../../flags.js';
+import {
+  Agent,
+  AgentJobSpecV2,
+  AgentCreateConfigV2,
+  AgentCreateLifecycleStagesV2,
+  AgentCreateResponseV2,
+  generateAgentApiName,
+} from '@salesforce/agents';
+import { FlaggablePrompt, makeFlags, promptForFlag, validateAgentType } from '../../flags.js';
+import { AgentSpecFileContents } from './generate/spec-v2.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create-v2');
 
-export type AgentCreateResult = {
-  isSuccess: boolean;
-  errorMessage?: string;
+// The JSON response returned by the command.
+export type AgentCreateResult = AgentCreateResponseV2 & {
+  previewFilePath?: string;
 };
 
 const MSO_STAGES = {
@@ -35,33 +43,7 @@ const FLAGGABLE_PROMPTS = {
     validate: (d: string): boolean | string => d.length > 0 || 'Agent Name cannot be empty',
     required: true,
   },
-  'user-id': {
-    message: messages.getMessage('flags.user-id.summary'),
-    validate: (d: string): boolean | string => {
-      // Allow empty string
-      if (d.length === 0) return true;
-
-      if (d.length === 15 || d.length === 18) {
-        if (d.startsWith('005')) {
-          return true;
-        }
-      }
-      return 'Please enter a valid User ID (005 prefix)';
-    },
-  },
-  'enrich-logs': {
-    message: messages.getMessage('flags.enrich-logs.summary'),
-    validate: (): boolean | string => true,
-    options: ['true', 'false'],
-    default: 'false',
-  },
-  tone: {
-    message: messages.getMessage('flags.tone.summary'),
-    validate: (): boolean | string => true,
-    options: ['formal', 'casual', 'neutral'],
-    default: 'casual',
-  },
-};
+} satisfies Record<string, FlaggablePrompt>;
 
 export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -83,21 +65,14 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
     preview: Flags.boolean({
       summary: messages.getMessage('flags.preview.summary'),
     }),
-    // Currently hidden; Do we even want to expose this?
     'agent-api-name': Flags.string({
       summary: messages.getMessage('flags.agent-api-name.summary'),
-      hidden: true,
     }),
-    // Currently hidden because only 'en_US' is supported
-    'primary-language': Flags.string({
-      summary: messages.getMessage('flags.primary-language.summary'),
-      options: ['en_US'],
-      default: 'en_US',
-      hidden: true,
-    }),
-    // Seems a very uncommon usecase, but it's possible to do it in the server side API
+    // This would be used as more of an agent update than create.
+    // Could possibly move to an `agent update` command.
     'planner-id': Flags.string({
       summary: messages.getMessage('flags.planner-id.summary'),
+      hidden: true,
     }),
   };
 
@@ -106,44 +81,30 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
     const { flags } = await this.parse(AgentCreateV2);
 
     // throw error if --json is used and not all required flags are provided
-    if (this.jsonEnabled()) {
-      if (!flags.preview && !flags['agent-name']) {
-        throw messages.createError('error.missingRequiredFlags', ['agent-name']);
-      }
+    if (this.jsonEnabled() && !flags['agent-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['agent-name']);
     }
 
     // Read the agent spec and validate
-    const inputSpec = YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as Partial<AgentJobSpecV2>;
+    const inputSpec = YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as AgentSpecFileContents;
     validateSpec(inputSpec);
 
-    // If we're saving the agent and we don't have flag values, prompt.
-    let agentName = flags['agent-name'];
-    let userId = flags['user-id'];
-    let enrichLogs = flags['enrich-logs'];
-    let tone = flags.tone;
-    if (!this.jsonEnabled() && !flags.preview) {
-      agentName ??= await promptForFlag(FLAGGABLE_PROMPTS['agent-name']);
-      userId ??= await promptForFlag(FLAGGABLE_PROMPTS['user-id']);
-      enrichLogs ??= await promptForFlag(FLAGGABLE_PROMPTS['enrich-logs']);
-      tone ??= await promptForFlag(FLAGGABLE_PROMPTS.tone);
-    }
+    // If we don't have an agent name yet, prompt.
+    const agentName = flags['agent-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['agent-name']));
+    const agentApiName = flags['agent-api-name'] ?? generateAgentApiName(agentName);
 
     let title: string;
     const stages = [MSO_STAGES.parse];
     if (flags.preview) {
-      title = 'Previewing Agent Creation';
+      title = `Previewing ${agentName} Creation`;
       stages.push(MSO_STAGES.preview);
     } else {
-      title = `Creating ${agentName as string} Agent`;
+      title = `Creating ${agentName} Agent`;
       stages.push(MSO_STAGES.create);
       stages.push(MSO_STAGES.retrieve);
     }
 
-    const mso = new MultiStageOutput({
-      jsonEnabled: this.jsonEnabled(),
-      title,
-      stages,
-    });
+    const mso = new MultiStageOutput({ jsonEnabled: this.jsonEnabled(), title, stages });
     mso.goto(MSO_STAGES.parse);
 
     // @ts-expect-error not using async method in callback
@@ -157,12 +118,12 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
     const agent = new Agent(connection, this.project!);
 
     const agentConfig: AgentCreateConfigV2 = {
-      agentType: inputSpec.agentType!,
+      agentType: inputSpec.agentType,
       generationInfo: {
         defaultInfo: {
-          role: inputSpec.role!,
-          companyName: inputSpec.companyName!,
-          companyDescription: inputSpec.companyDescription!,
+          role: inputSpec.role,
+          companyName: inputSpec.companyName,
+          companyDescription: inputSpec.companyDescription,
           preDefinedTopics: inputSpec.topics,
         },
       },
@@ -173,46 +134,47 @@ export default class AgentCreateV2 extends SfCommand<AgentCreateResult> {
     }
     if (!flags.preview) {
       agentConfig.saveAgent = true;
-      agentConfig.agentSettings = {
-        agentName: agentName!,
-      };
-      if (flags['agent-api-name']) {
-        agentConfig.agentSettings.agentApiName = flags['agent-api-name'];
-      }
+      agentConfig.agentSettings = { agentName, agentApiName };
       if (flags['planner-id']) {
         agentConfig.agentSettings.plannerId = flags['planner-id'];
       }
-      if (flags['user-id']) {
-        agentConfig.agentSettings.userId = userId;
+      if (inputSpec?.agentUser) {
+        // TODO: query for the user ID from the username
+        agentConfig.agentSettings.userId = inputSpec.agentUser;
       }
-      agentConfig.agentSettings.enrichLogs = Boolean(enrichLogs);
-      agentConfig.agentSettings.tone = tone as 'casual' | 'formal' | 'neutral';
+      if (inputSpec?.enrichLogs) {
+        agentConfig.agentSettings.enrichLogs = inputSpec.enrichLogs;
+      }
+      if (inputSpec?.tone) {
+        agentConfig.agentSettings.tone = inputSpec.tone;
+      }
     }
     const response = await agent.createV2(agentConfig);
+    const result: AgentCreateResult = response;
 
     mso.stop();
 
     if (response.isSuccess) {
       if (!flags.preview) {
+        const orgUsername = flags['target-org'].getUsername() as string;
+        this.log(`Successfully created ${agentName} in ${orgUsername}.\n`);
         this.log(
-          colorize(
-            'green',
-            `Successfully created ${agentName as string} in ${flags['target-org'].getUsername() ?? 'the target org'}.`
-          )
-        );
-        this.log(
-          `Use ${colorize('dim', `sf org open agent --name ${agentName as string}`)} to view the agent in the browser.`
+          `Use ${colorize(
+            'dim',
+            `sf org open agent --name ${agentApiName} -o ${orgUsername}`
+          )} to view the agent in the browser.`
         );
       } else {
-        const previewFileName = `agentPreview_${new Date().toISOString()}.json`;
+        const previewFileName = `${agentApiName}_Preview_${new Date().toISOString()}.json`;
         writeFileSync(previewFileName, JSON.stringify(response, null, 2));
-        this.log(colorize('green', `Successfully created agent for preview. See ${previewFileName}`));
+        result.previewFilePath = resolve(previewFileName);
+        this.log(`Successfully created agent for preview. See ${previewFileName}\n`);
       }
     } else {
-      this.log(colorize('red', `failed to create agent: ${response.errorMessage ?? ''}`));
+      this.log(colorize('red', `Failed to create agent: ${response.errorMessage ?? ''}`));
     }
 
-    return response;
+    return result;
   }
 }
 
@@ -228,7 +190,7 @@ const validateSpec = (spec: Partial<AgentJobSpecV2>): void => {
   ];
   const missingFlags = requiredSpecValues.filter((f) => !spec[f]);
   if (missingFlags.length) {
-    throw messages.createError('error.missingRequiredFlags', [missingFlags.join(', ')]);
+    throw messages.createError('error.missingRequiredSpecProperties', [missingFlags.join(', ')]);
   }
 
   validateAgentType(spec.agentType, true);

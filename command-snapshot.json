@@ -16,16 +16,12 @@
       "agent-api-name",
       "agent-name",
       "api-version",
-      "enrich-logs",
       "flags-dir",
       "json",
       "planner-id",
       "preview",
-      "primary-language",
       "spec",
-      "target-org",
-      "tone",
-      "user-id"
+      "target-org"
     ],
     "plugin": "@salesforce/plugin-agent"
   },
@@ -55,19 +51,24 @@
     "flagAliases": [],
     "flagChars": ["o", "t"],
     "flags": [
+      "agent-user",
       "api-version",
       "company-description",
       "company-name",
       "company-website",
+      "enrich-logs",
       "flags-dir",
+      "full-interview",
       "grounding-context",
       "json",
       "max-topics",
+      "no-prompt",
       "output-file",
       "prompt-template",
       "role",
       "spec",
       "target-org",
+      "tone",
       "type"
     ],
     "plugin": "@salesforce/plugin-agent"

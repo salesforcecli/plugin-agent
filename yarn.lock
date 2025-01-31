@@ -1462,15 +1462,15 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.9.0.tgz#a1292c7b678451d40c71c0b9e2fd657083616ad8"
-  integrity sha512-VOoJejtY+tFTUUZhx958IcuZ936hwpoua1G/1wHsJTWHg+gcpsYigSF6oF2T0SD8ZuTxzHiG6l/fopMJZiyutg==
+"@salesforce/agents@^0.9.2":
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.9.2.tgz#eacad6fab97cd156484b78a974f47389efaefb27"
+  integrity sha512-z/+mMa1GgiEwFpg+FD40ahzJhtf7Am5G8H+qHXjrUBijk7CdFm5lGZGvX0+LzhxD/Atn44qOo05V3Z3RuN7qYw==
   dependencies:
     "@salesforce/core" "^8.8.2"
     "@salesforce/kit" "^3.2.3"
     "@salesforce/sf-plugins-core" "^12.1.2"
-    "@salesforce/source-deploy-retrieve" "^12.14.0"
+    "@salesforce/source-deploy-retrieve" "^12.14.1"
     ansis "^3.9.0"
     fast-xml-parser "^4.5.1"
     nock "^13.5.6"
@@ -1622,6 +1622,26 @@
   version "12.14.0"
   resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.14.0.tgz#04036f76301071b2188c92f70d77a138bc0d72cf"
   integrity sha512-3WOQCUY0a8cNYx5/NVtaubLEgxo/vHS/7k4Kw/FEZY3ysALpPCqWk2psJQP56xsp/SDAI3lV0VpMZadrL+ryMw==
+  dependencies:
+    "@salesforce/core" "^8.8.2"
+    "@salesforce/kit" "^3.2.3"
+    "@salesforce/ts-types" "^2.0.12"
+    fast-levenshtein "^3.0.0"
+    fast-xml-parser "^4.5.1"
+    got "^11.8.6"
+    graceful-fs "^4.2.11"
+    ignore "^5.3.2"
+    isbinaryfile "^5.0.2"
+    jszip "^3.10.1"
+    mime "2.6.0"
+    minimatch "^9.0.5"
+    proxy-agent "^6.4.0"
+    yaml "^2.6.1"
+
+"@salesforce/source-deploy-retrieve@^12.14.1":
+  version "12.14.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.14.1.tgz#9067388b1eb9fadda7e6ccd894e9d1bb0e8407d5"
+  integrity sha512-8POp6tqoeciDFAv7a40LG21aHZ2XGHvX0/ySqcjcAVhTVhVhcP0EpC+qO+SSKjB6Ocf0/6iXMo5ciU2Eq32ydw==
   dependencies:
     "@salesforce/core" "^8.8.2"
     "@salesforce/kit" "^3.2.3"
