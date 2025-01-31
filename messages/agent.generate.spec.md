@@ -1,14 +1,18 @@
 # summary
 
-Generate an agent spec, which is the list of jobs that the agent performs.
+Generate an agent spec, which is a YAML file that captures what an agent can do.
 
 # description
 
-When using Salesforce CLI to create an agent in your org, the first step is to generate the local JSON-formatted agent spec file with this command.
+Before you use Salesforce CLI to create an agent in your org, you must first generate an agent spec with this command. An agent spec is a YAML-formatted file that contains information about the agent, such as its role and company description, and then an AI-generated list of topics based on this information. Topics define the range of jobs your agent can handle.
 
-An agent spec is a list of jobs and descriptions that capture what the agent can do. Use flags such as --role and --company-description to provide details about your company and the role that the agent plays in your company; you can also enter the information interactively if you prefer. When you then execute this command, the large language model (LLM) associated with your org uses the information to generate the list of jobs that the agent most likely performs. We recommend that you provide good details for --role, --company-description, etc, so that the LLM can generate the best and most relevant list of jobs and descriptions. Once generated, you can edit the spec file; for example, you can remove jobs that don't apply to your agent.
+Use flags, such as --role and --company-description, to provide details about your company and the role that the agent plays in your company. If you prefer, you can also be prompted for the information. Upon command execution, the large language model (LLM) associated with your org uses the information you provided to generate a list of topics for the agent. Because the LLM uses the company and role information to generate the topics, we recommend that you provide accurate and specific details so the LLM generates the best and most relevant topics. Once generated, you can edit the spec file; for example, you can remove topics that don't apply to your agent or change the description of a particular topic.
 
-When your agent spec is ready, you then create the agent in your org by specifying the agent spec file to the --job-spec flag of the "agent create" CLI command.
+You can iterate the spec generation process by using the --spec flag to pass an existing agent spec file to this command, and then using the --role, --company-description, etc, flags to refine your agent properties. Iteratively improving the description of your agent allows the LLM to generate progressively better topics.
+
+You can also specify a custom prompt template that the agent uses, and ground the prompt template to add context and personalization to the agent's prompts.
+
+When your agent spec is ready, you then create the agent in your org by running the "agent create" CLI command and specifying the spec with the --spec flag.
 
 # flags.type.summary
 
@@ -30,20 +34,88 @@ Description of your company.
 
 Website URL of your company.
 
-# flags.output-dir.summary
+# flags.output-file.summary
 
-Directory where the agent spec file is written; can be an absolute or relative path.
+Path for the generated YAML agent spec file; can be an absolute or relative path.
 
-# flags.file-name.summary
+# flags.max-topics.summary
 
-Name of the generated agent spec file.
+Maximum number of topics to generate in the agent spec; default is 10.
+
+# flags.max-topics.prompt
+
+Max number of topics to generate (1-30)
+
+# flags.prompt-template.summary
+
+API name of a customized prompt template to use instead of the default prompt template.
+
+# flags.grounding-context.summary
+
+Context information and personalization that's added to your prompts when using a custom prompt template.
+
+# flags.spec.summary
+
+Agent spec file, in YAML format, to use as input to the command.
+
+# flags.full-interview.summary
+
+Prompt for both required and optional flags.
+
+# flags.agent-user.summary
+
+Username of a user in your org to assign to your agent; determines what your agent can access and do.
+
+# flags.agent-user.prompt
+
+Username for agent
+
+# flags.enrich-logs.summary
+
+Adds agent conversation data to event logs so you can view all agent session activity in one place.
+
+# flags.enrich-logs.prompt
+
+Enrich event logs
+
+# flags.tone.summary
+
+Conversational style of the agent, such as how it expresses your brand personality in its messages through word choice, punctuation, and sentence structure.
+
+# flags.tone.prompt
+
+Agent conversation tone
+
+# flags.primary-language.summary
+
+Language the agent uses in conversations.
+
+# flags.no-prompt.summary
+
+Don't prompt the user to confirm spec file overwrite.
 
 # examples
 
-- Create an agent spec for your default org in the default location and use flags to specify the agent's role and your company details:
+- Generate an agent spec in the default location and use flags to specify the agent properties, such as its role and your company details; use your default org:
 
-  <%= config.bin %> <%= command.id %> --type customer --role "Assist users in navigating and managing bookings" --company-name "Coral Cloud" --company-description "Resort that manages guests and their reservations and experiences"
+  <%= config.bin %> <%= command.id %> --type customer --role "Field customer complaints and manage employee schedules." --company-name "Coral Cloud Resorts" --company-description "Provide customers with exceptional destination activities, unforgettable experiences, and reservation services."
 
-- Create an agent spec by being prompted for role and company details interactively; write the generated file to the "specs" directory and use the org with alias "my-org":
+- Generate an agent spec by being prompted for the required agent properties and generate a maxiumum of 5 topics; write the generated file to the "specs/resortManagerSpec.yaml" file and use the org with alias "my-org":
 
-  <%= config.bin %> <%= command.id %> --output-dir specs --target-org my-org
+  <%= config.bin %> <%= command.id %> --max-topics 5 --output-file specs/resortManagerAgent.yaml --target-org my-org
+
+- Specify an existing agent spec file called "specs/resortManagerAgent.yaml", and then overwrite it with a new version that contains newly AI-generated topics based on the updated role information passed in with the --role flag:
+
+  <%= config.bin %> <%= command.id %> --spec specs/resortManagerAgent.yaml --output-file specs/resortManagerAgent.yaml --role "Field customer complaints, manage employee schedules, and ensure all resort operations are running smoothly" --target-org my-org
+
+# error.missingRequiredFlags
+
+Missing required flags: %s
+
+# confirmSpecOverwrite
+
+Confirm overwrite of spec file %s?
+
+# commandCanceled
+
+Command canceled by user confirmation.
