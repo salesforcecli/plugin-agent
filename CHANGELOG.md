@@ -1,3 +1,9 @@
+# [1.13.0](https://github.com/salesforcecli/plugin-agent/compare/1.12.0...1.13.0) (2025-01-31)
+
+### Features
+
+- rename to generate agent-spec and more ([37007ba](https://github.com/salesforcecli/plugin-agent/commit/37007ba6a1004ee72761307b83f7af5b18ebc527))
+
 # [1.12.0](https://github.com/salesforcecli/plugin-agent/compare/1.11.1...1.12.0) (2025-01-31)
 
 ### Features

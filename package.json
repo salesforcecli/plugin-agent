@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/plugin-agent",
   "description": "Commands to interact with Salesforce agents",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {

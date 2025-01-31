@@ -62,7 +62,7 @@ sf plugins
 <!-- commands -->
 
 - [`sf agent create`](#sf-agent-create)
-- [`sf agent generate spec`](#sf-agent-generate-spec)
+- [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
@@ -78,8 +78,8 @@ Create an agent in your org using a local agent spec file.
 
 ```
 USAGE
-  $ sf agent create -o <value> --spec <value> [--json] [--flags-dir <value>] [--api-version <value>] [--agent-name
-    <value>] [--preview] [--agent-api-name <value>]
+  $ sf agent create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--agent-name <value>]
+    [--agent-api-name <value>] [--spec <value>] [--preview]
 
 FLAGS
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
@@ -89,7 +89,7 @@ FLAGS
       --agent-name=<value>      Name (label) of the new agent.
       --api-version=<value>     Override the api version used for api requests made by this command
       --preview                 Preview the agent without saving it in your org.
-      --spec=<value>            (required) Path to an agent spec file.
+      --spec=<value>            Path to an agent spec file.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -124,24 +124,23 @@ EXAMPLES
     $ sf agent create --agent-name ResortManager --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/create.ts)_
 
-## `sf agent generate spec`
+## `sf agent generate agent-spec`
 
 Generate an agent spec, which is a YAML file that captures what an agent can do.
 
 ```
 USAGE
-  $ sf agent generate spec -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-t customer|internal]
+  $ sf agent generate agent-spec -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--type customer|internal]
     [--role <value>] [--company-name <value>] [--company-description <value>] [--company-website <value>] [--max-topics
     <value>] [--agent-user <value>] [--enrich-logs true|false] [--tone formal|casual|neutral] [--spec <value>]
-    [--output-file <value>] [--full-interview] [--grounding-context <value> --prompt-template <value>] [--no-prompt]
+    [--output-file <value>] [--full-interview] [--grounding-context <value> --prompt-template <value>] [-p]
 
 FLAGS
   -o, --target-org=<value>           (required) Username or alias of the target org. Not required if the `target-org`
                                      configuration variable is already set.
-  -t, --type=<option>                Type of agent to create.
-                                     <options: customer|internal>
+  -p, --no-prompt                    Don't prompt the user to confirm spec file overwrite.
       --agent-user=<value>           Username of a user in your org to assign to your agent; determines what your agent
                                      can access and do.
       --api-version=<value>          Override the api version used for api requests made by this command
@@ -155,9 +154,8 @@ FLAGS
       --grounding-context=<value>    Context information and personalization that's added to your prompts when using a
                                      custom prompt template.
       --max-topics=<value>           Maximum number of topics to generate in the agent spec; default is 10.
-      --no-prompt                    Don't prompt the user to confirm spec file overwrite.
-      --output-file=<value>          [default: config/agentSpec.yaml] Path for the generated YAML agent spec file; can
-                                     be an absolute or relative path.
+      --output-file=<value>          [default: specs/agentSpec.yaml] Path for the generated YAML agent spec file; can be
+                                     an absolute or relative path.
       --prompt-template=<value>      API name of a customized prompt template to use instead of the default prompt
                                      template.
       --role=<value>                 Role of the agent.
@@ -165,6 +163,8 @@ FLAGS
       --tone=<option>                Conversational style of the agent, such as how it expresses your brand personality
                                      in its messages through word choice, punctuation, and sentence structure.
                                      <options: formal|casual|neutral>
+      --type=<option>                Type of agent to create.
+                                     <options: customer|internal>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -200,24 +200,24 @@ EXAMPLES
   Generate an agent spec in the default location and use flags to specify the agent properties, such as its role and
   your company details; use your default org:
 
-    $ sf agent generate spec --type customer --role "Field customer complaints and manage employee schedules." \
+    $ sf agent generate agent-spec --type customer --role "Field customer complaints and manage employee schedules." \
       --company-name "Coral Cloud Resorts" --company-description "Provide customers with exceptional destination \
       activities, unforgettable experiences, and reservation services."
 
   Generate an agent spec by being prompted for the required agent properties and generate a maxiumum of 5 topics;
   write the generated file to the "specs/resortManagerSpec.yaml" file and use the org with alias "my-org":
 
-    $ sf agent generate spec --max-topics 5 --output-file specs/resortManagerAgent.yaml --target-org my-org
+    $ sf agent generate agent-spec --max-topics 5 --output-file specs/resortManagerAgent.yaml --target-org my-org
 
   Specify an existing agent spec file called "specs/resortManagerAgent.yaml", and then overwrite it with a new version
   that contains newly AI-generated topics based on the updated role information passed in with the --role flag:
 
-    $ sf agent generate spec --spec specs/resortManagerAgent.yaml --output-file specs/resortManagerAgent.yaml --role \
-      "Field customer complaints, manage employee schedules, and ensure all resort operations are running smoothly" \
-      --target-org my-org
+    $ sf agent generate agent-spec --spec specs/resortManagerAgent.yaml --output-file specs/resortManagerAgent.yaml \
+      --role "Field customer complaints, manage employee schedules, and ensure all resort operations are running \
+      smoothly" --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/generate/spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -240,7 +240,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -275,7 +275,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -312,7 +312,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test create`
 
@@ -348,7 +348,7 @@ FLAG DESCRIPTIONS
     More information about a flag. Don't repeat the summary.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -377,7 +377,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -433,7 +433,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -496,7 +496,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -559,6 +559,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.12.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
