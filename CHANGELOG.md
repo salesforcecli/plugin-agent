@@ -1,3 +1,9 @@
+## [1.11.1](https://github.com/salesforcecli/plugin-agent/compare/1.11.0...1.11.1) (2025-01-31)
+
+### Bug Fixes
+
+- refactor spec generation and agent create commands ([1a2dd64](https://github.com/salesforcecli/plugin-agent/commit/1a2dd64b45f6f2436c3c609fae9374e8fb8218e9))
+
 # [1.11.0](https://github.com/salesforcecli/plugin-agent/compare/1.10.0...1.11.0) (2025-01-29)
 
 ### Bug Fixes
