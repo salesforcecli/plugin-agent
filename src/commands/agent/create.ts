@@ -5,11 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { resolve } from 'node:path';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Lifecycle, Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
+import { input as inquirerInput } from '@inquirer/prompts';
 import { colorize } from '@oclif/core/ux';
 import {
   Agent,
@@ -20,7 +21,8 @@ import {
   generateAgentApiName,
 } from '@salesforce/agents';
 import { FlaggablePrompt, makeFlags, promptForFlag, validateAgentType } from '../../flags.js';
-import { AgentSpecFileContents } from './generate/spec.js';
+import { theme } from '../../inquirer-theme.js';
+import { AgentSpecFileContents } from './generate/agent-spec.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create');
@@ -43,6 +45,33 @@ const FLAGGABLE_PROMPTS = {
     validate: (d: string): boolean | string => d.length > 0 || 'Agent Name cannot be empty',
     required: true,
   },
+  'agent-api-name': {
+    message: messages.getMessage('flags.agent-api-name.summary'),
+    validate: (d: string): boolean | string => {
+      if (d.length === 0) {
+        return true;
+      }
+      if (d.length > 80) {
+        return 'API name cannot be over 80 characters.';
+      }
+      const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+      if (!regex.test(d)) {
+        return 'Invalid API name.';
+      }
+      return true;
+    },
+  },
+  spec: {
+    message: messages.getMessage('flags.spec.summary'),
+    validate: (d: string): boolean | string => {
+      const specPath = resolve(d);
+      if (!existsSync(specPath)) {
+        return 'Please enter an existing agent spec (yaml) file';
+      }
+      return true;
+    },
+    required: true,
+  },
 } satisfies Record<string, FlaggablePrompt>;
 
 export default class AgentCreate extends SfCommand<AgentCreateResult> {
@@ -56,17 +85,8 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     ...makeFlags(FLAGGABLE_PROMPTS),
-    spec: Flags.file({
-      // char: 'f',
-      summary: messages.getMessage('flags.spec.summary'),
-      exists: true,
-      required: true,
-    }),
     preview: Flags.boolean({
       summary: messages.getMessage('flags.preview.summary'),
-    }),
-    'agent-api-name': Flags.string({
-      summary: messages.getMessage('flags.agent-api-name.summary'),
     }),
     // This would be used as more of an agent update than create.
     // Could possibly move to an `agent update` command.
@@ -81,17 +101,36 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     const { flags } = await this.parse(AgentCreate);
 
     // throw error if --json is used and not all required flags are provided
-    if (this.jsonEnabled() && !flags['agent-name']) {
-      throw messages.createError('error.missingRequiredFlags', ['agent-name']);
+    if (this.jsonEnabled()) {
+      if (!flags['agent-name']) {
+        throw messages.createError('error.missingRequiredFlags', ['agent-name']);
+      }
+      if (!flags.spec) {
+        throw messages.createError('error.missingRequiredFlags', ['spec']);
+      }
     }
 
+    // If we don't have an agent spec yet, prompt.
+    const specPath = flags.spec ?? (await promptForFlag(FLAGGABLE_PROMPTS['spec']));
+
     // Read the agent spec and validate
-    const inputSpec = YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as AgentSpecFileContents;
+    const inputSpec = YAML.parse(readFileSync(resolve(specPath), 'utf8')) as AgentSpecFileContents;
     validateSpec(inputSpec);
 
     // If we don't have an agent name yet, prompt.
     const agentName = flags['agent-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['agent-name']));
-    const agentApiName = flags['agent-api-name'] ?? generateAgentApiName(agentName);
+    let agentApiName = flags['agent-api-name'];
+    if (!agentApiName) {
+      agentApiName = generateAgentApiName(agentName);
+      const promptedValue = await inquirerInput({
+        message: messages.getMessage('flags.agent-api-name.prompt', [agentApiName]),
+        validate: FLAGGABLE_PROMPTS['agent-api-name'].validate,
+        theme,
+      });
+      if (promptedValue?.length) {
+        agentApiName = promptedValue;
+      }
+    }
 
     let title: string;
     const stages = [MSO_STAGES.parse];

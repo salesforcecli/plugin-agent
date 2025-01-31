@@ -8,7 +8,7 @@ import { join, resolve } from 'node:path';
 import { statSync } from 'node:fs';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { AgentCreateSpecResult } from '../../../../src/commands/agent/generate/spec.js';
+import { AgentCreateSpecResult } from '../../../../src/commands/agent/generate/agent-spec.js';
 
 describe('agent generate spec NUTs', () => {
   let session: TestSession;

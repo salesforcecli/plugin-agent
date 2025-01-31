@@ -28,6 +28,10 @@ Name (label) of the new agent.
 
 API name of the new agent; if not specified, the API name is derived from the agent name (label); the API name must not exist in the org.
 
+# flags.agent-api-name.prompt
+
+API name of the new agent (default = %s)
+
 # flags.planner-id.summary
 
 An existing GenAiPlanner ID to associate with the agent.
