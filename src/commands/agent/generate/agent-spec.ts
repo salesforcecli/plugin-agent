@@ -285,9 +285,9 @@ const buildSpecFile = (
             .reverse()
             .reduce(
               (acc, key) => ({
+                ...acc,
                 // @ts-expect-error need better typing of the array.
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                ...acc,
                 [key]: t[key],
               }),
               {}
