@@ -8,6 +8,7 @@
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
+import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from './inquirer-theme.js';
 
@@ -21,6 +22,7 @@ export type FlaggablePrompt = {
   char?: Interfaces.AlphabetLowercase | Interfaces.AlphabetUppercase;
   required?: boolean;
   default?: string | boolean;
+  promptMessage?: string;
 };
 
 type FlagsOfPrompts<T extends Record<string, FlaggablePrompt>> = Record<
@@ -39,45 +41,6 @@ export const testOutputDirFlag = Flags.custom<string>({
   description: messages.getMessage('flags.output-dir.description'),
   summary: messages.getMessage('flags.output-dir.summary'),
 });
-
-export const FLAGGABLE_SPEC_PROMPTS = {
-  type: {
-    message: messages.getMessage('flags.type.summary'),
-    validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
-    char: 't',
-    options: ['customer', 'internal'],
-    required: true,
-  },
-  role: {
-    message: messages.getMessage('flags.role.summary'),
-    validate: (d: string): boolean | string => d.length > 0 || 'Role cannot be empty',
-    required: true,
-  },
-  'company-name': {
-    message: messages.getMessage('flags.company-name.summary'),
-    validate: (d: string): boolean | string => d.length > 0 || 'Company name cannot be empty',
-    required: true,
-  },
-  'company-description': {
-    message: messages.getMessage('flags.company-description.summary'),
-    validate: (d: string): boolean | string => d.length > 0 || 'Company description cannot be empty',
-    required: true,
-  },
-  'company-website': {
-    message: messages.getMessage('flags.company-website.summary'),
-    validate: (d: string): boolean | string => {
-      // Allow empty string
-      if (d.length === 0) return true;
-
-      try {
-        new URL(d);
-        return true;
-      } catch (e) {
-        return 'Please enter a valid URL';
-      }
-    },
-  },
-} satisfies Record<string, FlaggablePrompt>;
 
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {
   const result = validate(input);
@@ -104,10 +67,10 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
 }
 
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const message = flagDef.message.replace(/\.$/, '');
+  const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
   if (flagDef.options) {
     return select<string>({
-      choices: flagDef.options.map((o) => ({ name: o, value: o })),
+      choices: flagDef.options.map((o) => ({ name: camelCaseToTitleCase(o), value: o })),
       message,
       theme,
     });

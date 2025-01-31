@@ -14,6 +14,26 @@ You can also specify a custom prompt template that the agent uses, and ground th
 
 When your agent spec is ready, you then create the agent in your org by running the "agent create" CLI command and specifying the spec with the --spec flag.
 
+# flags.type.summary
+
+Type of agent to create.
+
+# flags.role.summary
+
+Role of the agent.
+
+# flags.company-name.summary
+
+Name of your company.
+
+# flags.company-description.summary
+
+Description of your company.
+
+# flags.company-website.summary
+
+Website URL of your company.
+
 # flags.output-file.summary
 
 Path for the generated YAML agent spec file; can be an absolute or relative path.
@@ -21,6 +41,10 @@ Path for the generated YAML agent spec file; can be an absolute or relative path
 # flags.max-topics.summary
 
 Maximum number of topics to generate in the agent spec; default is 10.
+
+# flags.max-topics.prompt
+
+Max number of topics to generate (1-30)
 
 # flags.prompt-template.summary
 
@@ -33,6 +57,42 @@ Context information and personalization that's added to your prompts when using 
 # flags.spec.summary
 
 Agent spec file, in YAML format, to use as input to the command.
+
+# flags.full-interview.summary
+
+Prompt for both required and optional flags.
+
+# flags.agent-user.summary
+
+Username of a user in your org to assign to your agent; determines what your agent can access and do.
+
+# flags.agent-user.prompt
+
+Username for agent
+
+# flags.enrich-logs.summary
+
+Adds agent conversation data to event logs so you can view all agent session activity in one place.
+
+# flags.enrich-logs.prompt
+
+Enrich event logs
+
+# flags.tone.summary
+
+Conversational style of the agent, such as how it expresses your brand personality in its messages through word choice, punctuation, and sentence structure.
+
+# flags.tone.prompt
+
+Agent conversation tone
+
+# flags.primary-language.summary
+
+Language the agent uses in conversations.
+
+# flags.no-prompt.summary
+
+Don't prompt the user to confirm spec file overwrite.
 
 # examples
 
@@ -51,3 +111,11 @@ Agent spec file, in YAML format, to use as input to the command.
 # error.missingRequiredFlags
 
 Missing required flags: %s
+
+# confirmSpecOverwrite
+
+Confirm overwrite of spec file %s?
+
+# commandCanceled
+
+Command canceled by user confirmation.

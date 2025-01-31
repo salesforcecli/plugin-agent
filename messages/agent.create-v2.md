@@ -28,29 +28,17 @@ Name (label) of the new agent.
 
 API name of the new agent; if not specified, the API name is derived from the agent name (label); the API name must not exist in the org.
 
-# flags.user-id.summary
-
-ID of a user in your org that is assigned to your agent; determines what your agent can access and do.
-
-# flags.enrich-logs.summary
-
-Adds agent conversation data to event logs so you can view all agent session activity in one place.
-
-# flags.tone.summary
-
-Conversational style of the agent, such as how it expresses your brand personality in its messages through word choice, punctuation, and sentence structure.
-
-# flags.primary-language.summary
-
-Language the agent uses in conversations.
-
 # flags.planner-id.summary
 
-The GenAiPlanner ID to associate with the agent.
+An existing GenAiPlanner ID to associate with the agent.
 
 # error.missingRequiredFlags
 
 Missing required flags: %s
+
+# error.missingRequiredSpecProperties
+
+Missing required spec file properties: %s
 
 # examples
 
