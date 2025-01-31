@@ -32,7 +32,7 @@ describe('agent generate spec NUTs', () => {
     const companyName = 'Test Company Name';
     const companyDescription = 'Test Company Description';
     const companyWebsite = 'https://test-company-website.org';
-    const command = `agent generate spec ${targetOrg} --type ${type} --role "${role}" --company-name "${companyName}" --company-description "${companyDescription}" --company-website ${companyWebsite} --json`;
+    const command = `agent generate agent-spec ${targetOrg} --type ${type} --role "${role}" --company-name "${companyName}" --company-description "${companyDescription}" --company-website ${companyWebsite} --json`;
     const output = execCmd<AgentCreateSpecResult>(command, {
       ensureExitCode: 0,
       env: { ...process.env, SF_MOCK_DIR: mockDir },
