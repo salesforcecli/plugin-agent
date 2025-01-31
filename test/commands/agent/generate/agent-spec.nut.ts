@@ -38,7 +38,7 @@ describe('agent generate spec NUTs', () => {
       env: { ...process.env, SF_MOCK_DIR: mockDir },
     }).jsonOutput;
 
-    const expectedFilePath = resolve(session.project.dir, 'config', 'agentSpec.yaml');
+    const expectedFilePath = resolve(session.project.dir, 'specs', 'agentSpec.yaml');
     expect(output?.result.isSuccess).to.be.true;
     expect(output?.result.specPath).to.equal(expectedFilePath);
     expect(output?.result.agentType).to.equal(type);
