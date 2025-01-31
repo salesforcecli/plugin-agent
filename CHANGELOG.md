@@ -1,3 +1,9 @@
+# [1.12.0](https://github.com/salesforcecli/plugin-agent/compare/1.11.1...1.12.0) (2025-01-31)
+
+### Features
+
+- remove v1 agent create and generate spec commands ([bf78c52](https://github.com/salesforcecli/plugin-agent/commit/bf78c5210f78a4ba2f633af634dffead5cbb885a))
+
 ## [1.11.1](https://github.com/salesforcecli/plugin-agent/compare/1.11.0...1.11.1) (2025-01-31)
 
 ### Bug Fixes
