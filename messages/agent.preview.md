@@ -18,3 +18,7 @@ the API name of the agent? (TBD based on agents library)
 
 - <%= config.bin %> <%= command.id %> --agent HelpDeskAgent
 - <%= config.bin %> <%= command.id %> --agent ConciergeAgent --target-org production
+
+# flags.id.summary
+
+The Salesforce Id of the Agent to preview.
