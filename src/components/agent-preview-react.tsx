@@ -88,6 +88,7 @@ export function AgentPreviewReact(props: {
   const [sessionId, setSessionId] = React.useState('');
   const [query, setQuery] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(true);
+  // @ts-expect-error: Not sure why this is required
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timestamp, setTimestamp] = React.useState(new Date().getTime());
   const [tempDir, setTempDir] = React.useState('');
