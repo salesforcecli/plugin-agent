@@ -124,7 +124,7 @@ EXAMPLES
     $ sf agent create --agent-name ResortManager --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -217,7 +217,7 @@ EXAMPLES
       smoothly" --target-org my-org
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -240,7 +240,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -248,10 +248,11 @@ Interact with an active agent, as a user would, to preview responses
 
 ```
 USAGE
-  $ sf agent preview -o <value> -n <value> [--flags-dir <value>] [--api-version <value>]
+  $ sf agent preview -o <value> [--flags-dir <value>] [--api-version <value>] [-n <value> | -i <value>]
 
 FLAGS
-  -n, --name=<value>         (required) The name of the agent you want to preview
+  -i, --id=<value>           The Salesforce Id of the Agent to preview.
+  -n, --name=<value>         The name of the agent you want to preview
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
@@ -275,7 +276,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -312,7 +313,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test create`
 
@@ -348,7 +349,7 @@ FLAG DESCRIPTIONS
     More information about a flag. Don't repeat the summary.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -377,7 +378,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -433,7 +434,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -496,7 +497,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -559,6 +560,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.1-preview.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
