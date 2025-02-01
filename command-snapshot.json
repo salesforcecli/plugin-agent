@@ -57,8 +57,8 @@
     "alias": [],
     "command": "agent:preview",
     "flagAliases": [],
-    "flagChars": ["n", "o"],
-    "flags": ["api-version", "flags-dir", "name", "target-org"],
+    "flagChars": ["i", "n", "o"],
+    "flags": ["api-version", "flags-dir", "id", "name", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
