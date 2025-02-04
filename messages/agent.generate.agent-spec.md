@@ -18,6 +18,10 @@ When your agent spec is ready, you then create the agent in your org by running 
 
 Type of agent to create. Internal types are copilots used internally by your company and customer types are the agents you create for your customers.
 
+# flags.type.prompt
+
+Type of agent to create.
+
 # flags.role.summary
 
 Role of the agent.
