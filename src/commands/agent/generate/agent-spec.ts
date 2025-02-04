@@ -10,7 +10,15 @@ import { SfCommand, Flags, prompts } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import YAML from 'yaml';
 import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/agents';
-import { FlaggablePrompt, makeFlags, promptForFlag, validateAgentType, validateMaxTopics } from '../../../flags.js';
+import {
+  FlaggablePrompt,
+  makeFlags,
+  promptForFlag,
+  validateAgentType,
+  validateMaxTopics,
+  validateTone,
+  validateAgentUser,
+} from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.agent-spec');
@@ -22,11 +30,13 @@ export type AgentCreateSpecResult = {
   specPath?: string; // the location of the job spec file
 } & AgentJobSpecV2;
 
+type AgentTone = 'casual' | 'formal' | 'neutral';
+
 // Agent spec file schema
 export type AgentSpecFileContents = AgentJobSpecV2 & {
   agentUser?: string;
   enrichLogs?: boolean;
-  tone?: 'casual' | 'formal' | 'neutral';
+  tone?: AgentTone;
   primaryLanguage?: 'en_US';
 };
 
@@ -62,7 +72,6 @@ export const FLAGGABLE_PROMPTS = {
         const regExp = new RegExp('^(http|https)://', 'i');
         const companySite = regExp.test(d) ? d : `https://${d}`;
         new URL(companySite);
-        d = companySite;
         return true;
       } catch (e) {
         return 'Please enter a valid URL';
@@ -72,9 +81,17 @@ export const FLAGGABLE_PROMPTS = {
   'max-topics': {
     message: messages.getMessage('flags.max-topics.summary'),
     promptMessage: messages.getMessage('flags.max-topics.prompt'),
-    validate: (): boolean | string => true,
-    // min: 1,
-    // max: 30,
+    validate: (d: string): boolean | string => {
+      if (d.length === 0) return true;
+
+      // convert to a number
+      const maxTopics = Number(d.trim());
+      if (typeof maxTopics === 'number' && maxTopics > 0 && maxTopics < 31) {
+        return true;
+      }
+      return 'Please enter a number between 1-30';
+    },
+    default: '5',
   },
   'agent-user': {
     message: messages.getMessage('flags.agent-user.summary'),
@@ -143,14 +160,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
   public async run(): Promise<AgentCreateSpecResult> {
     const { flags } = await this.parse(AgentCreateSpec);
 
-    let outputFile: string;
-    try {
-      outputFile = await resolveOutputFile(flags['output-file'], flags['no-prompt']);
-    } catch (e) {
-      this.log(messages.getMessage('commandCanceled'));
-      // @ts-expect-error expected due to command cancelation.
-      return;
-    }
+    const outputFile = await resolveOutputFile(flags['output-file'], flags['no-prompt']);
 
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {
@@ -182,6 +192,8 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       (await promptForFlag(FLAGGABLE_PROMPTS['company-description']));
     const role = flags.role ?? inputSpec?.role ?? (await promptForFlag(FLAGGABLE_PROMPTS.role));
 
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+
     // full interview prompts
     const companyWebsite =
       flags['company-website'] ??
@@ -190,20 +202,23 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     const maxNumOfTopics =
       flags['max-topics'] ??
       validateMaxTopics(inputSpec?.maxNumOfTopics) ??
-      (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS['max-topics']) : 10);
+      (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS['max-topics']) : 5) ??
+      5;
     const agentUser =
       flags['agent-user'] ??
       inputSpec?.agentUser ??
       (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS['agent-user']) : undefined);
+    await validateAgentUser(connection, agentUser);
     let enrichLogs =
       flags['enrich-logs'] ??
       inputSpec?.enrichLogs ??
       (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS['enrich-logs']) : undefined);
     enrichLogs = Boolean(enrichLogs === 'true' || enrichLogs === true);
-    const tone =
+    let tone =
       flags.tone ??
       inputSpec?.tone ??
-      (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS.tone) : undefined);
+      (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS.tone) : 'casual');
+    tone = validateTone(tone as AgentTone);
     // const primaryLanguage =
     //   flags['primary-language'] ??
     //   inputSpec?.primaryLanguage ??
@@ -212,7 +227,6 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     this.log();
     this.spinner.start('Creating agent spec');
 
-    const connection = flags['target-org'].getConnection(flags['api-version']);
     const agent = new Agent(connection, this.project!);
     const specConfig: AgentJobSpecCreateConfigV2 = {
       agentType: type as 'customer' | 'internal',
@@ -234,8 +248,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     if (maxNumOfTopics) {
       specConfig.maxNumOfTopics = Number(maxNumOfTopics);
     }
-    // Should we log the specConfig being used?  It's returned in the JSON and the generated spec.
-    // this.log(`${ansis.green(figures.tick)} ${ansis.bold(message)} ${ansis.cyan(valueFromFlag)}`);
+
     const specResponse = await agent.createSpecV2(specConfig);
     // @ts-expect-error Need better typing
     const specFileContents = buildSpecFile(specResponse, { agentUser, enrichLogs, tone });
@@ -319,7 +332,12 @@ const resolveOutputFile = async (outputFile: string, noPrompt = false): Promise<
     if (existsSync(resolvedOutputFile)) {
       const message = messages.getMessage('confirmSpecOverwrite', [resolvedOutputFile]);
       if (!(await prompts.confirm({ message }))) {
-        throw Error('NoOverwrite');
+        return resolveOutputFile(
+          await promptForFlag({
+            message: messages.getMessage('flags.output-file.summary'),
+            validate: (d: string): boolean | string => d.length > 0 || 'Output file cannot be empty',
+          })
+        );
       }
     }
   }

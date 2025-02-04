@@ -7,7 +7,7 @@
 
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from './inquirer-theme.js';
@@ -29,6 +29,8 @@ type FlagsOfPrompts<T extends Record<string, FlaggablePrompt>> = Record<
   keyof T,
   Interfaces.OptionFlag<string | undefined, Interfaces.CustomOptions>
 >;
+
+type AgentTone = 'casual' | 'formal' | 'neutral';
 
 export const resultFormatFlag = Flags.option({
   options: ['json', 'human', 'junit', 'tap'] as const,
@@ -99,10 +101,38 @@ export const validateMaxTopics = (maxTopics?: number): number | undefined => {
   // Deliberately using: != null
   if (maxTopics != null) {
     if (!isNaN(maxTopics) && isFinite(maxTopics)) {
-      if (maxTopics > 0) {
+      if (maxTopics > 0 && maxTopics < 31) {
         return maxTopics;
       }
     }
     throw messages.createError('error.invalidMaxTopics', [maxTopics]);
   }
+};
+
+export const validateTone = (tone: AgentTone): AgentTone => {
+  if (!['formal', 'casual', 'neutral'].includes(tone)) {
+    throw messages.createError('error.invalidTone', [tone]);
+  }
+  return tone;
+};
+
+export const validateAgentUser = async (connection: Connection, agentUser?: string): Promise<void> => {
+  if (agentUser?.length) {
+    try {
+      const q = `SELECT Id FROM User WHERE Username = '${agentUser}'`;
+      await connection.singleRecordQuery<{ Id: string }>(q);
+    } catch (error) {
+      const err = SfError.wrap(error);
+      throw SfError.create({
+        name: 'InvalidAgentUser',
+        message: messages.getMessage('error.invalidAgentUser', [agentUser]),
+        cause: err,
+      });
+    }
+  }
+};
+
+export const getAgentUserId = async (connection: Connection, agentUser: string): Promise<string> => {
+  const q = `SELECT Id FROM User WHERE Username = '${agentUser}'`;
+  return (await connection.singleRecordQuery<{ Id: string }>(q)).Id;
 };
