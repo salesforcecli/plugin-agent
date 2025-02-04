@@ -1,3 +1,9 @@
+## [1.13.2](https://github.com/salesforcecli/plugin-agent/compare/1.13.1...1.13.2) (2025-02-04)
+
+### Bug Fixes
+
+- update prompt text for agent type ([892dc20](https://github.com/salesforcecli/plugin-agent/commit/892dc20c55af18196d7d9b5b1504d7f592fa7260))
+
 ## [1.13.1](https://github.com/salesforcecli/plugin-agent/compare/1.13.0...1.13.1) (2025-02-04)
 
 ### Bug Fixes
