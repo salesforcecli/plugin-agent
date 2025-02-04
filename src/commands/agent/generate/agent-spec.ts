@@ -43,6 +43,7 @@ export type AgentSpecFileContents = AgentJobSpecV2 & {
 export const FLAGGABLE_PROMPTS = {
   type: {
     message: messages.getMessage('flags.type.summary'),
+    promptMessage: messages.getMessage('flags.type.prompt'),
     validate: (d: string): boolean | string => d.length > 0 || 'Type cannot be empty',
     options: ['customer', 'internal'],
     required: true,
