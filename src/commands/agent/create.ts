@@ -20,7 +20,14 @@ import {
   AgentCreateResponseV2,
   generateAgentApiName,
 } from '@salesforce/agents';
-import { FlaggablePrompt, makeFlags, promptForFlag, validateAgentType } from '../../flags.js';
+import {
+  FlaggablePrompt,
+  makeFlags,
+  promptForFlag,
+  getAgentUserId,
+  validateAgentType,
+  validateTone,
+} from '../../flags.js';
 import { theme } from '../../inquirer-theme.js';
 import { AgentSpecFileContents } from './generate/agent-spec.js';
 
@@ -123,8 +130,9 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     if (!agentApiName) {
       agentApiName = generateAgentApiName(agentName);
       const promptedValue = await inquirerInput({
-        message: messages.getMessage('flags.agent-api-name.prompt', [agentApiName]),
+        message: messages.getMessage('flags.agent-api-name.prompt'),
         validate: FLAGGABLE_PROMPTS['agent-api-name'].validate,
+        default: agentApiName,
         theme,
       });
       if (promptedValue?.length) {
@@ -178,14 +186,13 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
         agentConfig.agentSettings.plannerId = flags['planner-id'];
       }
       if (inputSpec?.agentUser) {
-        // TODO: query for the user ID from the username
-        agentConfig.agentSettings.userId = inputSpec.agentUser;
+        agentConfig.agentSettings.userId = await getAgentUserId(connection, inputSpec.agentUser);
       }
       if (inputSpec?.enrichLogs) {
         agentConfig.agentSettings.enrichLogs = inputSpec.enrichLogs;
       }
       if (inputSpec?.tone) {
-        agentConfig.agentSettings.tone = inputSpec.tone;
+        agentConfig.agentSettings.tone = validateTone(inputSpec.tone);
       }
     }
     const response = await agent.createV2(agentConfig);

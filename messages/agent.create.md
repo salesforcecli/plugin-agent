@@ -30,7 +30,7 @@ API name of the new agent; if not specified, the API name is derived from the ag
 
 # flags.agent-api-name.prompt
 
-API name of the new agent (default = %s)
+API name of the new agent.
 
 # flags.planner-id.summary
 
