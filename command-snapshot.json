@@ -47,6 +47,14 @@
   },
   {
     "alias": [],
+    "command": "agent:generate:template",
+    "flagAliases": [],
+    "flagChars": ["d", "o"],
+    "flags": ["agent-api-name", "api-version", "flags-dir", "json", "output-dir", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:test-spec",
     "flagAliases": [],
     "flagChars": [],
