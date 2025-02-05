@@ -33,12 +33,12 @@ describe('agent test run NUTs', () => {
       env: { ...process.env, SF_MOCK_DIR: mockDir },
     }).jsonOutput;
     expect(output?.result.status).to.equal('NEW');
-    expect(output?.result.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
+    expect(output?.result.runId).to.equal('4KBSM000000003F4AQ');
 
     // check cache for test run entry
     const cache = await AgentTestCache.create();
     const testRun = cache.resolveFromCache();
-    expect(testRun.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
+    expect(testRun.runId).to.equal('4KBSM000000003F4AQ');
     expect(testRun.name).to.equal(name);
   });
 
@@ -51,10 +51,10 @@ describe('agent test run NUTs', () => {
     }).jsonOutput;
 
     expect(output?.result.status).to.equal('COMPLETED');
-    expect(output?.result.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
+    expect(output?.result.runId).to.equal('4KBSM000000003F4AQ');
 
     // check that cache does not have an entry
     const cache = await AgentTestCache.create();
-    expect(() => cache.resolveFromCache()).to.throw('Could not find an aiEvaluationId to resume');
+    expect(() => cache.resolveFromCache()).to.throw('Could not find a runId to resume');
   });
 });

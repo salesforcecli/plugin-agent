@@ -5,17 +5,14 @@
     "AgentTestRunResult": {
       "type": "object",
       "properties": {
-        "aiEvaluationId": {
+        "runId": {
           "type": "string"
         },
         "status": {
           "type": "string"
         }
       },
-      "required": [
-        "aiEvaluationId",
-        "status"
-      ],
+      "required": ["runId", "status"],
       "additionalProperties": false
     }
   }

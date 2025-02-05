@@ -100,8 +100,6 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       this.mso?.skipTo(AgentTestCreateLifecycleStages.Done);
       this.mso?.stop();
       this.log(`Preview of AiEvaluationDefinition created at ${path}`);
-      this.log();
-      this.log(contents);
     } else {
       this.log(
         `AiEvaluationDefinition created at ${path} and deployed to ${
