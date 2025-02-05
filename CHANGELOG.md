@@ -1,3 +1,9 @@
+# [1.14.0](https://github.com/salesforcecli/plugin-agent/compare/1.13.2...1.14.0) (2025-02-05)
+
+### Features
+
+- add agent generate template command ([d5f7aca](https://github.com/salesforcecli/plugin-agent/commit/d5f7aca74814f96d2043ab475cf770a27619fee7))
+
 ## [1.13.2](https://github.com/salesforcecli/plugin-agent/compare/1.13.1...1.13.2) (2025-02-04)
 
 ### Bug Fixes

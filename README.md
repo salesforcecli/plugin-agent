@@ -63,6 +63,7 @@ sf plugins
 
 - [`sf agent create`](#sf-agent-create)
 - [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
+- [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent test cancel`](#sf-agent-test-cancel)
@@ -131,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -235,7 +236,40 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/generate/agent-spec.ts)_
+
+## `sf agent generate template`
+
+Generate an agent template for packaging.
+
+```
+USAGE
+  $ sf agent generate template -o <value> --agent-api-name <value> [--json] [--flags-dir <value>] [--api-version <value>] [-d
+    <value>]
+
+FLAGS
+  -d, --output-dir=<value>      Directory to write the agent template.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
+      --agent-api-name=<value>  (required) API name of an existing Bot.
+      --api-version=<value>     Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Generate an agent template for packaging.
+
+  Generate agent template metadata to for packaging your agent.
+
+EXAMPLES
+  Generate an agent template from a Bot API name in your default package dir:
+
+    $ sf agent generate template --agent-api-name My_Packaged_Agent
+```
+
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -258,7 +292,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -293,7 +327,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -330,7 +364,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test create`
 
@@ -366,7 +400,7 @@ FLAG DESCRIPTIONS
     More information about a flag. Don't repeat the summary.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -395,7 +429,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -451,7 +485,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -514,7 +548,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -577,6 +611,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.13.2/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
