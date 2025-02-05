@@ -46,7 +46,7 @@ Your agent spec file is missing these required properties: %s.
 
 # examples
 
-- Create an agent by being prompted for the required information, such as the agent spec file, agent name and API name, and then create it in your default org:
+- Create an agent by being prompted for the required information, such as the agent spec file and agent name, and then create it in your default org:
 
   <%= config.bin %> <%= command.id %>
 
