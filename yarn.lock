@@ -1501,10 +1501,10 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@salesforce/agents@0.9.5-dev.0":
-  version "0.9.5-dev.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.9.5-dev.0.tgz#1344af97d7756d4b8c20a79a19c45ae3d11a8e8b"
-  integrity sha512-dKgk9Dmgmc+w+qMz8zHgsEzykIAwO5hUDncaRfo43ENIRnbXWaw2hgoo1Ae82uadHunF9scWjo2PpCQmivcT/w==
+"@salesforce/agents@0.9.5-dev.1":
+  version "0.9.5-dev.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.9.5-dev.1.tgz#95e68ef8b9e5f7e9b59a05978f44221be03a513e"
+  integrity sha512-3NUC3D2rK1EDtlSGDAfqK2vmhjcdvGq4uu223fszKO5eZHyqlqw8FBALANykmpqITV0ZD5KMTBNsYj7FfZ6jSw==
   dependencies:
     "@salesforce/core" "^8.8.2"
     "@salesforce/kit" "^3.2.3"
