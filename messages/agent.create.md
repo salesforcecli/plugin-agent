@@ -8,7 +8,7 @@ To run this comand, you must have an agent spec file, which is a YAML file that 
 
 When this command completes, your org contains the new agent, which you can then edit and customize in the Agent Builder UI. The new agent's topics are the same as the ones listed in the agent spec file. The agent might also have some AI-generated actions, or you can add them. This command also retrieves all the metadata files associated with the new agent to your local Salesforce DX project.
 
-Use the --preview flag to review what the agent looks like without actually saving it in your org. When previewing, the command creates a JSON file in the current directory with all the agent details.
+Use the --preview flag to review what the agent looks like without actually saving it in your org. When previewing, the command creates a JSON file in the current directory with all the agent details. The name of the JSON file is the agent's API name and a timestamp.
 
 To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name <agent-api-name>".
 
@@ -30,7 +30,7 @@ API name of the new agent; if not specified, the API name is derived from the ag
 
 # flags.agent-api-name.prompt
 
-API name of the new agent.
+API name of the new agent
 
 # flags.planner-id.summary
 
@@ -38,7 +38,7 @@ An existing GenAiPlanner ID to associate with the agent.
 
 # error.missingRequiredFlags
 
-Missing required flags: %s
+Missing required flags: %s.
 
 # error.missingRequiredSpecProperties
 
@@ -46,7 +46,7 @@ Your agent spec file is missing these required properties: %s.
 
 # examples
 
-- Create an agent by being prompted for the required information, such as the agent spec file, agent name, and agent API name and then create it in your default org:
+- Create an agent by being prompted for the required information, such as the agent spec file and agent name, and then create it in your default org:
 
   <%= config.bin %> <%= command.id %>
 

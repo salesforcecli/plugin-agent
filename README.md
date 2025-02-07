@@ -111,13 +111,14 @@ DESCRIPTION
   new agent to your local Salesforce DX project.
 
   Use the --preview flag to review what the agent looks like without actually saving it in your org. When previewing,
-  the command creates a JSON file in the current directory with all the agent details.
+  the command creates a JSON file in the current directory with all the agent details. The name of the JSON file is the
+  agent's API name and a timestamp.
 
   To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name <agent-api-name>".
 
 EXAMPLES
-  Create an agent by being prompted for the required information, such as the agent spec file, agent name, and agent
-  API name and then create it in your default org:
+  Create an agent by being prompted for the required information, such as the agent spec file and agent name, and then
+  create it in your default org:
 
     $ sf agent create
 
@@ -132,7 +133,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -161,7 +162,7 @@ FLAGS
       --full-interview               Prompt for both required and optional flags.
       --grounding-context=<value>    Context information and personalization that's added to your prompts when using a
                                      custom prompt template.
-      --max-topics=<value>           Maximum number of topics to generate in the agent spec; default is 10.
+      --max-topics=<value>           Maximum number of topics to generate in the agent spec; default is 5.
       --output-file=<value>          [default: specs/agentSpec.yaml] Path for the generated YAML agent spec file; can be
                                      an absolute or relative path.
       --prompt-template=<value>      API name of a customized prompt template to use instead of the default prompt
@@ -236,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -269,7 +270,7 @@ EXAMPLES
     $ sf agent generate template --agent-api-name My_Packaged_Agent
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -292,7 +293,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -327,7 +328,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test cancel`
 
@@ -364,7 +365,7 @@ EXAMPLES
     $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/cancel.ts)_
 
 ## `sf agent test create`
 
@@ -400,7 +401,7 @@ FLAG DESCRIPTIONS
     More information about a flag. Don't repeat the summary.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -429,7 +430,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -485,7 +486,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -548,7 +549,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -611,6 +612,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1-dev.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

@@ -44,7 +44,7 @@ Path for the generated YAML agent spec file; can be an absolute or relative path
 
 # flags.max-topics.summary
 
-Maximum number of topics to generate in the agent spec; default is 10.
+Maximum number of topics to generate in the agent spec; default is 5.
 
 # flags.max-topics.prompt
 
