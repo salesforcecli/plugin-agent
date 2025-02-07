@@ -6,7 +6,7 @@
  */
 import { join } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, convertTestResultsToFormat } from '@salesforce/agents';
+import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import ansis from 'ansis';
 
@@ -50,19 +50,6 @@ function makeSimpleTable(data: Record<string, string>, title: string): string {
     .join('\n');
 
   return `${title}\n${table}`;
-}
-
-function humanFriendlyName(name: string): string {
-  switch (name) {
-    case 'topic_sequence_match':
-      return 'Topic';
-    case 'action_sequence_match':
-      return 'Action';
-    case 'bot_response_rating':
-      return 'Outcome';
-    default:
-      return name;
-  }
 }
 
 export function truncate(value: number, decimals = 2): string {
