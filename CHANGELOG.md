@@ -1,3 +1,9 @@
+## [1.14.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.2...1.14.3) (2025-02-07)
+
+### Bug Fixes
+
+- add human readable formatter ([63cbd9d](https://github.com/salesforcecli/plugin-agent/commit/63cbd9d261a36d2377825f5e078ac4a9acf947ac))
+
 ## [1.14.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.1-dev.1...1.14.2) (2025-02-07)
 
 ## [1.14.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.0...1.14.1) (2025-02-05)
