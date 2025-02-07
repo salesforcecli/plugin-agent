@@ -1,3 +1,19 @@
+## [1.14.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.1-dev.1...1.14.2) (2025-02-07)
+
+## [1.14.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.0...1.14.1) (2025-02-05)
+
+### Bug Fixes
+
+- small tweaks ([00f3088](https://github.com/salesforcecli/plugin-agent/commit/00f3088935b8fdd2da332916d0180581aad03ed3))
+
+## [1.14.1-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.1-dev.0...1.14.1-dev.1) (2025-02-06)
+
+## [1.14.1-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.1...1.14.1-dev.0) (2025-02-05)
+
+### Bug Fixes
+
+- make adjustments for incoming api changes ([7781e25](https://github.com/salesforcecli/plugin-agent/commit/7781e25971b26498d48ef9d7004cf82a6c0b3918))
+
 ## [1.14.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.0...1.14.1) (2025-02-05)
 
 ### Bug Fixes
