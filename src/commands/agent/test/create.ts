@@ -86,7 +86,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       ? async (): Promise<boolean> => Promise.resolve(true)
       : async (spec: { name: string }): Promise<boolean> =>
           this.confirm({
-            message: `An AiEvaluationDefinition with the name ${spec.name} already exists in the org. Do you want to overwrite it?`,
+            message: messages.getMessage('prompt.confirm', [spec.name]),
             defaultAnswer: false,
           });
 
@@ -99,14 +99,10 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     if (flags.preview) {
       this.mso?.skipTo(AgentTestCreateLifecycleStages.Done);
       this.mso?.stop();
-      this.log(`Preview of AiEvaluationDefinition created at ${path}`);
-      this.log();
-      this.log(contents);
+      this.log(messages.getMessage('info.preview-success', [path]));
     } else {
       this.log(
-        `AiEvaluationDefinition created at ${path} and deployed to ${
-          flags['target-org'].getUsername() ?? flags['target-org'].getOrgId()
-        }`
+        messages.getMessage('info.success', [path, flags['target-org'].getUsername() ?? flags['target-org'].getOrgId()])
       );
     }
 

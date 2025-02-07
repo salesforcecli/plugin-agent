@@ -25,3 +25,15 @@ Don't prompt for confirmation when overwriting an existing test.
 # examples
 
 - <%= config.bin %> <%= command.id %>
+
+# prompt.confirm
+
+An AiEvaluationDefinition with the name %s already exists in the org. Do you want to overwrite it?
+
+# info.success
+
+AiEvaluationDefinition created at %s and deployed to %s
+
+# info.preview-success
+
+Preview of AiEvaluationDefinition created at %s

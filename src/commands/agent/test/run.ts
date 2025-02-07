@@ -6,9 +6,10 @@
  */
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
+import { CLIError } from '@oclif/core/errors';
 import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
@@ -19,7 +20,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.r
 
 // TODO: this should include details and status
 export type AgentTestRunResult = {
-  aiEvaluationId: string;
+  runId: string;
   status: string;
 };
 
@@ -49,28 +50,30 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     'output-dir': testOutputDirFlag(),
   };
 
+  private mso: TestStages | undefined;
+
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
 
-    const mso = new TestStages({ title: `Agent Test Run: ${flags.name}`, jsonEnabled: this.jsonEnabled() });
-    mso.start();
+    this.mso = new TestStages({ title: `Agent Test Run: ${flags.name}`, jsonEnabled: this.jsonEnabled() });
+    this.mso.start();
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
     const response = await agentTester.start(flags.name);
 
-    mso.update({ id: response.aiEvaluationId });
+    this.mso.update({ id: response.runId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.aiEvaluationId, flags.name);
+    await agentTestCache.createCacheEntry(response.runId, flags.name);
 
     if (flags.wait?.minutes) {
-      const { completed, response: detailsResponse } = await mso.poll(agentTester, response.aiEvaluationId, flags.wait);
-      if (completed) await agentTestCache.removeCacheEntry(response.aiEvaluationId);
+      const { completed, response: detailsResponse } = await this.mso.poll(agentTester, response.runId, flags.wait);
+      if (completed) await agentTestCache.removeCacheEntry(response.runId);
 
-      mso.stop();
+      this.mso.stop();
 
       await handleTestResults({
-        id: response.aiEvaluationId,
+        id: response.runId,
         format: flags['result-format'],
         results: detailsResponse,
         jsonEnabled: this.jsonEnabled(),
@@ -79,18 +82,20 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
       return {
         status: 'COMPLETED',
-        aiEvaluationId: response.aiEvaluationId,
+        runId: response.runId,
       };
     } else {
-      mso.stop();
+      this.mso.stop();
       this.log(
-        `Run ${colorize(
-          'dim',
-          `sf agent test resume --job-id ${response.aiEvaluationId}`
-        )} to resuming watching this test.`
+        `Run ${colorize('dim', `sf agent test resume --job-id ${response.runId}`)} to resuming watching this test.`
       );
     }
 
     return response;
+  }
+
+  protected catch(error: Error | SfError | CLIError): Promise<never> {
+    this.mso?.error();
+    return super.catch(error);
   }
 }

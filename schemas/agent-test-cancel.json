@@ -5,7 +5,7 @@
     "AgentTestCancelResult": {
       "type": "object",
       "properties": {
-        "aiEvaluationId": {
+        "runId": {
           "type": "string"
         },
         "success": {
@@ -18,10 +18,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "aiEvaluationId",
-        "success"
-      ],
+      "required": ["runId", "success"],
       "additionalProperties": false
     }
   }

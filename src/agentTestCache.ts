@@ -9,7 +9,7 @@ import { Global, SfError, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 
 type CacheContents = {
-  aiEvaluationId: string;
+  runId: string;
   name: string;
 };
 
@@ -28,41 +28,38 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     };
   }
 
-  public async createCacheEntry(aiEvaluationId: string, name: string): Promise<void> {
-    if (!aiEvaluationId) throw new SfError('aiEvaluationId is required to create a cache entry');
+  public async createCacheEntry(runId: string, name: string): Promise<void> {
+    if (!runId) throw new SfError('runId is required to create a cache entry');
 
-    this.set(aiEvaluationId, { aiEvaluationId, name });
+    this.set(runId, { runId, name });
     await this.write();
   }
 
-  public async removeCacheEntry(aiEvaluationId: string): Promise<void> {
-    if (!aiEvaluationId) throw new SfError('aiEvaluationId is required to remove a cache entry');
+  public async removeCacheEntry(runId: string): Promise<void> {
+    if (!runId) throw new SfError('runId is required to remove a cache entry');
 
-    this.unset(aiEvaluationId);
+    this.unset(runId);
     await this.write();
   }
 
   public resolveFromCache(): CacheContents {
     const key = this.getLatestKey();
-    if (!key) throw new SfError('Could not find an aiEvaluationId to resume');
+    if (!key) throw new SfError('Could not find a runId to resume');
 
     return this.get(key);
   }
 
-  public useIdOrMostRecent(
-    aiEvaluationId: string | undefined,
-    useMostRecent: boolean
-  ): { aiEvaluationId: string; name?: string } {
-    if (aiEvaluationId && useMostRecent) {
-      throw new SfError('Cannot specify both an aiEvaluationId and use most recent flag');
+  public useIdOrMostRecent(runId: string | undefined, useMostRecent: boolean): { runId: string; name?: string } {
+    if (runId && useMostRecent) {
+      throw new SfError('Cannot specify both a runId and use most recent flag');
     }
 
-    if (!aiEvaluationId && !useMostRecent) {
-      throw new SfError('Must specify either an aiEvaluationId or use most recent flag');
+    if (!runId && !useMostRecent) {
+      throw new SfError('Must specify either a runId or use most recent flag');
     }
 
-    if (aiEvaluationId) {
-      return { aiEvaluationId };
+    if (runId) {
+      return { runId };
     }
 
     return this.resolveFromCache();

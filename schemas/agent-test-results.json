@@ -23,24 +23,14 @@
         "subjectName": {
           "type": "string"
         },
-        "testSet": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "testCases": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/TestCaseResult"
-              }
-            }
-          },
-          "required": ["name", "testCases"],
-          "additionalProperties": false
+        "testCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestCaseResult"
+          }
         }
       },
-      "required": ["status", "startTime", "subjectName", "testSet"],
+      "required": ["status", "startTime", "subjectName", "testCases"],
       "additionalProperties": false
     },
     "TestStatus": {
@@ -145,9 +135,12 @@
             ],
             "additionalProperties": false
           }
+        },
+        "testNumber": {
+          "type": "number"
         }
       },
-      "required": ["status", "startTime", "inputs", "generatedData", "testResults"],
+      "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
       "additionalProperties": false
     }
   }
