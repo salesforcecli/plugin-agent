@@ -1,3 +1,9 @@
+## [1.14.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.3...1.14.4) (2025-02-10)
+
+### Bug Fixes
+
+- hide cancel command ([36a8201](https://github.com/salesforcecli/plugin-agent/commit/36a820155bcf22c88a798bbaf6180aaacc98aaf1))
+
 ## [1.14.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.2...1.14.3) (2025-02-07)
 
 ### Bug Fixes

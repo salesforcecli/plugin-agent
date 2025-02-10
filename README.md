@@ -66,7 +66,6 @@ sf plugins
 - [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
 - [`sf agent preview`](#sf-agent-preview)
-- [`sf agent test cancel`](#sf-agent-test-cancel)
 - [`sf agent test create`](#sf-agent-test-create)
 - [`sf agent test list`](#sf-agent-test-list)
 - [`sf agent test results`](#sf-agent-test-results)
@@ -133,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +236,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -270,7 +269,7 @@ EXAMPLES
     $ sf agent generate template --agent-api-name My_Packaged_Agent
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -293,7 +292,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -328,44 +327,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/preview.ts)_
-
-## `sf agent test cancel`
-
-Cancel an agent test that's currently running in your org.
-
-```
-USAGE
-  $ sf agent test cancel -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>] [-r]
-
-FLAGS
-  -i, --job-id=<value>       Job ID of the running agent test that you want to cancel.
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-  -r, --use-most-recent      Use the job ID of the most recently-run agent test.
-      --api-version=<value>  Override the api version used for api requests made by this command
-
-GLOBAL FLAGS
-  --flags-dir=<value>  Import flag values from a directory.
-  --json               Format output as json.
-
-DESCRIPTION
-  Cancel an agent test that's currently running in your org.
-
-  This command requires a job ID, which the original "agent test run" command displays when it completes. You can also
-  use the --use-most-recent flag to see results for the most recently run agent test.
-
-EXAMPLES
-  Cancel an agent test currently running in your default org using a job ID:
-
-    $ sf agent test cancel --job-id 4KBfake0000003F4AQ
-
-  Cancel the most recently run agent test in the org with alias "my-org":
-
-    $ sf agent test cancel --job-id 4KBfake0000003F4AQ --target-org my-org
-```
-
-_See code: [src/commands/agent/test/cancel.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/cancel.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -401,7 +363,7 @@ FLAG DESCRIPTIONS
     More information about a flag. Don't repeat the summary.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -430,7 +392,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -486,7 +448,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -549,7 +511,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -612,6 +574,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.3/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.14.4/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
