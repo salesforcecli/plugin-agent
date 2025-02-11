@@ -5,7 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { readFile } from 'node:fs/promises';
-import { SfCommand } from '@salesforce/sf-plugins-core';
+import { join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
 import { generateTestSpec } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
@@ -60,9 +62,9 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
       .split(',')
       .map((a) => a.trim());
 
-  const askForBotRating = async (): Promise<string> =>
+  const askForOutcome = async (): Promise<string> =>
     input({
-      message: 'Expected response',
+      message: 'Expected outcome',
       validate: (d: string): boolean | string => {
         if (!d.length) {
           return 'expected value cannot be empty';
@@ -94,14 +96,14 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
       }),
       // If the user selects OTHER for the topic, then we don't have a genAiPlugin to get actions from so we ask for them for custom input
       expectedActions: await askForOtherActions(),
-      expectedOutcome: await askForBotRating(),
+      expectedOutcome: await askForOutcome(),
     };
   }
 
   const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
   const parser = new XMLParser();
   const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-  const actions = castArray(parsed.GenAiPlugin.genAiFunctions).map((f) => f.functionName);
+  const actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
 
   let expectedActions = await checkbox<string>({
     message: 'Expected action(s)',
@@ -116,13 +118,13 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
     expectedActions = [...expectedActions.filter((a) => a !== customKey), ...additional];
   }
 
-  const expectedOutcome = await askForBotRating();
+  const expectedOutcome = await askForOutcome();
 
   return {
     utterance,
+    expectedTopic,
     expectedActions,
     expectedOutcome,
-    expectedTopic,
   };
 }
 
@@ -133,7 +135,16 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly enableJsonFlag = false;
   public static readonly state = 'beta';
 
+  public static readonly flags = {
+    'output-dir': Flags.directory({
+      char: 'd',
+      summary: messages.getMessage('flags.output-dir.summary'),
+      default: 'specs',
+    }),
+  };
+
   public async run(): Promise<void> {
+    const { flags } = await this.parse(AgentGenerateTestSpec);
     const directoryPaths = (await SfProject.resolve().then((project) => project.getPackageDirectories())).map(
       (dir) => dir.fullPath
     );
@@ -230,6 +241,12 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     this.log();
 
+    const outputFile = join(flags['output-dir'], `${subjectName}-test-spec.yaml`);
+
+    if (existsSync(outputFile)) {
+      await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
+    }
+
     await generateTestSpec(
       {
         name,
@@ -238,8 +255,8 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         subjectName,
         testCases,
       },
-      `${name}-test-spec.yaml`
+      outputFile
     );
-    this.log(`Created ${name}-test-spec.yaml`);
+    this.log(`Created ${outputFile}`);
   }
 }
