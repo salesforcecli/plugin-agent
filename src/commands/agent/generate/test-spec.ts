@@ -12,7 +12,7 @@ import { Messages, SfError, SfProject } from '@salesforce/core';
 import { generateTestSpec } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
-import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
+import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -35,90 +35,66 @@ function castArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
-async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestCase> {
+/**
+ * Prompts the user for test case information through interactive prompts.
+ *
+ * @param genAiPlugins - Record mapping topic names to GenAiPlugin XML file paths (used to find the related actions)
+ * @param genAiFunctions - Array of GenAiFunction names from the GenAiPlanner
+ * @returns Promise resolving to a TestCase object containing:
+ * - utterance: The user input string
+ * - expectedTopic: The expected topic for classification
+ * - expectedActions: Array of expected action names
+ * - expectedOutcome: Expected outcome string
+ *
+ * @remarks
+ * This function guides users through creating a test case by:
+ * 1. Prompting for an utterance
+ * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlanner)
+ * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlanner or GenAiPlugin)
+ * 4. Defining an expected outcome
+ */
+async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
   const utterance = await input({
     message: 'Utterance',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
     theme,
   });
 
-  const customKey = '<OTHER>';
-
-  const topics = Object.keys(genAiPlugins);
-
-  const askForOtherActions = async (): Promise<string[]> =>
-    (
-      await input({
-        message: 'Expected action(s)',
-        validate: (d: string): boolean | string => {
-          if (!d.length) {
-            return 'expected value cannot be empty';
-          }
-          return true;
-        },
-        theme,
-      })
-    )
-      .split(',')
-      .map((a) => a.trim());
-
-  const askForOutcome = async (): Promise<string> =>
-    input({
-      message: 'Expected outcome',
-      validate: (d: string): boolean | string => {
-        if (!d.length) {
-          return 'expected value cannot be empty';
-        }
-
-        return true;
-      },
-      theme,
-    });
-
   const expectedTopic = await select<string>({
     message: 'Expected topic',
-    choices: [...topics, customKey],
+    choices: Object.keys(genAiPlugins),
     theme,
   });
 
-  if (expectedTopic === customKey) {
-    return {
-      utterance,
-      expectedTopic: await input({
-        message: 'Expected topic',
-        validate: (d: string): boolean | string => {
-          if (!d.length) {
-            return 'expected value cannot be empty';
-          }
-          return true;
-        },
-        theme,
-      }),
-      // If the user selects OTHER for the topic, then we don't have a genAiPlugin to get actions from so we ask for them for custom input
-      expectedActions: await askForOtherActions(),
-      expectedOutcome: await askForOutcome(),
-    };
+  // GenAiFunctions (aka actions) can be defined in the GenAiPlugin or GenAiPlanner
+  // the actions from the planner are passed in as an argument to this function
+  // the actions from the plugin are read from the GenAiPlugin file
+  let actions: string[] = [];
+  if (genAiPlugins[expectedTopic]) {
+    const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
+    const parser = new XMLParser();
+    const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
+    actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
   }
 
-  const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
-  const parser = new XMLParser();
-  const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-  const actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
-
-  let expectedActions = await checkbox<string>({
+  const expectedActions = await checkbox<string>({
     message: 'Expected action(s)',
-    choices: [...actions, customKey],
+    choices: [...actions, ...genAiFunctions],
     theme,
     required: true,
   });
 
-  if (expectedActions.includes(customKey)) {
-    const additional = await askForOtherActions();
+  const expectedOutcome = await input({
+    message: 'Expected outcome',
+    validate: (d: string): boolean | string => {
+      if (!d.length) {
+        return 'expected value cannot be empty';
+      }
 
-    expectedActions = [...expectedActions.filter((a) => a !== customKey), ...additional];
-  }
-
-  const expectedOutcome = await askForOutcome();
+      return true;
+    },
+    theme,
+  });
 
   return {
     utterance,
@@ -126,6 +102,94 @@ async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<
     expectedActions,
     expectedOutcome,
   };
+}
+
+/**
+ * Retrieves GenAIPlugins and GenAiFunctions from a Bot's GenAiPlanner
+ *
+ * We have to get the bot version and planner for the selected bot so that we can get
+ * the actions (GenAiFunctions) and topics (GenAiPlugins) that can be selected for the
+ * test cases.
+ *
+ * The BotVersion tells us which GenAiPlanner to use, and the GenAiPlanner
+ * tells us which GenAiPlugins and GenAiFunctions are available. More GenAiFunctions
+ * might be available in the GenAiPlugin, so we read those later when the user
+ * has selected a GenAiPlugin/topic - inside of `promptForTestCase`.
+ *
+ * @param subjectName - The name of the Bot to analyze
+ * @param cs - ComponentSet containing Bot, GenAiPlanner, and GenAiPlugin components
+ *
+ * @returns Object containing:
+ * - genAiPlugins: Record of plugin names to their file paths
+ * - genAiFunctions: Array of function names
+ */
+async function getPluginsAndFunctions(
+  subjectName: string,
+  cs: ComponentSet
+): Promise<{
+  genAiPlugins: Record<string, string>;
+  genAiFunctions: string[];
+}> {
+  const botVersions = [...cs.filter((component) => component.type.name === 'Bot' && component.fullName !== '*')].reduce<
+    Record<string, string>
+  >(
+    (acc, component) => ({
+      ...acc,
+      // this resolves to the BotVersion filepath
+      [component.fullName]: cs.getComponentFilenamesByNameAndType({
+        fullName: component.fullName,
+        type: 'Bot',
+      })[0],
+    }),
+    {}
+  );
+
+  const genAiPlanners = [
+    ...cs.filter((component) => component.type.name === 'GenAiPlanner' && component.fullName !== '*'),
+  ].reduce<Record<string, string>>(
+    (acc, component) => ({
+      ...acc,
+      [component.fullName]: cs.getComponentFilenamesByNameAndType({
+        fullName: component.fullName,
+        type: 'GenAiPlanner',
+      })[0],
+    }),
+    {}
+  );
+
+  const parser = new XMLParser();
+  const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
+  const parsedBotVersion = parser.parse(botVersionXml) as {
+    BotVersion: { conversationDefinitionPlanners: { genAiPlannerName: string } };
+  };
+
+  const plannerXml = await readFile(
+    genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+    'utf-8'
+  );
+  const parsedPlanner = parser.parse(plannerXml) as {
+    GenAiPlanner: {
+      genAiPlugins: Array<{ genAiPluginName: string }>;
+      genAiFunctions: Array<{ genAiFunctionName: string }>;
+    };
+  };
+
+  const genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
+    ({ genAiFunctionName }) => genAiFunctionName
+  );
+
+  const genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
+    (acc, { genAiPluginName }) => ({
+      ...acc,
+      [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+        fullName: genAiPluginName,
+        type: 'GenAiPlugin',
+      })[0],
+    }),
+    {}
+  );
+
+  return { genAiPlugins, genAiFunctions };
 }
 
 export default class AgentGenerateTestSpec extends SfCommand<void> {
@@ -173,33 +237,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
-    const genAiPlanners = [
-      ...cs.filter((component) => component.type.name === 'GenAiPlanner' && component.fullName !== '*'),
-    ].reduce<Record<string, string>>(
-      (acc, component) => ({
-        ...acc,
-        [component.fullName]: cs.getComponentFilenamesByNameAndType({
-          fullName: component.fullName,
-          type: 'GenAiPlanner',
-        })[0],
-      }),
-      {}
-    );
-
-    const plannerXml = await readFile(genAiPlanners[subjectName], 'utf-8');
-    const parser = new XMLParser();
-    const parsed = parser.parse(plannerXml) as { GenAiPlanner: { genAiPlugins: Array<{ genAiPluginName: string }> } };
-
-    const genAiPlugins = parsed.GenAiPlanner.genAiPlugins.reduce(
-      (acc, { genAiPluginName }) => ({
-        ...acc,
-        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
-          fullName: genAiPluginName,
-          type: 'GenAiPlugin',
-        })[0],
-      }),
-      {}
-    );
+    const { genAiPlugins, genAiFunctions } = await getPluginsAndFunctions(subjectName, cs);
 
     const name = await input({
       message: 'Enter a name for the test definition',
@@ -231,7 +269,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       this.log();
       this.styledHeader(`Adding test case #${testCases.length + 1}`);
       // eslint-disable-next-line no-await-in-loop
-      testCases.push(await promptForTestCase(genAiPlugins));
+      testCases.push(await promptForTestCase(genAiPlugins, genAiFunctions));
     } while ( // eslint-disable-next-line no-await-in-loop
       await confirm({
         message: 'Would you like to add another test case',
