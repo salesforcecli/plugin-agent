@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
+ * Copyright (c) 2025, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { Messages, SfError, SfProject } from '@salesforce/core';
 import { generateTestSpec } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
+import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { theme } from '../../../inquirer-theme.js';
-import { readDir } from '../../../read-dir.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
@@ -135,10 +134,20 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly state = 'beta';
 
   public async run(): Promise<void> {
-    const botsDir = join('force-app', 'main', 'default', 'bots');
-    const bots = await readDir(botsDir);
+    const directoryPaths = (await SfProject.resolve().then((project) => project.getPackageDirectories())).map(
+      (dir) => dir.fullPath
+    );
+
+    const cs = await ComponentSetBuilder.build({
+      metadata: {
+        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
+        directoryPaths,
+      },
+    });
+    const botsComponents = cs.filter((component) => component.type.name === 'Bot');
+    const bots = [...botsComponents.map((c) => c.fullName).filter((n) => n !== '*')];
     if (bots.length === 0) {
-      throw new SfError(`No agents found in ${botsDir}`, 'NoAgentsFoundError');
+      throw new SfError(`No agents found in ${directoryPaths.join(', ')}`, 'NoAgentsFoundError');
     }
 
     const subjectType = await select<string>({
@@ -152,6 +161,34 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       choices: bots,
       theme,
     });
+
+    const genAiPlanners = [
+      ...cs.filter((component) => component.type.name === 'GenAiPlanner' && component.fullName !== '*'),
+    ].reduce<Record<string, string>>(
+      (acc, component) => ({
+        ...acc,
+        [component.fullName]: cs.getComponentFilenamesByNameAndType({
+          fullName: component.fullName,
+          type: 'GenAiPlanner',
+        })[0],
+      }),
+      {}
+    );
+
+    const plannerXml = await readFile(genAiPlanners[subjectName], 'utf-8');
+    const parser = new XMLParser();
+    const parsed = parser.parse(plannerXml) as { GenAiPlanner: { genAiPlugins: Array<{ genAiPluginName: string }> } };
+
+    const genAiPlugins = parsed.GenAiPlanner.genAiPlugins.reduce(
+      (acc, { genAiPluginName }) => ({
+        ...acc,
+        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+          fullName: genAiPluginName,
+          type: 'GenAiPlugin',
+        })[0],
+      }),
+      {}
+    );
 
     const name = await input({
       message: 'Enter a name for the test definition',
@@ -177,14 +214,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       message: 'Enter a description for test definition (optional)',
       theme,
     });
-
-    const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
-    const genAiPlugins = Object.fromEntries(
-      (await readDir(genAiPluginDir)).map((genAiPlugin) => [
-        genAiPlugin.replace('.genAiPlugin-meta.xml', ''),
-        join(genAiPluginDir, genAiPlugin),
-      ])
-    );
 
     const testCases = [];
     do {
