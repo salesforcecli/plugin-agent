@@ -199,6 +199,11 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       summary: messages.getMessage('flags.output-dir.summary'),
       default: 'specs',
     }),
+    'output-file': Flags.string({
+      char: 'f',
+      summary: messages.getMessage('flags.output-file.summary'),
+      default: 'agentTestSpec.yaml',
+    }),
   };
 
   public async run(): Promise<void> {
@@ -266,7 +271,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     this.log();
 
-    const outputFile = join(flags['output-dir'], `${subjectName}-test-spec.yaml`);
+    const outputFile = join(flags['output-dir'], `${subjectName}-${flags['output-file']}`);
 
     if (existsSync(outputFile)) {
       await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });

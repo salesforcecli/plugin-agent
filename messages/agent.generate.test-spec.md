@@ -10,6 +10,10 @@ This command will prompt you for the necessary information to create a new spec 
 
 The directory to save the generated spec file.
 
+# flags.output-file.summary
+
+The name of the generated spec file.
+
 # examples
 
 - <%= config.bin %> <%= command.id %>
