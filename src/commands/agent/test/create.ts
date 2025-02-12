@@ -33,18 +33,16 @@ const FLAGGABLE_PROMPTS = {
     validate: (d: string): boolean | string => {
       // ensure that it's not empty
       if (!d.length) {
-        return 'Name cannot be empty';
+        return 'API name cannot be empty';
       }
 
-      // validate that it contains no spaces or special chars (expect for underscores)
-      if (d.match(/[^a-zA-Z0-9_]/)) {
-        return 'Name must contain only letters, numbers, and underscores';
+      if (d.length > 80) {
+        return 'API name cannot be over 80 characters.';
       }
-
-      // check against FORTY_CHAR_API_NAME_REGEX once it's fixed
-      // if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-      //   return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
-      // }
+      const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+      if (!regex.test(d)) {
+        return 'Invalid API name.';
+      }
       return true;
     },
     required: true,
