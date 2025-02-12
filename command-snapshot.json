@@ -57,8 +57,8 @@
     "alias": [],
     "command": "agent:generate:test-spec",
     "flagAliases": [],
-    "flagChars": ["d"],
-    "flags": ["flags-dir", "output-dir"],
+    "flagChars": ["d", "f"],
+    "flags": ["flags-dir", "output-dir", "output-file"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
