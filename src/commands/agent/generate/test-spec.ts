@@ -18,12 +18,6 @@ import { theme } from '../../../inquirer-theme.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
 
-// TODO: add these back once we refine the regex
-// export const FORTY_CHAR_API_NAME_REGEX =
-//   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
-// export const EIGHTY_CHAR_API_NAME_REGEX =
-//   /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
-
 type TestCase = {
   utterance: string;
   expectedActions: string[];
@@ -248,13 +242,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         }
 
         return true;
-
-        // TODO: add back validation once we refine the regex
-        // check against FORTY_CHAR_API_NAME_REGEX
-        // if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-        //   return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
-        // }
-        // return true;
       },
       theme,
     });

@@ -1,18 +1,16 @@
 # summary
 
-Summary of a command.
+Convert a test spec file into an AiEvaluationDefinition and deploy it to your org.
 
 # description
 
-More information about a command. Don't repeat the summary.
+This command will convert a test spec file into an AiEvaluationDefinition and deploy it to your org. The spec file must be in yaml format.
+
+Use the --preview flag to see the metadata that will be deployed without actually deploying it.
 
 # flags.spec.summary
 
-Description of a flag.
-
-# flags.spec.description
-
-More information about a flag. Don't repeat the summary.
+The path to the spec file.
 
 # flags.preview.summary
 
@@ -21,6 +19,10 @@ Preview the test metadata without deploying to your org.
 # flags.no-prompt.summary
 
 Don't prompt for confirmation when overwriting an existing test.
+
+# flags.api-name.summary
+
+The API name of the AiEvaluationDefinition.
 
 # examples
 
@@ -37,3 +39,7 @@ AiEvaluationDefinition created at %s and deployed to %s
 # info.preview-success
 
 Preview of AiEvaluationDefinition created at %s
+
+# error.missingRequiredFlags
+
+Missing required flags: %s.

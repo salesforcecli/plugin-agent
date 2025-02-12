@@ -81,8 +81,8 @@
     "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
-    "flagChars": ["o", "p", "s"],
-    "flags": ["api-version", "flags-dir", "json", "no-prompt", "preview", "spec", "target-org"],
+    "flagChars": ["o", "p"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "no-prompt", "preview", "spec", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
