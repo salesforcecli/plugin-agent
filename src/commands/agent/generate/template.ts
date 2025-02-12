@@ -86,6 +86,9 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const genAiPlannerDir = join(basePath, 'genAiPlanners');
     const botTemplateDir = join(basePath, 'botTemplates');
 
+    const botTemplateFilePath = join(botTemplateDir, `${finalFilename}.botTemplate-meta.xml`);
+    const clonedGenAiPlannerFilePath = join(genAiPlannerDir, `${finalFilename}.genAiPlanner-meta.xml`);
+
     // Parse the metadata files as JSON
     const botJson = xmlToJson<BotExt>(join(botDir, `${botName}.bot-meta.xml`), parser);
     const botVersionJson = xmlToJson<BotVersionExt>(join(botDir, `v${botVersion}.botVersion-meta.xml`), parser);
@@ -97,20 +100,17 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     // Modify the metadata files for final output
     // TODO: Confirm this name (might be conversationDefinitionPlanners)
     genAiPlannerMetaJson.GenAiPlanner.botTemplate = finalFilename;
-    const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename);
+    const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
-    const cloneGenAiPlannerFilePath = join(genAiPlannerDir, `${finalFilename}.genAiPlanner-meta.xml`);
-    jsonToXml<GenAiPlannerExt>(cloneGenAiPlannerFilePath, genAiPlannerMetaJson, builder);
-
-    const botTemplateFilePath = join(botTemplateDir, `${finalFilename}.botTemplate-meta.xml`);
+    jsonToXml<GenAiPlannerExt>(clonedGenAiPlannerFilePath, genAiPlannerMetaJson, builder);
     jsonToXml<BotTemplateExt>(botTemplateFilePath, botTemplate, builder);
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
-    this.log(`Saved GenAiPlanner to:\n - ${cloneGenAiPlannerFilePath}`);
+    this.log(`Saved GenAiPlanner to:\n - ${clonedGenAiPlannerFilePath}`);
 
     return {
-      genAiPlannerPath: cloneGenAiPlannerFilePath,
+      genAiPlannerPath: clonedGenAiPlannerFilePath,
       botTemplatePath: botTemplateFilePath,
     };
   }
@@ -119,7 +119,8 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 const convertBotToBotTemplate = (
   bot: BotExt,
   botVersionJson: BotVersionExt,
-  newMlDomainName: string
+  newMlDomainName: string,
+  botFilePath: string
 ): BotTemplateExt => {
   const entryDialog = botVersionJson.BotVersion.entryDialog;
   const { conversationSystemDialogs } = botVersionJson.BotVersion;
@@ -132,8 +133,8 @@ const convertBotToBotTemplate = (
   // TODO: Test this on a newer org. I had to have this renamed.
   entryDialogJson.label = entryDialog;
 
-  if (!bot.Bot.label) throw new SfError('No label found in Agent (Bot) file');
-  if (!bot.Bot.botMlDomain) throw new SfError('No botMlDomain found in Agent (Bot)');
+  if (!bot.Bot.label) throw new SfError(`No label found in Agent (Bot) file: ${botFilePath}`);
+  if (!bot.Bot.botMlDomain) throw new SfError(`No botMlDomain found in Agent (Bot) file: ${botFilePath}`);
   const masterLabel = bot.Bot.label;
   const mlDomain = bot.Bot.botMlDomain;
 
