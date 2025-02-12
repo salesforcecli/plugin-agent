@@ -12,7 +12,7 @@ import { AgentTester, AgentTestCreateLifecycleStages } from '@salesforce/agents'
 import { DeployResult } from '@salesforce/source-deploy-retrieve';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { CLIError } from '@oclif/core/errors';
-import { makeFlags, promptForFlag } from '../../../flags.js';
+import { makeFlags, promptForFlag, promptForYamlFile } from '../../../flags.js';
 
 export const FORTY_CHAR_API_NAME_REGEX =
   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
@@ -91,7 +91,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
     const apiName = flags['api-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['api-name']));
-    const spec = flags.spec ?? (await promptForFlag(FLAGGABLE_PROMPTS.spec));
+    const spec = flags.spec ?? (await promptForYamlFile(FLAGGABLE_PROMPTS.spec));
     const lifecycle = Lifecycle.getInstance();
 
     lifecycle.on(AgentTestCreateLifecycleStages.CreatingLocalMetadata, async () => {
