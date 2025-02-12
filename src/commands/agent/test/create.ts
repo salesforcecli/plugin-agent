@@ -14,8 +14,10 @@ import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { CLIError } from '@oclif/core/errors';
 import { makeFlags, promptForFlag, promptForYamlFile } from '../../../flags.js';
 
-export const FORTY_CHAR_API_NAME_REGEX =
-  /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
+// TODO: fix this REGEX for validating Salesforce API names
+// for example: LocalInfoAgent passes but not LocalInfoAgentTest
+// export const FORTY_CHAR_API_NAME_REGEX =
+//   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.create');
@@ -34,10 +36,15 @@ const FLAGGABLE_PROMPTS = {
         return 'Name cannot be empty';
       }
 
-      // check against FORTY_CHAR_API_NAME_REGEX
-      if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-        return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
+      // validate that it contains no spaces or special chars (expect for underscores)
+      if (d.match(/[^a-zA-Z0-9_]/)) {
+        return 'Name must contain only letters, numbers, and underscores';
       }
+
+      // check against FORTY_CHAR_API_NAME_REGEX once it's fixed
+      // if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
+      //   return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
+      // }
       return true;
     },
     required: true,
