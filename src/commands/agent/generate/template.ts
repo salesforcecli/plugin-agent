@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { join, dirname } from 'node:path';
+import { join, dirname, parse, resolve } from 'node:path';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
@@ -58,30 +58,38 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'agent-api-name': Flags.string({
-      summary: messages.getMessage('flags.agent-api-name.summary'),
-      required: true,
-    }),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),
       required: true,
+    }),
+    'agent-file': Flags.file({
+      summary: messages.getMessage('flags.agent-file.summary'),
+      char: 'f',
+      required: true,
+      exists: true,
     }),
   };
 
   public async run(): Promise<AgentGenerateTemplateResult> {
     const { flags } = await this.parse(AgentGenerateTemplate);
-    const { 'agent-api-name': botName, 'agent-version': botVersion } = flags;
+    const { 'agent-file': agentFile, 'agent-version': botVersion } = flags;
+
+    if (!agentFile.endsWith('.bot-meta.xml')) {
+      throw new SfError(
+        'Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot.bot-meta.xml'
+      );
+    }
 
     const parser = new XMLParser({ ignoreAttributes: false });
     const builder = new XMLBuilder({ format: true, ignoreAttributes: false, indentBy: '    ' });
 
+    const botName = parse(agentFile).base.replace('.bot-meta.xml', '');
     // Since we are cloning the GenAiPlanner, we need to use a different name than the Agent (Bot) we started with
     // We will use this name for the BotTemplate also to make it clear they are related
     const finalFilename = `${botName}_v${botVersion}_Template`;
 
-    // TODO: Should we add a flag to specify the packagePath?
-    const packagePath = this.project?.getDefaultPackage().fullPath;
-    const basePath = join(packagePath as string, 'main', 'default');
+    // Build the base dir from the AgentFile
+    const basePath = resolve(join(dirname(agentFile), '..', '..'));
     const botDir = join(basePath, 'bots', botName);
     const genAiPlannerDir = join(basePath, 'genAiPlanners');
     const botTemplateDir = join(basePath, 'botTemplates');
