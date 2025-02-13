@@ -236,6 +236,12 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
+    const outputFile = join(flags['output-dir'], flags['output-file'] ?? `${subjectName}-agentTestSpec.yaml`);
+
+    if (existsSync(outputFile)) {
+      await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
+    }
+
     const { genAiPlugins, genAiFunctions } = await getPluginsAndFunctions(subjectName, cs);
 
     const name = await input({
@@ -270,12 +276,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     );
 
     this.log();
-
-    const outputFile = join(flags['output-dir'], `${subjectName}-${flags['output-file']}`);
-
-    if (existsSync(outputFile)) {
-      await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
-    }
 
     await generateTestSpec(
       {
