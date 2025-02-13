@@ -25,6 +25,7 @@ type GenAiPlannerExt = {
 };
 
 type BotTemplateExt = {
+  '?xml': { '@_version': '1.0'; '@_encoding': 'UTF-8' };
   BotTemplate: Omit<BotTemplate, 'botDialogGroups' | 'conversationGoals' | 'conversationVariables'> & {
     agentType?: string;
     botDialogGroups?: BotDialogGroup[];
@@ -153,7 +154,6 @@ const convertBotToBotTemplate = (
   delete bot.Bot.sessionTimeout;
 
   const botTemplate: BotTemplateExt = {
-    // @ts-expect-error xml attributes
     '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
     BotTemplate: {
       masterLabel,
