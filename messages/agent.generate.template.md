@@ -6,16 +6,16 @@ Generate an agent template for packaging.
 
 Generate agent template metadata to for packaging your agent.
 
-# flags.agent-api-name.summary
-
-API name of an existing Bot.
-
-# flags.output-dir.summary
-
-Directory to write the agent template.
-
 # examples
 
-- Generate an agent template from a Bot API name in your default package dir:
+- Generate an agent template from a Bot metadata file in your project:
 
-  <%= config.bin %> <%= command.id %> --agent-api-name My_Packaged_Agent
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
+
+# flags.agent-version.summary
+
+Version of the Agent (botVersion).
+
+# flags.agent-file.summary
+
+The path to an Agent (Bot) file.
