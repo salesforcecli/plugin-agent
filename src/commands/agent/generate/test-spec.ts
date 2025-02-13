@@ -14,6 +14,7 @@ import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { theme } from '../../../inquirer-theme.js';
+import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
@@ -177,6 +178,60 @@ async function getPluginsAndFunctions(
   return { genAiPlugins, genAiFunctions };
 }
 
+function ensureYamlExtension(filePath: string | undefined): string | undefined {
+  if (!filePath) return undefined;
+  if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) return filePath;
+  return `${filePath}.yaml`;
+}
+
+async function promptUntilUniqueFile(subjectName: string, filePath?: string): Promise<string | undefined> {
+  const outputFile =
+    filePath ??
+    (await input({
+      message: 'Enter a path for the test spec file',
+      validate(d: string): boolean | string {
+        if (!d.length) {
+          return 'Path cannot be empty';
+        }
+
+        return true;
+      },
+      theme,
+    }));
+
+  if (!existsSync(outputFile)) {
+    return outputFile;
+  }
+
+  const confirmation = await yesNoOrCancel({
+    message: `File ${outputFile} already exists. Overwrite?`,
+    default: false,
+  });
+
+  if (confirmation === 'cancel') {
+    return;
+  }
+
+  if (!confirmation) {
+    return promptUntilUniqueFile(subjectName);
+  }
+
+  return outputFile;
+}
+
+/**
+ * If the user provides the --force-overwrite flag, then we'll use the default file path (either the one provided by --output-file or the default path).
+ * If the user doesn't provide it, we'll prompt the user for a file path until they provide a unique one or cancel.
+ */
+async function determineFilePath(
+  subjectName: string,
+  outputFile: string | undefined,
+  forceOverwrite: boolean
+): Promise<string | undefined> {
+  const defaultFile = ensureYamlExtension(outputFile ?? join('specs', `${subjectName}-testSpec.yaml`));
+  return ensureYamlExtension(forceOverwrite ? defaultFile : await promptUntilUniqueFile(subjectName, defaultFile));
+}
+
 export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -185,18 +240,12 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly state = 'beta';
 
   public static readonly flags = {
-    'ai-eval-definition': Flags.string({
-      char: 'a',
-      summary: messages.getMessage('flags.ai-eval-definition.summary'),
-    }),
-    'no-prompt': Flags.boolean({
-      dependsOn: ['ai-eval-definition'],
-      summary: messages.getMessage('flags.no-prompt.summary'),
-    }),
-    'output-dir': Flags.directory({
+    'from-definition': Flags.string({
       char: 'd',
-      summary: messages.getMessage('flags.output-dir.summary'),
-      default: 'specs',
+      summary: messages.getMessage('flags.from-definition.summary'),
+    }),
+    'force-overwrite': Flags.boolean({
+      summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
     'output-file': Flags.string({
       char: 'f',
@@ -218,29 +267,35 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       },
     });
 
-    if (flags['ai-eval-definition']) {
+    if (flags['from-definition']) {
       const aiEvalDefs = getMetadataFilePaths(cs, 'AiEvaluationDefinition');
 
-      if (!aiEvalDefs[flags['ai-eval-definition']]) {
+      if (!aiEvalDefs[flags['from-definition']]) {
         throw new SfError(
-          `AiEvaluationDefinition ${flags['ai-eval-definition']} not found`,
+          `AiEvaluationDefinition ${flags['from-definition']} not found`,
           'AiEvalDefinitionNotFoundError'
         );
       }
 
-      const spec = await generateTestSpecFromAiEvalDefinition(aiEvalDefs[flags['ai-eval-definition']]);
-      const outputFile = join(flags['output-dir'], flags['output-file'] ?? `${spec.subjectName}-agentTestSpec.yaml`);
+      const spec = await generateTestSpecFromAiEvalDefinition(aiEvalDefs[flags['from-definition']]);
 
-      if (!flags['no-prompt'] && existsSync(outputFile)) {
-        await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
+      const outputFile = await determineFilePath(spec.subjectName, flags['output-file'], flags['force-overwrite']);
+      if (!outputFile) {
+        this.log(messages.getMessage('info.cancel'));
+        return;
       }
+
       await writeTestSpec(spec, outputFile);
       this.log(`Created ${outputFile}`);
       return;
     }
 
-    const botsComponents = cs.filter((component) => component.type.name === 'Bot');
-    const bots = [...botsComponents.map((c) => c.fullName).filter((n) => n !== '*')];
+    const bots = [
+      ...cs
+        .filter((component) => component.type.name === 'Bot')
+        .map((c) => c.fullName)
+        .filter((n) => n !== '*'),
+    ];
     if (bots.length === 0) {
       throw new SfError(`No agents found in ${directoryPaths.join(', ')}`, 'NoAgentsFoundError');
     }
@@ -257,10 +312,10 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
-    const outputFile = join(flags['output-dir'], flags['output-file'] ?? `${subjectName}-agentTestSpec.yaml`);
-
-    if (existsSync(outputFile)) {
-      await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
+    const outputFile = await determineFilePath(subjectName, flags['output-file'], flags['force-overwrite']);
+    if (!outputFile) {
+      this.log(messages.getMessage('info.cancel'));
+      return;
     }
 
     const { genAiPlugins, genAiFunctions } = await getPluginsAndFunctions(subjectName, cs);

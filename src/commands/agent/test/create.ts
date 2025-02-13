@@ -87,9 +87,8 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     preview: Flags.boolean({
       summary: messages.getMessage('flags.preview.summary'),
     }),
-    'no-prompt': Flags.boolean({
-      summary: messages.getMessage('flags.no-prompt.summary'),
-      char: 'p',
+    'force-overwrite': Flags.boolean({
+      summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
   };
   private mso?: MultiStageOutput<{ path: string }>;
@@ -98,7 +97,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     const { flags } = await this.parse(AgentTestCreate);
 
     // throw error if --json is used and not all required flags are provided
-    if (this.jsonEnabled() || flags['no-prompt']) {
+    if (this.jsonEnabled()) {
       if (!flags['test-api-name']) {
         throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
       }
@@ -107,9 +106,13 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       }
     }
 
+    if (flags['force-overwrite'] && !flags['test-api-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
+    }
+
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
-    const apiName = flags['no-prompt']
+    const apiName = flags['force-overwrite']
       ? flags['test-api-name']
       : await promptUntilUniqueName(agentTester, flags['test-api-name']);
     if (!apiName) {

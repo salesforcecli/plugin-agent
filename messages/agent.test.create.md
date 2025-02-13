@@ -16,7 +16,7 @@ The path to the spec file.
 
 Preview the test metadata without deploying to your org.
 
-# flags.no-prompt.summary
+# flags.force-overwrite.summary
 
 Don't prompt for confirmation when overwriting an existing test.
 
