@@ -94,7 +94,7 @@ Agent conversation tone
 
 Language the agent uses in conversations.
 
-# flags.no-prompt.summary
+# flags.force-overwrite.summary
 
 Don't prompt the user to confirm that an existing spec file will be overwritten.
 
