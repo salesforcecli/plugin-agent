@@ -57,8 +57,8 @@
     "alias": [],
     "command": "agent:generate:test-spec",
     "flagAliases": [],
-    "flagChars": ["a", "d", "f"],
-    "flags": ["ai-eval-definition", "flags-dir", "no-prompt", "output-dir", "output-file"],
+    "flagChars": ["d", "f"],
+    "flags": ["flags-dir", "force-overwrite", "from-definition", "output-file"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -81,8 +81,8 @@
     "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
-    "flagChars": ["o", "p"],
-    "flags": ["api-version", "flags-dir", "json", "no-prompt", "preview", "spec", "target-org", "test-api-name"],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org", "test-api-name"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
