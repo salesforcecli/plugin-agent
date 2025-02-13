@@ -1,3 +1,14 @@
+# [1.15.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.15.0) (2025-02-13)
+
+### Bug Fixes
+
+- pr review ([6e36523](https://github.com/salesforcecli/plugin-agent/commit/6e36523393b74c993a32f12f9f7c56e9cb97c7d8))
+- require agent path ([8b652ca](https://github.com/salesforcecli/plugin-agent/commit/8b652cafaa1ca8ab5bcb98523358ac512f061c98))
+
+### Features
+
+- generate template from bot ([606ace7](https://github.com/salesforcecli/plugin-agent/commit/606ace779ce1daee4b14d63c9606b0fc82ca2d6c))
+
 ## [1.14.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.3...1.14.4) (2025-02-10)
 
 ### Bug Fixes
