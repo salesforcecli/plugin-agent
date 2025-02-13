@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
-import { generateTestSpec } from '@salesforce/agents';
+import { writeTestSpec } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
@@ -202,7 +202,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     'output-file': Flags.string({
       char: 'f',
       summary: messages.getMessage('flags.output-file.summary'),
-      default: 'agentTestSpec.yaml',
     }),
   };
 
@@ -277,7 +276,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     this.log();
 
-    await generateTestSpec(
+    await writeTestSpec(
       {
         name,
         description,
