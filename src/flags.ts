@@ -90,15 +90,15 @@ async function traverseForYamlFiles(dir: string): Promise<string[]> {
 }
 
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const options = await traverseForYamlFiles(process.cwd());
+  const yamlFiles = await traverseForYamlFiles(process.cwd());
   return autocomplete({
     message: flagDef.message,
     // eslint-disable-next-line @typescript-eslint/require-await
     source: async (input) => {
-      const opts = options.map((o) => ({ name: relative(process.cwd(), o), value: o }));
+      const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
 
-      if (!input) return opts;
-      return opts.filter((o) => o.name.includes(input));
+      if (!input) return arr;
+      return arr.filter((o) => o.name.includes(input));
     },
   });
 };

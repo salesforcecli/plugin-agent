@@ -20,7 +20,7 @@ Preview the test metadata without deploying to your org.
 
 Don't prompt for confirmation when overwriting an existing test.
 
-# flags.api-name.summary
+# flags.test-api-name.summary
 
 The API name of the AiEvaluationDefinition.
 
@@ -43,3 +43,7 @@ Preview of AiEvaluationDefinition created at %s
 # error.missingRequiredFlags
 
 Missing required flags: %s.
+
+# info.cancel
+
+Operation canceled.

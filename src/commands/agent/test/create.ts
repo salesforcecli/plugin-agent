@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
+ * Copyright (c) 2025, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
@@ -13,11 +13,7 @@ import { DeployResult } from '@salesforce/source-deploy-retrieve';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { CLIError } from '@oclif/core/errors';
 import { makeFlags, promptForFlag, promptForYamlFile } from '../../../flags.js';
-
-// TODO: fix this REGEX for validating Salesforce API names
-// for example: LocalInfoAgent passes but not LocalInfoAgentTest
-// export const FORTY_CHAR_API_NAME_REGEX =
-//   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
+import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.create');
@@ -28,10 +24,9 @@ export type AgentTestCreateResult = {
 };
 
 const FLAGGABLE_PROMPTS = {
-  'api-name': {
-    message: messages.getMessage('flags.api-name.summary'),
+  'test-api-name': {
+    message: messages.getMessage('flags.test-api-name.summary'),
     validate: (d: string): boolean | string => {
-      // ensure that it's not empty
       if (!d.length) {
         return 'API name cannot be empty';
       }
@@ -60,6 +55,25 @@ const FLAGGABLE_PROMPTS = {
   },
 };
 
+async function promptUntilUniqueName(agentTester: AgentTester, name?: string | undefined): Promise<string | undefined> {
+  const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['test-api-name']));
+  const existingDefinitions = await agentTester.list();
+  if (existingDefinitions.some((d) => d.fullName === apiName)) {
+    const confirmation = await yesNoOrCancel({
+      message: messages.getMessage('prompt.confirm', [apiName]),
+      default: false,
+    });
+    if (confirmation === 'cancel') {
+      return;
+    }
+
+    if (!confirmation) {
+      return promptUntilUniqueName(agentTester);
+    }
+  }
+  return apiName;
+}
+
 export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -84,9 +98,9 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     const { flags } = await this.parse(AgentTestCreate);
 
     // throw error if --json is used and not all required flags are provided
-    if (this.jsonEnabled()) {
-      if (!flags['api-name']) {
-        throw messages.createError('error.missingRequiredFlags', ['api-name']);
+    if (this.jsonEnabled() || flags['no-prompt']) {
+      if (!flags['test-api-name']) {
+        throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
       }
       if (!flags.spec) {
         throw messages.createError('error.missingRequiredFlags', ['spec']);
@@ -95,7 +109,17 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
-    const apiName = flags['api-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['api-name']));
+    const apiName = flags['no-prompt']
+      ? flags['test-api-name']
+      : await promptUntilUniqueName(agentTester, flags['test-api-name']);
+    if (!apiName) {
+      this.log(messages.getMessage('info.cancel'));
+      return {
+        path: '',
+        contents: '',
+      };
+    }
+
     const spec = flags.spec ?? (await promptForYamlFile(FLAGGABLE_PROMPTS.spec));
     const lifecycle = Lifecycle.getInstance();
 
@@ -128,17 +152,6 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
 
       return Promise.resolve();
     });
-
-    const existingDefinitions = await agentTester.list();
-    if (existingDefinitions.some((d) => d.fullName === apiName)) {
-      const confirmation = await this.confirm({
-        message: messages.getMessage('prompt.confirm', [apiName]),
-        defaultAnswer: false,
-      });
-      if (!confirmation) {
-        throw new SfError(`An AiEvaluationDefinition with the name ${apiName} already exists in the org.`);
-      }
-    }
 
     const { path, contents } = await agentTester.create(apiName, spec, {
       outputDir: join('force-app', 'main', 'default', 'aiEvaluationDefinitions'),
