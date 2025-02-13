@@ -25,6 +25,7 @@ type GenAiPlannerExt = {
 };
 
 type BotTemplateExt = {
+  '?xml': { '@_version': '1.0'; '@_encoding': 'UTF-8' };
   BotTemplate: Omit<BotTemplate, 'botDialogGroups' | 'conversationGoals' | 'conversationVariables'> & {
     agentType?: string;
     botDialogGroups?: BotDialogGroup[];
@@ -83,7 +84,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const parser = new XMLParser({ ignoreAttributes: false });
     const builder = new XMLBuilder({ format: true, ignoreAttributes: false, indentBy: '    ' });
 
-    const botName = basename(agentFile).replace('.bot-meta.xml', '');
+    const botName = basename(agentFile, '.bot-meta.xml');
     // Since we are cloning the GenAiPlanner, we need to use a different name than the Agent (Bot) we started with
     // We will use this name for the BotTemplate also to make it clear they are related
     const finalFilename = `${botName}_v${botVersion}_Template`;
@@ -152,8 +153,8 @@ const convertBotToBotTemplate = (
   delete bot.Bot.logPrivateConversationData;
   delete bot.Bot.sessionTimeout;
 
-  // botDialogGroups is not required
   const botTemplate: BotTemplateExt = {
+    '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
     BotTemplate: {
       masterLabel,
       conversationLanguages: 'en_US',
