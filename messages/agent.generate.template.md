@@ -18,4 +18,4 @@ Version of the Agent (botVersion).
 
 # flags.agent-file.summary
 
-The relative path to an Agent (Bot) file.
+The path to an Agent (Bot) file.

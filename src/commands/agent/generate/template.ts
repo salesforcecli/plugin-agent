@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { join, dirname, parse, resolve } from 'node:path';
+import { join, dirname, basename, resolve } from 'node:path';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
@@ -83,13 +83,13 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const parser = new XMLParser({ ignoreAttributes: false });
     const builder = new XMLBuilder({ format: true, ignoreAttributes: false, indentBy: '    ' });
 
-    const botName = parse(agentFile).base.replace('.bot-meta.xml', '');
+    const botName = basename(agentFile).replace('.bot-meta.xml', '');
     // Since we are cloning the GenAiPlanner, we need to use a different name than the Agent (Bot) we started with
     // We will use this name for the BotTemplate also to make it clear they are related
     const finalFilename = `${botName}_v${botVersion}_Template`;
 
     // Build the base dir from the AgentFile
-    const basePath = resolve(join(dirname(agentFile), '..', '..'));
+    const basePath = resolve(dirname(agentFile), '..', '..');
     const botDir = join(basePath, 'bots', botName);
     const genAiPlannerDir = join(basePath, 'genAiPlanners');
     const botTemplateDir = join(basePath, 'botTemplates');
