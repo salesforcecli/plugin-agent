@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
-import { writeTestSpec } from '@salesforce/agents';
+import { writeTestSpec, generateTestSpecFromAiEvalDefinition } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
@@ -98,6 +98,21 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   };
 }
 
+function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
+  return [...cs.filter((component) => component.type.name === type && component.fullName !== '*')].reduce<
+    Record<string, string>
+  >(
+    (acc, component) => ({
+      ...acc,
+      [component.fullName]: cs.getComponentFilenamesByNameAndType({
+        fullName: component.fullName,
+        type,
+      })[0],
+    }),
+    {}
+  );
+}
+
 /**
  * Retrieves GenAIPlugins and GenAiFunctions from a Bot's GenAiPlanner
  *
@@ -124,32 +139,8 @@ async function getPluginsAndFunctions(
   genAiPlugins: Record<string, string>;
   genAiFunctions: string[];
 }> {
-  const botVersions = [...cs.filter((component) => component.type.name === 'Bot' && component.fullName !== '*')].reduce<
-    Record<string, string>
-  >(
-    (acc, component) => ({
-      ...acc,
-      // this resolves to the BotVersion filepath
-      [component.fullName]: cs.getComponentFilenamesByNameAndType({
-        fullName: component.fullName,
-        type: 'Bot',
-      })[0],
-    }),
-    {}
-  );
-
-  const genAiPlanners = [
-    ...cs.filter((component) => component.type.name === 'GenAiPlanner' && component.fullName !== '*'),
-  ].reduce<Record<string, string>>(
-    (acc, component) => ({
-      ...acc,
-      [component.fullName]: cs.getComponentFilenamesByNameAndType({
-        fullName: component.fullName,
-        type: 'GenAiPlanner',
-      })[0],
-    }),
-    {}
-  );
+  const botVersions = getMetadataFilePaths(cs, 'Bot');
+  const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
 
   const parser = new XMLParser();
   const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
@@ -194,6 +185,14 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly state = 'beta';
 
   public static readonly flags = {
+    'ai-eval-definition': Flags.string({
+      char: 'a',
+      summary: messages.getMessage('flags.ai-eval-definition.summary'),
+    }),
+    'no-prompt': Flags.boolean({
+      dependsOn: ['ai-eval-definition'],
+      summary: messages.getMessage('flags.no-prompt.summary'),
+    }),
     'output-dir': Flags.directory({
       char: 'd',
       summary: messages.getMessage('flags.output-dir.summary'),
@@ -207,16 +206,39 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(AgentGenerateTestSpec);
+
     const directoryPaths = (await SfProject.resolve().then((project) => project.getPackageDirectories())).map(
       (dir) => dir.fullPath
     );
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
+        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot', 'AiEvaluationDefinition'],
         directoryPaths,
       },
     });
+
+    if (flags['ai-eval-definition']) {
+      const aiEvalDefs = getMetadataFilePaths(cs, 'AiEvaluationDefinition');
+
+      if (!aiEvalDefs[flags['ai-eval-definition']]) {
+        throw new SfError(
+          `AiEvaluationDefinition ${flags['ai-eval-definition']} not found`,
+          'AiEvalDefinitionNotFoundError'
+        );
+      }
+
+      const spec = await generateTestSpecFromAiEvalDefinition(aiEvalDefs[flags['ai-eval-definition']]);
+      const outputFile = join(flags['output-dir'], flags['output-file'] ?? `${spec.subjectName}-agentTestSpec.yaml`);
+
+      if (!flags['no-prompt'] && existsSync(outputFile)) {
+        await this.confirm({ message: `File ${outputFile} already exists. Overwrite?`, defaultAnswer: false });
+      }
+      await writeTestSpec(spec, outputFile);
+      this.log(`Created ${outputFile}`);
+      return;
+    }
+
     const botsComponents = cs.filter((component) => component.type.name === 'Bot');
     const bots = [...botsComponents.map((c) => c.fullName).filter((n) => n !== '*')];
     if (bots.length === 0) {
