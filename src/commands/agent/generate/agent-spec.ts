@@ -151,9 +151,8 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       summary: messages.getMessage('flags.grounding-context.summary'),
       dependsOn: ['prompt-template'],
     }),
-    'no-prompt': Flags.boolean({
-      summary: messages.getMessage('flags.no-prompt.summary'),
-      char: 'p',
+    'force-overwrite': Flags.boolean({
+      summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
   };
 
@@ -161,7 +160,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
   public async run(): Promise<AgentCreateSpecResult> {
     const { flags } = await this.parse(AgentCreateSpec);
 
-    const outputFile = await resolveOutputFile(flags['output-file'], flags['no-prompt']);
+    const outputFile = await resolveOutputFile(flags['output-file'], flags['force-overwrite']);
 
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {

@@ -132,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -143,12 +143,12 @@ USAGE
   $ sf agent generate agent-spec -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--type customer|internal]
     [--role <value>] [--company-name <value>] [--company-description <value>] [--company-website <value>] [--max-topics
     <value>] [--agent-user <value>] [--enrich-logs true|false] [--tone formal|casual|neutral] [--spec <value>]
-    [--output-file <value>] [--full-interview] [--grounding-context <value> --prompt-template <value>] [-p]
+    [--output-file <value>] [--full-interview] [--grounding-context <value> --prompt-template <value>]
+    [--force-overwrite]
 
 FLAGS
   -o, --target-org=<value>           (required) Username or alias of the target org. Not required if the `target-org`
                                      configuration variable is already set.
-  -p, --no-prompt                    Don't prompt the user to confirm that an existing spec file will be overwritten.
       --agent-user=<value>           Username of a user in your org to assign to your agent; determines what your agent
                                      can access and do.
       --api-version=<value>          Override the api version used for api requests made by this command
@@ -158,6 +158,7 @@ FLAGS
       --enrich-logs=<option>         Adds agent conversation data to event logs so you can view all agent session
                                      activity in one place.
                                      <options: true|false>
+      --force-overwrite              Don't prompt the user to confirm that an existing spec file will be overwritten.
       --full-interview               Prompt for both required and optional flags.
       --grounding-context=<value>    Context information and personalization that's added to your prompts when using a
                                      custom prompt template.
@@ -236,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -270,7 +271,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -298,7 +299,7 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -333,7 +334,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -369,7 +370,7 @@ EXAMPLES
   $ sf agent test create
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -398,7 +399,7 @@ EXAMPLES
   $ sf agent test list
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -454,7 +455,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -517,7 +518,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -580,6 +581,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.3/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.2/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

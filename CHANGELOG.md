@@ -1,3 +1,9 @@
+## [1.15.2](https://github.com/salesforcecli/plugin-agent/compare/1.15.1...1.15.2) (2025-02-14)
+
+### Bug Fixes
+
+- switch no-prompt flag to force-overwrite ([43a79bb](https://github.com/salesforcecli/plugin-agent/commit/43a79bb9590a6022f19ef263ee3e36d871578b6a))
+
 ## [1.15.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1) (2025-02-13)
 
 ### Bug Fixes
