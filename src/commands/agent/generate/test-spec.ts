@@ -265,7 +265,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     'output-file': Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.output-file.summary'),
-      parse: async (raw): Promise<string | undefined> => Promise.resolve(raw ? ensureYamlExtension(raw) : undefined),
+      parse: async (raw): Promise<string> => Promise.resolve(ensureYamlExtension(raw)),
     }),
   };
 
@@ -278,7 +278,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot', 'AiEvaluationDefinition'],
+        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
         directoryPaths,
       },
     });
