@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
@@ -13,6 +13,7 @@ import { writeTestSpec, generateTestSpecFromAiEvalDefinition } from '@salesforce
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
+import { warn } from '@oclif/core/errors';
 import { theme } from '../../../inquirer-theme.js';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
 
@@ -179,10 +180,13 @@ async function getPluginsAndFunctions(
   return { genAiPlugins, genAiFunctions };
 }
 
-function ensureYamlExtension(filePath: string | undefined): string | undefined {
-  if (!filePath) return undefined;
-  if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) return filePath;
-  return `${filePath}.yaml`;
+function ensureYamlExtension(filePath: string): string {
+  const parsedPath = parse(filePath);
+
+  if (parsedPath.ext === '.yaml' || parsedPath.ext === '.yml') return filePath;
+  const normalized = `${join(parsedPath.dir, parsedPath.name)}.yaml`;
+  warn(`Provided file path does not have a .yaml or .yml extension. Normalizing to ${normalized}`);
+  return normalized;
 }
 
 async function promptUntilUniqueFile(subjectName: string, filePath?: string): Promise<string | undefined> {
@@ -200,12 +204,14 @@ async function promptUntilUniqueFile(subjectName: string, filePath?: string): Pr
       theme,
     }));
 
-  if (!existsSync(outputFile)) {
-    return outputFile;
+  const normalized = ensureYamlExtension(outputFile);
+
+  if (!existsSync(normalized)) {
+    return normalized;
   }
 
   const confirmation = await yesNoOrCancel({
-    message: `File ${outputFile} already exists. Overwrite?`,
+    message: `File ${normalized} already exists. Overwrite?`,
     default: false,
   });
 
@@ -217,7 +223,7 @@ async function promptUntilUniqueFile(subjectName: string, filePath?: string): Pr
     return promptUntilUniqueFile(subjectName);
   }
 
-  return outputFile;
+  return normalized;
 }
 
 /**
@@ -230,7 +236,7 @@ async function determineFilePath(
   forceOverwrite: boolean
 ): Promise<string | undefined> {
   const defaultFile = ensureYamlExtension(outputFile ?? join('specs', `${subjectName}-testSpec.yaml`));
-  return ensureYamlExtension(forceOverwrite ? defaultFile : await promptUntilUniqueFile(subjectName, defaultFile));
+  return forceOverwrite ? defaultFile : promptUntilUniqueFile(subjectName, defaultFile);
 }
 
 export default class AgentGenerateTestSpec extends SfCommand<void> {
@@ -248,9 +254,10 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     'force-overwrite': Flags.boolean({
       summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
-    'output-file': Flags.string({
+    'output-file': Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.output-file.summary'),
+      parse: async (raw): Promise<string | undefined> => Promise.resolve(raw ? ensureYamlExtension(raw) : undefined),
     }),
   };
 
