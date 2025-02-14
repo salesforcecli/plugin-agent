@@ -1,3 +1,9 @@
+# [1.18.0](https://github.com/salesforcecli/plugin-agent/compare/1.17.0...1.18.0) (2025-02-14)
+
+### Features
+
+- use file path for --from-definition ([ef5e810](https://github.com/salesforcecli/plugin-agent/commit/ef5e8103512caa6365e88722dd9f5b7ad37af6a4))
+
 # [1.17.0](https://github.com/salesforcecli/plugin-agent/compare/1.16.0...1.17.0) (2025-02-14)
 
 ### Features
