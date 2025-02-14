@@ -17,27 +17,6 @@ async function writeFileToDir(outputDir: string, fileName: string, content: stri
   await writeFile(join(outputDir, fileName), content);
 }
 
-/**
- * Clean a string by replacing HTML entities with their respective characters. Implementation done by copilot.
- *
- * This is only required until W-17594913 is resolved by SF Eval
- *
- * @param str - The string to clean.
- * @returns The cleaned string with all HTML entities replaced with their respective characters.
- */
-function decodeHtmlEntities(str: string): string {
-  const entities: { [key: string]: string } = {
-    '&quot;': '"',
-    '&apos;': "'",
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&#39;': "'",
-  };
-
-  return str.replace(/&[a-zA-Z0-9#]+;/g, (entity) => entities[entity] || entity);
-}
-
 function makeSimpleTable(data: Record<string, string>, title: string): string {
   if (Object.keys(data).length === 0) {
     return '';
@@ -102,8 +81,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults.map((r) => ({
         test: humanFriendlyName(r.name),
         result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
-        expected: decodeHtmlEntities(r.expectedValue),
-        actual: decodeHtmlEntities(r.actualValue),
+        expected: r.expectedValue,
+        actual: r.actualValue,
       })),
       width: '100%',
     });

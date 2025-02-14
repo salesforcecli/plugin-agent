@@ -5,11 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { readdir } from 'node:fs/promises';
+import { join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
+import autocomplete from 'inquirer-autocomplete-standalone';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -67,6 +70,38 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
     ])
   ) as FlagsOfPrompts<T>;
 }
+
+async function traverseForYamlFiles(dir: string): Promise<string[]> {
+  const files = await readdir(dir, { withFileTypes: true });
+  const results: string[] = [];
+
+  for (const file of files) {
+    const fullPath = join(dir, file.name);
+
+    if (file.isDirectory()) {
+      // eslint-disable-next-line no-await-in-loop
+      results.push(...(await traverseForYamlFiles(fullPath)));
+    } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
+  const yamlFiles = await traverseForYamlFiles(process.cwd());
+  return autocomplete({
+    message: flagDef.message,
+    // eslint-disable-next-line @typescript-eslint/require-await
+    source: async (input) => {
+      const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
+
+      if (!input) return arr;
+      return arr.filter((o) => o.name.includes(input));
+    },
+  });
+};
 
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
