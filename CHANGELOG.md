@@ -1,16 +1,219 @@
-## [1.15.2](https://github.com/salesforcecli/plugin-agent/compare/1.15.1...1.15.2) (2025-02-14)
+# [1.16.0](https://github.com/salesforcecli/plugin-agent/compare/1.15.2...1.16.0) (2025-02-14)
+
+## [1.15.1-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.2...1.15.1-dev.3) (2025-02-14)
+
+### Bug Fixes
+
+- better ensure file path is yaml ([e83a22e](https://github.com/salesforcecli/plugin-agent/commit/e83a22e7522dc33d84e478c641cef9517b688353))
+- gracefully handle no genAiFunctions inside of GenAiPlanner ([88ff2ee](https://github.com/salesforcecli/plugin-agent/commit/88ff2ee6c0961c4605b3abafae0569941551dfb5))
+
+## [1.15.1-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.15.1...1.15.1-dev.2) (2025-02-14)
+
+## [1.15.1-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.0...1.15.1-dev.1) (2025-02-13)
+
+### Features
+
+- add --ai-eval-definition flag ([cbeab4f](https://github.com/salesforcecli/plugin-agent/commit/cbeab4fa0868d05b4978d0c5929be87a80d51ae2))
+- use --force-overwrite and prompt until unique file names ([631625b](https://github.com/salesforcecli/plugin-agent/commit/631625b16a9fa0f5f907b0a975f6ebe46d8fc7ec))
+
+## [1.15.1-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1-dev.0) (2025-02-13)
+
+### Bug Fixes
+
+- prompt for overwrite confirmation earlier ([48469aa](https://github.com/salesforcecli/plugin-agent/commit/48469aa96ac4a1e032a4b2584523883c5667690c))
+
+## [1.14.5-dev.5](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.4...1.14.5-dev.5) (2025-02-13)
+
+### Bug Fixes
+
+- better api name validation ([8f75a01](https://github.com/salesforcecli/plugin-agent/commit/8f75a01c3fd8ce945bede52800348ea1919cc682))
+
+### Features
+
+- prompt for api name until unique ([55a2caa](https://github.com/salesforcecli/plugin-agent/commit/55a2caaae118c0fec4829902d72cefab5b3ca58a))
+
+## [1.14.5-dev.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.3...1.14.5-dev.4) (2025-02-12)
+
+## [1.14.5-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.2...1.14.5-dev.3) (2025-02-12)
+
+### Bug Fixes
+
+- simplify api name regex ([cd07d7f](https://github.com/salesforcecli/plugin-agent/commit/cd07d7f90e76c1cd5aa79e942706d7e4e3bf0799))
+
+### Features
+
+- add --output-file to generate test-spec ([f97c477](https://github.com/salesforcecli/plugin-agent/commit/f97c47779a43717a1848852c0a8e4b4588849c24))
+
+## [1.14.5-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.1...1.14.5-dev.2) (2025-02-12)
+
+### Performance Improvements
+
+- improve traverse for yaml files ([07b8dbc](https://github.com/salesforcecli/plugin-agent/commit/07b8dbcc62a3adaed604c34bec49ed06363e60a7))
+
+## [1.14.5-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.0...1.14.5-dev.1) (2025-02-12)
+
+### Features
+
+- add autocomplete for yaml input ([3643682](https://github.com/salesforcecli/plugin-agent/commit/3643682c0bdd12144e8fe80b50bc7c536471c80b))
+
+## [1.14.5-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.14.5-dev.0) (2025-02-12)
+
+### Bug Fixes
+
+- improvements to test generation ([7a5220c](https://github.com/salesforcecli/plugin-agent/commit/7a5220c8569337eb1a4a4a6b4f9eb6b4addd93dd))
+- use BotVersion to find GenAiPlanner ([10fa18a](https://github.com/salesforcecli/plugin-agent/commit/10fa18af9d02f8ae219b958fb89207162e074fa1))
+
+### Features
+
+- add --api-name ([2a97ed6](https://github.com/salesforcecli/plugin-agent/commit/2a97ed62f8e17d23c7ae38c282be1553743a86f0))
+- ux improvements ([7efa7e1](https://github.com/salesforcecli/plugin-agent/commit/7efa7e102609d8462d084b700fd7ccfdaaa684c9))
+
+## [1.15.2](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.3...1.15.2) (2025-02-14)
 
 ### Bug Fixes
 
 - switch no-prompt flag to force-overwrite ([43a79bb](https://github.com/salesforcecli/plugin-agent/commit/43a79bb9590a6022f19ef263ee3e36d871578b6a))
 
-## [1.15.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1) (2025-02-13)
+## [1.15.1-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.2...1.15.1-dev.3) (2025-02-14)
+
+### Bug Fixes
+
+- better ensure file path is yaml ([e83a22e](https://github.com/salesforcecli/plugin-agent/commit/e83a22e7522dc33d84e478c641cef9517b688353))
+- gracefully handle no genAiFunctions inside of GenAiPlanner ([88ff2ee](https://github.com/salesforcecli/plugin-agent/commit/88ff2ee6c0961c4605b3abafae0569941551dfb5))
+
+## [1.15.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.1...1.15.1) (2025-02-13)
 
 ### Bug Fixes
 
 - add xml key and attributes ([64f6a23](https://github.com/salesforcecli/plugin-agent/commit/64f6a2373c2e85827a8d0844326d3e797edad950))
 
-# [1.15.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.15.0) (2025-02-13)
+## [1.15.1-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.15.1...1.15.1-dev.2) (2025-02-14)
+
+## [1.15.1-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.0...1.15.1-dev.1) (2025-02-13)
+
+### Features
+
+- add --ai-eval-definition flag ([cbeab4f](https://github.com/salesforcecli/plugin-agent/commit/cbeab4fa0868d05b4978d0c5929be87a80d51ae2))
+- use --force-overwrite and prompt until unique file names ([631625b](https://github.com/salesforcecli/plugin-agent/commit/631625b16a9fa0f5f907b0a975f6ebe46d8fc7ec))
+
+## [1.15.1-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1-dev.0) (2025-02-13)
+
+### Bug Fixes
+
+- prompt for overwrite confirmation earlier ([48469aa](https://github.com/salesforcecli/plugin-agent/commit/48469aa96ac4a1e032a4b2584523883c5667690c))
+
+## [1.14.5-dev.5](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.4...1.14.5-dev.5) (2025-02-13)
+
+### Bug Fixes
+
+- better api name validation ([8f75a01](https://github.com/salesforcecli/plugin-agent/commit/8f75a01c3fd8ce945bede52800348ea1919cc682))
+
+### Features
+
+- prompt for api name until unique ([55a2caa](https://github.com/salesforcecli/plugin-agent/commit/55a2caaae118c0fec4829902d72cefab5b3ca58a))
+
+## [1.14.5-dev.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.3...1.14.5-dev.4) (2025-02-12)
+
+## [1.14.5-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.2...1.14.5-dev.3) (2025-02-12)
+
+### Bug Fixes
+
+- simplify api name regex ([cd07d7f](https://github.com/salesforcecli/plugin-agent/commit/cd07d7f90e76c1cd5aa79e942706d7e4e3bf0799))
+
+### Features
+
+- add --output-file to generate test-spec ([f97c477](https://github.com/salesforcecli/plugin-agent/commit/f97c47779a43717a1848852c0a8e4b4588849c24))
+
+## [1.14.5-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.1...1.14.5-dev.2) (2025-02-12)
+
+### Performance Improvements
+
+- improve traverse for yaml files ([07b8dbc](https://github.com/salesforcecli/plugin-agent/commit/07b8dbcc62a3adaed604c34bec49ed06363e60a7))
+
+## [1.14.5-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.0...1.14.5-dev.1) (2025-02-12)
+
+### Features
+
+- add autocomplete for yaml input ([3643682](https://github.com/salesforcecli/plugin-agent/commit/3643682c0bdd12144e8fe80b50bc7c536471c80b))
+
+## [1.14.5-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.14.5-dev.0) (2025-02-12)
+
+### Bug Fixes
+
+- improvements to test generation ([7a5220c](https://github.com/salesforcecli/plugin-agent/commit/7a5220c8569337eb1a4a4a6b4f9eb6b4addd93dd))
+- use BotVersion to find GenAiPlanner ([10fa18a](https://github.com/salesforcecli/plugin-agent/commit/10fa18af9d02f8ae219b958fb89207162e074fa1))
+
+### Features
+
+- add --api-name ([2a97ed6](https://github.com/salesforcecli/plugin-agent/commit/2a97ed62f8e17d23c7ae38c282be1553743a86f0))
+- ux improvements ([7efa7e1](https://github.com/salesforcecli/plugin-agent/commit/7efa7e102609d8462d084b700fd7ccfdaaa684c9))
+
+## [1.15.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.1...1.15.1) (2025-02-13)
+
+### Bug Fixes
+
+- add xml key and attributes ([64f6a23](https://github.com/salesforcecli/plugin-agent/commit/64f6a2373c2e85827a8d0844326d3e797edad950))
+
+## [1.15.1-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.0...1.15.1-dev.1) (2025-02-13)
+
+### Features
+
+- add --ai-eval-definition flag ([cbeab4f](https://github.com/salesforcecli/plugin-agent/commit/cbeab4fa0868d05b4978d0c5929be87a80d51ae2))
+- use --force-overwrite and prompt until unique file names ([631625b](https://github.com/salesforcecli/plugin-agent/commit/631625b16a9fa0f5f907b0a975f6ebe46d8fc7ec))
+
+## [1.15.1-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1-dev.0) (2025-02-13)
+
+### Bug Fixes
+
+- prompt for overwrite confirmation earlier ([48469aa](https://github.com/salesforcecli/plugin-agent/commit/48469aa96ac4a1e032a4b2584523883c5667690c))
+
+## [1.14.5-dev.5](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.4...1.14.5-dev.5) (2025-02-13)
+
+### Bug Fixes
+
+- better api name validation ([8f75a01](https://github.com/salesforcecli/plugin-agent/commit/8f75a01c3fd8ce945bede52800348ea1919cc682))
+
+### Features
+
+- prompt for api name until unique ([55a2caa](https://github.com/salesforcecli/plugin-agent/commit/55a2caaae118c0fec4829902d72cefab5b3ca58a))
+
+## [1.14.5-dev.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.3...1.14.5-dev.4) (2025-02-12)
+
+## [1.14.5-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.2...1.14.5-dev.3) (2025-02-12)
+
+### Bug Fixes
+
+- simplify api name regex ([cd07d7f](https://github.com/salesforcecli/plugin-agent/commit/cd07d7f90e76c1cd5aa79e942706d7e4e3bf0799))
+
+### Features
+
+- add --output-file to generate test-spec ([f97c477](https://github.com/salesforcecli/plugin-agent/commit/f97c47779a43717a1848852c0a8e4b4588849c24))
+
+## [1.14.5-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.1...1.14.5-dev.2) (2025-02-12)
+
+### Performance Improvements
+
+- improve traverse for yaml files ([07b8dbc](https://github.com/salesforcecli/plugin-agent/commit/07b8dbcc62a3adaed604c34bec49ed06363e60a7))
+
+## [1.14.5-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.0...1.14.5-dev.1) (2025-02-12)
+
+### Features
+
+- add autocomplete for yaml input ([3643682](https://github.com/salesforcecli/plugin-agent/commit/3643682c0bdd12144e8fe80b50bc7c536471c80b))
+
+## [1.14.5-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.14.5-dev.0) (2025-02-12)
+
+### Bug Fixes
+
+- improvements to test generation ([7a5220c](https://github.com/salesforcecli/plugin-agent/commit/7a5220c8569337eb1a4a4a6b4f9eb6b4addd93dd))
+- use BotVersion to find GenAiPlanner ([10fa18a](https://github.com/salesforcecli/plugin-agent/commit/10fa18af9d02f8ae219b958fb89207162e074fa1))
+
+### Features
+
+- add --api-name ([2a97ed6](https://github.com/salesforcecli/plugin-agent/commit/2a97ed62f8e17d23c7ae38c282be1553743a86f0))
+- ux improvements ([7efa7e1](https://github.com/salesforcecli/plugin-agent/commit/7efa7e102609d8462d084b700fd7ccfdaaa684c9))
+
+# [1.15.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.5...1.15.0) (2025-02-13)
 
 ### Bug Fixes
 
@@ -20,6 +223,52 @@
 ### Features
 
 - generate template from bot ([606ace7](https://github.com/salesforcecli/plugin-agent/commit/606ace779ce1daee4b14d63c9606b0fc82ca2d6c))
+
+## [1.14.5-dev.5](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.4...1.14.5-dev.5) (2025-02-13)
+
+### Bug Fixes
+
+- better api name validation ([8f75a01](https://github.com/salesforcecli/plugin-agent/commit/8f75a01c3fd8ce945bede52800348ea1919cc682))
+
+### Features
+
+- prompt for api name until unique ([55a2caa](https://github.com/salesforcecli/plugin-agent/commit/55a2caaae118c0fec4829902d72cefab5b3ca58a))
+
+## [1.14.5-dev.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.3...1.14.5-dev.4) (2025-02-12)
+
+### Bug Fixes
+
+- simplify api name regex ([cd07d7f](https://github.com/salesforcecli/plugin-agent/commit/cd07d7f90e76c1cd5aa79e942706d7e4e3bf0799))
+
+### Features
+
+- add --output-file to generate test-spec ([f97c477](https://github.com/salesforcecli/plugin-agent/commit/f97c47779a43717a1848852c0a8e4b4588849c24))
+
+## [1.14.5-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.2...1.14.5-dev.3) (2025-02-12)
+
+## [1.14.5-dev.2](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.1...1.14.5-dev.2) (2025-02-12)
+
+### Performance Improvements
+
+- improve traverse for yaml files ([07b8dbc](https://github.com/salesforcecli/plugin-agent/commit/07b8dbcc62a3adaed604c34bec49ed06363e60a7))
+
+## [1.14.5-dev.1](https://github.com/salesforcecli/plugin-agent/compare/1.14.5-dev.0...1.14.5-dev.1) (2025-02-12)
+
+### Features
+
+- add autocomplete for yaml input ([3643682](https://github.com/salesforcecli/plugin-agent/commit/3643682c0bdd12144e8fe80b50bc7c536471c80b))
+
+## [1.14.5-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.14.5-dev.0) (2025-02-12)
+
+### Bug Fixes
+
+- improvements to test generation ([7a5220c](https://github.com/salesforcecli/plugin-agent/commit/7a5220c8569337eb1a4a4a6b4f9eb6b4addd93dd))
+- use BotVersion to find GenAiPlanner ([10fa18a](https://github.com/salesforcecli/plugin-agent/commit/10fa18af9d02f8ae219b958fb89207162e074fa1))
+
+### Features
+
+- add --api-name ([2a97ed6](https://github.com/salesforcecli/plugin-agent/commit/2a97ed62f8e17d23c7ae38c282be1553743a86f0))
+- ux improvements ([7efa7e1](https://github.com/salesforcecli/plugin-agent/commit/7efa7e102609d8462d084b700fd7ccfdaaa684c9))
 
 ## [1.14.4](https://github.com/salesforcecli/plugin-agent/compare/1.14.3...1.14.4) (2025-02-10)
 
