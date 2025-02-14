@@ -10,8 +10,7 @@
           "$ref": "#/definitions/DraftAgentTopics"
         },
         "agentType": {
-          "type": "string",
-          "enum": ["customer", "internal"],
+          "$ref": "#/definitions/AgentType",
           "description": "Internal type is copilots; used by customers' employees. Customer type is agents; used by customers' customers."
         },
         "role": {
@@ -67,6 +66,10 @@
       },
       "minItems": 1,
       "maxItems": 1
+    },
+    "AgentType": {
+      "type": "string",
+      "enum": ["customer", "internal"]
     }
   }
 }

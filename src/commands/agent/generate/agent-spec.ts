@@ -9,7 +9,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { SfCommand, Flags, prompts } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import YAML from 'yaml';
-import { Agent, AgentJobSpecCreateConfigV2, AgentJobSpecV2 } from '@salesforce/agents';
+import { Agent, AgentJobSpecCreateConfig, AgentJobSpec, AgentTone, AgentType } from '@salesforce/agents';
 import {
   FlaggablePrompt,
   makeFlags,
@@ -28,12 +28,10 @@ export type AgentCreateSpecResult = {
   isSuccess: boolean;
   errorMessage?: string;
   specPath?: string; // the location of the job spec file
-} & AgentJobSpecV2;
-
-type AgentTone = 'casual' | 'formal' | 'neutral';
+} & AgentJobSpec;
 
 // Agent spec file schema
-export type AgentSpecFileContents = AgentJobSpecV2 & {
+export type AgentSpecFileContents = AgentJobSpec & {
   agentUser?: string;
   enrichLogs?: boolean;
   tone?: AgentTone;
@@ -228,8 +226,8 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     this.spinner.start('Creating agent spec');
 
     const agent = new Agent(connection, this.project!);
-    const specConfig: AgentJobSpecCreateConfigV2 = {
-      agentType: type as 'customer' | 'internal',
+    const specConfig: AgentJobSpecCreateConfig = {
+      agentType: type as AgentType,
       companyName,
       companyDescription,
       role,
@@ -249,7 +247,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       specConfig.maxNumOfTopics = Number(maxNumOfTopics);
     }
 
-    const specResponse = await agent.createSpecV2(specConfig);
+    const specResponse = await agent.createSpec(specConfig);
     // @ts-expect-error Need better typing
     const specFileContents = buildSpecFile(specResponse, { agentUser, enrichLogs, tone });
 
@@ -266,7 +264,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
 // Builds spec file contents from the spec response and any additional flags
 // in a specific order.
 const buildSpecFile = (
-  specResponse: AgentJobSpecV2,
+  specResponse: AgentJobSpec,
   extraProps: Partial<AgentSpecFileContents>
 ): AgentSpecFileContents => {
   const propertyOrder = [
@@ -315,7 +313,7 @@ const buildSpecFile = (
   return specFileContents as AgentSpecFileContents;
 };
 
-const writeSpecFile = (outputFile: string, agentSpec: AgentJobSpecV2): string => {
+const writeSpecFile = (outputFile: string, agentSpec: AgentJobSpec): string => {
   // create the directory if not already created
   const outputFilePath = resolve(outputFile);
   mkdirSync(dirname(outputFilePath), { recursive: true });
