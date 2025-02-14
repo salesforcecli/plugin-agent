@@ -1,3 +1,9 @@
+# [1.17.0](https://github.com/salesforcecli/plugin-agent/compare/1.16.0...1.17.0) (2025-02-14)
+
+### Features
+
+- remove v1 legacy code and rename v2 code ([42f3083](https://github.com/salesforcecli/plugin-agent/commit/42f3083a1b0c29a5a8201b8002d7424f60816675))
+
 # [1.16.0](https://github.com/salesforcecli/plugin-agent/compare/1.15.2...1.16.0) (2025-02-14)
 
 ## [1.15.1-dev.3](https://github.com/salesforcecli/plugin-agent/compare/1.15.1-dev.2...1.15.1-dev.3) (2025-02-14)
