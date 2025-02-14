@@ -1,3 +1,9 @@
+## [1.15.1](https://github.com/salesforcecli/plugin-agent/compare/1.15.0...1.15.1) (2025-02-13)
+
+### Bug Fixes
+
+- add xml key and attributes ([64f6a23](https://github.com/salesforcecli/plugin-agent/commit/64f6a2373c2e85827a8d0844326d3e797edad950))
+
 # [1.15.0](https://github.com/salesforcecli/plugin-agent/compare/1.14.4...1.15.0) (2025-02-13)
 
 ### Bug Fixes

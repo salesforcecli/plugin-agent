@@ -132,7 +132,12 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/create.ts)_
+=======
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/create.ts)_
+
+> > > > > > > main
 
 ## `sf agent generate agent-spec`
 
@@ -236,7 +241,12 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/generate/agent-spec.ts)_
+=======
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/generate/agent-spec.ts)_
+
+> > > > > > > main
 
 ## `sf agent generate template`
 
@@ -270,7 +280,12 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/generate/template.ts)_
+=======
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/generate/template.ts)_
+
+> > > > > > > main
 
 ## `sf agent generate test-spec`
 
@@ -298,7 +313,12 @@ EXAMPLES
   $ sf agent generate test-spec
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/generate/test-spec.ts)_
+=======
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/generate/test-spec.ts)_
+
+> > > > > > > main
 
 ## `sf agent preview`
 
@@ -333,7 +353,12 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/preview.ts)_
+=======
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/preview.ts)_
+
+> > > > > > > main
 
 ## `sf agent test create`
 
@@ -369,7 +394,12 @@ EXAMPLES
   $ sf agent test create
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/test/create.ts)_
+=======
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/test/create.ts)_
+
+> > > > > > > main
 
 ## `sf agent test list`
 
@@ -398,7 +428,12 @@ EXAMPLES
   $ sf agent test list
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/test/list.ts)_
+=======
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/test/list.ts)_
+
+> > > > > > > main
 
 ## `sf agent test results`
 
@@ -454,7 +489,12 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/test/results.ts)_
+=======
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/test/results.ts)_
+
+> > > > > > > main
 
 ## `sf agent test resume`
 
@@ -517,7 +557,12 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/test/resume.ts)_
+=======
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/test/resume.ts)_
+
+> > > > > > > main
 
 ## `sf agent test run`
 
@@ -580,6 +625,11 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
+<<<<<<< HEAD
 _See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1-dev.1/src/commands/agent/test/run.ts)_
+=======
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.15.1/src/commands/agent/test/run.ts)_
+
+> > > > > > > main
 
 <!-- commandsstop -->
