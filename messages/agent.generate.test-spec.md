@@ -8,7 +8,7 @@ This command will prompt you for the necessary information to create a new spec 
 
 # flags.from-definition.summary
 
-The API name of the AIEvaluationDefinition that you want to convert to a spec file.
+The file path to the AIEvaluationDefinition that you want to convert to a spec file.
 
 # flags.force-overwrite.summary
 
@@ -25,3 +25,11 @@ The name of the generated spec file. Defaults to "specs/<AGENT_API_NAME>-testSpe
 # info.cancel
 
 Operation canceled.
+
+# error.InvalidAiEvaluationDefinition
+
+File must be an AiEvaluationDefinition metadata file
+
+# error.NoAgentsFound
+
+No agents found in %s

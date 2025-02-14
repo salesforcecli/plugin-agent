@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError, SfProject } from '@salesforce/core';
+import { Messages, SfProject } from '@salesforce/core';
 import { writeTestSpec, generateTestSpecFromAiEvalDefinition } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
@@ -247,9 +247,17 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly state = 'beta';
 
   public static readonly flags = {
-    'from-definition': Flags.string({
+    'from-definition': Flags.file({
       char: 'd',
+      exists: true,
       summary: messages.getMessage('flags.from-definition.summary'),
+      parse: async (raw): Promise<string> => {
+        if (!raw.endsWith('aiEvaluationDefinition-meta.xml')) {
+          throw messages.createError('error.InvalidAiEvaluationDefinition');
+        }
+
+        return Promise.resolve(raw);
+      },
     }),
     'force-overwrite': Flags.boolean({
       summary: messages.getMessage('flags.force-overwrite.summary'),
@@ -257,7 +265,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     'output-file': Flags.file({
       char: 'f',
       summary: messages.getMessage('flags.output-file.summary'),
-      parse: async (raw): Promise<string | undefined> => Promise.resolve(raw ? ensureYamlExtension(raw) : undefined),
+      parse: async (raw): Promise<string> => Promise.resolve(ensureYamlExtension(raw)),
     }),
   };
 
@@ -270,22 +278,13 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot', 'AiEvaluationDefinition'],
+        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
         directoryPaths,
       },
     });
 
     if (flags['from-definition']) {
-      const aiEvalDefs = getMetadataFilePaths(cs, 'AiEvaluationDefinition');
-
-      if (!aiEvalDefs[flags['from-definition']]) {
-        throw new SfError(
-          `AiEvaluationDefinition ${flags['from-definition']} not found`,
-          'AiEvalDefinitionNotFoundError'
-        );
-      }
-
-      const spec = await generateTestSpecFromAiEvalDefinition(aiEvalDefs[flags['from-definition']]);
+      const spec = await generateTestSpecFromAiEvalDefinition(flags['from-definition']);
 
       const outputFile = await determineFilePath(spec.subjectName, flags['output-file'], flags['force-overwrite']);
       if (!outputFile) {
@@ -305,7 +304,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         .filter((n) => n !== '*'),
     ];
     if (bots.length === 0) {
-      throw new SfError(`No agents found in ${directoryPaths.join(', ')}`, 'NoAgentsFoundError');
+      throw messages.createError('error.NoAgentsFound', [directoryPaths.join(', ')]);
     }
 
     const subjectType = await select<string>({
