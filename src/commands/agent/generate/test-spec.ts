@@ -1,27 +1,24 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
+ * Copyright (c) 2025, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
-import { generateTestSpec } from '@salesforce/agents';
+import { join, parse } from 'node:path';
+import { existsSync } from 'node:fs';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { Messages, SfError, SfProject } from '@salesforce/core';
+import { writeTestSpec, generateTestSpecFromAiEvalDefinition } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
+import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
+import { warn } from '@oclif/core/errors';
 import { theme } from '../../../inquirer-theme.js';
-import { readDir } from '../../../read-dir.js';
+import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
-
-// TODO: add these back once we refine the regex
-// export const FORTY_CHAR_API_NAME_REGEX =
-//   /^(?=.{1,57}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,39})?$/;
-// export const EIGHTY_CHAR_API_NAME_REGEX =
-//   /^(?=.{1,97}$)[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,14}(__[a-zA-Z]([a-zA-Z0-9]|_(?!_)){0,79})?$/;
 
 type TestCase = {
   utterance: string;
@@ -31,100 +28,215 @@ type TestCase = {
 };
 
 function castArray<T>(value: T | T[]): T[] {
+  if (!value) return [];
   return Array.isArray(value) ? value : [value];
 }
 
-async function promptForTestCase(genAiPlugins: Record<string, string>): Promise<TestCase> {
+/**
+ * Prompts the user for test case information through interactive prompts.
+ *
+ * @param genAiPlugins - Record mapping topic names to GenAiPlugin XML file paths (used to find the related actions)
+ * @param genAiFunctions - Array of GenAiFunction names from the GenAiPlanner
+ * @returns Promise resolving to a TestCase object containing:
+ * - utterance: The user input string
+ * - expectedTopic: The expected topic for classification
+ * - expectedActions: Array of expected action names
+ * - expectedOutcome: Expected outcome string
+ *
+ * @remarks
+ * This function guides users through creating a test case by:
+ * 1. Prompting for an utterance
+ * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlanner)
+ * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlanner or GenAiPlugin)
+ * 4. Defining an expected outcome
+ */
+async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
   const utterance = await input({
     message: 'Utterance',
     validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
     theme,
   });
 
-  const customKey = '<OTHER>';
+  const expectedTopic = await select<string>({
+    message: 'Expected topic',
+    choices: Object.keys(genAiPlugins),
+    theme,
+  });
 
-  const topics = Object.keys(genAiPlugins);
+  // GenAiFunctions (aka actions) can be defined in the GenAiPlugin or GenAiPlanner
+  // the actions from the planner are passed in as an argument to this function
+  // the actions from the plugin are read from the GenAiPlugin file
+  let actions: string[] = [];
+  if (genAiPlugins[expectedTopic]) {
+    const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
+    const parser = new XMLParser();
+    const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
+    actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
+  }
 
-  const askForOtherActions = async (): Promise<string[]> =>
-    (
-      await input({
-        message: 'Expected action(s)',
-        validate: (d: string): boolean | string => {
-          if (!d.length) {
-            return 'expected value cannot be empty';
-          }
-          return true;
-        },
-        theme,
-      })
-    )
-      .split(',')
-      .map((a) => a.trim());
+  const expectedActions = await checkbox<string>({
+    message: 'Expected action(s)',
+    choices: [...actions, ...genAiFunctions],
+    theme,
+    required: true,
+  });
 
-  const askForBotRating = async (): Promise<string> =>
-    input({
-      message: 'Expected response',
-      validate: (d: string): boolean | string => {
+  const expectedOutcome = await input({
+    message: 'Expected outcome',
+    validate: (d: string): boolean | string => {
+      if (!d.length) {
+        return 'expected value cannot be empty';
+      }
+
+      return true;
+    },
+    theme,
+  });
+
+  return {
+    utterance,
+    expectedTopic,
+    expectedActions,
+    expectedOutcome,
+  };
+}
+
+function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
+  return [...cs.filter((component) => component.type.name === type && component.fullName !== '*')].reduce<
+    Record<string, string>
+  >(
+    (acc, component) => ({
+      ...acc,
+      [component.fullName]: cs.getComponentFilenamesByNameAndType({
+        fullName: component.fullName,
+        type,
+      })[0],
+    }),
+    {}
+  );
+}
+
+/**
+ * Retrieves GenAIPlugins and GenAiFunctions from a Bot's GenAiPlanner
+ *
+ * We have to get the bot version and planner for the selected bot so that we can get
+ * the actions (GenAiFunctions) and topics (GenAiPlugins) that can be selected for the
+ * test cases.
+ *
+ * The BotVersion tells us which GenAiPlanner to use, and the GenAiPlanner
+ * tells us which GenAiPlugins and GenAiFunctions are available. More GenAiFunctions
+ * might be available in the GenAiPlugin, so we read those later when the user
+ * has selected a GenAiPlugin/topic - inside of `promptForTestCase`.
+ *
+ * @param subjectName - The name of the Bot to analyze
+ * @param cs - ComponentSet containing Bot, GenAiPlanner, and GenAiPlugin components
+ *
+ * @returns Object containing:
+ * - genAiPlugins: Record of plugin names to their file paths
+ * - genAiFunctions: Array of function names
+ */
+async function getPluginsAndFunctions(
+  subjectName: string,
+  cs: ComponentSet
+): Promise<{
+  genAiPlugins: Record<string, string>;
+  genAiFunctions: string[];
+}> {
+  const botVersions = getMetadataFilePaths(cs, 'Bot');
+  const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
+
+  const parser = new XMLParser();
+  const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
+  const parsedBotVersion = parser.parse(botVersionXml) as {
+    BotVersion: { conversationDefinitionPlanners: { genAiPlannerName: string } };
+  };
+
+  const plannerXml = await readFile(
+    genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+    'utf-8'
+  );
+  const parsedPlanner = parser.parse(plannerXml) as {
+    GenAiPlanner: {
+      genAiPlugins: Array<{ genAiPluginName: string }>;
+      genAiFunctions: Array<{ genAiFunctionName: string }>;
+    };
+  };
+
+  const genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
+    ({ genAiFunctionName }) => genAiFunctionName
+  );
+
+  const genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
+    (acc, { genAiPluginName }) => ({
+      ...acc,
+      [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+        fullName: genAiPluginName,
+        type: 'GenAiPlugin',
+      })[0],
+    }),
+    {}
+  );
+
+  return { genAiPlugins, genAiFunctions };
+}
+
+function ensureYamlExtension(filePath: string): string {
+  const parsedPath = parse(filePath);
+
+  if (parsedPath.ext === '.yaml' || parsedPath.ext === '.yml') return filePath;
+  const normalized = `${join(parsedPath.dir, parsedPath.name)}.yaml`;
+  warn(`Provided file path does not have a .yaml or .yml extension. Normalizing to ${normalized}`);
+  return normalized;
+}
+
+async function promptUntilUniqueFile(subjectName: string, filePath?: string): Promise<string | undefined> {
+  const outputFile =
+    filePath ??
+    (await input({
+      message: 'Enter a path for the test spec file',
+      validate(d: string): boolean | string {
         if (!d.length) {
-          return 'expected value cannot be empty';
+          return 'Path cannot be empty';
         }
 
         return true;
       },
       theme,
-    });
+    }));
 
-  const expectedTopic = await select<string>({
-    message: 'Expected topic',
-    choices: [...topics, customKey],
-    theme,
-  });
+  const normalized = ensureYamlExtension(outputFile);
 
-  if (expectedTopic === customKey) {
-    return {
-      utterance,
-      expectedTopic: await input({
-        message: 'Expected topic',
-        validate: (d: string): boolean | string => {
-          if (!d.length) {
-            return 'expected value cannot be empty';
-          }
-          return true;
-        },
-        theme,
-      }),
-      // If the user selects OTHER for the topic, then we don't have a genAiPlugin to get actions from so we ask for them for custom input
-      expectedActions: await askForOtherActions(),
-      expectedOutcome: await askForBotRating(),
-    };
+  if (!existsSync(normalized)) {
+    return normalized;
   }
 
-  const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
-  const parser = new XMLParser();
-  const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-  const actions = castArray(parsed.GenAiPlugin.genAiFunctions).map((f) => f.functionName);
-
-  let expectedActions = await checkbox<string>({
-    message: 'Expected action(s)',
-    choices: [...actions, customKey],
-    theme,
-    required: true,
+  const confirmation = await yesNoOrCancel({
+    message: `File ${normalized} already exists. Overwrite?`,
+    default: false,
   });
 
-  if (expectedActions.includes(customKey)) {
-    const additional = await askForOtherActions();
-
-    expectedActions = [...expectedActions.filter((a) => a !== customKey), ...additional];
+  if (confirmation === 'cancel') {
+    return;
   }
 
-  const expectedOutcome = await askForBotRating();
+  if (!confirmation) {
+    return promptUntilUniqueFile(subjectName);
+  }
 
-  return {
-    utterance,
-    expectedActions,
-    expectedOutcome,
-    expectedTopic,
-  };
+  return normalized;
+}
+
+/**
+ * If the user provides the --force-overwrite flag, then we'll use the default file path (either the one provided by --output-file or the default path).
+ * If the user doesn't provide it, we'll prompt the user for a file path until they provide a unique one or cancel.
+ */
+async function determineFilePath(
+  subjectName: string,
+  outputFile: string | undefined,
+  forceOverwrite: boolean
+): Promise<string | undefined> {
+  const defaultFile = ensureYamlExtension(outputFile ?? join('specs', `${subjectName}-testSpec.yaml`));
+  return forceOverwrite ? defaultFile : promptUntilUniqueFile(subjectName, defaultFile);
 }
 
 export default class AgentGenerateTestSpec extends SfCommand<void> {
@@ -134,11 +246,66 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
   public static readonly enableJsonFlag = false;
   public static readonly state = 'beta';
 
+  public static readonly flags = {
+    'from-definition': Flags.string({
+      char: 'd',
+      summary: messages.getMessage('flags.from-definition.summary'),
+    }),
+    'force-overwrite': Flags.boolean({
+      summary: messages.getMessage('flags.force-overwrite.summary'),
+    }),
+    'output-file': Flags.file({
+      char: 'f',
+      summary: messages.getMessage('flags.output-file.summary'),
+      parse: async (raw): Promise<string | undefined> => Promise.resolve(raw ? ensureYamlExtension(raw) : undefined),
+    }),
+  };
+
   public async run(): Promise<void> {
-    const botsDir = join('force-app', 'main', 'default', 'bots');
-    const bots = await readDir(botsDir);
+    const { flags } = await this.parse(AgentGenerateTestSpec);
+
+    const directoryPaths = (await SfProject.resolve().then((project) => project.getPackageDirectories())).map(
+      (dir) => dir.fullPath
+    );
+
+    const cs = await ComponentSetBuilder.build({
+      metadata: {
+        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot', 'AiEvaluationDefinition'],
+        directoryPaths,
+      },
+    });
+
+    if (flags['from-definition']) {
+      const aiEvalDefs = getMetadataFilePaths(cs, 'AiEvaluationDefinition');
+
+      if (!aiEvalDefs[flags['from-definition']]) {
+        throw new SfError(
+          `AiEvaluationDefinition ${flags['from-definition']} not found`,
+          'AiEvalDefinitionNotFoundError'
+        );
+      }
+
+      const spec = await generateTestSpecFromAiEvalDefinition(aiEvalDefs[flags['from-definition']]);
+
+      const outputFile = await determineFilePath(spec.subjectName, flags['output-file'], flags['force-overwrite']);
+      if (!outputFile) {
+        this.log(messages.getMessage('info.cancel'));
+        return;
+      }
+
+      await writeTestSpec(spec, outputFile);
+      this.log(`Created ${outputFile}`);
+      return;
+    }
+
+    const bots = [
+      ...cs
+        .filter((component) => component.type.name === 'Bot')
+        .map((c) => c.fullName)
+        .filter((n) => n !== '*'),
+    ];
     if (bots.length === 0) {
-      throw new SfError(`No agents found in ${botsDir}`, 'NoAgentsFoundError');
+      throw new SfError(`No agents found in ${directoryPaths.join(', ')}`, 'NoAgentsFoundError');
     }
 
     const subjectType = await select<string>({
@@ -153,6 +320,14 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
+    const outputFile = await determineFilePath(subjectName, flags['output-file'], flags['force-overwrite']);
+    if (!outputFile) {
+      this.log(messages.getMessage('info.cancel'));
+      return;
+    }
+
+    const { genAiPlugins, genAiFunctions } = await getPluginsAndFunctions(subjectName, cs);
+
     const name = await input({
       message: 'Enter a name for the test definition',
       validate(d: string): boolean | string {
@@ -162,13 +337,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         }
 
         return true;
-
-        // TODO: add back validation once we refine the regex
-        // check against FORTY_CHAR_API_NAME_REGEX
-        // if (!FORTY_CHAR_API_NAME_REGEX.test(d)) {
-        //   return 'The non-namespaced portion an API name must begin with a letter, contain only letters, numbers, and underscores, not contain consecutive underscores, and not end with an underscore.';
-        // }
-        // return true;
       },
       theme,
     });
@@ -178,20 +346,12 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
-    const genAiPluginDir = join('force-app', 'main', 'default', 'genAiPlugins');
-    const genAiPlugins = Object.fromEntries(
-      (await readDir(genAiPluginDir)).map((genAiPlugin) => [
-        genAiPlugin.replace('.genAiPlugin-meta.xml', ''),
-        join(genAiPluginDir, genAiPlugin),
-      ])
-    );
-
     const testCases = [];
     do {
       this.log();
       this.styledHeader(`Adding test case #${testCases.length + 1}`);
       // eslint-disable-next-line no-await-in-loop
-      testCases.push(await promptForTestCase(genAiPlugins));
+      testCases.push(await promptForTestCase(genAiPlugins, genAiFunctions));
     } while ( // eslint-disable-next-line no-await-in-loop
       await confirm({
         message: 'Would you like to add another test case',
@@ -201,7 +361,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     this.log();
 
-    await generateTestSpec(
+    await writeTestSpec(
       {
         name,
         description,
@@ -209,8 +369,8 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         subjectName,
         testCases,
       },
-      `${name}-test-spec.yaml`
+      outputFile
     );
-    this.log(`Created ${name}-test-spec.yaml`);
+    this.log(`Created ${outputFile}`);
   }
 }

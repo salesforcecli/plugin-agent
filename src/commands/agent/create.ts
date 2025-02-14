@@ -27,6 +27,7 @@ import {
   getAgentUserId,
   validateAgentType,
   validateTone,
+  promptForYamlFile,
 } from '../../flags.js';
 import { theme } from '../../inquirer-theme.js';
 import { AgentSpecFileContents } from './generate/agent-spec.js';
@@ -118,7 +119,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     }
 
     // If we don't have an agent spec yet, prompt.
-    const specPath = flags.spec ?? (await promptForFlag(FLAGGABLE_PROMPTS['spec']));
+    const specPath = flags.spec ?? (await promptForYamlFile(FLAGGABLE_PROMPTS['spec']));
 
     // Read the agent spec and validate
     const inputSpec = YAML.parse(readFileSync(resolve(specPath), 'utf8')) as AgentSpecFileContents;
