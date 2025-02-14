@@ -14,10 +14,10 @@ import { input as inquirerInput } from '@inquirer/prompts';
 import { colorize } from '@oclif/core/ux';
 import {
   Agent,
-  AgentJobSpecV2,
-  AgentCreateConfigV2,
-  AgentCreateLifecycleStagesV2,
-  AgentCreateResponseV2,
+  AgentJobSpec,
+  AgentCreateConfig,
+  AgentCreateLifecycleStages,
+  AgentCreateResponse,
   generateAgentApiName,
 } from '@salesforce/agents';
 import {
@@ -35,7 +35,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.create');
 
 // The JSON response returned by the command.
-export type AgentCreateResult = AgentCreateResponseV2 & {
+export type AgentCreateResult = AgentCreateResponse & {
   previewFilePath?: string;
 };
 
@@ -154,17 +154,18 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     const mso = new MultiStageOutput({ jsonEnabled: this.jsonEnabled(), title, stages });
     mso.goto(MSO_STAGES.parse);
 
-    // @ts-expect-error not using async method in callback
-    Lifecycle.getInstance().on(AgentCreateLifecycleStagesV2.Previewing, () => mso.goto(MSO_STAGES.preview));
-    // @ts-expect-error not using async method in callback
-    Lifecycle.getInstance().on(AgentCreateLifecycleStagesV2.Creating, () => mso.goto(MSO_STAGES.create));
-    // @ts-expect-error not using async method in callback
-    Lifecycle.getInstance().on(AgentCreateLifecycleStagesV2.Retrieving, () => mso.goto(MSO_STAGES.retrieve));
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.Previewing, () =>
+      Promise.resolve(mso.goto(MSO_STAGES.preview))
+    );
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.Creating, () => Promise.resolve(mso.goto(MSO_STAGES.create)));
+    Lifecycle.getInstance().on(AgentCreateLifecycleStages.Retrieving, () =>
+      Promise.resolve(mso.goto(MSO_STAGES.retrieve))
+    );
 
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const agent = new Agent(connection, this.project!);
 
-    const agentConfig: AgentCreateConfigV2 = {
+    const agentConfig: AgentCreateConfig = {
       agentType: inputSpec.agentType,
       generationInfo: {
         defaultInfo: {
@@ -195,7 +196,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
         agentConfig.agentSettings.tone = validateTone(inputSpec.tone);
       }
     }
-    const response = await agent.createV2(agentConfig);
+    const response = await agent.create(agentConfig);
     const result: AgentCreateResult = response;
 
     mso.stop();
@@ -226,7 +227,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
 
 // The spec must define: agentType, role, companyName, companyDescription, and topics.
 // Agent type must be 'customer' or 'internal'.
-const validateSpec = (spec: Partial<AgentJobSpecV2>): void => {
+const validateSpec = (spec: Partial<AgentJobSpec>): void => {
   const requiredSpecValues: Array<'agentType' | 'role' | 'companyName' | 'companyDescription' | 'topics'> = [
     'agentType',
     'role',
