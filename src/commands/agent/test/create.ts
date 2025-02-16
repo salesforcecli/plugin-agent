@@ -47,7 +47,7 @@ const FLAGGABLE_PROMPTS = {
     validate: (d: string): boolean | string => {
       const specPath = resolve(d);
       if (!existsSync(specPath)) {
-        return 'Please enter an existing test spec (yaml) file';
+        return 'Enter an existing test spec YAML file';
       }
       return true;
     },
