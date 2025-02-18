@@ -1,3 +1,11 @@
+## [1.18.2](https://github.com/salesforcecli/plugin-agent/compare/1.18.1...1.18.2) (2025-02-18)
+
+### Bug Fixes
+
+- edit help for "agent generate test-spec" and "agent test create" ([0ab0f03](https://github.com/salesforcecli/plugin-agent/commit/0ab0f036d72f2bccab1b6d02971d69678da12c6f))
+- minor tweaks to existing help ([7709a34](https://github.com/salesforcecli/plugin-agent/commit/7709a34aa61a01a9e34fe1c45ec14de7c31abbf6))
+- set "agent test list" as a beta command ([8df23de](https://github.com/salesforcecli/plugin-agent/commit/8df23dedef2920cd50e1aa37c8c097d35f386c17))
+
 ## [1.18.1](https://github.com/salesforcecli/plugin-agent/compare/1.18.0...1.18.1) (2025-02-18)
 
 ### Bug Fixes
