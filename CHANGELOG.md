@@ -1,3 +1,9 @@
+## [1.18.1](https://github.com/salesforcecli/plugin-agent/compare/1.18.0...1.18.1) (2025-02-18)
+
+### Bug Fixes
+
+- edit help ([540dcc9](https://github.com/salesforcecli/plugin-agent/commit/540dcc932392d15e05079090190008b69d019027))
+
 # [1.18.0](https://github.com/salesforcecli/plugin-agent/compare/1.17.0...1.18.0) (2025-02-14)
 
 ### Features
