@@ -1,44 +1,56 @@
 # summary
 
-Convert a test spec file into an AiEvaluationDefinition and deploy it to your org.
+Create an agent test in your org using a local test spec YAML file.
 
 # description
 
-This command will convert a test spec file into an AiEvaluationDefinition and deploy it to your org. The spec file must be in yaml format.
+To run this command, you must have an agent test spec file, which is a YAML file that lists the test cases for testing a specific agent. Use the "agent generate test-spec" CLI command to generate a test spec file. Then specify the file to this command with the --spec flag, or run this command with no flags to be prompted.
 
-Use the --preview flag to see the metadata that will be deployed without actually deploying it.
+When this command completes, your org contains the new agent test, which you can view and edit using the Testing Center UI. This command also retrieves the metadata component (AiEvaluationDefinition) associated with the new test to your local Salesforce DX project and displays its filename.
+
+After you've created the test in the org, use the "agent test run" command to run it.
 
 # flags.spec.summary
 
-The path to the spec file.
+Path to the test spec YAML file.
 
 # flags.preview.summary
 
-Preview the test metadata without deploying to your org.
+Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
 
 # flags.force-overwrite.summary
 
-Don't prompt for confirmation when overwriting an existing test.
+Don't prompt for confirmation when overwriting an existing test (based on API name) in your org.
 
 # flags.test-api-name.summary
 
-The API name of the AiEvaluationDefinition.
+API name of the new test; the API name must not exist in the org.
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- Create an agent test interactively and be prompted for the test spec and API name of the test in the org; use the default org:
+
+  <%= config.bin %> <%= command.id %>
+
+- Create an agent test and use flags to specify all required information; if a test with same API name already exists in the org, overwrite it without confirmation. Use the org with alias "my-org":
+
+  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --force-overwrite --target-org my-org
+
+- Preview what the agent test metadata (AiEvaluationDefinition) looks like without deploying it to your default org:
+
+  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
 
 # prompt.confirm
 
-An AiEvaluationDefinition with the name %s already exists in the org. Do you want to overwrite it?
+A test with the API name %s already exists in the org. Do you want to overwrite it?
 
 # info.success
 
-AiEvaluationDefinition created at %s and deployed to %s
+Local AiEvaluationDefinition metadata XML file created at %s and agent test deployed to %s.
 
 # info.preview-success
 
-Preview of AiEvaluationDefinition created at %s
+Preview of of the test created at %s.
 
 # error.missingRequiredFlags
 
