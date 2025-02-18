@@ -21,7 +21,7 @@
     "alias": [],
     "command": "agent:generate:agent-spec",
     "flagAliases": [],
-    "flagChars": ["o", "p"],
+    "flagChars": ["o"],
     "flags": [
       "agent-user",
       "api-version",
@@ -30,11 +30,11 @@
       "company-website",
       "enrich-logs",
       "flags-dir",
+      "force-overwrite",
       "full-interview",
       "grounding-context",
       "json",
       "max-topics",
-      "no-prompt",
       "output-file",
       "prompt-template",
       "role",
@@ -47,10 +47,18 @@
   },
   {
     "alias": [],
+    "command": "agent:generate:template",
+    "flagAliases": [],
+    "flagChars": ["f", "o"],
+    "flags": ["agent-file", "agent-version", "api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:test-spec",
     "flagAliases": [],
-    "flagChars": [],
-    "flags": ["flags-dir"],
+    "flagChars": ["d", "f"],
+    "flags": ["flags-dir", "force-overwrite", "from-definition", "output-file"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -73,8 +81,8 @@
     "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
-    "flagChars": ["o", "p", "s"],
-    "flags": ["api-version", "flags-dir", "json", "no-prompt", "preview", "spec", "target-org"],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org", "test-api-name"],
     "plugin": "@salesforce/plugin-agent"
   },
   {

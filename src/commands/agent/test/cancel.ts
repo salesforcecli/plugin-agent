@@ -14,7 +14,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.cancel');
 
 export type AgentTestCancelResult = {
-  aiEvaluationId: string;
+  runId: string;
   success: boolean;
   errorCode?: string;
   message?: string;
@@ -25,6 +25,7 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
+  public static readonly hidden = true;
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -45,20 +46,20 @@ export default class AgentTestCancel extends SfCommand<AgentTestCancelResult> {
     const { flags } = await this.parse(AgentTestCancel);
 
     const agentTestCache = await AgentTestCache.create();
-    const { aiEvaluationId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+    const { runId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
 
-    this.log(`Canceling tests for AiEvaluation Job: ${aiEvaluationId}`);
+    this.log(`Canceling tests for AiEvaluation Job: ${runId}`);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const result = await agentTester.cancel(aiEvaluationId);
+    const result = await agentTester.cancel(runId);
 
     if (result.success) {
-      await agentTestCache.removeCacheEntry(aiEvaluationId);
+      await agentTestCache.removeCacheEntry(runId);
     }
 
     return {
       success: result.success,
-      aiEvaluationId,
+      runId,
     };
   }
 }

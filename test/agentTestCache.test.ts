@@ -25,17 +25,17 @@ describe('AgentTestCache', () => {
       const writeStub = sinon.stub(cache, 'write').resolves();
       await cache.createCacheEntry('123', 'testName');
       const entry = cache.get('123');
-      expect(entry.aiEvaluationId).to.equal('123');
+      expect(entry.runId).to.equal('123');
       expect(entry.name).to.equal('testName');
       expect(writeStub.calledOnce).to.be.true;
     });
 
-    it('should throw an error if aiEvaluationId is not provided', async () => {
+    it('should throw an error if runId is not provided', async () => {
       try {
         await cache.createCacheEntry('', 'testName');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).message).to.equal('aiEvaluationId is required to create a cache entry');
+        expect((e as SfError).message).to.equal('runId is required to create a cache entry');
       }
     });
   });
@@ -49,12 +49,12 @@ describe('AgentTestCache', () => {
       expect(writeStub.calledTwice).to.be.true;
     });
 
-    it('should throw an error if aiEvaluationId is not provided', async () => {
+    it('should throw an error if runId is not provided', async () => {
       try {
         await cache.removeCacheEntry('');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).message).to.equal('aiEvaluationId is required to remove a cache entry');
+        expect((e as SfError).message).to.equal('runId is required to remove a cache entry');
       }
     });
   });
@@ -64,7 +64,7 @@ describe('AgentTestCache', () => {
       sinon.stub(cache, 'getLatestKey').returns('123');
       await cache.createCacheEntry('123', 'testName');
       const result = cache.resolveFromCache();
-      expect(result.aiEvaluationId).to.equal('123');
+      expect(result.runId).to.equal('123');
       expect(result.name).to.equal('testName');
     });
 
@@ -74,38 +74,38 @@ describe('AgentTestCache', () => {
         cache.resolveFromCache();
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).message).to.equal('Could not find an aiEvaluationId to resume');
+        expect((e as SfError).message).to.equal('Could not find a runId to resume');
       }
     });
   });
 
   describe('useIdOrMostRecent', () => {
-    it('should return the provided aiEvaluationId', () => {
+    it('should return the provided runId', () => {
       const result = cache.useIdOrMostRecent('123', false);
-      expect(result).to.deep.equal({ aiEvaluationId: '123' });
+      expect(result).to.deep.equal({ runId: '123' });
     });
 
     it('should return the most recent cache entry', async () => {
-      sinon.stub(cache, 'resolveFromCache').returns({ aiEvaluationId: '123', name: 'testName' });
+      sinon.stub(cache, 'resolveFromCache').returns({ runId: '123', name: 'testName' });
       const result = cache.useIdOrMostRecent(undefined, true);
-      expect(result).to.deep.equal({ aiEvaluationId: '123', name: 'testName' });
+      expect(result).to.deep.equal({ runId: '123', name: 'testName' });
     });
 
-    it('should throw an error if both aiEvaluationId and useMostRecent are provided', () => {
+    it('should throw an error if both runId and useMostRecent are provided', () => {
       try {
         cache.useIdOrMostRecent('123', true);
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).message).to.equal('Cannot specify both an aiEvaluationId and use most recent flag');
+        expect((e as SfError).message).to.equal('Cannot specify both a runId and use most recent flag');
       }
     });
 
-    it('should throw an error if neither aiEvaluationId nor useMostRecent are provided', () => {
+    it('should throw an error if neither runId nor useMostRecent are provided', () => {
       try {
         cache.useIdOrMostRecent(undefined, false);
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).message).to.equal('Must specify either an aiEvaluationId or use most recent flag');
+        expect((e as SfError).message).to.equal('Must specify either a runId or use most recent flag');
       }
     });
   });

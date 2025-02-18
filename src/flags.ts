@@ -5,11 +5,14 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { readdir } from 'node:fs/promises';
+import { join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
+import autocomplete from 'inquirer-autocomplete-standalone';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -29,6 +32,8 @@ type FlagsOfPrompts<T extends Record<string, FlaggablePrompt>> = Record<
   keyof T,
   Interfaces.OptionFlag<string | undefined, Interfaces.CustomOptions>
 >;
+
+type AgentTone = 'casual' | 'formal' | 'neutral';
 
 export const resultFormatFlag = Flags.option({
   options: ['json', 'human', 'junit', 'tap'] as const,
@@ -66,6 +71,38 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
   ) as FlagsOfPrompts<T>;
 }
 
+async function traverseForYamlFiles(dir: string): Promise<string[]> {
+  const files = await readdir(dir, { withFileTypes: true });
+  const results: string[] = [];
+
+  for (const file of files) {
+    const fullPath = join(dir, file.name);
+
+    if (file.isDirectory()) {
+      // eslint-disable-next-line no-await-in-loop
+      results.push(...(await traverseForYamlFiles(fullPath)));
+    } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
+  const yamlFiles = await traverseForYamlFiles(process.cwd());
+  return autocomplete({
+    message: flagDef.message,
+    // eslint-disable-next-line @typescript-eslint/require-await
+    source: async (input) => {
+      const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
+
+      if (!input) return arr;
+      return arr.filter((o) => o.name.includes(input));
+    },
+  });
+};
+
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
   if (flagDef.options) {
@@ -99,10 +136,38 @@ export const validateMaxTopics = (maxTopics?: number): number | undefined => {
   // Deliberately using: != null
   if (maxTopics != null) {
     if (!isNaN(maxTopics) && isFinite(maxTopics)) {
-      if (maxTopics > 0) {
+      if (maxTopics > 0 && maxTopics < 31) {
         return maxTopics;
       }
     }
     throw messages.createError('error.invalidMaxTopics', [maxTopics]);
   }
+};
+
+export const validateTone = (tone: AgentTone): AgentTone => {
+  if (!['formal', 'casual', 'neutral'].includes(tone)) {
+    throw messages.createError('error.invalidTone', [tone]);
+  }
+  return tone;
+};
+
+export const validateAgentUser = async (connection: Connection, agentUser?: string): Promise<void> => {
+  if (agentUser?.length) {
+    try {
+      const q = `SELECT Id FROM User WHERE Username = '${agentUser}'`;
+      await connection.singleRecordQuery<{ Id: string }>(q);
+    } catch (error) {
+      const err = SfError.wrap(error);
+      throw SfError.create({
+        name: 'InvalidAgentUser',
+        message: messages.getMessage('error.invalidAgentUser', [agentUser]),
+        cause: err,
+      });
+    }
+  }
+};
+
+export const getAgentUserId = async (connection: Connection, agentUser: string): Promise<string> => {
+  const q = `SELECT Id FROM User WHERE Username = '${agentUser}'`;
+  return (await connection.singleRecordQuery<{ Id: string }>(q)).Id;
 };

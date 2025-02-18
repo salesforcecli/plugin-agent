@@ -35,10 +35,10 @@ describe('agent test resume NUTs', () => {
       }
     ).jsonOutput;
 
-    expect(runResult?.result.aiEvaluationId).to.be.ok;
+    expect(runResult?.result.runId).to.be.ok;
 
     const output = execCmd<AgentTestResumeResult>(
-      `agent test resume --job-id ${runResult?.result.aiEvaluationId} --target-org ${session.hubOrg.username} --json`,
+      `agent test resume --job-id ${runResult?.result.runId} --target-org ${session.hubOrg.username} --json`,
       {
         ensureExitCode: 0,
         env: { ...process.env, SF_MOCK_DIR: mockDir },
@@ -46,10 +46,10 @@ describe('agent test resume NUTs', () => {
     ).jsonOutput;
 
     expect(output?.result.status).to.equal('COMPLETED');
-    expect(output?.result.aiEvaluationId).to.equal('4KBSM000000003F4AQ');
+    expect(output?.result.runId).to.equal('4KBSM000000003F4AQ');
 
     // check that cache does not have an entry
     const cache = await AgentTestCache.create();
-    expect(() => cache.resolveFromCache()).to.throw('Could not find an aiEvaluationId to resume');
+    expect(() => cache.resolveFromCache()).to.throw('Could not find a runId to resume');
   });
 });

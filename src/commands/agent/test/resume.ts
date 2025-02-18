@@ -17,7 +17,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.resume');
 
 export type AgentTestResumeResult = {
-  aiEvaluationId: string;
+  runId: string;
   status: string;
 };
 
@@ -55,22 +55,22 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
     const { flags } = await this.parse(AgentTestResume);
 
     const agentTestCache = await AgentTestCache.create();
-    const { name, aiEvaluationId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+    const { name, runId } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
 
     const mso = new TestStages({
-      title: `Agent Test Run: ${name ?? aiEvaluationId}`,
+      title: `Agent Test Run: ${name ?? runId}`,
       jsonEnabled: this.jsonEnabled(),
     });
-    mso.start({ id: aiEvaluationId });
+    mso.start({ id: runId });
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
-    const { completed, response } = await mso.poll(agentTester, aiEvaluationId, flags.wait);
-    if (completed) await agentTestCache.removeCacheEntry(aiEvaluationId);
+    const { completed, response } = await mso.poll(agentTester, runId, flags.wait);
+    if (completed) await agentTestCache.removeCacheEntry(runId);
 
     mso.stop();
 
     await handleTestResults({
-      id: aiEvaluationId,
+      id: runId,
       format: flags['result-format'],
       results: response,
       jsonEnabled: this.jsonEnabled(),
@@ -79,7 +79,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
 
     return {
       status: 'COMPLETED',
-      aiEvaluationId,
+      runId,
     };
   }
 }

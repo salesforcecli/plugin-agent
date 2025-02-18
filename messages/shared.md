@@ -16,4 +16,12 @@ agentType must be either "customer" or "internal". Found: [%s]
 
 # error.invalidMaxTopics
 
-maxNumOfTopics must be a number greater than 0. Found: [%s]
+maxNumOfTopics must be a number between 1-30. Found: [%s]
+
+# error.invalidTone
+
+tone must be one of ['formal', 'casual', 'neutral']. Found: [%s]
+
+# error.invalidAgentUser
+
+agentUser must be the username of an existing user in the org. Found: [%s]

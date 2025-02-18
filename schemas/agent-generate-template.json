@@ -1,18 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentTestResumeResult",
+  "$ref": "#/definitions/AgentGenerateTemplateResult",
   "definitions": {
-    "AgentTestResumeResult": {
+    "AgentGenerateTemplateResult": {
       "type": "object",
       "properties": {
-        "runId": {
+        "genAiPlannerPath": {
           "type": "string"
         },
-        "status": {
+        "botTemplatePath": {
           "type": "string"
         }
       },
-      "required": ["runId", "status"],
+      "required": ["genAiPlannerPath", "botTemplatePath"],
       "additionalProperties": false
     }
   }
