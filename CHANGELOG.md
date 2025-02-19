@@ -1,3 +1,9 @@
+## [1.18.3](https://github.com/salesforcecli/plugin-agent/compare/1.18.2...1.18.3) (2025-02-19)
+
+### Bug Fixes
+
+- remove target-org ([9c98758](https://github.com/salesforcecli/plugin-agent/commit/9c98758f2edb4d8faba945dcd1fbd627d4de032a))
+
 ## [1.18.2](https://github.com/salesforcecli/plugin-agent/compare/1.18.1...1.18.2) (2025-02-18)
 
 ### Bug Fixes
