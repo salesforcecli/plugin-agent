@@ -12,7 +12,7 @@ By default, this command outputs test results in human-readable tables for each 
 
 # flags.api-name.summary
 
-API Name of the agent test to start.
+API name of the AiEvaluationDefinition to run.
 
 # flags.wait.summary
 

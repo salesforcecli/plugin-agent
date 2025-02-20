@@ -13,6 +13,7 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
+import { AgentTester } from '../../agents/lib/index.js';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -71,7 +72,7 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
   ) as FlagsOfPrompts<T>;
 }
 
-async function traverseForYamlFiles(dir: string): Promise<string[]> {
+async function traverseForFiles(dir: string, suffixes: string[]): Promise<string[]> {
   const files = await readdir(dir, { withFileTypes: true });
   const results: string[] = [];
 
@@ -80,8 +81,8 @@ async function traverseForYamlFiles(dir: string): Promise<string[]> {
 
     if (file.isDirectory()) {
       // eslint-disable-next-line no-await-in-loop
-      results.push(...(await traverseForYamlFiles(fullPath)));
-    } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+      results.push(...(await traverseForFiles(fullPath, suffixes)));
+    } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
       results.push(fullPath);
     }
   }
@@ -89,8 +90,33 @@ async function traverseForYamlFiles(dir: string): Promise<string[]> {
   return results;
 }
 
+export const promptForAiEvaluationDefinitionApiName = async (
+  flagDef: FlaggablePrompt,
+  connection: Connection
+): Promise<string> => {
+  const agents = new AgentTester(connection);
+  const aiDefFiles = await agents.list();
+
+  return Promise.race<string>([
+    autocomplete({
+      message: flagDef.message,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      source: async (input) => {
+        const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
+
+        if (!input) return arr;
+        return arr.filter((o) => o.name.includes(input));
+      },
+    }),
+    new Promise((_, reject) =>
+      // throw an error after 30s of no selection
+      setTimeout(() => reject(new SfError('Selection timed out after 30 seconds')), 30 * 1000)
+    ),
+  ]);
+};
+
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const yamlFiles = await traverseForYamlFiles(process.cwd());
+  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml']);
   return autocomplete({
     message: flagDef.message,
     // eslint-disable-next-line @typescript-eslint/require-await
