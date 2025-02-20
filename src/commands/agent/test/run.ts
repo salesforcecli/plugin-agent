@@ -33,10 +33,10 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    name: Flags.string({
+    'api-name': Flags.string({
       char: 'n',
       required: true,
-      summary: messages.getMessage('flags.name.summary'),
+      summary: messages.getMessage('flags.api-name.summary'),
     }),
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
@@ -55,16 +55,16 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
 
-    this.mso = new TestStages({ title: `Agent Test Run: ${flags.name}`, jsonEnabled: this.jsonEnabled() });
+    this.mso = new TestStages({ title: `Agent Test Run: ${flags['api-name']}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.start(flags.name);
+    const response = await agentTester.start(flags['api-name']);
 
     this.mso.update({ id: response.runId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.runId, flags.name);
+    await agentTestCache.createCacheEntry(response.runId, flags['api-name']);
 
     if (flags.wait?.minutes) {
       const { completed, response: detailsResponse } = await this.mso.poll(agentTester, response.runId, flags.wait);
