@@ -1,3 +1,9 @@
+## [1.18.4](https://github.com/salesforcecli/plugin-agent/compare/1.18.3...1.18.4) (2025-02-21)
+
+### Bug Fixes
+
+- change --name to --api-name for agent:run:test ([#92](https://github.com/salesforcecli/plugin-agent/issues/92)) ([fd694d9](https://github.com/salesforcecli/plugin-agent/commit/fd694d9958b9d4c14cc034a3601eab4bb2e4cabf))
+
 ## [1.18.3](https://github.com/salesforcecli/plugin-agent/compare/1.18.2...1.18.3) (2025-02-19)
 
 ### Bug Fixes

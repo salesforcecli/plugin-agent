@@ -61,7 +61,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     ...makeFlags(FLAGGABLE_PROMPTS),
-
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
     wait: Flags.duration({
