@@ -368,9 +368,9 @@ DESCRIPTION
   XXX
 
 EXAMPLES
-  $ sf agent preview --agent HelpDeskAgent
+  $ sf agent preview --name HelpDeskAgent
 
-  $ sf agent preview --agent ConciergeAgent --target-org production
+  $ sf agent preview --name ConciergeAgent --target-org production
 
 FLAG DESCRIPTIONS
   -n, --name=<value>  The name of the agent you want to preview

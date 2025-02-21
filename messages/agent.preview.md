@@ -16,5 +16,5 @@ the API name of the agent? (TBD based on agents library)
 
 # examples
 
-- <%= config.bin %> <%= command.id %> --agent HelpDeskAgent
-- <%= config.bin %> <%= command.id %> --agent ConciergeAgent --target-org production
+- <%= config.bin %> <%= command.id %> --name HelpDeskAgent
+- <%= config.bin %> <%= command.id %> --name ConciergeAgent --target-org production
