@@ -28,7 +28,7 @@ describe('agent test results NUTs', () => {
 
   it('should get results of completed test run', async () => {
     const runResult = execCmd<AgentTestRunResult>(
-      `agent test run --name my_agent_tests --target-org ${session.hubOrg.username} --wait 5 --json`,
+      `agent test run --api-name my_agent_tests --target-org ${session.hubOrg.username} --wait 5 --json`,
       {
         ensureExitCode: 0,
         env: { ...process.env, SF_MOCK_DIR: mockDir },

@@ -28,7 +28,7 @@ describe('agent test cancel NUTs', () => {
 
   it('should cancel async test run', async () => {
     const runResult = execCmd<AgentTestRunResult>(
-      `agent test run --name my_agent_tests --target-org ${session.hubOrg.username} --json`,
+      `agent test run --api-name my_agent_tests --target-org ${session.hubOrg.username} --json`,
       {
         ensureExitCode: 0,
         env: { ...process.env, SF_MOCK_DIR: mockDir },
