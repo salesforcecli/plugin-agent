@@ -13,7 +13,7 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import { AgentTester } from '../../agents/lib/index.js';
+import { AgentTester } from '@salesforce/agents';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
