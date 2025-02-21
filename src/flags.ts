@@ -97,7 +97,14 @@ export const promptForAiEvaluationDefinitionApiName = async (
   const agents = new AgentTester(connection);
   const aiDefFiles = await agents.list();
 
-  return Promise.race<string>([
+  let id: NodeJS.Timeout;
+  const timeout = new Promise((_, reject) => {
+    id = setTimeout(() => {
+      reject(new Error('Selection timed out after 30 seconds'));
+    }, 30 * 1000).unref();
+  });
+
+  return Promise.race([
     autocomplete({
       message: flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
@@ -108,11 +115,11 @@ export const promptForAiEvaluationDefinitionApiName = async (
         return arr.filter((o) => o.name.includes(input));
       },
     }),
-    new Promise((_, reject) =>
-      // throw an error after 30s of no selection
-      setTimeout(() => reject(new SfError('Selection timed out after 30 seconds')), 30 * 1000)
-    ),
-  ]);
+    timeout,
+  ]).then((result) => {
+    clearTimeout(id);
+    return result as string;
+  });
 };
 
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
