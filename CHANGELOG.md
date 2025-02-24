@@ -1,3 +1,9 @@
+# [1.19.0](https://github.com/salesforcecli/plugin-agent/compare/1.18.4...1.19.0) (2025-02-24)
+
+### Features
+
+- prompt users for `--api-name` ([#94](https://github.com/salesforcecli/plugin-agent/issues/94)) ([527ab0d](https://github.com/salesforcecli/plugin-agent/commit/527ab0d8cc4ecad210006a0d7febf20f283fac01))
+
 ## [1.18.4](https://github.com/salesforcecli/plugin-agent/compare/1.18.3...1.18.4) (2025-02-21)
 
 ### Bug Fixes

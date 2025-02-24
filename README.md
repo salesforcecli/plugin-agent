@@ -132,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -285,7 +285,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -343,7 +343,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -378,7 +378,7 @@ FLAG DESCRIPTIONS
     the API name of the agent? (TBD based on agents library)
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -433,7 +433,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -468,7 +468,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -524,7 +524,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -587,7 +587,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -595,12 +595,13 @@ Start an agent test in your org.
 
 ```
 USAGE
-  $ sf agent test run -o <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
+  $ sf agent test run -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w <value>]
     [--result-format json|human|junit|tap] [-d <value>]
 
 FLAGS
   -d, --output-dir=<value>      Directory to write the agent test results into.
-  -n, --api-name=<value>        (required) API Name of the agent test to start.
+  -n, --api-name=<value>        API name of the agent test to run; corresponds to the name of the AiEvaluationDefinition
+                                metadata component that implements the agent test.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
   -w, --wait=<value>            Number of minutes to wait for the command to complete and display results to the
@@ -650,6 +651,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.4/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.0/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
