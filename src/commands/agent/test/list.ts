@@ -33,7 +33,7 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
     this.table({
       data: results,
       columns: [
-        { key: 'fullName', name: 'Name' },
+        { key: 'fullName', name: 'API Name' },
         { key: 'id', name: 'Id' },
         { key: 'createdDate', name: 'Created Date' },
       ],
