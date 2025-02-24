@@ -1,3 +1,9 @@
+## [1.19.1](https://github.com/salesforcecli/plugin-agent/compare/1.19.0...1.19.1) (2025-02-24)
+
+### Bug Fixes
+
+- change table column title to API name, was already displaying it ([c25a299](https://github.com/salesforcecli/plugin-agent/commit/c25a2990609802fdca2bdc92336296bb4b00d060))
+
 # [1.19.0](https://github.com/salesforcecli/plugin-agent/compare/1.18.4...1.19.0) (2025-02-24)
 
 ### Features
