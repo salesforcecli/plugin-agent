@@ -10,7 +10,13 @@ import { Messages, SfError } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
-import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import {
+  FlaggablePrompt,
+  makeFlags,
+  promptForAiEvaluationDefinitionApiName,
+  resultFormatFlag,
+  testOutputDirFlag,
+} from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
 import { handleTestResults } from '../../../handleTestResults.js';
@@ -24,6 +30,27 @@ export type AgentTestRunResult = {
   status: string;
 };
 
+const FLAGGABLE_PROMPTS = {
+  'api-name': {
+    char: 'n',
+    required: true,
+    message: messages.getMessage('flags.api-name.summary'),
+    validate: (d: string): boolean | string => {
+      if (d.length === 0) {
+        return true;
+      }
+      if (d.length > 80) {
+        return 'API name cannot be over 80 characters.';
+      }
+      const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+      if (!regex.test(d)) {
+        return 'Invalid API name.';
+      }
+      return true;
+    },
+  },
+} satisfies Record<string, FlaggablePrompt>;
+
 export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -33,11 +60,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'api-name': Flags.string({
-      char: 'n',
-      required: true,
-      summary: messages.getMessage('flags.api-name.summary'),
-    }),
+    ...makeFlags(FLAGGABLE_PROMPTS),
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
     wait: Flags.duration({
@@ -54,17 +77,20 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const apiName =
+      flags['api-name'] ?? (await promptForAiEvaluationDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection));
 
-    this.mso = new TestStages({ title: `Agent Test Run: ${flags['api-name']}`, jsonEnabled: this.jsonEnabled() });
+    this.mso = new TestStages({ title: `Agent Test Run: ${apiName}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();
 
-    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.start(flags['api-name']);
+    const agentTester = new AgentTester(connection);
+    const response = await agentTester.start(apiName);
 
     this.mso.update({ id: response.runId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.runId, flags['api-name']);
+    await agentTestCache.createCacheEntry(response.runId, apiName);
 
     if (flags.wait?.minutes) {
       const { completed, response: detailsResponse } = await this.mso.poll(agentTester, response.runId, flags.wait);
