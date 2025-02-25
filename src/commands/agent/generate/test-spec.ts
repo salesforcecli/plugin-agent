@@ -78,9 +78,8 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     await checkbox<string | null>({
       message: 'Expected action(s)',
       choices: [
-        ...actions.map((a) => ({ name: a, value: a })),
-        ...genAiFunctions.map((f) => ({ name: f, value: f })),
         { name: 'No Actions', value: null },
+        ...actions.concat(genAiFunctions).map((a) => ({ name: a, value: a })),
       ],
       theme,
       validate: (choices) => {
