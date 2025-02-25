@@ -1,3 +1,9 @@
+## [1.19.2](https://github.com/salesforcecli/plugin-agent/compare/1.19.1...1.19.2) (2025-02-25)
+
+### Bug Fixes
+
+- add role to BotTemplate ([7b56118](https://github.com/salesforcecli/plugin-agent/commit/7b56118b1a0a03bf7b776c969d2375c10f0baccf))
+
 ## [1.19.1](https://github.com/salesforcecli/plugin-agent/compare/1.19.0...1.19.1) (2025-02-24)
 
 ### Bug Fixes
