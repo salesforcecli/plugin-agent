@@ -6,27 +6,12 @@
  */
 
 import path from 'node:path';
-import { tmpdir } from 'node:os';
 import fs from 'node:fs';
 import React from 'react';
-import { Box, Text } from 'ink';
-import figures from '@inquirer/figures';
+import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { AgentPreview, AgentPreviewSendResponse } from '@salesforce/agents';
 import { sleep } from '@salesforce/kit';
-
-// TODO:
-// - [ ] Add a way to end the session
-// -     [ ] On exit, notify that the transcript and results have been saved
-// - [x] Fix timestamp on Typing
-// - [ ] Break this into more components
-// - [ ] Flashing in iterm2
-// - [x] Correct the content width calculation
-// - [x] Add a way to save the transcript to a file
-// - [x] Add a way to save API results to a file
-// - [ ] If you ask to be connected with a human, then messages[0].message is empty...
-// -     [ ] It looks like if the type is Escalate, then the next message is empty
-// - [ ] Add the response type on the AgentResponse
 
 // Component to show a simple typing animation
 function Typing(): React.ReactNode {
@@ -52,22 +37,22 @@ function Typing(): React.ReactNode {
   );
 }
 
-// We split the content on newlines, then find the longest array element
+// Split the content on newlines, then find the longest array element
 const calculateWidth = (content: string): number =>
   content.split('\n').reduce((acc, line) => Math.max(acc, line.length), 0) + 4;
 
 const saveTranscriptsToFile = (
-  tempDir: string,
+  outputDir: string,
   messages: Array<{ timestamp: Date; role: string; content: string }>,
   responses: AgentPreviewSendResponse[]
 ): void => {
-  if (!tempDir) return;
-  fs.mkdirSync(tempDir, { recursive: true });
+  if (!outputDir) return;
+  fs.mkdirSync(outputDir, { recursive: true });
 
-  const transcriptPath = path.join(tempDir, 'transcript.json');
+  const transcriptPath = path.join(outputDir, 'transcript.json');
   fs.writeFileSync(transcriptPath, JSON.stringify(messages, null, 2));
 
-  const responsesPath = path.join(tempDir, 'responses.json');
+  const responsesPath = path.join(outputDir, 'responses.json');
   fs.writeFileSync(responsesPath, JSON.stringify(responses, null, 2));
 };
 
@@ -82,29 +67,53 @@ export function AgentPreviewReact(props: {
   readonly agent: AgentPreview;
   readonly id: string;
   readonly name: string;
+  readonly outputDir: string | undefined;
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
   const [sessionId, setSessionId] = React.useState('');
   const [query, setQuery] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(true);
+  const [sessionEnded, setSessionEnded] = React.useState(false);
   // @ts-expect-error: Complains if this is not defined but it's not used
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timestamp, setTimestamp] = React.useState(new Date().getTime());
   const [tempDir, setTempDir] = React.useState('');
-  // TODO: Fix type
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
 
-  const { agent, id, name } = props;
+  const { agent, id, name, outputDir } = props;
+
+  useInput((input, key) => {
+    if (key.escape) {
+      setSessionEnded(true);
+    }
+    if (key.ctrl && input === 'c') {
+      setSessionEnded(true);
+    }
+  });
+
+  React.useEffect(() => {
+    const endSession = async (): Promise<void> => {
+      if (sessionEnded) {
+        // TODO: Support other end types (such as Escalate)
+        await agent.end(sessionId, 'UserRequest');
+        process.exit(0);
+      }
+    };
+    void endSession();
+  }, [sessionEnded]);
 
   React.useEffect(() => {
     const startSession = async (): Promise<void> => {
       const session = await agent.start(id);
       setSessionId(session.sessionId);
       setHeader(`New session started with "${props.name}" (${session.sessionId})`);
-      await sleep(1300); // Add a delay to make it feel more natural
+      await sleep(500); // Add a short delay to make it feel more natural
       setIsTyping(false);
-      setTempDir(path.join(tmpdir(), 'agent-preview', `${timestamp}-${session.sessionId}`));
+      if (outputDir) {
+        const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+        setTempDir(path.join(outputDir, `${dateForDir}--${session.sessionId}`));
+      }
       setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
     };
 
@@ -174,12 +183,12 @@ export function AgentPreviewReact(props: {
         <Text dimColor>{'─'.repeat(process.stdout.columns - 2)}</Text>
       </Box>
 
-      <Box>
-        <Text>{figures.pointer} </Text>
+      <Box marginBottom={1}>
+        <Text>&gt; </Text>
         <TextInput
           showCursor
           value={query}
-          placeholder="Start typing…"
+          placeholder="Start typing (press ESC to exit)"
           onChange={setQuery}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onSubmit={async (content) => {
@@ -203,6 +212,22 @@ export function AgentPreviewReact(props: {
           }}
         />
       </Box>
+
+      {sessionEnded ? (
+        <Box
+          flexDirection="column"
+          width={process.stdout.columns}
+          borderStyle="round"
+          marginTop={1}
+          marginBottom={1}
+          paddingLeft={1}
+          paddingRight={1}
+        >
+          <Text bold>Session Ended</Text>
+          {outputDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
+          {outputDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
+        </Box>
+      ) : null}
     </Box>
   );
 }
