@@ -74,12 +74,27 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
   }
 
-  const expectedActions = await checkbox<string>({
-    message: 'Expected action(s)',
-    choices: [...actions, ...genAiFunctions],
-    theme,
-    required: true,
-  });
+  const expectedActions = (
+    await checkbox<string | null>({
+      message: 'Expected action(s)',
+      choices: [
+        { name: 'No Actions', value: null },
+        ...actions.concat(genAiFunctions).map((a) => ({ name: a, value: a })),
+      ],
+      theme,
+      validate: (choices) => {
+        if (choices.find((c) => c.name === 'No Actions')?.checked && choices.length > 1) {
+          // "no actions" selected, and other actions selected
+          // returns as the error message to the user
+          return 'Cannot select "No Actions" and other Actions';
+        }
+        return true;
+      },
+      required: true,
+    })
+  )
+    // remove the 'No Actions', null entry to produce "expectedActions: []" in spec.yaml
+    .filter((f) => f !== null);
 
   const expectedOutcome = await input({
     message: 'Expected outcome',
