@@ -7,7 +7,7 @@
 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTester, AgentTestStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
 import {
@@ -85,7 +85,18 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso.start();
 
     const agentTester = new AgentTester(connection);
-    const response = await agentTester.start(apiName);
+    let response: AgentTestStartResponse;
+    try {
+      response = await agentTester.start(apiName);
+    } catch (e) {
+      const wrapped = SfError.wrap(e);
+      if (wrapped.message.includes('Invalid AiEvalDefinitionVersion identifier')) {
+        wrapped.actions = [
+          `Try running "sf agent test list -o ${flags['target-org'].getUsername() ?? ''}" to see available options`,
+        ];
+      }
+      throw wrapped;
+    }
 
     this.mso.update({ id: response.runId });
 
