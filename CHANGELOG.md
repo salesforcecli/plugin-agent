@@ -1,3 +1,9 @@
+## [1.20.1](https://github.com/salesforcecli/plugin-agent/compare/1.20.0...1.20.1) (2025-02-27)
+
+### Bug Fixes
+
+- change substeps ([98f5a0f](https://github.com/salesforcecli/plugin-agent/commit/98f5a0f451a25350452a8a1111131af3c580c760))
+
 # [1.20.0](https://github.com/salesforcecli/plugin-agent/compare/1.19.5...1.20.0) (2025-02-27)
 
 ### Features

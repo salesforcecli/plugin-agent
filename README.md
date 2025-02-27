@@ -132,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -285,7 +285,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -343,7 +343,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -389,12 +389,12 @@ DESCRIPTION
 
   1. Create a connected app in your org as described in the "Create a Connected App" section here:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these
-  additional steps:
+  two additional steps:
 
-  1. When specifying the connected app's Callback URL, add this second callback URL on a new line:
+  a. When specifying the connected app's Callback URL, add this second callback URL on a new line:
   http://localhost:1717/OauthRedirect
 
-  2. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+  b. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
 
   2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
@@ -419,7 +419,7 @@ EXAMPLES
       "transcripts/my-preview"
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -474,7 +474,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -509,7 +509,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -565,7 +565,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -628,7 +628,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -692,6 +692,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
