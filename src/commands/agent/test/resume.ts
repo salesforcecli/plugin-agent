@@ -72,6 +72,6 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       outputDir: flags['output-dir'],
     });
 
-    return { runId, status: 'COMPLETED', ...response };
+    return { ...response!, runId, status: 'COMPLETED' };
   }
 }
