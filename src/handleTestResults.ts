@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { join } from 'node:path';
+import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
@@ -158,7 +159,7 @@ export async function handleTestResults({
     const formatted = humanFormat(results);
     if (outputDir) {
       const file = `test-result-${id}.txt`;
-      await writeFileToDir(outputDir, file, formatted);
+      await writeFileToDir(outputDir, file, stripVTControlCharacters(formatted));
       ux.log(`Created human-readable file at ${join(outputDir, file)}`);
     } else {
       ux.log(formatted);
