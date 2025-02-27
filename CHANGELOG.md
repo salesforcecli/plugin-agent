@@ -1,3 +1,15 @@
+# [1.20.0](https://github.com/salesforcecli/plugin-agent/compare/1.19.5...1.20.0) (2025-02-27)
+
+### Features
+
+- output-dir, pilot api, agent parsing, and more ([dd0bc5a](https://github.com/salesforcecli/plugin-agent/commit/dd0bc5a99be9595719c067683fe972cb70ea7e0b))
+
+## [1.13.1-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.13.0...1.13.1-preview.0) (2025-02-01)
+
+### Features
+
+- wip agent preview ([be7ff30](https://github.com/salesforcecli/plugin-agent/commit/be7ff3032d5a7816be835a3e6d28ae5b10f5cf07))
+
 ## [1.19.5](https://github.com/salesforcecli/plugin-agent/compare/1.19.4...1.19.5) (2025-02-27)
 
 ## [1.19.4](https://github.com/salesforcecli/plugin-agent/compare/1.19.3...1.19.4) (2025-02-27)
@@ -386,11 +398,17 @@
 
 - update prompt text for agent type ([892dc20](https://github.com/salesforcecli/plugin-agent/commit/892dc20c55af18196d7d9b5b1504d7f592fa7260))
 
-## [1.13.1](https://github.com/salesforcecli/plugin-agent/compare/1.13.0...1.13.1) (2025-02-04)
+## [1.13.1](https://github.com/salesforcecli/plugin-agent/compare/1.13.1-preview.0...1.13.1) (2025-02-04)
 
 ### Bug Fixes
 
 - more refactor spec generation and agent create commands ([cd9446e](https://github.com/salesforcecli/plugin-agent/commit/cd9446e068943cb668f895f5d2402499007b2932))
+
+## [1.13.1-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.13.0...1.13.1-preview.0) (2025-02-01)
+
+### Features
+
+- wip agent preview ([be7ff30](https://github.com/salesforcecli/plugin-agent/commit/be7ff3032d5a7816be835a3e6d28ae5b10f5cf07))
 
 # [1.13.0](https://github.com/salesforcecli/plugin-agent/compare/1.12.0...1.13.0) (2025-01-31)
 
