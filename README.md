@@ -347,35 +347,76 @@ _See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesfo
 
 ## `sf agent preview`
 
-Interact with an active agent, as a user would, to preview responses
+Interact with an active agent to preview how the agent responds to your statements, questions, and commands (utterances).
 
 ```
 USAGE
-  $ sf agent preview -o <value> -n <value> [--flags-dir <value>] [--api-version <value>]
+  $ sf agent preview -o <value> -a <value> [--flags-dir <value>] [--api-version <value>] [-n <value>] [-d <value>]
 
 FLAGS
-  -n, --name=<value>         (required) The name of the agent you want to preview
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-      --api-version=<value>  Override the api version used for api requests made by this command
+  -a, --connected-app-user=<value>  (required) Username or alias of the connected app user that's configured with
+                                    JWT-based access tokens to the agent.
+  -d, --output-dir=<value>          Directory where conversation transcripts are saved.
+  -n, --api-name=<value>            API name of the agent you want to interact with.
+  -o, --target-org=<value>          (required) Username or alias of the target org. Not required if the `target-org`
+                                    configuration variable is already set.
+      --api-version=<value>         Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
 
 DESCRIPTION
-  Interact with an active agent, as a user would, to preview responses
+  Interact with an active agent to preview how the agent responds to your statements, questions, and commands
+  (utterances).
 
-  XXX
+  Use this command to have a natural language conversation with an active agent in your org, as if you were an actual
+  user. The interface is simple: in the "Start typing..." prompt, enter a statement, question, or command; when you're
+  done, enter Return. Your utterance is posted on the right along with a timestamp. The agent then responds on the left.
+  To exit the conversation, hit ESC or Control+C.
+
+  This command is useful to test if the agent responds to your utterances as you expect. For example, you can test that
+  the agent uses a particular topic when asked a question, and then whether it invokes the correct action associated
+  with that topic. This command is the CLI-equivalent of the Conversation Preview panel in your org's Agent Builder UI.
+
+  When the session concludes, the command asks if you want to save the API responses and chat transcripts. By default,
+  the files are saved to the "./temp/agent-preview" directory. Specify a new default directory by setting the
+  environment variable "SF_AGENT_PREVIEW_OUTPUT_DIR" to the directory. Or you can pass the directory to the --output-dir
+  flag.
+
+  Find the agent's API name in its main details page in your org's Agent page in Setup.
+
+  Before you use this command, you must complete these steps:
+
+  1. Create a connected app in your org as described in the "Create a Connected App" section here:
+  https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these
+  additional steps:
+
+  1. When specifying the connected app's Callback URL, add this second callback URL on a new line:
+  http://localhost:1717/OauthRedirect
+
+  2. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+
+  2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here:
+  https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
+
+  3. Using the username of the user you specified as the "Run As" user above, authorize your org using the JWT flow, as
+  described in this document:
+  https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm.
+
+  4. When you run this command to interact with an agent, specify the username you authorized in the preceding step with
+  the --connected-app-user (-a) flag.
 
 EXAMPLES
-  $ sf agent preview --name HelpDeskAgent
+  Interact with an agent with API name "Resort_Manager" in the org with alias "my-org". Connect to your agent using
+  the alias "my-jwt-user"; this alias must point to the username who is authorized using JWT:
 
-  $ sf agent preview --name ConciergeAgent --target-org production
+    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user
 
-FLAG DESCRIPTIONS
-  -n, --name=<value>  The name of the agent you want to preview
+  Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview"
+  directory rather than the default "./temp/agent-preview":
 
-    the API name of the agent? (TBD based on agents library)
+    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user --output-dir \
+      "transcripts/my-preview"
 ```
 
 _See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/preview.ts)_

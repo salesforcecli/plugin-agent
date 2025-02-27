@@ -6,14 +6,13 @@
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
     "@inquirer/core": "^10.1.6",
-    "@inquirer/figures": "^1.0.7",
     "@inquirer/prompts": "^7.2.0",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.7.12",
-    "@salesforce/agents": "0.12.0",
-    "@salesforce/core": "^8.8.0",
+    "@salesforce/agents": "0.12.9",
+    "@salesforce/core": "^8.8.3",
     "@salesforce/kit": "^3.2.1",
-    "@salesforce/sf-plugins-core": "^12.1.0",
+    "@salesforce/sf-plugins-core": "^12.2.0",
     "@salesforce/source-deploy-retrieve": "^12.14.0",
     "@salesforce/types": "^1.3.0",
     "ansis": "^3.3.2",
@@ -28,8 +27,9 @@
     "@oclif/plugin-command-snapshot": "^5.2.19",
     "@oclif/test": "^4.1.0",
     "@salesforce/cli-plugins-testkit": "^5.3.35",
-    "@salesforce/dev-scripts": "^10.2.10",
+    "@salesforce/dev-scripts": "^10.2.12",
     "@salesforce/plugin-command-reference": "^3.1.29",
+    "@types/inquirer": "^9.0.7",
     "@types/react": "^18.3.3",
     "eslint-config-xo": "^0.45.0",
     "eslint-config-xo-react": "^0.27.0",
@@ -217,7 +217,7 @@
       "output": []
     },
     "link-check": {
-      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
+      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
       "files": [
         "./*.md",
         "./!(CHANGELOG).md",
