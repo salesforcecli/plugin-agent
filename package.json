@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/plugin-agent",
   "description": "Commands to interact with Salesforce agents",
-  "version": "1.18.1",
+  "version": "1.19.5",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
@@ -9,7 +9,7 @@
     "@inquirer/prompts": "^7.2.0",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.7.12",
-    "@salesforce/agents": "0.12.0",
+    "@salesforce/agents": "0.12.9",
     "@salesforce/core": "^8.8.3",
     "@salesforce/kit": "^3.2.1",
     "@salesforce/sf-plugins-core": "^12.2.0",
@@ -154,7 +154,7 @@
       "output": []
     },
     "test:compile": {
-      "command": "tsc -p \"./test\" --pretty --jsx react-jsx",
+      "command": "tsc -p \"./test\" --pretty",
       "files": [
         "test/**/*.ts",
         "**/tsconfig.json"
@@ -217,7 +217,7 @@
       "output": []
     },
     "link-check": {
-      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
+      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
       "files": [
         "./*.md",
         "./!(CHANGELOG).md",

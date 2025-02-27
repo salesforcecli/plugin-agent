@@ -132,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -245,13 +245,10 @@ Generate an agent template from an existing agent in your DX project so you can 
 
 ```
 USAGE
-  $ sf agent generate template -o <value> --agent-version <value> -f <value> [--json] [--flags-dir <value>] [--api-version
-    <value>]
+  $ sf agent generate template --agent-version <value> -f <value> [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
   -f, --agent-file=<value>     (required) Path to an agent (Bot) metadata file.
-  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
-                               configuration variable is already set.
       --agent-version=<value>  (required) Version of the agent (BotVersion).
       --api-version=<value>    Override the api version used for api requests made by this command
 
@@ -288,35 +285,65 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
-Interactively generate a specification file for a AI evaluation test.
+Generate an agent test spec, which is a YAML file that lists the test cases for testing a specific agent.
 
 ```
 USAGE
   $ sf agent generate test-spec [--flags-dir <value>] [-d <value>] [--force-overwrite] [-f <value>]
 
 FLAGS
-  -d, --from-definition=<value>  The file path to the AIEvaluationDefinition that you want to convert to a spec file.
-  -f, --output-file=<value>      The name of the generated spec file. Defaults to "specs/<AGENT_API_NAME>-testSpec.yaml"
-      --force-overwrite          Don't prompt for confirmation when overwriting an existing test spec file.
+  -d, --from-definition=<value>  Filepath to the AIEvaluationDefinition metadata XML file in your DX project that you
+                                 want to convert to a test spec YAML file.
+  -f, --output-file=<value>      Name of the generated test spec YAML file. Default value is
+                                 "specs/<AGENT_API_NAME>-testSpec.yaml".
+      --force-overwrite          Don't prompt for confirmation when overwriting an existing test spec YAML file.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
 
 DESCRIPTION
-  Interactively generate a specification file for a AI evaluation test.
+  Generate an agent test spec, which is a YAML file that lists the test cases for testing a specific agent.
 
-  This command will prompt you for the necessary information to create a new spec file (in yaml format). You can then
-  create a new AI evaluation using "sf agent test create --spec <spec-file>".
+  The first step when using Salesforce CLI to create an agent test in your org is to use this interactive command to
+  generate a local YAML-formatted test spec file. The test spec YAML file contains information about the agent being
+  tested, such as its API name, and then one or more test cases. This command uses the metadata components in your DX
+  project when prompting for information, such as the agent API name; it doesn't look in your org.
+
+  To generate a specific agent test case, this command prompts you for this information; when possible, the command
+  provides a list of options for you to choose from:
+
+  - Utterance: Natural language statement, question, or command used to test the agent.
+  - Expected topic: API name of the topic you expect the agent to use when responding to the utterance.
+  - Expected actions: One or more API names of the expection actions the agent takes.
+  - Expected outcome: Natural language description of the outcome you expect.
+
+  When your test spec is ready, you then run the "agent test create" command to actually create the test in your org and
+  synchronize the metadata with your DX project. The metadata type for an agent test is AiEvaluationDefinition.
+
+  If you have an existing AiEvaluationDefinition metadata XML file in your DX project, you can generate its equivalent
+  YAML test spec file with the --from-definition flag.
 
 EXAMPLES
-  $ sf agent generate test-spec
+  Generate an agent test spec YAML file interactively:
+
+    $ sf agent generate test-spec
+
+  Generate an agent test spec YAML file and specify a name for the new file; if the file exists, overwrite it without
+  confirmation:
+
+    $ sf agent generate test-spec --output-file specs/Resort_Manager-new-version-testSpec.yaml --force-overwrite
+
+  Generate an agent test spec YAML file from an existing AiEvaluationDefinition metadata XML file in your DX project:
+
+    $ sf agent generate test-spec --from-definition \
+      force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -392,11 +419,11 @@ EXAMPLES
       "transcripts/my-preview"
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
-Convert a test spec file into an AiEvaluationDefinition and deploy it to your org.
+Create an agent test in your org using a local test spec YAML file.
 
 ```
 USAGE
@@ -407,32 +434,51 @@ FLAGS
   -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
                                configuration variable is already set.
       --api-version=<value>    Override the api version used for api requests made by this command
-      --force-overwrite        Don't prompt for confirmation when overwriting an existing test.
-      --preview                Preview the test metadata without deploying to your org.
-      --spec=<value>           The path to the spec file.
-      --test-api-name=<value>  The API name of the AiEvaluationDefinition.
+      --force-overwrite        Don't prompt for confirmation when overwriting an existing test (based on API name) in
+                               your org.
+      --preview                Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
+      --spec=<value>           Path to the test spec YAML file.
+      --test-api-name=<value>  API name of the new test; the API name must not exist in the org.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
   --json               Format output as json.
 
 DESCRIPTION
-  Convert a test spec file into an AiEvaluationDefinition and deploy it to your org.
+  Create an agent test in your org using a local test spec YAML file.
 
-  This command will convert a test spec file into an AiEvaluationDefinition and deploy it to your org. The spec file
-  must be in yaml format.
+  To run this command, you must have an agent test spec file, which is a YAML file that lists the test cases for testing
+  a specific agent. Use the "agent generate test-spec" CLI command to generate a test spec file. Then specify the file
+  to this command with the --spec flag, or run this command with no flags to be prompted.
 
-  Use the --preview flag to see the metadata that will be deployed without actually deploying it.
+  When this command completes, your org contains the new agent test, which you can view and edit using the Testing
+  Center UI. This command also retrieves the metadata component (AiEvaluationDefinition) associated with the new test to
+  your local Salesforce DX project and displays its filename.
+
+  After you've created the test in the org, use the "agent test run" command to run it.
 
 EXAMPLES
-  $ sf agent test create
+  Create an agent test interactively and be prompted for the test spec and API name of the test in the org; use the
+  default org:
+
+    $ sf agent test create
+
+  Create an agent test and use flags to specify all required information; if a test with same API name already exists
+  in the org, overwrite it without confirmation. Use the org with alias "my-org":
+
+    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test \
+      --force-overwrite --target-org my-org
+
+  Preview what the agent test metadata (AiEvaluationDefinition) looks like without deploying it to your default org:
+
+    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
-List the available tests in the org.
+List the available agent tests in your org.
 
 ```
 USAGE
@@ -448,16 +494,22 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  List the available tests in the org.
+  List the available agent tests in your org.
 
-  Run this command to get a list of tests that are available in the org. This command will return the test ID, name, and
-  created date of each test.
+  The command outputs a table with the name (API name) of each test along with its unique ID and the date it was created
+  in the org.
 
 EXAMPLES
-  $ sf agent test list
+  List the agent tests in your default org:
+
+    $ sf agent test list
+
+  List the agent tests in an org with alias "my-org""
+
+    $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -513,7 +565,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -576,7 +628,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -584,12 +636,13 @@ Start an agent test in your org.
 
 ```
 USAGE
-  $ sf agent test run -o <value> -n <value> [--json] [--flags-dir <value>] [--api-version <value>] [-w <value>]
+  $ sf agent test run -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w <value>]
     [--result-format json|human|junit|tap] [-d <value>]
 
 FLAGS
   -d, --output-dir=<value>      Directory to write the agent test results into.
-  -n, --name=<value>            (required) Name of the agent test to start.
+  -n, --api-name=<value>        API name of the agent test to run; corresponds to the name of the AiEvaluationDefinition
+                                metadata component that implements the agent test.
   -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
                                 configuration variable is already set.
   -w, --wait=<value>            Number of minutes to wait for the command to complete and display results to the
@@ -605,13 +658,13 @@ GLOBAL FLAGS
 DESCRIPTION
   Start an agent test in your org.
 
-  Use the --name flag to specify the name of the agent test you want to run; find the agent test's name in the Testing
-  Center page in the Setup UI of your org.
+  Use the --api-name flag to specify the name of the agent test you want to run. Use the output of the "agent test list"
+  command to get the names of all the available agent tests in your org.
 
-  This command starts the agent test in your org, but doesn't by default wait for it to finish. Instead, it displays the
-  "agent test resume" command, with a job ID, that you execute to see the results of the test run, and then returns
-  control of the terminal window to you. Use the --wait flag to specify the number of minutes for the command to wait
-  for the agent test to complete; if the test completes by the end of the wait time, the command displays the test
+  By default, this command starts the agent test in your org, but it doesn't wait for the test to finish. Instead, it
+  displays the "agent test resume" command, with a job ID, that you execute to see the results of the test run, and then
+  returns control of the terminal window to you. Use the --wait flag to specify the number of minutes for the command to
+  wait for the agent test to complete; if the test completes by the end of the wait time, the command displays the test
   results. If not, run "agent test resume".
 
   By default, this command outputs test results in human-readable tables for each test case, if the test completes in
@@ -620,17 +673,17 @@ DESCRIPTION
   to write the results to a file rather than to the terminal.
 
 EXAMPLES
-  Start a test called MyAgentTest for an agent in your default org, don't wait for the test to finish:
+  Start an agent test called Resort_Manager_Test for an agent in your default org, don't wait for the test to finish:
 
-    $ sf agent test run --name MyAgentTest
+    $ sf agent test run --api-name Resort_Manager_Test
 
-  Start a test for an agent in an org with alias "my-org" and wait for 10 minutes for the test to finish:
+  Start an agent test for an agent in an org with alias "my-org" and wait for 10 minutes for the test to finish:
 
-    $ sf agent test run --name MyAgentTest --wait 10 --target-org my-org
+    $ sf agent test run --api-name Resort_Manager_Test --wait 10 --target-org my-org
 
-  Start a test and write the JSON-formatted results into a directory called "test-results":
+  Start an agent test and write the JSON-formatted results into a directory called "test-results":
 
-    $ sf agent test run --name MyAgentTest --wait 10 --output-dir ./test-results --result-format json
+    $ sf agent test run --api-name Resort_Manager_Test --wait 10 --output-dir ./test-results --result-format json
 
 FLAG DESCRIPTIONS
   -d, --output-dir=<value>  Directory to write the agent test results into.
@@ -639,6 +692,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.18.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.19.5/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

@@ -74,12 +74,27 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
   }
 
-  const expectedActions = await checkbox<string>({
-    message: 'Expected action(s)',
-    choices: [...actions, ...genAiFunctions],
-    theme,
-    required: true,
-  });
+  const expectedActions = (
+    await checkbox<string | null>({
+      message: 'Expected action(s)',
+      choices: [
+        { name: 'No Actions', value: null },
+        ...actions.concat(genAiFunctions).map((a) => ({ name: a, value: a })),
+      ],
+      theme,
+      validate: (choices) => {
+        if (choices.find((c) => c.name === 'No Actions')?.checked && choices.length > 1) {
+          // "no actions" selected, and other actions selected
+          // returns as the error message to the user
+          return 'Cannot select "No Actions" and other Actions';
+        }
+        return true;
+      },
+      required: true,
+    })
+  )
+    // remove the 'No Actions', null entry to produce "expectedActions: []" in spec.yaml
+    .filter((f) => f !== null);
 
   const expectedOutcome = await input({
     message: 'Expected outcome',
@@ -193,7 +208,7 @@ async function promptUntilUniqueFile(subjectName: string, filePath?: string): Pr
   const outputFile =
     filePath ??
     (await input({
-      message: 'Enter a path for the test spec file',
+      message: 'Enter a filepath for the test spec file',
       validate(d: string): boolean | string {
         if (!d.length) {
           return 'Path cannot be empty';
@@ -314,7 +329,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     });
 
     const subjectName = await select<string>({
-      message: 'Select the Agent to test',
+      message: 'Select the agent to test',
       choices: bots,
       theme,
     });
@@ -328,7 +343,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     const { genAiPlugins, genAiFunctions } = await getPluginsAndFunctions(subjectName, cs);
 
     const name = await input({
-      message: 'Enter a name for the test definition',
+      message: "Enter a name for the test; this name will become the test's label when created in the org",
       validate(d: string): boolean | string {
         // ensure that it's not empty
         if (!d.length) {
@@ -341,7 +356,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     });
 
     const description = await input({
-      message: 'Enter a description for test definition (optional)',
+      message: 'Enter a description for the test (optional)',
       theme,
     });
 
@@ -353,7 +368,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       testCases.push(await promptForTestCase(genAiPlugins, genAiFunctions));
     } while ( // eslint-disable-next-line no-await-in-loop
       await confirm({
-        message: 'Would you like to add another test case',
+        message: 'Do you want to add another test case',
         default: true,
       })
     );

@@ -27,7 +27,7 @@ describe('agent test run NUTs', () => {
 
   it('should start async test run', async () => {
     const name = 'my_agent_tests';
-    const command = `agent test run --name ${name} --target-org ${session.hubOrg.username} --json`;
+    const command = `agent test run --api-name ${name} --target-org ${session.hubOrg.username} --json`;
     const output = execCmd<AgentTestRunResult>(command, {
       ensureExitCode: 0,
       env: { ...process.env, SF_MOCK_DIR: mockDir },
@@ -44,7 +44,7 @@ describe('agent test run NUTs', () => {
 
   it('should poll for test run completion when --wait is used', async () => {
     const name = 'my_agent_tests';
-    const command = `agent test run --name ${name} --target-org ${session.hubOrg.username} --wait 5 --json`;
+    const command = `agent test run --api-name ${name} --target-org ${session.hubOrg.username} --wait 5 --json`;
     const output = execCmd<AgentTestRunResult>(command, {
       ensureExitCode: 0,
       env: { ...process.env, SF_MOCK_DIR: mockDir },

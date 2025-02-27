@@ -57,7 +57,6 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
   public static readonly requiresProject = true;
 
   public static readonly flags = {
-    'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),

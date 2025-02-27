@@ -1,3 +1,55 @@
+## [1.19.5](https://github.com/salesforcecli/plugin-agent/compare/1.19.4...1.19.5) (2025-02-27)
+
+## [1.19.4](https://github.com/salesforcecli/plugin-agent/compare/1.19.3...1.19.4) (2025-02-27)
+
+### Bug Fixes
+
+- suggest agent test list command when invalid name used ([#100](https://github.com/salesforcecli/plugin-agent/issues/100)) ([74d74e1](https://github.com/salesforcecli/plugin-agent/commit/74d74e18b4c17b87459bb1780d86f20b6396a5eb))
+
+## [1.19.3](https://github.com/salesforcecli/plugin-agent/compare/1.19.2...1.19.3) (2025-02-27)
+
+### Bug Fixes
+
+- allow no actions in generate test-spec ([d50ce12](https://github.com/salesforcecli/plugin-agent/commit/d50ce12930033b4d08a220df69d32ff974f25ea3))
+
+## [1.19.2](https://github.com/salesforcecli/plugin-agent/compare/1.19.1...1.19.2) (2025-02-25)
+
+### Bug Fixes
+
+- add role to BotTemplate ([7b56118](https://github.com/salesforcecli/plugin-agent/commit/7b56118b1a0a03bf7b776c969d2375c10f0baccf))
+
+## [1.19.1](https://github.com/salesforcecli/plugin-agent/compare/1.19.0...1.19.1) (2025-02-24)
+
+### Bug Fixes
+
+- change table column title to API name, was already displaying it ([c25a299](https://github.com/salesforcecli/plugin-agent/commit/c25a2990609802fdca2bdc92336296bb4b00d060))
+
+# [1.19.0](https://github.com/salesforcecli/plugin-agent/compare/1.18.4...1.19.0) (2025-02-24)
+
+### Features
+
+- prompt users for `--api-name` ([#94](https://github.com/salesforcecli/plugin-agent/issues/94)) ([527ab0d](https://github.com/salesforcecli/plugin-agent/commit/527ab0d8cc4ecad210006a0d7febf20f283fac01))
+
+## [1.18.4](https://github.com/salesforcecli/plugin-agent/compare/1.18.3...1.18.4) (2025-02-21)
+
+### Bug Fixes
+
+- change --name to --api-name for agent:run:test ([#92](https://github.com/salesforcecli/plugin-agent/issues/92)) ([fd694d9](https://github.com/salesforcecli/plugin-agent/commit/fd694d9958b9d4c14cc034a3601eab4bb2e4cabf))
+
+## [1.18.3](https://github.com/salesforcecli/plugin-agent/compare/1.18.2...1.18.3) (2025-02-19)
+
+### Bug Fixes
+
+- remove target-org ([9c98758](https://github.com/salesforcecli/plugin-agent/commit/9c98758f2edb4d8faba945dcd1fbd627d4de032a))
+
+## [1.18.2](https://github.com/salesforcecli/plugin-agent/compare/1.18.1...1.18.2) (2025-02-18)
+
+### Bug Fixes
+
+- edit help for "agent generate test-spec" and "agent test create" ([0ab0f03](https://github.com/salesforcecli/plugin-agent/commit/0ab0f036d72f2bccab1b6d02971d69678da12c6f))
+- minor tweaks to existing help ([7709a34](https://github.com/salesforcecli/plugin-agent/commit/7709a34aa61a01a9e34fe1c45ec14de7c31abbf6))
+- set "agent test list" as a beta command ([8df23de](https://github.com/salesforcecli/plugin-agent/commit/8df23dedef2920cd50e1aa37c8c097d35f386c17))
+
 ## [1.18.1](https://github.com/salesforcecli/plugin-agent/compare/1.18.0...1.18.1) (2025-02-18)
 
 ### Bug Fixes

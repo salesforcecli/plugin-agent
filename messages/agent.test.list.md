@@ -1,11 +1,17 @@
 # summary
 
-List the available tests in the org.
+List the available agent tests in your org.
 
 # description
 
-Run this command to get a list of tests that are available in the org. This command will return the test ID, name, and created date of each test.
+The command outputs a table with the name (API name) of each test along with its unique ID and the date it was created in the org.
 
 # examples
 
-- <%= config.bin %> <%= command.id %>
+- List the agent tests in your default org:
+
+  <%= config.bin %> <%= command.id %>
+
+- List the agent tests in an org with alias "my-org""
+
+  <%= config.bin %> <%= command.id %> --target-org my-org

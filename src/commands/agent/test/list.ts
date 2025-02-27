@@ -18,6 +18,7 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -32,7 +33,7 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
     this.table({
       data: results,
       columns: [
-        { key: 'fullName', name: 'Name' },
+        { key: 'fullName', name: 'API Name' },
         { key: 'id', name: 'Id' },
         { key: 'createdDate', name: 'Created Date' },
       ],
