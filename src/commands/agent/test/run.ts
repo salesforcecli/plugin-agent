@@ -101,12 +101,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         outputDir: flags['output-dir'],
       });
 
-      return detailsResponse
-        ? { ...detailsResponse, ...{ status: 'COMPLETED', runId: response.runId } }
-        : {
-            status: 'IN_PROGRESS',
-            runId: response.runId,
-          };
+      return { ...detailsResponse, ...{ status: 'COMPLETED', runId: response.runId } };
     } else {
       this.mso.stop();
       this.log(

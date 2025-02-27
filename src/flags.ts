@@ -19,12 +19,7 @@ import { theme } from './inquirer-theme.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'shared');
 
-export type AgentTestRunResult =
-  | {
-      runId: string;
-      status: string;
-    }
-  | (AgentTestResultsResponse & { status: 'COMPLETED'; runId: string });
+export type AgentTestRunResult = Partial<AgentTestResultsResponse> & { status: string; runId: string };
 
 export type FlaggablePrompt = {
   message: string;
