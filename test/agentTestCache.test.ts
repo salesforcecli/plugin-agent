@@ -81,8 +81,9 @@ describe('AgentTestCache', () => {
 
   describe('useIdOrMostRecent', () => {
     it('should return the provided runId', () => {
+      sinon.stub(cache, 'get').returns({ runId: '123', name: 'testName' });
       const result = cache.useIdOrMostRecent('123', false);
-      expect(result).to.deep.equal({ runId: '123' });
+      expect(result).to.deep.equal({ runId: '123', name: 'testName' });
     });
 
     it('should return the most recent cache entry', async () => {
