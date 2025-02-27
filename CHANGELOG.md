@@ -1,3 +1,9 @@
+## [1.19.3](https://github.com/salesforcecli/plugin-agent/compare/1.19.2...1.19.3) (2025-02-27)
+
+### Bug Fixes
+
+- allow no actions in generate test-spec ([d50ce12](https://github.com/salesforcecli/plugin-agent/commit/d50ce12930033b4d08a220df69d32ff974f25ea3))
+
 ## [1.19.2](https://github.com/salesforcecli/plugin-agent/compare/1.19.1...1.19.2) (2025-02-25)
 
 ### Bug Fixes
