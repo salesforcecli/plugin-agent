@@ -31,7 +31,6 @@ type BotTemplateExt = {
     botDialogGroups?: BotDialogGroup[];
     conversationGoals?: ConversationDefinitionGoal[];
     conversationVariables?: ConversationVariable[];
-    role?: string;
   };
 };
 
@@ -40,7 +39,7 @@ type BotExt = {
 };
 
 type BotVersionExt = {
-  BotVersion: BotVersion & { role?: string };
+  BotVersion: BotVersion;
 };
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -132,7 +131,7 @@ const convertBotToBotTemplate = (
   botFilePath: string
 ): BotTemplateExt => {
   const entryDialog = botVersionJson.BotVersion.entryDialog;
-  const { conversationSystemDialogs, role } = botVersionJson.BotVersion;
+  const { conversationSystemDialogs } = botVersionJson.BotVersion;
 
   // We need to pull the botDialog from the BotVersion file that matches the entryDialog
   // This will be added to the BotTemplate
@@ -170,7 +169,6 @@ const convertBotToBotTemplate = (
         entryDialogJson,
       ],
       conversationSystemDialogs,
-      role,
       entryDialog,
       mlDomain,
       ...bot.Bot,
