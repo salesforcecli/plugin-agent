@@ -13,11 +13,18 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import { AgentTester } from '@salesforce/agents';
+import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
 import { theme } from './inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'shared');
+
+export type AgentTestRunResult =
+  | {
+      runId: string;
+      status: string;
+    }
+  | (AgentTestResultsResponse & { status: 'COMPLETED'; runId: string });
 
 export type FlaggablePrompt = {
   message: string;

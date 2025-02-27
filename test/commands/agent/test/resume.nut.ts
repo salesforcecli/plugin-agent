@@ -7,9 +7,8 @@
 import { resolve } from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { AgentTestRunResult } from '../../../../src/commands/agent/test/run.js';
-import { AgentTestResumeResult } from '../../../../src/commands/agent/test/resume.js';
 import { AgentTestCache } from '../../../../src/agentTestCache.js';
+import type { AgentTestRunResult } from '../../../../src/flags.js';
 
 describe('agent test resume NUTs', () => {
   let session: TestSession;
@@ -37,7 +36,7 @@ describe('agent test resume NUTs', () => {
 
     expect(runResult?.result.runId).to.be.ok;
 
-    const output = execCmd<AgentTestResumeResult>(
+    const output = execCmd<AgentTestRunResult>(
       `agent test resume --job-id ${runResult?.result.runId} --target-org ${session.hubOrg.username} --json`,
       {
         ensureExitCode: 0,
