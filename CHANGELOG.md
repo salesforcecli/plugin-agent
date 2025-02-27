@@ -1,3 +1,5 @@
+## [1.19.5](https://github.com/salesforcecli/plugin-agent/compare/1.19.4...1.19.5) (2025-02-27)
+
 ## [1.19.4](https://github.com/salesforcecli/plugin-agent/compare/1.19.3...1.19.4) (2025-02-27)
 
 ### Bug Fixes
