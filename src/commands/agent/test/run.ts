@@ -109,7 +109,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       );
     }
 
-    return { status: 'IN_PROGRESS', runId: response.runId };
+    return { status: 'NEW', runId: response.runId };
   }
 
   protected catch(error: Error | SfError | CLIError): Promise<never> {
