@@ -11,6 +11,7 @@ import { Duration } from '@salesforce/kit';
 type CacheContents = {
   runId: string;
   name: string;
+  outputDir?: string;
 };
 
 export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> {
@@ -28,10 +29,10 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     };
   }
 
-  public async createCacheEntry(runId: string, name: string): Promise<void> {
+  public async createCacheEntry(runId: string, name: string, outputDir?: string): Promise<void> {
     if (!runId) throw new SfError('runId is required to create a cache entry');
 
-    this.set(runId, { runId, name });
+    this.set(runId, { runId, name, outputDir });
     await this.write();
   }
 
@@ -49,7 +50,10 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     return this.get(key);
   }
 
-  public useIdOrMostRecent(runId: string | undefined, useMostRecent: boolean): { runId: string; name?: string } {
+  public useIdOrMostRecent(
+    runId: string | undefined,
+    useMostRecent: boolean
+  ): { runId: string; name?: string; outputDir?: string } {
     if (runId && useMostRecent) {
       throw new SfError('Cannot specify both a runId and use most recent flag');
     }
@@ -59,7 +63,7 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     }
 
     if (runId) {
-      return { runId };
+      return this.get(runId);
     }
 
     return this.resolveFromCache();
