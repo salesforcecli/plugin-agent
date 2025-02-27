@@ -1,3 +1,9 @@
+## [1.20.2](https://github.com/salesforcecli/plugin-agent/compare/1.20.1...1.20.2) (2025-02-27)
+
+### Bug Fixes
+
+- strip ANSI escape codes from test results ([770870b](https://github.com/salesforcecli/plugin-agent/commit/770870b203c80d9769a0864e5084dddc888f2e91))
+
 ## [1.20.1](https://github.com/salesforcecli/plugin-agent/compare/1.20.0...1.20.1) (2025-02-27)
 
 ### Bug Fixes
