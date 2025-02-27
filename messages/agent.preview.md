@@ -14,11 +14,11 @@ Find the agent's API name in its main details page in your org's Agent page in S
 
 Before you use this command, you must complete these steps:
 
-1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these additional steps:
+1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these two additional steps:
 
-   1. When specifying the connected app's Callback URL, add this second callback URL on a new line: http://localhost:1717/OauthRedirect
+   a. When specifying the connected app's Callback URL, add this second callback URL on a new line: http://localhost:1717/OauthRedirect
 
-   2. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+   b. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
 
 2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
 
