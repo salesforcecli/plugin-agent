@@ -1,3 +1,9 @@
+## [1.19.4](https://github.com/salesforcecli/plugin-agent/compare/1.19.3...1.19.4) (2025-02-27)
+
+### Bug Fixes
+
+- suggest agent test list command when invalid name used ([#100](https://github.com/salesforcecli/plugin-agent/issues/100)) ([74d74e1](https://github.com/salesforcecli/plugin-agent/commit/74d74e18b4c17b87459bb1780d86f20b6396a5eb))
+
 ## [1.19.3](https://github.com/salesforcecli/plugin-agent/compare/1.19.2...1.19.3) (2025-02-27)
 
 ### Bug Fixes
