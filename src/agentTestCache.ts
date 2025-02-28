@@ -63,7 +63,7 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     }
 
     if (runId) {
-      return this.get(runId);
+      return this.has(runId) ? this.get(runId) : { runId };
     }
 
     return this.resolveFromCache();
