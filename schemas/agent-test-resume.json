@@ -1,18 +1,181 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentTestResumeResult",
+  "$ref": "#/definitions/AgentTestRunResult",
   "definitions": {
-    "AgentTestResumeResult": {
+    "AgentTestRunResult": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "$ref": "#/definitions/TestStatus"
+            },
+            "runId": {
+              "type": "string"
+            },
+            "startTime": {
+              "type": "string"
+            },
+            "endTime": {
+              "type": "string"
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "subjectName": {
+              "type": "string"
+            },
+            "testCases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TestCaseResult"
+              }
+            }
+          },
+          "required": ["runId", "status"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "$ref": "#/definitions/TestStatus"
+            },
+            "runId": {
+              "type": "string"
+            },
+            "startTime": {
+              "type": "string"
+            },
+            "endTime": {
+              "type": "string"
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "subjectName": {
+              "type": "string"
+            },
+            "testCases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TestCaseResult"
+              }
+            }
+          },
+          "required": ["runId", "startTime", "status", "subjectName", "testCases"]
+        }
+      ]
+    },
+    "TestStatus": {
+      "type": "string",
+      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR", "TERMINATED"]
+    },
+    "TestCaseResult": {
       "type": "object",
       "properties": {
-        "runId": {
+        "status": {
+          "$ref": "#/definitions/TestStatus"
+        },
+        "startTime": {
           "type": "string"
         },
-        "status": {
+        "endTime": {
           "type": "string"
+        },
+        "inputs": {
+          "type": "object",
+          "properties": {
+            "utterance": {
+              "type": "string"
+            }
+          },
+          "required": ["utterance"],
+          "additionalProperties": false
+        },
+        "generatedData": {
+          "type": "object",
+          "properties": {
+            "actionsSequence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "outcome": {
+              "type": "string"
+            },
+            "topic": {
+              "type": "string"
+            }
+          },
+          "required": ["actionsSequence", "outcome", "topic"],
+          "additionalProperties": false
+        },
+        "testResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "actualValue": {
+                "type": "string"
+              },
+              "expectedValue": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "result": {
+                "type": "string",
+                "enum": ["PASS", "FAILURE"]
+              },
+              "metricLabel": {
+                "type": "string",
+                "enum": ["Accuracy", "Precision"]
+              },
+              "metricExplainability": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/definitions/TestStatus"
+              },
+              "startTime": {
+                "type": "string"
+              },
+              "endTime": {
+                "type": "string"
+              },
+              "errorCode": {
+                "type": "string"
+              },
+              "errorMessage": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "actualValue",
+              "expectedValue",
+              "score",
+              "result",
+              "metricLabel",
+              "metricExplainability",
+              "status",
+              "startTime"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "testNumber": {
+          "type": "number"
         }
       },
-      "required": ["runId", "status"],
+      "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
       "additionalProperties": false
     }
   }

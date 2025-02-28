@@ -10,18 +10,13 @@ import { Messages } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
-import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import { AgentTestRunResult, resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.resume');
 
-export type AgentTestResumeResult = {
-  runId: string;
-  status: string;
-};
-
-export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
+export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -51,7 +46,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
     'output-dir': testOutputDirFlag(),
   };
 
-  public async run(): Promise<AgentTestResumeResult> {
+  public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestResume);
 
     const agentTestCache = await AgentTestCache.create();
@@ -77,9 +72,6 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
       outputDir: flags['output-dir'],
     });
 
-    return {
-      status: 'COMPLETED',
-      runId,
-    };
+    return { ...response!, runId, status: 'COMPLETED' };
   }
 }

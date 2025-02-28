@@ -7,8 +7,8 @@
 import { resolve } from 'node:path';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { AgentTestRunResult } from '../../../../src/commands/agent/test/run.js';
 import { AgentTestCache } from '../../../../src/agentTestCache.js';
+import type { AgentTestRunResult } from '../../../../src/flags.js';
 
 describe('agent test run NUTs', () => {
   let session: TestSession;

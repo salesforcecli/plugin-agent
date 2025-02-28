@@ -11,6 +11,7 @@ import { AgentTester, AgentTestStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
 import {
+  AgentTestRunResult,
   FlaggablePrompt,
   makeFlags,
   promptForAiEvaluationDefinitionApiName,
@@ -23,12 +24,6 @@ import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
-
-// TODO: this should include details and status
-export type AgentTestRunResult = {
-  runId: string;
-  status: string;
-};
 
 const FLAGGABLE_PROMPTS = {
   'api-name': {
@@ -117,10 +112,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         outputDir: flags['output-dir'],
       });
 
-      return {
-        status: 'COMPLETED',
-        runId: response.runId,
-      };
+      return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId };
     } else {
       this.mso.stop();
       this.log(
@@ -128,7 +120,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       );
     }
 
-    return response;
+    return { status: 'NEW', runId: response.runId };
   }
 
   protected catch(error: Error | SfError | CLIError): Promise<never> {
