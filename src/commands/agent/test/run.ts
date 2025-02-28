@@ -96,7 +96,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso.update({ id: response.runId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.runId, apiName);
+    await agentTestCache.createCacheEntry(response.runId, apiName, flags['output-dir'], flags['result-format']);
 
     if (flags.wait?.minutes) {
       const { completed, response: detailsResponse } = await this.mso.poll(agentTester, response.runId, flags.wait);
