@@ -1,3 +1,9 @@
+## [1.20.3](https://github.com/salesforcecli/plugin-agent/compare/1.20.2...1.20.3) (2025-02-28)
+
+### Bug Fixes
+
+- return test results if tests finished during run/resume --json ([#101](https://github.com/salesforcecli/plugin-agent/issues/101)) ([7cace65](https://github.com/salesforcecli/plugin-agent/commit/7cace65ca7ffc5d154aee5110166369244d7d836))
+
 ## [1.20.2](https://github.com/salesforcecli/plugin-agent/compare/1.20.1...1.20.2) (2025-02-27)
 
 ### Bug Fixes
