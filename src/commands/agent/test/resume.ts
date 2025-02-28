@@ -55,7 +55,10 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
     const { flags } = await this.parse(AgentTestResume);
 
     const agentTestCache = await AgentTestCache.create();
-    const { name, runId, outputDir } = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+    const { name, runId, outputDir, resultFormat } = agentTestCache.useIdOrMostRecent(
+      flags['job-id'],
+      flags['use-most-recent']
+    );
 
     const mso = new TestStages({
       title: `Agent Test Run: ${name ?? runId}`,
@@ -71,7 +74,7 @@ export default class AgentTestResume extends SfCommand<AgentTestResumeResult> {
 
     await handleTestResults({
       id: runId,
-      format: flags['result-format'],
+      format: resultFormat ?? flags['result-format'],
       results: response,
       jsonEnabled: this.jsonEnabled(),
       outputDir: outputDir ?? flags['output-dir'],
