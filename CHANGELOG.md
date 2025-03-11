@@ -1,3 +1,9 @@
+## [1.20.5](https://github.com/salesforcecli/plugin-agent/compare/1.20.4...1.20.5) (2025-03-11)
+
+### Bug Fixes
+
+- add output-dir to cache, use it if found W-17919149 ([#104](https://github.com/salesforcecli/plugin-agent/issues/104)) ([72f05a8](https://github.com/salesforcecli/plugin-agent/commit/72f05a83ba56e86f29d1a5a4a30d118a4aec22e4))
+
 ## [1.20.4](https://github.com/salesforcecli/plugin-agent/compare/1.20.4-preview.0...1.20.4) (2025-03-11)
 
 ## [1.20.4-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.3...1.20.4-preview.0) (2025-03-05)
