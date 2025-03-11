@@ -1,3 +1,11 @@
+## [1.20.4](https://github.com/salesforcecli/plugin-agent/compare/1.20.4-preview.0...1.20.4) (2025-03-11)
+
+## [1.20.4-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.3...1.20.4-preview.0) (2025-03-05)
+
+### Bug Fixes
+
+- add conversationVariables to botTemplate ([6b52f84](https://github.com/salesforcecli/plugin-agent/commit/6b52f84e1582344684450cd87317819a42ee1afc))
+
 ## [1.20.3](https://github.com/salesforcecli/plugin-agent/compare/1.20.2...1.20.3) (2025-02-28)
 
 ### Bug Fixes
