@@ -131,7 +131,7 @@ const convertBotToBotTemplate = (
   botFilePath: string
 ): BotTemplateExt => {
   const entryDialog = botVersionJson.BotVersion.entryDialog;
-  const { conversationSystemDialogs } = botVersionJson.BotVersion;
+  const { conversationSystemDialogs, conversationVariables } = botVersionJson.BotVersion;
 
   // We need to pull the botDialog from the BotVersion file that matches the entryDialog
   // This will be added to the BotTemplate
@@ -169,6 +169,7 @@ const convertBotToBotTemplate = (
         entryDialogJson,
       ],
       conversationSystemDialogs,
+      conversationVariables,
       entryDialog,
       mlDomain,
       ...bot.Bot,
