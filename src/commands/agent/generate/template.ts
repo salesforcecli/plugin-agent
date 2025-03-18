@@ -141,8 +141,14 @@ const convertBotToBotTemplate = (
   // TODO: Test this on a newer org. I had to have this renamed.
   entryDialogJson.label = entryDialog;
 
+  // Validate the Bot file to ensure successful Agent creation from a BotTemplate
+  if (bot.Bot.type === 'Bot')
+    throw new SfError(
+      `Agent (Bot) file cannot have a 'type' of 'Bot'. This indicates it is an Einstein Bot, not an Agent: ${botFilePath}`
+    );
   if (!bot.Bot.label) throw new SfError(`No label found in Agent (Bot) file: ${botFilePath}`);
   if (!bot.Bot.botMlDomain) throw new SfError(`No botMlDomain found in Agent (Bot) file: ${botFilePath}`);
+
   const masterLabel = bot.Bot.label;
   const mlDomain = bot.Bot.botMlDomain;
 
