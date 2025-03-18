@@ -144,7 +144,7 @@ const convertBotToBotTemplate = (
   // Validate the Bot file to ensure successful Agent creation from a BotTemplate
   if (bot.Bot.type === 'Bot')
     throw new SfError(
-      `Agent (Bot) file cannot have a 'type' of 'Bot'. This indicates it is an Einstein Bot, not an Agent: ${botFilePath}`
+      `The 'type' attribute of this Bot metadata component XML file can't have a value of 'Bot', which indicates that it's an Einstein Bot and not an agent: ${botFilePath}.  Agents have a value of either 'ExternalCopilot or ' or 'InternalCopilot'.`
     );
   if (!bot.Bot.label) throw new SfError(`No label found in Agent (Bot) file: ${botFilePath}`);
   if (!bot.Bot.botMlDomain) throw new SfError(`No botMlDomain found in Agent (Bot) file: ${botFilePath}`);
