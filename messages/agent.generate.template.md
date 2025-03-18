@@ -23,3 +23,23 @@ Version of the agent (BotVersion).
 # flags.agent-file.summary
 
 Path to an agent (Bot) metadata file.
+
+# error.invalid-agent-file
+
+Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml
+
+# error.no-entry-dialog
+
+No entryDialog found in BotVersion file.
+
+# error.invalid-bot-type
+
+The 'type' attribute of this Bot metadata component XML file can't have a value of 'Bot', which indicates that it's an Einstein Bot and not an agent: %s.
+
+# error.no-label
+
+No label found in Agent (Bot) file: %s.
+
+# error.no-ml-domain
+
+No botMlDomain found in Agent (Bot) file: %s.

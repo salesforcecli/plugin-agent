@@ -32,7 +32,9 @@ describe('agent generate template NUTs', () => {
       ensureExitCode: 1,
     }).jsonOutput;
 
-    expect(output?.message).to.include("Agent (Bot) file cannot have a 'type' of 'Bot'.");
+    expect(output?.message).to.include(
+      "The 'type' attribute of this Bot metadata component XML file can't have a value of 'Bot'"
+    );
   });
 
   it('Converts an Agent into an BotTemplate and GenAiPlanner', async () => {
