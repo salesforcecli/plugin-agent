@@ -1,3 +1,9 @@
+## [1.20.6](https://github.com/salesforcecli/plugin-agent/compare/1.20.5...1.20.6) (2025-03-20)
+
+### Bug Fixes
+
+- validate bot type ([e089fcd](https://github.com/salesforcecli/plugin-agent/commit/e089fcda73239546b9fbfc8bb398e8ddf15057ad))
+
 ## [1.20.5](https://github.com/salesforcecli/plugin-agent/compare/1.20.4...1.20.5) (2025-03-11)
 
 ### Bug Fixes
