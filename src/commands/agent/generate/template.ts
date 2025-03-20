@@ -20,11 +20,11 @@ import type {
   ConversationVariable,
 } from '@salesforce/types/metadata';
 
-type GenAiPlannerExt = {
+export type GenAiPlannerExt = {
   GenAiPlanner: GenAiPlanner & { botTemplate?: string };
 };
 
-type BotTemplateExt = {
+export type BotTemplateExt = {
   '?xml': { '@_version': '1.0'; '@_encoding': 'UTF-8' };
   BotTemplate: Omit<BotTemplate, 'botDialogGroups' | 'conversationGoals' | 'conversationVariables'> & {
     agentType?: string;

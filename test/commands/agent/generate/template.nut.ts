@@ -7,8 +7,13 @@
 import { join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { XMLParser } from 'fast-xml-parser';
 import { expect } from 'chai';
-import { AgentGenerateTemplateResult } from '../../../../src/commands/agent/generate/template.js';
+import {
+  AgentGenerateTemplateResult,
+  BotTemplateExt,
+  GenAiPlannerExt,
+} from '../../../../src/commands/agent/generate/template.js';
 
 describe('agent generate template NUTs', () => {
   let session: TestSession;
@@ -89,13 +94,19 @@ describe('agent generate template NUTs', () => {
       genAiPlannerFilePath
     );
 
-    // read both files and compare them
-    const generatedBotTemplateFile = readFileSync(generatedBotTemplateFilePath, 'utf-8');
-    const mockBotTemplateFile = readFileSync(mockBotTemplateFilePath, 'utf-8');
-    expect(generatedBotTemplateFile).to.equal(mockBotTemplateFile);
+    const parser = new XMLParser({ ignoreAttributes: false });
 
-    const generatedGenAiPlannerFile = readFileSync(generatedGenAiPlannerFilePath, 'utf-8');
-    const mockGenAiPlannerFile = readFileSync(mockGenAiPlannerFilePath, 'utf-8');
-    expect(generatedGenAiPlannerFile).to.equal(mockGenAiPlannerFile);
+    // read both files and compare them
+    const generatedBotTemplateFile = parser.parse(
+      readFileSync(generatedBotTemplateFilePath, 'utf-8')
+    ) as BotTemplateExt;
+    const mockBotTemplateFile = parser.parse(readFileSync(mockBotTemplateFilePath, 'utf-8')) as BotTemplateExt;
+    expect(generatedBotTemplateFile).to.deep.equal(mockBotTemplateFile);
+
+    const generatedGenAiPlannerFile = parser.parse(
+      readFileSync(generatedGenAiPlannerFilePath, 'utf-8')
+    ) as GenAiPlannerExt;
+    const mockGenAiPlannerFile = parser.parse(readFileSync(mockGenAiPlannerFilePath, 'utf-8')) as GenAiPlannerExt;
+    expect(generatedGenAiPlannerFile).to.deep.equal(mockGenAiPlannerFile);
   });
 });
