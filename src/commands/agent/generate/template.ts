@@ -20,11 +20,11 @@ import type {
   ConversationVariable,
 } from '@salesforce/types/metadata';
 
-type GenAiPlannerExt = {
+export type GenAiPlannerExt = {
   GenAiPlanner: GenAiPlanner & { botTemplate?: string };
 };
 
-type BotTemplateExt = {
+export type BotTemplateExt = {
   '?xml': { '@_version': '1.0'; '@_encoding': 'UTF-8' };
   BotTemplate: Omit<BotTemplate, 'botDialogGroups' | 'conversationGoals' | 'conversationVariables'> & {
     agentType?: string;
@@ -75,9 +75,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const { 'agent-file': agentFile, 'agent-version': botVersion } = flags;
 
     if (!agentFile.endsWith('.bot-meta.xml')) {
-      throw new SfError(
-        'Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot.bot-meta.xml'
-      );
+      throw new SfError(messages.getMessage('error.invalid-agent-file'));
     }
 
     const parser = new XMLParser({ ignoreAttributes: false });
@@ -137,12 +135,15 @@ const convertBotToBotTemplate = (
   // This will be added to the BotTemplate
   const entryDialogJson = botVersionJson.BotVersion.botDialogs.find((dialog) => dialog.developerName === entryDialog);
 
-  if (!entryDialogJson) throw new SfError('No entryDialog found in BotVersion file');
+  if (!entryDialogJson) throw new SfError(messages.getMessage('error.no-entry-dialog'));
   // TODO: Test this on a newer org. I had to have this renamed.
   entryDialogJson.label = entryDialog;
 
-  if (!bot.Bot.label) throw new SfError(`No label found in Agent (Bot) file: ${botFilePath}`);
-  if (!bot.Bot.botMlDomain) throw new SfError(`No botMlDomain found in Agent (Bot) file: ${botFilePath}`);
+  // Validate the Bot file to ensure successful Agent creation from a BotTemplate
+  if (bot.Bot.type === 'Bot') throw new SfError(messages.getMessage('error.invalid-bot-type', [botFilePath]));
+  if (!bot.Bot.label) throw new SfError(messages.getMessage('error.no-label', [botFilePath]));
+  if (!bot.Bot.botMlDomain) throw new SfError(messages.getMessage('error.no-ml-domain', [botFilePath]));
+
   const masterLabel = bot.Bot.label;
   const mlDomain = bot.Bot.botMlDomain;
 

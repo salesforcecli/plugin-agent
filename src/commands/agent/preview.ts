@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import React from 'react';
@@ -161,7 +161,7 @@ export const resolveOutputDir = async (outputDir: string | undefined): Promise<s
     if (response) {
       const getDir = await input({
         message: 'Enter the output directory',
-        default: env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', 'temp/agent-preview'),
+        default: env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', join('temp', 'agent-preview')),
         required: true,
       });
 
