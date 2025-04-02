@@ -70,6 +70,14 @@ export function readableTime(time: number, decimalPlaces = 2): string {
 
 export function humanFormat(results: AgentTestResultsResponse): string {
   const ux = new Ux();
+  const metrics = [
+    'completeness',
+    'coherence',
+    'conciseness',
+    'output_latency_milliseconds',
+    'instruction_following',
+    'factuality',
+  ];
 
   const tables: string[] = [];
   for (const testCase of results.testCases) {
@@ -82,17 +90,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for topics/action/output validation (actual v expected)
         // filter out other metrics from it
-        .filter(
-          (f) =>
-            ![
-              'completeness',
-              'coherence',
-              'conciseness',
-              'output_latency_milliseconds',
-              'instruction_following',
-              'factuality',
-            ].includes(f.name)
-        )
+        .filter((f) => !metrics.includes(f.name))
         .map((r) => ({
           test: humanFriendlyName(r.name),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
@@ -114,16 +112,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for metric information
         // filter out the standard evaluations (topics/action/output)
-        .filter((f) =>
-          [
-            'completeness',
-            'coherence',
-            'conciseness',
-            'output_latency_milliseconds',
-            'instruction_following',
-            'factuality',
-          ].includes(f.name)
-        )
+        .filter((f) => metrics.includes(f.name))
         .map((r) => ({
           test: humanFriendlyName(r.name),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
