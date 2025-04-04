@@ -20,8 +20,8 @@ import type {
   ConversationVariable,
 } from '@salesforce/types/metadata';
 
-export type GenAiPlannerExt = {
-  GenAiPlanner: GenAiPlanner & { botTemplate?: string };
+export type GenAiPlannerBundleExt = {
+  GenAiPlannerBundle: GenAiPlanner & { botTemplate?: string };
 };
 
 export type BotTemplateExt = {
@@ -46,7 +46,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.template');
 
 export type AgentGenerateTemplateResult = {
-  genAiPlannerPath: string;
+  genAiPlannerBundlePath: string;
   botTemplatePath: string;
 };
 export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTemplateResult> {
@@ -82,41 +82,45 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const builder = new XMLBuilder({ format: true, ignoreAttributes: false, indentBy: '    ' });
 
     const botName = basename(agentFile, '.bot-meta.xml');
-    // Since we are cloning the GenAiPlanner, we need to use a different name than the Agent (Bot) we started with
+    // Since we are cloning the GenAiPlannerBundle, we need to use a different name than the Agent (Bot) we started with
     // We will use this name for the BotTemplate also to make it clear they are related
     const finalFilename = `${botName}_v${botVersion}_Template`;
 
     // Build the base dir from the AgentFile
     const basePath = resolve(dirname(agentFile), '..', '..');
     const botDir = join(basePath, 'bots', botName);
-    const genAiPlannerDir = join(basePath, 'genAiPlanners');
+    const genAiPlannerBundleDir = join(basePath, 'genAiPlannerBundles');
     const botTemplateDir = join(basePath, 'botTemplates');
 
     const botTemplateFilePath = join(botTemplateDir, `${finalFilename}.botTemplate-meta.xml`);
-    const clonedGenAiPlannerFilePath = join(genAiPlannerDir, `${finalFilename}.genAiPlanner-meta.xml`);
+    const clonedGenAiPlannerBundleFilePath = join(
+      genAiPlannerBundleDir,
+      finalFilename,
+      `${finalFilename}.genAiPlannerBundle`
+    );
 
     // Parse the metadata files as JSON
     const botJson = xmlToJson<BotExt>(join(botDir, `${botName}.bot-meta.xml`), parser);
     const botVersionJson = xmlToJson<BotVersionExt>(join(botDir, `v${botVersion}.botVersion-meta.xml`), parser);
-    const genAiPlannerMetaJson = xmlToJson<GenAiPlannerExt>(
-      join(genAiPlannerDir, `${botName}.genAiPlanner-meta.xml`),
+    const genAiPlannerBundleMetaJson = xmlToJson<GenAiPlannerBundleExt>(
+      join(genAiPlannerBundleDir, botName, `${botName}.genAiPlannerBundle`),
       parser
     );
 
     // Modify the metadata files for final output
     // TODO: Confirm this name (might be conversationDefinitionPlanners)
-    genAiPlannerMetaJson.GenAiPlanner.botTemplate = finalFilename;
+    genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
-    jsonToXml<GenAiPlannerExt>(clonedGenAiPlannerFilePath, genAiPlannerMetaJson, builder);
+    jsonToXml<GenAiPlannerBundleExt>(clonedGenAiPlannerBundleFilePath, genAiPlannerBundleMetaJson, builder);
     jsonToXml<BotTemplateExt>(botTemplateFilePath, botTemplate, builder);
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
-    this.log(`Saved GenAiPlanner to:\n - ${clonedGenAiPlannerFilePath}`);
+    this.log(`Saved GenAiPlannerBundle to:\n - ${clonedGenAiPlannerBundleFilePath}`);
 
     return {
-      genAiPlannerPath: clonedGenAiPlannerFilePath,
+      genAiPlannerBundlePath: clonedGenAiPlannerBundleFilePath,
       botTemplatePath: botTemplateFilePath,
     };
   }
