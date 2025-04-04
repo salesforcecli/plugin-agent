@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenAiPlanner xmlns="http://soap.sforce.com/2006/04/metadata">
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>Deliver personalized customer interactions with an autonomous AI agent. Agentforce Service Agent intelligently supports your customers with common inquiries and escalates complex issues.</description>
     <genAiFunctions>
         <genAiFunctionName>EmployeeCopilot__AnswerQuestionsWithKnowledge</genAiFunctionName>
@@ -16,4 +16,4 @@
     <masterLabel>Guest Experience Agent</masterLabel>
     <plannerType>AiCopilot__ReAct</plannerType>
     <botTemplate>Guest_Experience_Agent_v1_Template</botTemplate>
-</GenAiPlanner>
+</GenAiPlannerBundle>
