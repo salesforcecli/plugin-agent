@@ -5,14 +5,14 @@
     "AgentGenerateTemplateResult": {
       "type": "object",
       "properties": {
-        "genAiPlannerPath": {
+        "genAiPlannerBundlePath": {
           "type": "string"
         },
         "botTemplatePath": {
           "type": "string"
         }
       },
-      "required": ["genAiPlannerPath", "botTemplatePath"],
+      "required": ["genAiPlannerBundlePath", "botTemplatePath"],
       "additionalProperties": false
     }
   }
