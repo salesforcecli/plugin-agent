@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages } from '@salesforce/core';
+import { Lifecycle, Messages, SfProject } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { input as inquirerInput } from '@inquirer/prompts';
 import { colorize } from '@oclif/core/ux';
@@ -164,7 +164,6 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     );
 
     const connection = flags['target-org'].getConnection(flags['api-version']);
-    const agent = new Agent(connection, this.project!);
 
     const agentConfig: AgentCreateConfig = {
       agentType: inputSpec.agentType,
@@ -197,7 +196,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
         agentConfig.agentSettings.tone = validateTone(inputSpec.tone);
       }
     }
-    const response = await agent.create(agentConfig);
+    const response = await Agent.create(connection, this.project as SfProject, agentConfig);
     const result: AgentCreateResult = response;
 
     mso.stop();

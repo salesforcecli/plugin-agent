@@ -96,8 +96,8 @@
                 "type": "number"
               },
               "result": {
-                "type": "string",
-                "enum": ["PASS", "FAILURE"]
+                "type": ["null", "string"],
+                "enum": [null, "PASS", "FAILURE"]
               },
               "metricLabel": {
                 "type": "string",
