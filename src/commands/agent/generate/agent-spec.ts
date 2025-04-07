@@ -212,8 +212,8 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       inputSpec?.enrichLogs ??
       (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS['enrich-logs']) : undefined);
     enrichLogs = Boolean(enrichLogs === 'true' || enrichLogs === true);
-    let tone =
-      flags.tone ??
+    let tone: AgentTone =
+      (flags.tone as AgentTone) ??
       inputSpec?.tone ??
       (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS.tone) : 'casual');
     tone = validateTone(tone as AgentTone);
@@ -225,7 +225,6 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
     this.log();
     this.spinner.start('Creating agent spec');
 
-    const agent = new Agent(connection, this.project!);
     const specConfig: AgentJobSpecCreateConfig = {
       agentType: type as AgentType,
       companyName,
@@ -247,8 +246,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       specConfig.maxNumOfTopics = Number(maxNumOfTopics);
     }
 
-    const specResponse = await agent.createSpec(specConfig);
-    // @ts-expect-error Need better typing
+    const specResponse = await Agent.createSpec(connection, specConfig);
     const specFileContents = buildSpecFile(specResponse, { agentUser, enrichLogs, tone });
 
     const outputFilePath = writeSpecFile(outputFile, specFileContents);
