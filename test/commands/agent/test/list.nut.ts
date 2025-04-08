@@ -24,7 +24,9 @@ describe('agent test list NUTs', () => {
   });
 
   it('should list agent tests in org', async () => {
-    const result = execCmd<AgentTestListResult>('agent test list --json', { ensureExitCode: 0 }).jsonOutput?.result;
+    const result = execCmd<AgentTestListResult>(`agent test list --target-org ${session.hubOrg.username} --json`, {
+      ensureExitCode: 0,
+    }).jsonOutput?.result;
     expect(result).to.be.ok;
     expect(result?.length).to.be.greaterThan(1);
     expect(result?.at(0)?.type).to.include('AiEvaluationDefinition');
