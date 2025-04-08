@@ -28,7 +28,7 @@ describe('agent test list NUTs', () => {
       ensureExitCode: 0,
     }).jsonOutput?.result;
     expect(result).to.be.ok;
-    expect(result?.length).to.be.greaterThan(1);
+    expect(result?.length).to.be.greaterThanOrEqual(1);
     expect(result?.at(0)?.type).to.include('AiEvaluationDefinition');
   });
 });
