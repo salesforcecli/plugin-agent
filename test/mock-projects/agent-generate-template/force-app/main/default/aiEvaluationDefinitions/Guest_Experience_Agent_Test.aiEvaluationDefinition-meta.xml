@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AiEvaluationDefinition xmlns="http://soap.sforce.com/2006/04/metadata">
   <description>abc</description>
-  <name>guest_experience_agent_test</name>
-  <subjectName>Guest_Experience_Agent</subjectName>
+  <name>Agent_for_Setup</name>
+  <subjectName>Agent_for_Setup</subjectName>
   <subjectType>AGENT</subjectType>
   <subjectVersion>v1</subjectVersion>
   <testCase>
