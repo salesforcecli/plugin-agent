@@ -30,6 +30,8 @@ describe('agent generate spec NUTs', () => {
   });
 
   it('should write yaml spec file with minimal flags', async () => {
+    // TODO: since we're not creating scratch orgs / NUT
+    // we've created a sandbox from na40, so all tests will be run against that, as the '.hubOrg'
     const targetOrg = `--target-org ${session.hubOrg.username}`;
     const type = 'customer';
     const role = 'test agent role';

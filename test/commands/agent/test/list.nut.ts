@@ -9,8 +9,7 @@ import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { AgentTestListResult } from '../../../../src/commands/agent/test/list.js';
 
-// cancelling tests is not supported yet
-describe.skip('agent test cancel NUTs', () => {
+describe('agent test list NUTs', () => {
   let session: TestSession;
 
   before(async () => {
@@ -28,5 +27,6 @@ describe.skip('agent test cancel NUTs', () => {
     const result = execCmd<AgentTestListResult>('agent test list --json', { ensureExitCode: 0 }).jsonOutput?.result;
     expect(result).to.be.ok;
     expect(result?.length).to.be.greaterThan(1);
+    expect(result?.at(0)?.type).to.include('AiEvaluationDefinition');
   });
 });
