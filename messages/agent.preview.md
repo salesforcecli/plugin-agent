@@ -12,25 +12,31 @@ When the session concludes, the command asks if you want to save the API respons
 
 Find the agent's API name in its main details page in your org's Agent page in Setup.
 
-Before you use this command, you must complete these steps:
+# Before you use this command, you must complete these steps:
 
-1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these two additional steps:
+1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these four additional steps:
 
-   a. When specifying the connected app's Callback URL, add this second callback URL on a new line: http://localhost:1717/OauthRedirect
+   a. When specifying the connected app's Callback URL, add this second callback URL on a new line: "http://localhost:1717/OauthRedirect".
 
-   b. When adding the scopes to the connected app, add `Manage user data via Web browsers (web)`.
+   b. When adding the scopes to the connected app, add "Manage user data via Web browsers (web)".
 
-   c. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+   c. Ensure that the "Require Secret for Web Server Flow" option is not selected.
+
+   d. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
 
 2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
 
-3. Request the specific OAuth scopes needed for the APIs by setting the `SFDX_AUTH_SCOPES` environment variable to `refresh_token sfap_api chatbot_api web api`.
+3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
-4. Using the username of the user you specified as the "Run As" user above, authorize your org using the web server flow, as described in this document: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm
-   IMPORTANT: you must pass `--client-id <CONNECTED-APP-CONSUMER-KEY>` to `sf org login web`, otherwise it will use the default CLI connected app.
-   Press Enter to skip sharing the client secret (`Require Secret for Web Server Flow` in the connected app should be disabled).
+4. Set the "SFDX_AUTH_SCOPES" environment variable to "refresh_token sfap_api chatbot_api web api". This step ensures that you get the specific OAuth scopes required by this command.
 
-5. When you run this command to interact with an agent, specify the username you authorized in the preceding step with the --connected-app-user (-a) flag.
+5. Using the username of the user you specified as the "Run As" user above, authorize your org using the web server flow, as described in this document: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm.
+
+   IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
+
+   Press Enter to skip sharing the client secret.
+
+6. When you run this command to interact with an agent, specify the username you authorized in the preceding step with the --connected-app-user (-a) flag.
 
 # flags.api-name.summary
 
