@@ -4147,12 +4147,12 @@ eslint-plugin-react@^7.34.3:
     string.prototype.matchall "^4.0.12"
     string.prototype.repeat "^1.0.0"
 
-eslint-plugin-sf-plugin@^1.20.9:
-  version "1.20.14"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-sf-plugin/-/eslint-plugin-sf-plugin-1.20.14.tgz#85c3821a5d62785a2c8af45e6ed4955f6eb83906"
-  integrity sha512-193twioaAWsLPDPliXffLDOGciOX4v8SoKOnWLqfw8QEhQwaG9XTRp7GMjxCgeTnaFPFtOqTbVGCg5714YQGMQ==
+eslint-plugin-sf-plugin@^1.20.18:
+  version "1.20.18"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-sf-plugin/-/eslint-plugin-sf-plugin-1.20.18.tgz#06e7a27babf6d5638b17e082c888c11201c01cd4"
+  integrity sha512-ljPpknrhJio/YOnZUm6f63ujT2Gi7jUE63D4BWtYYbMaljX27kmXYygoViYi/Vsz5+S8jj/ydSHLJVTRo5Ynqw==
   dependencies:
-    "@salesforce/core" "^8.8.2"
+    "@salesforce/core" "^8.8.7"
     "@typescript-eslint/utils" "^7.18.0"
 
 eslint-plugin-unicorn@^50.0.1:
