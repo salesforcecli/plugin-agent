@@ -1,5 +1,16 @@
 {
-  "orgName": "ewillhoit company",
+  "orgName": "Agent NUTs",
   "edition": "Developer",
-  "features": []
+  "features": ["CustomerDataPlatform", "CustomerDataPlatformLite", "Einstein1AIPlatform"],
+  "settings": {
+    "einsteinGptSettings": {
+      "enableEinsteinGptPlatform": true
+    },
+    "customerDataPlatformSettings": {
+      "enableCustomerDataPlatform": true
+    },
+    "agentPlatformSettings": {
+      "enableAgentPlatform": true
+    }
+  }
 }

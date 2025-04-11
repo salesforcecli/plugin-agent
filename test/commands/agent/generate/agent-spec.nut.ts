@@ -9,6 +9,7 @@ import { statSync } from 'node:fs';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 import { AgentCreateSpecResult } from '../../../../src/commands/agent/generate/agent-spec.js';
+import { AgentCreateResult } from '../../../../src/commands/agent/create.js';
 
 describe('agent generate spec NUTs', () => {
   let session: TestSession;
@@ -54,5 +55,16 @@ describe('agent generate spec NUTs', () => {
     const fileStat = statSync(expectedFilePath);
     expect(fileStat.isFile()).to.be.true;
     expect(fileStat.size).to.be.greaterThan(0);
+  });
+
+  it('should create new agent in org', async () => {
+    const name = `myAgent${Date.now().toString()}`;
+    const result = execCmd<AgentCreateResult>(
+      `agent create --spec ${resolve(session.project.dir, 'specs', 'agentSpec.yaml')} --target-org ${
+        session.hubOrg.username
+      } --agent-name ${name} --agent-api-name ${name} --json`
+    ).jsonOutput?.result;
+    expect(result).to.be.ok;
+    expect(result?.agentDefinition.sampleUtterances.length).to.be.greaterThanOrEqual(1);
   });
 });
