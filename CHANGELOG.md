@@ -1,3 +1,9 @@
+## [1.20.9](https://github.com/salesforcecli/plugin-agent/compare/1.20.8...1.20.9) (2025-04-11)
+
+### Bug Fixes
+
+- update auth instructions for `agent preview` ([#123](https://github.com/salesforcecli/plugin-agent/issues/123)) ([e1c54d4](https://github.com/salesforcecli/plugin-agent/commit/e1c54d49b70875ad3e559703d7d48960f0bcba6c)), closes [#124](https://github.com/salesforcecli/plugin-agent/issues/124)
+
 ## [1.20.8](https://github.com/salesforcecli/plugin-agent/compare/1.20.7...1.20.8) (2025-04-07)
 
 ### Bug Fixes
