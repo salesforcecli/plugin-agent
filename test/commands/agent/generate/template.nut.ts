@@ -12,7 +12,7 @@ import { expect } from 'chai';
 import {
   AgentGenerateTemplateResult,
   BotTemplateExt,
-  GenAiPlannerExt,
+  GenAiPlannerBundleExt,
 } from '../../../../src/commands/agent/generate/template.js';
 
 describe('agent generate template NUTs', () => {
@@ -42,7 +42,7 @@ describe('agent generate template NUTs', () => {
     );
   });
 
-  it('Converts an Agent into an BotTemplate and GenAiPlanner', async () => {
+  it('Converts an Agent into an BotTemplate and GenAiPlannerBundle', async () => {
     const agentVersion = 1;
     const agentFile = join(
       'force-app',
@@ -64,19 +64,20 @@ describe('agent generate template NUTs', () => {
       'botTemplates',
       'Guest_Experience_Agent_v1_Template.botTemplate-meta.xml'
     );
-    const genAiPlannerFilePath = join(
+    const genAiPlannerBundleFilePath = join(
       'force-app',
       'main',
       'default',
-      'genAiPlanners',
-      'Guest_Experience_Agent_v1_Template.genAiPlanner-meta.xml'
+      'genAiPlannerBundles',
+      'Guest_Experience_Agent_v1_Template',
+      'Guest_Experience_Agent_v1_Template.genAiPlannerBundle'
     );
 
     const generatedBotTemplateFilePath = resolve(session.project.dir, botTemplateFilePath);
-    const generatedGenAiPlannerFilePath = resolve(session.project.dir, genAiPlannerFilePath);
+    const generatedGenAiPlannerBundleFilePath = resolve(session.project.dir, genAiPlannerBundleFilePath);
     // Ensure it returns the paths to the generated files
     expect(output?.result.botTemplatePath).to.equal(generatedBotTemplateFilePath);
-    expect(output?.result.genAiPlannerPath).to.equal(generatedGenAiPlannerFilePath);
+    expect(output?.result.genAiPlannerBundlePath).to.equal(generatedGenAiPlannerBundleFilePath);
 
     // Compare generated files with mock files
     const mockBotTemplateFilePath = join(
@@ -86,12 +87,12 @@ describe('agent generate template NUTs', () => {
       'MOCK-XML',
       botTemplateFilePath
     );
-    const mockGenAiPlannerFilePath = join(
+    const mockGenAiPlannerBundleFilePath = join(
       'test',
       'mock-projects',
       'agent-generate-template',
       'MOCK-XML',
-      genAiPlannerFilePath
+      genAiPlannerBundleFilePath
     );
 
     const parser = new XMLParser({ ignoreAttributes: false });
@@ -103,10 +104,12 @@ describe('agent generate template NUTs', () => {
     const mockBotTemplateFile = parser.parse(readFileSync(mockBotTemplateFilePath, 'utf-8')) as BotTemplateExt;
     expect(generatedBotTemplateFile).to.deep.equal(mockBotTemplateFile);
 
-    const generatedGenAiPlannerFile = parser.parse(
-      readFileSync(generatedGenAiPlannerFilePath, 'utf-8')
-    ) as GenAiPlannerExt;
-    const mockGenAiPlannerFile = parser.parse(readFileSync(mockGenAiPlannerFilePath, 'utf-8')) as GenAiPlannerExt;
-    expect(generatedGenAiPlannerFile).to.deep.equal(mockGenAiPlannerFile);
+    const generatedGenAiPlannerBundleFile = parser.parse(
+      readFileSync(generatedGenAiPlannerBundleFilePath, 'utf-8')
+    ) as GenAiPlannerBundleExt;
+    const mockGenAiPlannerBundleFile = parser.parse(
+      readFileSync(mockGenAiPlannerBundleFilePath, 'utf-8')
+    ) as GenAiPlannerBundleExt;
+    expect(generatedGenAiPlannerBundleFile).to.deep.equal(mockGenAiPlannerBundleFile);
   });
 });

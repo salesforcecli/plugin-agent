@@ -1,6 +1,6 @@
-# plugin-agent - PREVIEW
+# plugin-agent - Beta
 
-### THIS PLUGIN IS A PREVIEW VERSION AND IS NOT MEANT FOR PRODUCTION USAGE UNTIL ANNOUNCED.
+### :warning: This plugin is beta. We expect to announce GA availability very soon. :warning:
 
 [![NPM](https://img.shields.io/npm/v/@salesforce/plugin-agent.svg?label=@salesforce/plugin-agent)](https://www.npmjs.com/package/@salesforce/plugin-agent) [![Downloads/week](https://img.shields.io/npm/dw/@salesforce/plugin-agent.svg)](https://npmjs.org/package/@salesforce/plugin-agent) [![License](https://img.shields.io/badge/License-BSD%203--Clause-brightgreen.svg)](https://raw.githubusercontent.com/salesforcecli/plugin-agent/main/LICENSE.txt)
 
@@ -132,7 +132,7 @@ EXAMPLES
     $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -285,7 +285,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -343,7 +343,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -355,7 +355,7 @@ USAGE
 
 FLAGS
   -a, --connected-app-user=<value>  (required) Username or alias of the connected app user that's configured with
-                                    JWT-based access tokens to the agent.
+                                    web-based access tokens to the agent.
   -d, --output-dir=<value>          Directory where conversation transcripts are saved.
   -n, --api-name=<value>            API name of the agent you want to interact with.
   -o, --target-org=<value>          (required) Username or alias of the target org. Not required if the `target-org`
@@ -386,40 +386,57 @@ DESCRIPTION
   Find the agent's API name in its main details page in your org's Agent page in Setup.
 
   Before you use this command, you must complete these steps:
+  -----------------------------------------------------------
 
   1. Create a connected app in your org as described in the "Create a Connected App" section here:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these
-  two additional steps:
+  four additional steps:
 
   a. When specifying the connected app's Callback URL, add this second callback URL on a new line:
-  http://localhost:1717/OauthRedirect
+  "http://localhost:1717/OauthRedirect".
 
-  b. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+  b. When adding the scopes to the connected app, add "Manage user data via Web browsers (web)".
+
+  c. Ensure that the "Require Secret for Web Server Flow" option is not selected.
+
+  d. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
 
   2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
 
-  3. Using the username of the user you specified as the "Run As" user above, authorize your org using the JWT flow, as
-  described in this document:
-  https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm.
+  3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here:
+  https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
-  4. When you run this command to interact with an agent, specify the username you authorized in the preceding step with
+  4. Set the "SFDX_AUTH_SCOPES" environment variable to "refresh_token sfap_api chatbot_api web api". This step ensures
+  that you get the specific OAuth scopes required by this command.
+
+  5. Using the username of the user you specified as the "Run As" user above, authorize your org using the web server
+  flow, as described in this document:
+  https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm.
+
+  IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where
+  CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web"
+  command uses your custom connected app, and not the default CLI connected app.
+
+  Press Enter to skip sharing the client secret.
+
+  6. When you run this command to interact with an agent, specify the username you authorized in the preceding step with
   the --connected-app-user (-a) flag.
 
 EXAMPLES
   Interact with an agent with API name "Resort_Manager" in the org with alias "my-org". Connect to your agent using
-  the alias "my-jwt-user"; this alias must point to the username who is authorized using JWT:
+  the alias "my-agent-user"; this alias must point to the username who is authorized using the Web server flow:
 
-    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user
+    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user
 
   Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview"
   directory rather than the default "./temp/agent-preview":
 
-    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user --output-dir \
-      "transcripts/my-preview"
+    $ sf agent preview --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user \
+      --output-dir "transcripts/my-preview"
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -474,7 +491,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -509,7 +526,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -565,7 +582,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -628,7 +645,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -692,6 +709,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.6/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.9/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

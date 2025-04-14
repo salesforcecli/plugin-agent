@@ -1,3 +1,21 @@
+## [1.20.9](https://github.com/salesforcecli/plugin-agent/compare/1.20.8...1.20.9) (2025-04-11)
+
+### Bug Fixes
+
+- update auth instructions for `agent preview` ([#123](https://github.com/salesforcecli/plugin-agent/issues/123)) ([e1c54d4](https://github.com/salesforcecli/plugin-agent/commit/e1c54d49b70875ad3e559703d7d48960f0bcba6c)), closes [#124](https://github.com/salesforcecli/plugin-agent/issues/124)
+
+## [1.20.8](https://github.com/salesforcecli/plugin-agent/compare/1.20.7...1.20.8) (2025-04-07)
+
+### Bug Fixes
+
+- change to Beta and use latest agents lib ([636b82a](https://github.com/salesforcecli/plugin-agent/commit/636b82a5b5b4fcf4b020e2ab5eb2ab57a3658858))
+
+## [1.20.7](https://github.com/salesforcecli/plugin-agent/compare/1.20.6...1.20.7) (2025-04-04)
+
+### Bug Fixes
+
+- support genAiPlannerBundles ([38df83a](https://github.com/salesforcecli/plugin-agent/commit/38df83a003f56f911231c64e62321410efa28caf))
+
 ## [1.20.6](https://github.com/salesforcecli/plugin-agent/compare/1.20.5...1.20.6) (2025-03-20)
 
 ### Bug Fixes

@@ -12,19 +12,31 @@ When the session concludes, the command asks if you want to save the API respons
 
 Find the agent's API name in its main details page in your org's Agent page in Setup.
 
-Before you use this command, you must complete these steps:
+## Before you use this command, you must complete these steps:
 
-1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these two additional steps:
+1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these four additional steps:
 
-   a. When specifying the connected app's Callback URL, add this second callback URL on a new line: http://localhost:1717/OauthRedirect
+   a. When specifying the connected app's Callback URL, add this second callback URL on a new line: "http://localhost:1717/OauthRedirect".
 
-   b. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
+   b. When adding the scopes to the connected app, add "Manage user data via Web browsers (web)".
+
+   c. Ensure that the "Require Secret for Web Server Flow" option is not selected.
+
+   d. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
 
 2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
 
-3. Using the username of the user you specified as the "Run As" user above, authorize your org using the JWT flow, as described in this document: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm.
+3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
-4. When you run this command to interact with an agent, specify the username you authorized in the preceding step with the --connected-app-user (-a) flag.
+4. Set the "SFDX_AUTH_SCOPES" environment variable to "refresh_token sfap_api chatbot_api web api". This step ensures that you get the specific OAuth scopes required by this command.
+
+5. Using the username of the user you specified as the "Run As" user above, authorize your org using the web server flow, as described in this document: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm.
+
+   IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
+
+   Press Enter to skip sharing the client secret.
+
+6. When you run this command to interact with an agent, specify the username you authorized in the preceding step with the --connected-app-user (-a) flag.
 
 # flags.api-name.summary
 
@@ -32,7 +44,7 @@ API name of the agent you want to interact with.
 
 # flags.connected-app-user.summary
 
-Username or alias of the connected app user that's configured with JWT-based access tokens to the agent.
+Username or alias of the connected app user that's configured with web-based access tokens to the agent.
 
 # flags.output-dir.summary
 
@@ -40,10 +52,10 @@ Directory where conversation transcripts are saved.
 
 # examples
 
-- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org". Connect to your agent using the alias "my-jwt-user"; this alias must point to the username who is authorized using JWT:
+- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org". Connect to your agent using the alias "my-agent-user"; this alias must point to the username who is authorized using the Web server flow:
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user
 
 - Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview" directory rather than the default "./temp/agent-preview":
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-jwt-user --output-dir "transcripts/my-preview"
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user --output-dir "transcripts/my-preview"
