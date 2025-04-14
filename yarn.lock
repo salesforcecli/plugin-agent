@@ -1471,31 +1471,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.2", "@salesforce/core@^8.8.5", "@salesforce/core@^8.8.7":
-  version "8.8.7"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.8.7.tgz#ac307e8f10934affa7bcf33ccb65993669cd8f12"
-  integrity sha512-AuPSmb/GZ7F8eV5GO6NcfFq3YSOVnPL4sssEQEvKduOSJMs8RTJ92kEefrId/tgFBYfw4b7UzndjFtdgrGGeoA==
-  dependencies:
-    "@jsforce/jsforce-node" "^3.7.0"
-    "@salesforce/kit" "^3.2.2"
-    "@salesforce/schemas" "^1.9.0"
-    "@salesforce/ts-types" "^2.0.10"
-    ajv "^8.17.1"
-    change-case "^4.1.2"
-    fast-levenshtein "^3.0.0"
-    faye "^1.4.0"
-    form-data "^4.0.0"
-    js2xmlparser "^4.0.1"
-    jsonwebtoken "9.0.2"
-    jszip "3.10.1"
-    pino "^9.4.0"
-    pino-abstract-transport "^1.2.0"
-    pino-pretty "^11.2.2"
-    proper-lockfile "^4.1.2"
-    semver "^7.6.3"
-    ts-retry-promise "^0.8.1"
-
-"@salesforce/core@^8.9.0":
+"@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.2", "@salesforce/core@^8.8.5", "@salesforce/core@^8.8.7", "@salesforce/core@^8.9.0":
   version "8.9.0"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.9.0.tgz#318dead8c9399c016df5a8e526665d69dca17fb9"
   integrity sha512-p3ihmhGRfMrbup9unQ+YjDQb0o7WiNPUg38KB9J11YRMd2zKvERE1ncQcsnfOQ1MLRxvDMUchlKNrAe5Xw7RZw==
@@ -1621,28 +1597,7 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^12.18.0":
-  version "12.18.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.18.4.tgz#b16c1a3eeb9e40877b3109373555e95e02458894"
-  integrity sha512-W13y72vCV98pROwvX0WmmIEmNivju4cMuK5jGzT5JHcX1qgy6i03VksT0R9CbyU3G4gbrB3Gay0rQLwdubNqOw==
-  dependencies:
-    "@salesforce/core" "^8.8.7"
-    "@salesforce/kit" "^3.2.3"
-    "@salesforce/ts-types" "^2.0.12"
-    "@salesforce/types" "^1.3.0"
-    fast-levenshtein "^3.0.0"
-    fast-xml-parser "^4.5.3"
-    got "^11.8.6"
-    graceful-fs "^4.2.11"
-    ignore "^5.3.2"
-    isbinaryfile "^5.0.2"
-    jszip "^3.10.1"
-    mime "2.6.0"
-    minimatch "^9.0.5"
-    proxy-agent "^6.4.0"
-    yaml "^2.7.1"
-
-"@salesforce/source-deploy-retrieve@^12.19.0":
+"@salesforce/source-deploy-retrieve@^12.18.0", "@salesforce/source-deploy-retrieve@^12.19.0":
   version "12.19.1"
   resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.19.1.tgz#bb28580ad8a46987888430af7eea6dbc26f4dc37"
   integrity sha512-FKzNDIwVcESzrAlyOK6xdOQxxIE9d0VJ6Ypk0txCJ1KYShIAJ7uNln3dWUi/JY0HqmTlcBDo1SZfs4jgDhQQ/g==
