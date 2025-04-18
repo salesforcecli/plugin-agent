@@ -114,7 +114,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
         // filter out the standard evaluations (topics/action/output)
         .filter((f) => metrics.includes(f.name))
         .map((r) => ({
-          test: humanFriendlyName(r.name),
+          test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
           score: `${r.score} (0.6)`,
           metricLabel: r.metricLabel,
@@ -159,8 +159,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
     Object.entries(failedTestCases).map(([, tc]) => [
       `Test Case #${tc.testNumber}`,
       tc.testResults
-        .filter((r) => r.result === 'FAILURE')
-        .map((r) => humanFriendlyName(r.name))
+        .filter((r) => r.result === 'FAILURE' || r.status === 'ERROR')
+        .map((r) => humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()))
         .join(', '),
     ])
   );
