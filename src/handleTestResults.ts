@@ -106,8 +106,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       columns: [
         { key: 'test', name: 'Metric' },
         'result',
-        { key: 'score', name: 'Value (Threshold)', width: '40%' },
-        { key: 'metricLabel', name: 'Explanation', width: '40%' },
+        { key: 'score', name: 'Value (Threshold)' },
+        { key: 'metricExplainability', name: 'Explanation' },
       ],
       data: testCase.testResults
         // this is the table for metric information
@@ -116,8 +116,10 @@ export function humanFormat(results: AgentTestResultsResponse): string {
         .map((r) => ({
           test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
-          score: `${r.score} (0.6)`,
-          metricLabel: r.metricLabel,
+          // the threshold is 0.6 for now, in the future it will be customizable per customer
+          // for output_latency_milliseconds, the score is a milliseconds of duration, without threshold
+          score: r.name === 'output_latency_milliseconds' ? r.score : `${r.score} (0.6)`,
+          metricExplainability: r.metricExplainability,
         })),
       width: '100%',
     });
