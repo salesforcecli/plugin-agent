@@ -7,8 +7,8 @@
 import { join, resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages, SfError } from '@salesforce/core';
-import { AgentTester, AgentTestCreateLifecycleStages } from '@salesforce/agents';
+import { Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { AgentTest, AgentTestCreateLifecycleStages } from '@salesforce/agents';
 import { DeployResult } from '@salesforce/source-deploy-retrieve';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { CLIError } from '@oclif/core/errors';
@@ -55,9 +55,9 @@ const FLAGGABLE_PROMPTS = {
   },
 };
 
-async function promptUntilUniqueName(agentTester: AgentTester, name?: string | undefined): Promise<string | undefined> {
+async function promptUntilUniqueName(connection: Connection, name?: string | undefined): Promise<string | undefined> {
   const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['test-api-name']));
-  const existingDefinitions = await agentTester.list();
+  const existingDefinitions = await AgentTest.list(connection);
   if (existingDefinitions.some((d) => d.fullName === apiName)) {
     const confirmation = await yesNoOrCancel({
       message: messages.getMessage('prompt.confirm', [apiName]),
@@ -68,7 +68,7 @@ async function promptUntilUniqueName(agentTester: AgentTester, name?: string | u
     }
 
     if (!confirmation) {
-      return promptUntilUniqueName(agentTester);
+      return promptUntilUniqueName(connection);
     }
   }
   return apiName;
@@ -95,6 +95,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
 
   public async run(): Promise<AgentTestCreateResult> {
     const { flags } = await this.parse(AgentTestCreate);
+    const connection = flags['target-org'].getConnection(flags['api-version']);
 
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {
@@ -110,11 +111,9 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
     }
 
-    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-
     const apiName = flags['force-overwrite']
       ? flags['test-api-name']
-      : await promptUntilUniqueName(agentTester, flags['test-api-name']);
+      : await promptUntilUniqueName(connection, flags['test-api-name']);
     if (!apiName) {
       this.log(messages.getMessage('info.cancel'));
       return {
@@ -156,7 +155,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       return Promise.resolve();
     });
 
-    const { path, contents } = await agentTester.create(apiName, spec, {
+    const { path, contents } = await AgentTest.create(connection, apiName, spec, {
       outputDir: join('force-app', 'main', 'default', 'aiEvaluationDefinitions'),
       preview: flags.preview,
     });
