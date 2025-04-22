@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { AgentTester, type AvailableDefinition } from '@salesforce/agents';
+import { AgentTest, type AvailableDefinition } from '@salesforce/agents';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 
@@ -28,8 +28,7 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
   public async run(): Promise<AgentTestListResult> {
     const { flags } = await this.parse(AgentTestList);
 
-    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const results = await agentTester.list();
+    const results = await AgentTest.list(flags['target-org'].getConnection(flags['api-version']));
     this.table({
       data: results,
       columns: [
