@@ -6,5 +6,5 @@
     "jsx": "react",
     "skipLibCheck": true
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "test/commands/agent/preview/preview.test.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

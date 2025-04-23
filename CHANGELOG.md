@@ -1,3 +1,15 @@
+## [1.20.11](https://github.com/salesforcecli/plugin-agent/compare/1.20.10...1.20.11) (2025-04-22)
+
+### Bug Fixes
+
+- add config with everything enabled, still missing a license ([2f53f89](https://github.com/salesforcecli/plugin-agent/commit/2f53f892f155e8eb5c365ad4123f2790d5cf7640))
+
+## [1.20.10](https://github.com/salesforcecli/plugin-agent/compare/1.20.9...1.20.10) (2025-04-22)
+
+### Bug Fixes
+
+- consume agents lib refactor ([5dc0d65](https://github.com/salesforcecli/plugin-agent/commit/5dc0d65146a06a7d7e430271da87fe13635c0112))
+
 ## [1.20.9](https://github.com/salesforcecli/plugin-agent/compare/1.20.8...1.20.9) (2025-04-11)
 
 ### Bug Fixes

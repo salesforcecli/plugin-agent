@@ -9,7 +9,7 @@ import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfProject } from '@salesforce/core';
-import { writeTestSpec, generateTestSpecFromAiEvalDefinition } from '@salesforce/agents';
+import { AgentTest } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
@@ -299,7 +299,8 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     });
 
     if (flags['from-definition']) {
-      const spec = await generateTestSpecFromAiEvalDefinition(flags['from-definition']);
+      const agentTest = new AgentTest({ mdPath: flags['from-definition'] });
+      const spec = await agentTest.getTestSpec();
 
       const outputFile = await determineFilePath(spec.subjectName, flags['output-file'], flags['force-overwrite']);
       if (!outputFile) {
@@ -307,7 +308,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
         return;
       }
 
-      await writeTestSpec(spec, outputFile);
+      await agentTest.writeTestSpec(outputFile);
       this.log(`Created ${outputFile}`);
       return;
     }
@@ -322,11 +323,11 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       throw messages.createError('error.NoAgentsFound', [directoryPaths.join(', ')]);
     }
 
-    const subjectType = await select<string>({
+    const subjectType = (await select<string>({
       message: 'What are you testing',
       choices: ['AGENT'],
       theme,
-    });
+    })) as 'AGENT';
 
     const subjectName = await select<string>({
       message: 'Select the agent to test',
@@ -375,16 +376,16 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     this.log();
 
-    await writeTestSpec(
-      {
+    const agentTest = new AgentTest({
+      specData: {
         name,
         description,
         subjectType,
         subjectName,
         testCases,
       },
-      outputFile
-    );
+    });
+    await agentTest.writeTestSpec(outputFile);
     this.log(`Created ${outputFile}`);
   }
 }

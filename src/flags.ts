@@ -13,7 +13,7 @@ import { Connection, Messages, SfError } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
+import { AgentTest, AgentTestResultsResponse } from '@salesforce/agents';
 import { theme } from './inquirer-theme.js';
 import { AgentTestResultsResult } from './commands/agent/test/results.js';
 
@@ -99,8 +99,7 @@ export const promptForAiEvaluationDefinitionApiName = async (
   flagDef: FlaggablePrompt,
   connection: Connection
 ): Promise<string> => {
-  const agents = new AgentTester(connection);
-  const aiDefFiles = await agents.list();
+  const aiDefFiles = await AgentTest.list(connection);
 
   let id: NodeJS.Timeout;
   const timeout = new Promise((_, reject) => {
