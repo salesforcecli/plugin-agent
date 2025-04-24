@@ -7,7 +7,7 @@
 import { join } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName } from '@salesforce/agents';
+import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName, metric } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import ansis from 'ansis';
 
@@ -73,37 +73,65 @@ export function humanFormat(results: AgentTestResultsResponse): string {
 
   const tables: string[] = [];
   for (const testCase of results.testCases) {
-    const table = ux.makeTable({
+    let table = ux.makeTable({
       title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('Utterance')}: ${
         testCase.inputs.utterance
       }`,
       overflow: 'wrap',
       columns: ['test', 'result', { key: 'expected', width: '40%' }, { key: 'actual', width: '40%' }],
-      data: testCase.testResults.map((r) => ({
-        test: humanFriendlyName(r.name),
-        result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
-        expected: r.expectedValue,
-        actual: r.actualValue,
-      })),
+      data: testCase.testResults
+        // this is the table for topics/action/output validation (actual v expected)
+        // filter out other metrics from it
+        .filter((f) => !metric.includes(f.name as (typeof metric)[number]))
+        .map((r) => ({
+          test: humanFriendlyName(r.name),
+          result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+          expected: r.expectedValue,
+          actual: r.actualValue,
+        })),
+      width: '100%',
+    });
+    tables.push(table);
+
+    table = ux.makeTable({
+      overflow: 'wrap',
+      columns: [
+        { key: 'test', name: 'Metric' },
+        'result',
+        { key: 'score', name: 'Value (Threshold)' },
+        { key: 'metricExplainability', name: 'Explanation' },
+      ],
+      data: testCase.testResults
+        // this is the table for metric information
+        // filter out the standard evaluations (topics/action/output)
+        .filter((f) => metric.includes(f.name as (typeof metric)[number]))
+        .map((r) => ({
+          test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
+          result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+          // the threshold is 0.6 for now, in the future it will be customizable per customer
+          // for output_latency_milliseconds, the score is a milliseconds of duration, without threshold
+          score: r.name === 'output_latency_milliseconds' ? r.score : `${r.score} (0.6)`,
+          metricExplainability: r.metricExplainability,
+        })),
       width: '100%',
     });
     tables.push(table);
   }
 
   const topicPassCount = results.testCases.reduce((acc, tc) => {
-    const topic = tc.testResults.find((r) => r.name === 'topic_sequence_match');
+    const topic = tc.testResults.find((r) => r.name === 'topic_sequence_match' || r.name === 'topic_assertion');
     return topic?.result === 'PASS' ? acc + 1 : acc;
   }, 0);
   const topicPassPercent = (topicPassCount / results.testCases.length) * 100;
 
   const actionPassCount = results.testCases.reduce((acc, tc) => {
-    const action = tc.testResults.find((r) => r.name === 'action_sequence_match');
+    const action = tc.testResults.find((r) => r.name === 'action_sequence_match' || r.name === 'actions_assertion');
     return action?.result === 'PASS' ? acc + 1 : acc;
   }, 0);
   const actionPassPercent = (actionPassCount / results.testCases.length) * 100;
 
   const outcomePassCount = results.testCases.reduce((acc, tc) => {
-    const outcome = tc.testResults.find((r) => r.name === 'bot_response_rating');
+    const outcome = tc.testResults.find((r) => r.name === 'bot_response_rating' || r.name === 'output_validation');
     return outcome?.result === 'PASS' ? acc + 1 : acc;
   }, 0);
   const outcomePassPercent = (outcomePassCount / results.testCases.length) * 100;
@@ -125,8 +153,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
     Object.entries(failedTestCases).map(([, tc]) => [
       `Test Case #${tc.testNumber}`,
       tc.testResults
-        .filter((r) => r.result === 'FAILURE')
-        .map((r) => humanFriendlyName(r.name))
+        .filter((r) => r.result === 'FAILURE' || r.status === 'ERROR')
+        .map((r) => humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()))
         .join(', '),
     ])
   );
