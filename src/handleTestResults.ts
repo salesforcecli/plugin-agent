@@ -7,7 +7,7 @@
 import { join } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName } from '@salesforce/agents';
+import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName, metric } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import ansis from 'ansis';
 
@@ -70,14 +70,6 @@ export function readableTime(time: number, decimalPlaces = 2): string {
 
 export function humanFormat(results: AgentTestResultsResponse): string {
   const ux = new Ux();
-  const metrics = [
-    'completeness',
-    'coherence',
-    'conciseness',
-    'output_latency_milliseconds',
-    'instruction_following',
-    'factuality',
-  ];
 
   const tables: string[] = [];
   for (const testCase of results.testCases) {
@@ -90,7 +82,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for topics/action/output validation (actual v expected)
         // filter out other metrics from it
-        .filter((f) => !metrics.includes(f.name))
+        .filter((f) => !metric.includes(f.name as (typeof metric)[number]))
         .map((r) => ({
           test: humanFriendlyName(r.name),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
@@ -112,7 +104,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for metric information
         // filter out the standard evaluations (topics/action/output)
-        .filter((f) => metrics.includes(f.name))
+        .filter((f) => metric.includes(f.name as (typeof metric)[number]))
         .map((r) => ({
           test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
           result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
