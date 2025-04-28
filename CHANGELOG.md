@@ -1,3 +1,9 @@
+## [1.20.12](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12) (2025-04-28)
+
+### Bug Fixes
+
+- bump agents ([61532cf](https://github.com/salesforcecli/plugin-agent/commit/61532cf8f637fab251ebc7af0c555eac7e3121c4))
+
 ## [1.20.11](https://github.com/salesforcecli/plugin-agent/compare/1.20.10...1.20.11) (2025-04-22)
 
 ### Bug Fixes
