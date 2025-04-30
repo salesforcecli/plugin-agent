@@ -82,12 +82,14 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for topics/action/output validation (actual v expected)
         // filter out other metrics from it
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         .filter((f) => !metric.includes(f.name as (typeof metric)[number]))
         .map((r) => ({
           test: humanFriendlyName(r.name),
-          result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+          result:
+            r.result === 'PASS' ? ansis.green('Pass') : r.status === 'ERROR' ? ansis.red('Error') : ansis.red('Fail'),
           expected: r.expectedValue,
-          actual: r.actualValue,
+          actual: r.status === 'ERROR' ? r.errorMessage : r.actualValue,
         })),
       width: '100%',
     });
@@ -104,10 +106,13 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       data: testCase.testResults
         // this is the table for metric information
         // filter out the standard evaluations (topics/action/output)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
         .filter((f) => metric.includes(f.name as (typeof metric)[number]))
         .map((r) => ({
           test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
-          result: r.result === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+          // output_latency_milliseconds will never fail
+          result:
+            r.result === 'PASS' || r.name === 'output_latency_milliseconds' ? ansis.green('Pass') : ansis.red('Fail'),
           // the threshold is 0.6 for now, in the future it will be customizable per customer
           // for output_latency_milliseconds, the score is a milliseconds of duration, without threshold
           score: r.name === 'output_latency_milliseconds' ? r.score : `${r.score} (0.6)`,
