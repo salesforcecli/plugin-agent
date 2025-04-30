@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import YAML from 'yaml';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages, SfProject } from '@salesforce/core';
+import { Lifecycle, Messages, SfProject, generateApiName } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { input as inquirerInput } from '@inquirer/prompts';
 import { colorize } from '@oclif/core/ux';
@@ -18,7 +18,6 @@ import {
   AgentCreateConfig,
   AgentCreateLifecycleStages,
   AgentCreateResponse,
-  generateAgentApiName,
 } from '@salesforce/agents';
 import {
   FlaggablePrompt,
@@ -129,7 +128,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     const agentName = flags['agent-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['agent-name']));
     let agentApiName = flags['agent-api-name'];
     if (!agentApiName) {
-      agentApiName = generateAgentApiName(agentName);
+      agentApiName = generateApiName(agentName);
       const promptedValue = await inquirerInput({
         message: messages.getMessage('flags.agent-api-name.prompt'),
         validate: FLAGGABLE_PROMPTS['agent-api-name'].validate,
