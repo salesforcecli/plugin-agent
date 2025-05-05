@@ -1471,7 +1471,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.10.0", "@salesforce/core@^8.10.2", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.5", "@salesforce/core@^8.8.7", "@salesforce/core@^8.9.1":
+"@salesforce/core@^8.10.0", "@salesforce/core@^8.10.2", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0", "@salesforce/core@^8.8.5", "@salesforce/core@^8.8.7":
   version "8.10.2"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.10.2.tgz#22727a7dee2e69a34b0b14dae39c025f2b258af0"
   integrity sha512-o/Qvm0U9+nuHAdFfjXZoAXyLaeG7lDnrLmUkCQ38oquiFrwzWSbXh6crHqFEmeZyK6MYYgh0KCaInrui06XP6Q==

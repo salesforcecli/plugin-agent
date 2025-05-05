@@ -1,3 +1,17 @@
+## [1.20.13](https://github.com/salesforcecli/plugin-agent/compare/1.20.12...1.20.13) (2025-04-30)
+
+### Bug Fixes
+
+- use generateApiName from core ([783b2bf](https://github.com/salesforcecli/plugin-agent/commit/783b2bfaa21aeb5b700fd8ff5b6793ebd38e1899))
+- use generateApiName from core ([a853671](https://github.com/salesforcecli/plugin-agent/commit/a8536713bb9aa34ca5ea1755ea6e2764efa72ce3))
+- use latest agents lib ([f73e30e](https://github.com/salesforcecli/plugin-agent/commit/f73e30e715e659b815e6475ff011839ac71419ce))
+
+## [1.20.12](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12) (2025-04-28)
+
+### Bug Fixes
+
+- bump agents ([61532cf](https://github.com/salesforcecli/plugin-agent/commit/61532cf8f637fab251ebc7af0c555eac7e3121c4))
+
 ## [1.20.11](https://github.com/salesforcecli/plugin-agent/compare/1.20.10...1.20.11) (2025-04-22)
 
 ### Bug Fixes
