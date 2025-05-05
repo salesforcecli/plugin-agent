@@ -121,9 +121,10 @@ export function humanFormat(results: AgentTestResultsResponse): string {
         })),
         width: '100%',
       });
-      // add a line break between end of the first table and the utterance of the next
-      tables.push(table + '\n');
+      tables.push(table);
     }
+    // add a line break between end of the first table and the utterance of the next
+    tables.push('\n');
   }
 
   const topicPassCount = results.testCases.reduce((acc, tc) => {
