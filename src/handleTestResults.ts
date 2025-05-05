@@ -95,20 +95,21 @@ export function humanFormat(results: AgentTestResultsResponse): string {
     });
     tables.push(table);
 
-    table = ux.makeTable({
-      overflow: 'wrap',
-      columns: [
-        { key: 'test', name: 'Metric' },
-        'result',
-        { key: 'score', name: 'Value (Threshold)' },
-        { key: 'metricExplainability', name: 'Explanation' },
-      ],
-      data: testCase.testResults
-        // this is the table for metric information
-        // filter out the standard evaluations (topics/action/output)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-        .filter((f) => metric.includes(f.name as (typeof metric)[number]))
-        .map((r) => ({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+    const metrics = testCase.testResults.filter((f) => metric.includes(f.name as (typeof metric)[number]));
+
+    if (metrics.length > 0) {
+      // this is the table for metric information
+      // filter out the standard evaluations (topics/action/output)
+      table = ux.makeTable({
+        overflow: 'wrap',
+        columns: [
+          { key: 'test', name: 'Metric' },
+          'result',
+          { key: 'score', name: 'Value (Threshold)' },
+          { key: 'metricExplainability', name: 'Explanation' },
+        ],
+        data: metrics.map((r) => ({
           test: humanFriendlyName(r.name).replace(/^./, (char) => char.toUpperCase()),
           // output_latency_milliseconds will never fail
           result:
@@ -118,9 +119,11 @@ export function humanFormat(results: AgentTestResultsResponse): string {
           score: r.name === 'output_latency_milliseconds' ? r.score : `${r.score} (0.6)`,
           metricExplainability: r.metricExplainability,
         })),
-      width: '100%',
-    });
-    tables.push(table);
+        width: '100%',
+      });
+      // add a line break between end of the first table and the utterance of the next
+      tables.push(table + '\n');
+    }
   }
 
   const topicPassCount = results.testCases.reduce((acc, tc) => {
@@ -165,7 +168,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
   );
   const failedTestCasesTable = makeSimpleTable(failedTestCasesObj, ansis.red.bold('Failed Test Cases'));
 
-  return tables.join('\n') + `\n${resultsTable}\n\n${failedTestCasesTable}\n`;
+  return tables.join('') + `\n${resultsTable}\n\n${failedTestCasesTable}\n`;
 }
 
 export async function handleTestResults({
