@@ -62,7 +62,7 @@ describe('agent generate spec NUTs', () => {
     const result = execCmd<AgentCreateResult>(
       `agent create --spec ${resolve(session.project.dir, 'specs', 'agentSpec.yaml')} --target-org ${
         session.hubOrg.username
-      } --agent-name ${name} --agent-api-name ${name} --json`
+      } --name ${name} --api-name ${name} --json`
     ).jsonOutput?.result;
     expect(result).to.be.ok;
     expect(result?.agentDefinition.sampleUtterances.length).to.be.greaterThanOrEqual(1);
