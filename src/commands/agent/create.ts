@@ -47,13 +47,13 @@ const MSO_STAGES = {
 };
 
 const FLAGGABLE_PROMPTS = {
-  'agent-name': {
-    message: messages.getMessage('flags.agent-name.summary'),
+  name: {
+    message: messages.getMessage('flags.name.summary'),
     validate: (d: string): boolean | string => d.length > 0 || 'Agent Name cannot be empty',
     required: true,
   },
-  'agent-api-name': {
-    message: messages.getMessage('flags.agent-api-name.summary'),
+  'api-name': {
+    message: messages.getMessage('flags.api-name.summary'),
     validate: (d: string): boolean | string => {
       if (d.length === 0) {
         return true;
@@ -86,7 +86,6 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -109,8 +108,8 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
 
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {
-      if (!flags['agent-name']) {
-        throw messages.createError('error.missingRequiredFlags', ['agent-name']);
+      if (!flags['name']) {
+        throw messages.createError('error.missingRequiredFlags', ['name']);
       }
       if (!flags.spec) {
         throw messages.createError('error.missingRequiredFlags', ['spec']);
@@ -125,13 +124,13 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
     validateSpec(inputSpec);
 
     // If we don't have an agent name yet, prompt.
-    const agentName = flags['agent-name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['agent-name']));
-    let agentApiName = flags['agent-api-name'];
+    const agentName = flags['name'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['name']));
+    let agentApiName = flags['api-name'];
     if (!agentApiName) {
       agentApiName = generateApiName(agentName);
       const promptedValue = await inquirerInput({
-        message: messages.getMessage('flags.agent-api-name.prompt'),
-        validate: FLAGGABLE_PROMPTS['agent-api-name'].validate,
+        message: messages.getMessage('flags.api-name.prompt'),
+        validate: FLAGGABLE_PROMPTS['api-name'].validate,
         default: agentApiName,
         theme,
       });
