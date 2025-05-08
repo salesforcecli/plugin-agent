@@ -1,4 +1,36 @@
-## [1.20.13](https://github.com/salesforcecli/plugin-agent/compare/1.20.12...1.20.13) (2025-04-30)
+# [1.21.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.6...1.21.0) (2025-05-08)
+
+## [1.20.13-preview.6](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.5...1.20.13-preview.6) (2025-05-07)
+
+## [1.20.13-preview.5](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.4...1.20.13-preview.5) (2025-05-07)
+
+### Bug Fixes
+
+- change flag names, GA commands! ([679ab68](https://github.com/salesforcecli/plugin-agent/commit/679ab68d5c3cb28111e9ed8992cca1120d7ccbdb))
+
+## [1.20.13-preview.4](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.3...1.20.13-preview.4) (2025-05-05)
+
+### Bug Fixes
+
+- always add linebreak between TC ([7355fb7](https://github.com/salesforcecli/plugin-agent/commit/7355fb775a5f7aea789a8c82d850103b76d0a1ba))
+
+## [1.20.13-preview.3](https://github.com/salesforcecli/plugin-agent/compare/1.20.13...1.20.13-preview.3) (2025-05-05)
+
+## [1.20.12-preview.2](https://github.com/salesforcecli/plugin-agent/compare/1.20.12-preview.1...1.20.12-preview.2) (2025-04-30)
+
+### Bug Fixes
+
+- update table for error scenario ([20b7729](https://github.com/salesforcecli/plugin-agent/commit/20b772906ac6d4de2079021ad7d5b0a50eff5128))
+
+## [1.20.12-preview.1](https://github.com/salesforcecli/plugin-agent/compare/1.20.12...1.20.12-preview.1) (2025-04-28)
+
+## [1.20.12-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12-preview.0) (2025-04-24)
+
+### Features
+
+- add second table per TC with metric resutls ([6e5c1ca](https://github.com/salesforcecli/plugin-agent/commit/6e5c1ca119fd011c110c981231a1f040b6cc8d0f))
+
+## [1.20.13](https://github.com/salesforcecli/plugin-agent/compare/1.20.12-preview.2...1.20.13) (2025-04-30)
 
 ### Bug Fixes
 
@@ -6,11 +38,37 @@
 - use generateApiName from core ([a853671](https://github.com/salesforcecli/plugin-agent/commit/a8536713bb9aa34ca5ea1755ea6e2764efa72ce3))
 - use latest agents lib ([f73e30e](https://github.com/salesforcecli/plugin-agent/commit/f73e30e715e659b815e6475ff011839ac71419ce))
 
-## [1.20.12](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12) (2025-04-28)
+## [1.20.12](https://github.com/salesforcecli/plugin-agent/compare/1.20.12-preview.0...1.20.12) (2025-04-28)
 
 ### Bug Fixes
 
 - bump agents ([61532cf](https://github.com/salesforcecli/plugin-agent/commit/61532cf8f637fab251ebc7af0c555eac7e3121c4))
+
+## [1.20.12-preview.2](https://github.com/salesforcecli/plugin-agent/compare/1.20.12-preview.1...1.20.12-preview.2) (2025-04-30)
+
+### Bug Fixes
+
+- update table for error scenario ([20b7729](https://github.com/salesforcecli/plugin-agent/commit/20b772906ac6d4de2079021ad7d5b0a50eff5128))
+
+## [1.20.12-preview.1](https://github.com/salesforcecli/plugin-agent/compare/1.20.12...1.20.12-preview.1) (2025-04-28)
+
+## [1.20.12-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12-preview.0) (2025-04-24)
+
+### Features
+
+- add second table per TC with metric resutls ([6e5c1ca](https://github.com/salesforcecli/plugin-agent/commit/6e5c1ca119fd011c110c981231a1f040b6cc8d0f))
+
+## [1.20.12](https://github.com/salesforcecli/plugin-agent/compare/1.20.12-preview.0...1.20.12) (2025-04-28)
+
+### Bug Fixes
+
+- bump agents ([61532cf](https://github.com/salesforcecli/plugin-agent/commit/61532cf8f637fab251ebc7af0c555eac7e3121c4))
+
+## [1.20.12-preview.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.11...1.20.12-preview.0) (2025-04-24)
+
+### Features
+
+- add second table per TC with metric resutls ([6e5c1ca](https://github.com/salesforcecli/plugin-agent/commit/6e5c1ca119fd011c110c981231a1f040b6cc8d0f))
 
 ## [1.20.11](https://github.com/salesforcecli/plugin-agent/compare/1.20.10...1.20.11) (2025-04-22)
 
