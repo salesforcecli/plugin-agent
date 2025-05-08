@@ -4,17 +4,7 @@
     "command": "agent:create",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": [
-      "agent-api-name",
-      "agent-name",
-      "api-version",
-      "flags-dir",
-      "json",
-      "planner-id",
-      "preview",
-      "spec",
-      "target-org"
-    ],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "name", "planner-id", "preview", "spec", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -82,7 +72,7 @@
     "command": "agent:test:create",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": ["api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org", "test-api-name"],
+    "flags": ["api-name", "api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {

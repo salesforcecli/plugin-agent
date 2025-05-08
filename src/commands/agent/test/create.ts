@@ -24,8 +24,8 @@ export type AgentTestCreateResult = {
 };
 
 const FLAGGABLE_PROMPTS = {
-  'test-api-name': {
-    message: messages.getMessage('flags.test-api-name.summary'),
+  'api-name': {
+    message: messages.getMessage('flags.api-name.summary'),
     validate: (d: string): boolean | string => {
       if (!d.length) {
         return 'API name cannot be empty';
@@ -56,7 +56,7 @@ const FLAGGABLE_PROMPTS = {
 };
 
 async function promptUntilUniqueName(connection: Connection, name?: string | undefined): Promise<string | undefined> {
-  const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['test-api-name']));
+  const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['api-name']));
   const existingDefinitions = await AgentTest.list(connection);
   if (existingDefinitions.some((d) => d.fullName === apiName)) {
     const confirmation = await yesNoOrCancel({
@@ -78,7 +78,6 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly state = 'beta';
 
   public static readonly flags = {
     ...makeFlags(FLAGGABLE_PROMPTS),
@@ -99,21 +98,21 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
 
     // throw error if --json is used and not all required flags are provided
     if (this.jsonEnabled()) {
-      if (!flags['test-api-name']) {
-        throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
+      if (!flags['api-name']) {
+        throw messages.createError('error.missingRequiredFlags', ['api-name']);
       }
       if (!flags.spec) {
         throw messages.createError('error.missingRequiredFlags', ['spec']);
       }
     }
 
-    if (flags['force-overwrite'] && !flags['test-api-name']) {
-      throw messages.createError('error.missingRequiredFlags', ['test-api-name']);
+    if (flags['force-overwrite'] && !flags['api-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
 
     const apiName = flags['force-overwrite']
-      ? flags['test-api-name']
-      : await promptUntilUniqueName(connection, flags['test-api-name']);
+      ? flags['api-name']
+      : await promptUntilUniqueName(connection, flags['api-name']);
     if (!apiName) {
       this.log(messages.getMessage('info.cancel'));
       return {

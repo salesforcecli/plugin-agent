@@ -22,7 +22,7 @@ Preview the test metadata file (AiEvaluationDefinition) without deploying to you
 
 Don't prompt for confirmation when overwriting an existing test (based on API name) in your org.
 
-# flags.test-api-name.summary
+# flags.api-name.summary
 
 API name of the new test; the API name must not exist in the org.
 
@@ -34,11 +34,11 @@ API name of the new test; the API name must not exist in the org.
 
 - Create an agent test and use flags to specify all required information; if a test with same API name already exists in the org, overwrite it without confirmation. Use the org with alias "my-org":
 
-  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --force-overwrite --target-org my-org
+  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --force-overwrite --target-org my-org
 
 - Preview what the agent test metadata (AiEvaluationDefinition) looks like without deploying it to your default org:
 
-  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
+  <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 
 # prompt.confirm
 

@@ -78,18 +78,18 @@ Create an agent in your org using a local agent spec file.
 
 ```
 USAGE
-  $ sf agent create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--agent-name <value>]
-    [--agent-api-name <value>] [--spec <value>] [--preview]
+  $ sf agent create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--name <value>] [--api-name
+    <value>] [--spec <value>] [--preview]
 
 FLAGS
-  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
-                                configuration variable is already set.
-      --agent-api-name=<value>  API name of the new agent; if not specified, the API name is derived from the agent name
-                                (label); the API name must not exist in the org.
-      --agent-name=<value>      Name (label) of the new agent.
-      --api-version=<value>     Override the api version used for api requests made by this command
-      --preview                 Preview the agent without saving it in your org.
-      --spec=<value>            Path to an agent spec file.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-name=<value>     API name of the new agent; if not specified, the API name is derived from the agent name
+                             (label); the API name must not exist in the org.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --name=<value>         Name (label) of the new agent.
+      --preview              Preview the agent without saving it in your org.
+      --spec=<value>         Path to an agent spec file.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -98,11 +98,11 @@ GLOBAL FLAGS
 DESCRIPTION
   Create an agent in your org using a local agent spec file.
 
-  To run this comand, you must have an agent spec file, which is a YAML file that define the agent properties and
+  To run this command, you must have an agent spec file, which is a YAML file that define the agent properties and
   contains a list of AI-generated topics. Topics define the range of jobs the agent can handle. Use the "agent generate
   agent-spec" CLI command to generate an agent spec file. Then specify the file to this command using the --spec flag,
-  along with the name (label) of the new agent with the --agent-name flag. If you don't specify any of the required
-  flags, the command prompts you.
+  along with the name (label) of the new agent with the --name flag. If you don't specify any of the required flags, the
+  command prompts you.
 
   When this command completes, your org contains the new agent, which you can then edit and customize in the Agent
   Builder UI. The new agent's topics are the same as the ones listed in the agent spec file. The agent might also have
@@ -113,7 +113,7 @@ DESCRIPTION
   the command creates a JSON file in the current directory with all the agent details. The name of the JSON file is the
   agent's API name and a timestamp.
 
-  To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --name <agent-api-name>".
+  To open the new agent in your org's Agent Builder UI, run this command: "sf org open agent --api-name <api-name>".
 
 EXAMPLES
   Create an agent by being prompted for the required information, such as the agent spec file and agent name, and then
@@ -124,15 +124,15 @@ EXAMPLES
   Create an agent by specifying the agent name, API name, and spec file with flags; use the org with alias "my-org";
   the command fails if the API name is already being used in your org:
 
-    $ sf agent create --agent-name "Resort Manager" --agent-api-name Resort_Manager --spec \
-      specs/resortManagerAgent.yaml --target-org my-org
+    $ sf agent create --name "Resort Manager" --api-name Resort_Manager --spec specs/resortManagerAgent.yaml \
+      --target-org my-org
 
   Preview the creation of an agent named "Resort Manager" and use your default org:
 
-    $ sf agent create --agent-name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
+    $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -237,7 +237,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -285,7 +285,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -343,7 +343,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -386,7 +386,7 @@ DESCRIPTION
   Find the agent's API name in its main details page in your org's Agent page in Setup.
 
   Before you use this command, you must complete these steps:
-  -----------------------------------------------------------
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   1. Create a connected app in your org as described in the "Create a Connected App" section here:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these
@@ -436,7 +436,7 @@ EXAMPLES
       --output-dir "transcripts/my-preview"
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -444,18 +444,18 @@ Create an agent test in your org using a local test spec YAML file.
 
 ```
 USAGE
-  $ sf agent test create -o <value> [--json] [--flags-dir <value>] [--test-api-name <value>] [--spec <value>]
-    [--api-version <value>] [--preview] [--force-overwrite]
+  $ sf agent test create -o <value> [--json] [--flags-dir <value>] [--api-name <value>] [--spec <value>] [--api-version
+    <value>] [--preview] [--force-overwrite]
 
 FLAGS
-  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
-                               configuration variable is already set.
-      --api-version=<value>    Override the api version used for api requests made by this command
-      --force-overwrite        Don't prompt for confirmation when overwriting an existing test (based on API name) in
-                               your org.
-      --preview                Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
-      --spec=<value>           Path to the test spec YAML file.
-      --test-api-name=<value>  API name of the new test; the API name must not exist in the org.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-name=<value>     API name of the new test; the API name must not exist in the org.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --force-overwrite      Don't prompt for confirmation when overwriting an existing test (based on API name) in your
+                             org.
+      --preview              Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
+      --spec=<value>         Path to the test spec YAML file.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -483,15 +483,15 @@ EXAMPLES
   Create an agent test and use flags to specify all required information; if a test with same API name already exists
   in the org, overwrite it without confirmation. Use the org with alias "my-org":
 
-    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test \
+    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test \
       --force-overwrite --target-org my-org
 
   Preview what the agent test metadata (AiEvaluationDefinition) looks like without deploying it to your default org:
 
-    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --test-api-name Resort_Manager_Test --preview
+    $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -526,7 +526,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -582,7 +582,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -645,7 +645,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -709,6 +709,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.20.13-preview.6/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
