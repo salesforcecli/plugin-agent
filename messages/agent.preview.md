@@ -63,4 +63,3 @@ Enable apex debug logging during agent conversation.
 - Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview" directory rather than the default "./temp/agent-preview":
 
   <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user --output-dir "transcripts/my-preview"
-```
