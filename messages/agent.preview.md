@@ -52,7 +52,7 @@ Directory where conversation transcripts are saved.
 
 # flags.apex-debug.summary
 
-Enable apex debug logging during agent conversation.
+Enable Apex debug logging during the agent preview conversation.
 
 # examples
 
