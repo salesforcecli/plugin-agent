@@ -67,6 +67,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.output-dir.summary'),
       char: 'd',
     }),
+    'apex-debug': Flags.boolean({
+      summary: messages.getMessage('flags.apex-debug.summary'),
+      char: 'x',
+    }),
   };
 
   public async run(): Promise<AgentPreviewResult> {
@@ -98,12 +102,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     }
 
     const outputDir = await resolveOutputDir(flags['output-dir']);
-    const agentPreview = new Preview(apiConn);
+    const agentPreview = new Preview(apiConn, selectedAgent.Id);
+    agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
+        connection: conn,
         agent: agentPreview,
-        id: selectedAgent.Id,
         name: selectedAgent.DeveloperName,
         outputDir,
       }),
