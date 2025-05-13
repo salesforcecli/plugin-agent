@@ -14,8 +14,6 @@ Find the agent's API name in its main details page in your org's Agent page in S
 
 Before you use this command, you must complete these steps:
 
-```
-
 1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these four additional steps:
 
    a. When specifying the connected app's Callback URL, add this second callback URL on a new line: "http://localhost:1717/OauthRedirect".
