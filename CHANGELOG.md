@@ -1,3 +1,5 @@
+## [1.21.1](https://github.com/salesforcecli/plugin-agent/compare/1.21.0...1.21.1) (2025-05-14)
+
 # [1.21.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.6...1.21.0) (2025-05-08)
 
 ## [1.20.13-preview.6](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.5...1.20.13-preview.6) (2025-05-07)
