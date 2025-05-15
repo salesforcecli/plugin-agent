@@ -1,0 +1,122 @@
+{
+  "status": "COMPLETED",
+  "startTime": "2025-01-07T12:00:00Z",
+  "endTime": "2025-01-07T12:00:10.35Z",
+  "errorMessage": null,
+  "subjectName": "test-subject",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "status": "COMPLETED",
+      "inputs": { "utterance": "test1" },
+      "testResults": [
+        {
+          "actualValue": "Local_Events_Information",
+          "endTime": "2025-05-15T17:24:07Z",
+          "errorCode": 0,
+          "expectedValue": "Local_Events_Information",
+          "metricLabel": "topic_assertion",
+          "name": "topic_assertion",
+          "result": "PASS",
+          "score": 1,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED"
+        },
+        {
+          "actualValue": "[]",
+          "endTime": "2025-05-15T17:24:07Z",
+          "errorCode": 0,
+          "expectedValue": "[]",
+          "metricLabel": "actions_assertion",
+          "name": "actions_assertion",
+          "result": "PASS",
+          "score": 1,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED"
+        },
+        {
+          "actualValue": "Could you please specify the type of event you're interested in? For example, are you looking for cultural events, family-friendly activities, or something else?",
+          "endTime": "2025-05-15T17:24:07Z",
+          "errorCode": 0,
+          "expectedValue": "Could you let me know what type of event you're interested in? For example, are you looking for cultural events, family-friendly activities, or something else?",
+          "metricLabel": "output_validation",
+          "name": "output_validation",
+          "result": "PASS",
+          "score": 1,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED"
+        },
+        {
+          "endTime": "2025-05-15T17:24:08Z",
+          "errorCode": 0,
+          "metricExplainability": "The answer does not provide any weather information, which is the main request. It only provides a general response without addressing the user&#39;s query.",
+          "metricLabel": "completeness",
+          "name": "completeness",
+          "result": "FAILURE",
+          "score": 0.2,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED",
+          "actualValue": "",
+          "expectedValue": ""
+        }
+      ],
+      "startTime": "2024-01-01T00:00:00Z",
+      "generatedData": {
+        "actionsSequence": [],
+        "outcome": "test outcome",
+        "topic": "test topic"
+      }
+    },
+    {
+      "testNumber": 2,
+      "status": "COMPLETED",
+      "inputs": { "utterance": "test2" },
+      "testResults": [
+        {
+          "actualValue": "Weather_and_Temperature_Information",
+          "endTime": "2025-05-15T17:24:08Z",
+          "errorCode": 0,
+          "expectedValue": "Weather_and_Temperature_Information",
+          "metricLabel": "topic_assertion",
+          "name": "topic_assertion",
+          "result": "PASS",
+          "score": 1,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED"
+        },
+        {
+          "endTime": "2025-05-15T17:24:08Z",
+          "errorCode": 0,
+          "metricExplainability": "The answer is a short sentence that does not provide any weather information, and it does not seem to be related to the question. It is difficult to understand what the answer is trying to say, and it does not contain any grammar errors.",
+          "metricLabel": "coherence",
+          "name": "coherence",
+          "result": "FAILURE",
+          "score": 0.2,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED",
+          "actualValue": "",
+          "expectedValue": ""
+        },
+        {
+          "endTime": "2025-05-15T17:24:08Z",
+          "errorCode": 0,
+          "metricExplainability": "The answer does not provide any weather information, which is the main request. It only provides a general response without addressing the user&#39;s query.",
+          "metricLabel": "completeness",
+          "name": "completeness",
+          "result": "FAILURE",
+          "score": 0.2,
+          "startTime": "2025-05-15T17:23:57Z",
+          "status": "COMPLETED",
+          "actualValue": "",
+          "expectedValue": ""
+        }
+      ],
+      "startTime": "2024-01-01T00:00:00Z",
+      "generatedData": {
+        "actionsSequence": [],
+        "outcome": "test outcome",
+        "topic": "test topic"
+      }
+    }
+  ]
+}
