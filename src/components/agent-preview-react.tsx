@@ -81,6 +81,7 @@ export function AgentPreviewReact(props: {
   const [timestamp, setTimestamp] = React.useState(new Date().getTime());
   const [tempDir, setTempDir] = React.useState('');
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
+  const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
 
   const { connection, agent, name, outputDir } = props;
 
@@ -213,8 +214,12 @@ export function AgentPreviewReact(props: {
 
             // If there is an apex debug log entry, get the log and write it to the output dir
             if (response.apexDebugLog && tempDir) {
-              // Write the apex debug  to the output dir
+              // Write the apex debug to the output dir
               await writeDebugLog(connection, response.apexDebugLog, tempDir);
+              const logId = response.apexDebugLog.Id;
+              if (logId) {
+                setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+              }
             }
           }}
         />
@@ -233,6 +238,7 @@ export function AgentPreviewReact(props: {
           <Text bold>Session Ended</Text>
           {outputDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
           {outputDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
+          {apexDebugLogs.length > 0 && <Text>Apex Debug Logs: {'\n' + apexDebugLogs.join('\n')}</Text>}
         </Box>
       ) : null}
     </Box>

@@ -101,7 +101,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       });
     }
 
-    const outputDir = await resolveOutputDir(flags['output-dir']);
+    const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
     const agentPreview = new Preview(apiConn, selectedAgent.Id);
     agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
@@ -156,16 +156,22 @@ export const getAgentChoices = (agents: AgentData[]): Array<Choice<AgentValue>> 
     };
   });
 
-export const resolveOutputDir = async (outputDir: string | undefined): Promise<string | undefined> => {
+export const resolveOutputDir = async (
+  outputDir: string | undefined,
+  apexDebug: boolean | undefined
+): Promise<string | undefined> => {
   if (!outputDir) {
-    const response = await confirm({
-      message: 'Save transcripts to an output directory?',
-      default: true,
-    });
+    const response = apexDebug
+      ? true
+      : await confirm({
+          message: 'Save transcripts to an output directory?',
+          default: true,
+        });
 
+    const outputTypes = apexDebug ? 'debug logs and transcripts' : 'transcripts';
     if (response) {
       const getDir = await input({
-        message: 'Enter the output directory',
+        message: `Enter the output directory for ${outputTypes}`,
         default: env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', join('temp', 'agent-preview')),
         required: true,
       });
