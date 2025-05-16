@@ -1,3 +1,10 @@
+## [1.22.1](https://github.com/salesforcecli/plugin-agent/compare/1.22.0...1.22.1) (2025-05-16)
+
+### Bug Fixes
+
+- exclude node_modules dir from yaml files inspection ([7bce94f](https://github.com/salesforcecli/plugin-agent/commit/7bce94f3d20f005c764ea3a0b8c4ae2f1ef96a37))
+- test updates for windows ([2677e67](https://github.com/salesforcecli/plugin-agent/commit/2677e67f627c352015af957407dfbeaf572969ca))
+
 # [1.22.0](https://github.com/salesforcecli/plugin-agent/compare/1.21.1...1.22.0) (2025-05-16)
 
 ### Features
