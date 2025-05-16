@@ -1,3 +1,9 @@
+# [1.22.0](https://github.com/salesforcecli/plugin-agent/compare/1.21.1...1.22.0) (2025-05-16)
+
+### Features
+
+- add agent preview debug mode - W-18417013 ([#141](https://github.com/salesforcecli/plugin-agent/issues/141)) ([32368ed](https://github.com/salesforcecli/plugin-agent/commit/32368ed79987fc9e60aff731a180cc65d0025ff9))
+
 ## [1.21.1](https://github.com/salesforcecli/plugin-agent/compare/1.21.0...1.21.1) (2025-05-14)
 
 # [1.21.0](https://github.com/salesforcecli/plugin-agent/compare/1.20.13-preview.6...1.21.0) (2025-05-08)
