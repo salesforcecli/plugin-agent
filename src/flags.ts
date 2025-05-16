@@ -77,16 +77,16 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
   ) as FlagsOfPrompts<T>;
 }
 
-async function traverseForFiles(dir: string, suffixes: string[]): Promise<string[]> {
+export async function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): Promise<string[]> {
   const files = await readdir(dir, { withFileTypes: true });
   const results: string[] = [];
 
   for (const file of files) {
     const fullPath = join(dir, file.name);
 
-    if (file.isDirectory()) {
+    if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
       // eslint-disable-next-line no-await-in-loop
-      results.push(...(await traverseForFiles(fullPath, suffixes)));
+      results.push(...(await traverseForFiles(fullPath, suffixes, excludeDirs)));
     } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
       results.push(fullPath);
     }
@@ -127,7 +127,7 @@ export const promptForAiEvaluationDefinitionApiName = async (
 };
 
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml']);
+  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules']);
   return autocomplete({
     message: flagDef.message,
     // eslint-disable-next-line @typescript-eslint/require-await
