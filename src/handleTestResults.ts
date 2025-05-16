@@ -72,6 +72,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
   const ux = new Ux();
 
   const tables: string[] = [];
+  const metricResults = [];
   for (const testCase of results.testCases) {
     let table = ux.makeTable({
       title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('Utterance')}: ${
@@ -122,6 +123,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
         width: '100%',
       });
       tables.push(table);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      metricResults.push(...metrics);
     }
     // add a line break between end of the first table and the utterance of the next
     tables.push('\n');
@@ -145,6 +148,12 @@ export function humanFormat(results: AgentTestResultsResponse): string {
   }, 0);
   const outcomePassPercent = (outcomePassCount / results.testCases.length) * 100;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const metricPassCount = metricResults.filter(
+    (f) => f.result === 'PASS' || f.name === 'output_latency_milliseconds'
+  ).length;
+  const metricPassPercent = metricResults.length > 0 ? (metricPassCount / metricResults.length) * 100 : 0;
+
   const final = {
     Status: results.status,
     Duration: results.endTime
@@ -153,6 +162,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
     'Topic Pass %': `${topicPassPercent.toFixed(2)}%`,
     'Action Pass %': `${actionPassPercent.toFixed(2)}%`,
     'Outcome Pass %': `${outcomePassPercent.toFixed(2)}%`,
+    ...(metricResults.length ? { 'Metric Pass %': `${metricPassPercent.toFixed(2)}%` } : {}),
   };
 
   const resultsTable = makeSimpleTable(final, ansis.bold.blue('Test Results'));
