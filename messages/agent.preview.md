@@ -13,7 +13,6 @@ When the session concludes, the command asks if you want to save the API respons
 Find the agent's API name in its main details page in your org's Agent page in Setup.
 
 Before you use this command, you must complete these steps:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these four additional steps:
 
@@ -50,6 +49,10 @@ Username or alias of the connected app user that's configured with web-based acc
 # flags.output-dir.summary
 
 Directory where conversation transcripts are saved.
+
+# flags.apex-debug.summary
+
+Enable Apex debug logging during the agent preview conversation.
 
 # examples
 

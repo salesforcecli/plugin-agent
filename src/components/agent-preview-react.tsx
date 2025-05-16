@@ -10,7 +10,8 @@ import fs from 'node:fs';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { AgentPreview, AgentPreviewSendResponse } from '@salesforce/agents';
+import { Connection } from '@salesforce/core';
+import { AgentPreview, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
 import { sleep } from '@salesforce/kit';
 
 // Component to show a simple typing animation
@@ -64,8 +65,8 @@ const saveTranscriptsToFile = (
  * - Add keystroke to scroll down
  */
 export function AgentPreviewReact(props: {
+  readonly connection: Connection;
   readonly agent: AgentPreview;
-  readonly id: string;
   readonly name: string;
   readonly outputDir: string | undefined;
 }): React.ReactNode {
@@ -80,8 +81,9 @@ export function AgentPreviewReact(props: {
   const [timestamp, setTimestamp] = React.useState(new Date().getTime());
   const [tempDir, setTempDir] = React.useState('');
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
+  const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
 
-  const { agent, id, name, outputDir } = props;
+  const { connection, agent, name, outputDir } = props;
 
   useInput((input, key) => {
     if (key.escape) {
@@ -105,7 +107,7 @@ export function AgentPreviewReact(props: {
 
   React.useEffect(() => {
     const startSession = async (): Promise<void> => {
-      const session = await agent.start(id);
+      const session = await agent.start();
       setSessionId(session.sessionId);
       setHeader(`New session started with "${props.name}" (${session.sessionId})`);
       await sleep(500); // Add a short delay to make it feel more natural
@@ -209,6 +211,16 @@ export function AgentPreviewReact(props: {
 
             // Add the agent's response to the chat
             setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+
+            // If there is an apex debug log entry, get the log and write it to the output dir
+            if (response.apexDebugLog && tempDir) {
+              // Write the apex debug to the output dir
+              await writeDebugLog(connection, response.apexDebugLog, tempDir);
+              const logId = response.apexDebugLog.Id;
+              if (logId) {
+                setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+              }
+            }
           }}
         />
       </Box>
@@ -226,6 +238,7 @@ export function AgentPreviewReact(props: {
           <Text bold>Session Ended</Text>
           {outputDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
           {outputDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
+          {apexDebugLogs.length > 0 && <Text>Apex Debug Logs: {'\n' + apexDebugLogs.join('\n')}</Text>}
         </Box>
       ) : null}
     </Box>
