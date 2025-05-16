@@ -15,10 +15,10 @@ describe('traverseForFiles', () => {
   const testFiles = [
     'file1.yml',
     'file2.yaml',
-    'subdir/file3.yml',
-    'subdir/file4.yaml',
-    'node_modules/file5.yml',
-    'excluded/file6.yaml',
+    join('subdir', 'file3.yml'),
+    join('subdir', 'file4.yaml'),
+    join('node_modules', 'file5.yml'),
+    join('excluded', 'file6.yaml'),
   ] as const;
 
   before(async () => {
@@ -42,10 +42,10 @@ describe('traverseForFiles', () => {
     expect(results).to.have.lengthOf(6);
     expect(results).to.include(join(testDir, 'file1.yml'));
     expect(results).to.include(join(testDir, 'file2.yaml'));
-    expect(results).to.include(join(testDir, 'subdir/file3.yml'));
-    expect(results).to.include(join(testDir, 'subdir/file4.yaml'));
-    expect(results).to.include(join(testDir, 'node_modules/file5.yml'));
-    expect(results).to.include(join(testDir, 'excluded/file6.yaml'));
+    expect(results).to.include(join(testDir, 'subdir', 'file3.yml'));
+    expect(results).to.include(join(testDir, 'subdir', 'file4.yaml'));
+    expect(results).to.include(join(testDir, 'node_modules', 'file5.yml'));
+    expect(results).to.include(join(testDir, 'excluded', 'file6.yaml'));
   });
 
   it('should exclude specified directories', async () => {
@@ -53,10 +53,10 @@ describe('traverseForFiles', () => {
     expect(results).to.have.lengthOf(4);
     expect(results).to.include(join(testDir, 'file1.yml'));
     expect(results).to.include(join(testDir, 'file2.yaml'));
-    expect(results).to.include(join(testDir, 'subdir/file3.yml'));
-    expect(results).to.include(join(testDir, 'subdir/file4.yaml'));
-    expect(results).to.not.include(join(testDir, 'node_modules/file5.yml'));
-    expect(results).to.not.include(join(testDir, 'excluded/file6.yaml'));
+    expect(results).to.include(join(testDir, 'subdir', 'file3.yml'));
+    expect(results).to.include(join(testDir, 'subdir', 'file4.yaml'));
+    expect(results).to.not.include(join(testDir, 'node_modules', 'file5.yml'));
+    expect(results).to.not.include(join(testDir, 'excluded', 'file6.yaml'));
   });
 
   it('should handle empty excludeDirs array', async () => {
