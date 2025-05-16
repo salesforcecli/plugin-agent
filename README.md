@@ -380,7 +380,7 @@ DESCRIPTION
   the agent uses a particular topic when asked a question, and then whether it invokes the correct action associated
   with that topic. This command is the CLI-equivalent of the Conversation Preview panel in your org's Agent Builder UI.
 
-  When the session concludes, the command asks if you want to save the API responses and chat transcripts. By default,
+  Before the session starts, the command asks if you want to save the API responses and chat transcripts. By default,
   the files are saved to the "./temp/agent-preview" directory. Specify a new default directory by setting the
   environment variable "SF_AGENT_PREVIEW_OUTPUT_DIR" to the directory. Or you can pass the directory to the --output-dir
   flag.
