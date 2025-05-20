@@ -81,3 +81,25 @@ describe('truncate', () => {
     expect(truncate(0, 0)).to.equal('0');
   });
 });
+
+describe('metric calculations', () => {
+  it('should handle test cases with no metrics', async () => {
+    const raw = await readFile('./test/mocks/einstein_ai-evaluations_runs_4KBSM000000003F4AQ_results/4.json', 'utf8');
+    const input = JSON.parse(raw) as AgentTestResultsResponse;
+    const output = humanFormat(input);
+    expect(output).to.not.include('Metric Pass %');
+  });
+  it('should correctly calculate metric pass percentage', async () => {
+    const raw = await readFile('./test/mocks/einstein_ai-evaluations_runs_4KBSM000000003F4AQ_results/5.json', 'utf8');
+    const input = JSON.parse(raw) as AgentTestResultsResponse;
+    const output = humanFormat(input);
+    expect(output).to.include('Metric Pass %   33.33%');
+  });
+
+  it('should handle test cases where all metrics fail', async () => {
+    const raw = await readFile('./test/mocks/einstein_ai-evaluations_runs_4KBSM000000003F4AQ_results/6.json', 'utf8');
+    const input = JSON.parse(raw) as AgentTestResultsResponse;
+    const output = humanFormat(input);
+    expect(output).to.include('Metric Pass %   0.00%');
+  });
+});
