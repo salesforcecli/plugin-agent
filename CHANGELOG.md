@@ -1,3 +1,9 @@
+## [1.22.2](https://github.com/salesforcecli/plugin-agent/compare/1.22.1...1.22.2) (2025-05-20)
+
+### Bug Fixes
+
+- add Metric Pass percentage to test results summary ([0a88bdf](https://github.com/salesforcecli/plugin-agent/commit/0a88bdfe1c13b463f5a8b945cef3cb0e28126547))
+
 ## [1.22.1](https://github.com/salesforcecli/plugin-agent/compare/1.22.0...1.22.1) (2025-05-16)
 
 ### Bug Fixes
