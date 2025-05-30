@@ -1,3 +1,9 @@
+## [1.22.4](https://github.com/salesforcecli/plugin-agent/compare/1.22.3...1.22.4) (2025-05-30)
+
+### Bug Fixes
+
+- clarify timing of save prompt for agent preview in README ([ab2d205](https://github.com/salesforcecli/plugin-agent/commit/ab2d205b9db8052c44a1cd54f3e195d15e106f28))
+
 ## [1.22.3](https://github.com/salesforcecli/plugin-agent/compare/1.22.2...1.22.3) (2025-05-30)
 
 ### Bug Fixes
