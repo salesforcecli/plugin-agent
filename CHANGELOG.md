@@ -1,3 +1,9 @@
+## [1.22.3](https://github.com/salesforcecli/plugin-agent/compare/1.22.2...1.22.3) (2025-05-30)
+
+### Bug Fixes
+
+- use correct flag name in success message ([ba622ff](https://github.com/salesforcecli/plugin-agent/commit/ba622ffb75c31f13b01917778eec6eb75e8a621a))
+
 ## [1.22.2](https://github.com/salesforcecli/plugin-agent/compare/1.22.1...1.22.2) (2025-05-20)
 
 ### Bug Fixes
