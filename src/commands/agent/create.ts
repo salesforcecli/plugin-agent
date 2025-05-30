@@ -206,7 +206,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
         this.log(
           `Use ${colorize(
             'dim',
-            `sf org open agent --name ${agentApiName} -o ${orgUsername}`
+            `sf org open agent --api-name ${agentApiName} -o ${orgUsername}`
           )} to view the agent in the browser.`
         );
       } else {
