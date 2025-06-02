@@ -1,3 +1,9 @@
+## [1.22.5](https://github.com/salesforcecli/plugin-agent/compare/1.22.4...1.22.5) (2025-06-02)
+
+### Bug Fixes
+
+- replace colon in file name ([eced613](https://github.com/salesforcecli/plugin-agent/commit/eced613cd76da3a32c9ecf64095ff4830cd426f1))
+
 ## [1.22.4](https://github.com/salesforcecli/plugin-agent/compare/1.22.3...1.22.4) (2025-05-30)
 
 ### Bug Fixes
