@@ -210,7 +210,7 @@ export default class AgentCreate extends SfCommand<AgentCreateResult> {
           )} to view the agent in the browser.`
         );
       } else {
-        const previewFileName = `${agentApiName}_Preview_${new Date().toISOString()}.json`;
+        const previewFileName = `${agentApiName}_Preview_${new Date().toISOString().replace(/:/g, '-')}.json`;
         writeFileSync(previewFileName, JSON.stringify(response, null, 2));
         result.previewFilePath = resolve(previewFileName);
         this.log(`Successfully created agent for preview. See ${previewFileName}\n`);
