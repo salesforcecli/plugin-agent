@@ -34,7 +34,7 @@ API name of the new agent
 
 # flags.planner-id.summary
 
-An existing GenAiPlanner ID to associate with the agent.
+An existing GenAiPlannerBundle ID to associate with the agent.
 
 # error.missingRequiredFlags
 
