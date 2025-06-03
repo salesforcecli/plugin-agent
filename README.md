@@ -130,7 +130,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/create.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -235,7 +235,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -258,11 +258,11 @@ DESCRIPTION
   Generate an agent template from an existing agent in your DX project so you can then package the template in a managed
   package.
 
-  At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlanner metadata types. The GenAiPlanner type in
-  turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in
-  your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use the BotTemplate file,
-  along with the GenAiPlanner file that references the BotTemplate, to package the template in a managed package that
-  you can share between orgs or on AppExchange.
+  At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The
+  GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these
+  three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use
+  the BotTemplate file, along with the GenAiPlannerBundle file that references the BotTemplate, to package the template
+  in a managed package that you can share between orgs or on AppExchange.
 
   Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as
   force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple
@@ -271,7 +271,7 @@ DESCRIPTION
   force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
 
   The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the
-  name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as
+  name <Agent_API_name>_v<Version>_Template.botTemplate-meta.xml, such as
   force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full
   pathname of the generated files when it completes.
 
@@ -283,7 +283,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -341,7 +341,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -435,7 +435,7 @@ EXAMPLES
       --output-dir "transcripts/my-preview"
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -490,7 +490,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -525,7 +525,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -581,7 +581,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -644,7 +644,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -708,6 +708,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.6/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.22.7/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->

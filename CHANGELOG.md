@@ -1,3 +1,9 @@
+## [1.22.7](https://github.com/salesforcecli/plugin-agent/compare/1.22.6...1.22.7) (2025-06-03)
+
+### Bug Fixes
+
+- change "GenAiPlanner" to "GenAiPlannerBundle" ([ad9b15f](https://github.com/salesforcecli/plugin-agent/commit/ad9b15f97e72614f2dac1777e622392e7d9887ac))
+
 ## [1.22.6](https://github.com/salesforcecli/plugin-agent/compare/1.22.5...1.22.6) (2025-06-03)
 
 ### Bug Fixes
