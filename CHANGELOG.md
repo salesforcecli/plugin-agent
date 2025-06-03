@@ -1,3 +1,9 @@
+## [1.22.6](https://github.com/salesforcecli/plugin-agent/compare/1.22.5...1.22.6) (2025-06-03)
+
+### Bug Fixes
+
+- ga template generate command ([08d6a51](https://github.com/salesforcecli/plugin-agent/commit/08d6a5114fd4a0847a1c844d5d5ba0afd0482c44))
+
 ## [1.22.5](https://github.com/salesforcecli/plugin-agent/compare/1.22.4...1.22.5) (2025-06-02)
 
 ### Bug Fixes
