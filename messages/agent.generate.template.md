@@ -4,11 +4,11 @@ Generate an agent template from an existing agent in your DX project so you can 
 
 # description
 
-At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlanner metadata types. The GenAiPlanner type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use the BotTemplate file, along with the GenAiPlanner file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
+At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use the BotTemplate file, along with the GenAiPlannerBundle file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
 
 Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
 
-The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>_v<Version>_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
 
 # examples
 
