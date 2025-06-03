@@ -36,7 +36,7 @@ function castArray<T>(value: T | T[]): T[] {
  * Prompts the user for test case information through interactive prompts.
  *
  * @param genAiPlugins - Record mapping topic names to GenAiPlugin XML file paths (used to find the related actions)
- * @param genAiFunctions - Array of GenAiFunction names from the GenAiPlanner
+ * @param genAiFunctions - Array of GenAiFunction names from the GenAiPlannerBundle
  * @returns Promise resolving to a TestCase object containing:
  * - utterance: The user input string
  * - expectedTopic: The expected topic for classification
@@ -46,8 +46,8 @@ function castArray<T>(value: T | T[]): T[] {
  * @remarks
  * This function guides users through creating a test case by:
  * 1. Prompting for an utterance
- * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlanner)
- * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlanner or GenAiPlugin)
+ * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlannerBundle)
+ * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlannerBundle or GenAiPlugin)
  * 4. Defining an expected outcome
  */
 async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
@@ -63,7 +63,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     theme,
   });
 
-  // GenAiFunctions (aka actions) can be defined in the GenAiPlugin or GenAiPlanner
+  // GenAiFunctions (aka actions) can be defined in the GenAiPlugin or GenAiPlannerBundle
   // the actions from the planner are passed in as an argument to this function
   // the actions from the plugin are read from the GenAiPlugin file
   let actions: string[] = [];
@@ -132,19 +132,19 @@ function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, st
 }
 
 /**
- * Retrieves GenAIPlugins and GenAiFunctions from a Bot's GenAiPlanner
+ * Retrieves GenAIPlugins and GenAiFunctions from a Bot's GenAiPlannerBundle
  *
  * We have to get the bot version and planner for the selected bot so that we can get
  * the actions (GenAiFunctions) and topics (GenAiPlugins) that can be selected for the
  * test cases.
  *
- * The BotVersion tells us which GenAiPlanner to use, and the GenAiPlanner
+ * The BotVersion tells us which GenAiPlannerBundle to use, and the GenAiPlannerBundle
  * tells us which GenAiPlugins and GenAiFunctions are available. More GenAiFunctions
  * might be available in the GenAiPlugin, so we read those later when the user
  * has selected a GenAiPlugin/topic - inside of `promptForTestCase`.
  *
  * @param subjectName - The name of the Bot to analyze
- * @param cs - ComponentSet containing Bot, GenAiPlanner, and GenAiPlugin components
+ * @param cs - ComponentSet containing Bot, GenAiPlannerBundle, and GenAiPlugin components
  *
  * @returns Object containing:
  * - genAiPlugins: Record of plugin names to their file paths
