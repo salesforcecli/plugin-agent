@@ -55,8 +55,8 @@
     "alias": [],
     "command": "agent:preview",
     "flagAliases": [],
-    "flagChars": ["a", "d", "n", "o", "x"],
-    "flags": ["apex-debug", "api-name", "api-version", "connected-app-user", "flags-dir", "output-dir", "target-org"],
+    "flagChars": ["d", "n", "o", "x"],
+    "flags": ["apex-debug", "api-name", "api-version", "app", "flags-dir", "output-dir", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
