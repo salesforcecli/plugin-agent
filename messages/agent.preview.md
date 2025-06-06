@@ -28,23 +28,24 @@ Before you use this command, you must complete these steps:
 
 3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
-4. Set the "SFDX_AUTH_SCOPES" environment variable to "refresh_token sfap_api chatbot_api web api". This step ensures that you get the specific OAuth scopes required by this command.
-
-5. Using the username of the user you specified as the "Run As" user above, authorize your org using the web server flow, as described in this document: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm.
+4. Link the connected app to your authenticated user with the required API scopes using the web server flow:
+```
+sf org login web --app agent-app --username <username> --client-id <consumer-key> --scopes "sfap_api chatbot_api api refresh_token api web"
+```
 
    IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
 
    Press Enter to skip sharing the client secret.
 
-6. When you run this command to interact with an agent, specify the username you authorized in the preceding step with the --connected-app-user (-a) flag.
+5. When you run this command to interact with an agent, specify the org username and linked connected app with the --target-org and --app flags.
 
 # flags.api-name.summary
 
 API name of the agent you want to interact with.
 
-# flags.connected-app-user.summary
+# flags.app.summary
 
-Username or alias of the connected app user that's configured with web-based access tokens to the agent.
+Name of the linked connected app or external client app to use for the connection.
 
 # flags.output-dir.summary
 
@@ -56,10 +57,10 @@ Enable Apex debug logging during the agent preview conversation.
 
 # examples
 
-- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org". Connect to your agent using the alias "my-agent-user"; this alias must point to the username who is authorized using the Web server flow:
+- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app" connected app.
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --app agent-app
 
 - Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview" directory rather than the default "./temp/agent-preview":
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --connected-app-user my-agent-user --output-dir "transcripts/my-preview"
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --app agent-app --output-dir "transcripts/my-preview"
