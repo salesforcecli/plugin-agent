@@ -29,23 +29,24 @@ Before you use this command, you must complete these steps:
 3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
 4. Link the connected app to your authenticated user with the required API scopes using the web server flow:
+
 ```
-sf org login web --app agent-app --username <username> --client-id <consumer-key> --scopes "sfap_api chatbot_api api refresh_token api web"
+sf org login web --client-app agent-app --username <username> --client-id <consumer-key> --scopes "sfap_api chatbot_api api refresh_token api web"
 ```
 
-   IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
+IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
 
-   Press Enter to skip sharing the client secret.
+Press Enter to skip sharing the client secret.
 
-5. When you run this command to interact with an agent, specify the org username and linked connected app with the --target-org and --app flags.
+5. When you run this command to interact with an agent, specify the org username and linked connected app with the --target-org and --client-app flags.
 
 # flags.api-name.summary
 
 API name of the agent you want to interact with.
 
-# flags.app.summary
+# flags.client-app.summary
 
-Name of the linked connected app or external client app to use for the connection.
+Name of the linked client app to use for the agent connection.
 
 # flags.output-dir.summary
 
@@ -59,8 +60,8 @@ Enable Apex debug logging during the agent preview conversation.
 
 - Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app" connected app.
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --app agent-app
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --client-app agent-app
 
 - Same as the preceding example, but this time save the conversation transcripts to the "./transcripts/my-preview" directory rather than the default "./temp/agent-preview":
 
-  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --app agent-app --output-dir "transcripts/my-preview"
+  <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --client-app agent-app --output-dir "transcripts/my-preview"

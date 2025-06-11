@@ -54,9 +54,11 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    app: Flags.string({
-      summary: messages.getMessage('flags.app.summary'),
+    'client-app': Flags.string({
+      char: 'c',
+      summary: messages.getMessage('flags.client-app.summary'),
       required: true,
+      dependsOn: ['target-org'],
     }),
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
@@ -84,7 +86,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const jwtConn = await Connection.create({
       authInfo,
-      app: flags.app,
+      clientApp: flags['client-app'],
     });
 
     const agentsQuery = await conn.query<AgentData>(
