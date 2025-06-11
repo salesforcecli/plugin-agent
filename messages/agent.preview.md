@@ -14,31 +14,27 @@ Find the agent's API name in its main details page in your org's Agent page in S
 
 Before you use this command, you must complete these steps:
 
-1. Create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these four additional steps:
+1. Using your org's Setup UI, create a connected app in your org as described in the "Create a Connected App" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#create-a-connected-app. Do these additional steps:
 
    a. When specifying the connected app's Callback URL, add this second callback URL on a new line: "http://localhost:1717/OauthRedirect".
 
    b. When adding the scopes to the connected app, add "Manage user data via Web browsers (web)".
 
-   c. Ensure that the "Require Secret for Web Server Flow" option is not selected.
-
-   d. Make note of the user that you specified as the "Run As" user when updating the Client Credentials Flow section.
-
 2. Add the connected app to your agent as described in the "Add Connected App to Agent" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#add-connected-app-to-agent.
 
 3. Copy the consumer key from your connected app as described in the "Obtain Credentials" section here: https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#obtain-credentials.
 
-4. Link the connected app to your authenticated user with the required API scopes using the web server flow:
+4. If you haven't already, run the "org login web" CLI command as usual to authorize the development org that contains the agent you want to preview.
 
-```
-sf org login web --client-app agent-app --username <username> --client-id <consumer-key> --scopes "sfap_api chatbot_api api refresh_token api web"
-```
+5. Re-run the "org web login" command to link the new connected app to your already-authenticated user. Use the --client-app flag to give the link a name; you can specify any string, but make a note of it because you'll need it later. Use --username to specify the username that you used to log into the org in the previous step. Use --client-id to specify the consumer key you previously copied. Finally, use --scopes as indicated to specify the required API scopes. Here's an example:
+
+sf org login web --client-app agent-app --username <username> --client-id <consumer-key> --scopes "sfap_api chatbot_api refresh_token api web"
 
 IMPORTANT: You must use the "--client-id <CONNECTED-APP-CONSUMER-KEY>" flag of "org login web", where CONNECTED-APP-CONSUMER-KEY is the consumer key you previously copied. This step ensures that the "org login web" command uses your custom connected app, and not the default CLI connected app.
 
-Press Enter to skip sharing the client secret.
+6. Press Enter to skip sharing the client secret, then log in with your org username as usual and click Accept.
 
-5. When you run this command to interact with an agent, specify the org username and linked connected app with the --target-org and --client-app flags.
+7. Run this command ("agent preview") to interact with an agent by using the --target-org flag to specify the org username or alias as usual and --client-app to specify the linked connected app ("agent-app" in the previous example). Use the "org display" command to get the list of client apps associated with an org.
 
 # flags.api-name.summary
 
@@ -46,7 +42,7 @@ API name of the agent you want to interact with.
 
 # flags.client-app.summary
 
-Name of the linked client app to use for the agent connection.
+Name of the linked client app to use for the agent connection. You must have previously created this link with "org login web --client-app". Run "org display" to see the available linked client apps.
 
 # flags.output-dir.summary
 
@@ -58,7 +54,7 @@ Enable Apex debug logging during the agent preview conversation.
 
 # examples
 
-- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app" connected app.
+- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app" connected app:
 
   <%= config.bin %> <%= command.id %> --api-name "Resort_Manager" --target-org my-org --client-app agent-app
 
