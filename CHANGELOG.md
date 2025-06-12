@@ -1,3 +1,9 @@
+# [1.23.0](https://github.com/salesforcecli/plugin-agent/compare/1.22.8...1.23.0) (2025-06-12)
+
+### Features
+
+- use linked connected apps for auth W-18394868 ([#157](https://github.com/salesforcecli/plugin-agent/issues/157)) ([bce191f](https://github.com/salesforcecli/plugin-agent/commit/bce191f751b36fa73a510fc0fdabb76397070d23)), closes [#159](https://github.com/salesforcecli/plugin-agent/issues/159)
+
 ## [1.22.8](https://github.com/salesforcecli/plugin-agent/compare/1.22.7...1.22.8) (2025-06-03)
 
 ### Bug Fixes
