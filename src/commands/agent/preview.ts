@@ -7,7 +7,7 @@
 
 import { resolve, join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import { env } from '@salesforce/kit';
@@ -54,10 +54,11 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'connected-app-user': Flags.requiredOrg({
-      summary: messages.getMessage('flags.connected-app-user.summary'),
-      char: 'a',
+    'client-app': Flags.string({
+      char: 'c',
+      summary: messages.getMessage('flags.client-app.summary'),
       required: true,
+      dependsOn: ['target-org'],
     }),
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
@@ -78,7 +79,15 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const { 'api-name': apiNameFlag } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
-    const apiConn = flags['connected-app-user'].getConnection(flags['api-version']);
+
+    const authInfo = await AuthInfo.create({
+      username: flags['target-org'].getUsername(),
+    });
+
+    const jwtConn = await Connection.create({
+      authInfo,
+      clientApp: flags['client-app'],
+    });
 
     const agentsQuery = await conn.query<AgentData>(
       'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
@@ -102,7 +111,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     }
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
-    const agentPreview = new Preview(apiConn, selectedAgent.Id);
+    const agentPreview = new Preview(jwtConn, selectedAgent.Id);
     agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
     const instance = render(
