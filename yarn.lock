@@ -1332,16 +1332,16 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/multi-stage-output@^0.7.12":
-  version "0.7.18"
-  resolved "https://registry.yarnpkg.com/@oclif/multi-stage-output/-/multi-stage-output-0.7.18.tgz#20010d85e52a01c559b651cb1f6f151c702dbcd2"
-  integrity sha512-lWFih9hXnDIdSYnB0sJTea9WK7SAmSljUh5YZcK7fKdwtPwM0sfW+Vtl+mDU83pXdd9SrXPnKzC3F7N+CdM9Rg==
+"@oclif/multi-stage-output@^0.8.14":
+  version "0.8.14"
+  resolved "https://registry.yarnpkg.com/@oclif/multi-stage-output/-/multi-stage-output-0.8.14.tgz#7276009eef1ebd904666a230d690066b1a3b16ae"
+  integrity sha512-s6Ra2xJrRtIQfn+b/KcLaphboNIVP/2jymEM1rS8T8wADDvF6nw4GtkqUNNR77sZLe1XuxuiDLx4qFY9lYBxow==
   dependencies:
     "@oclif/core" "^4"
     "@types/react" "^18.3.12"
     cli-spinners "^2"
     figures "^6.1.0"
-    ink "^5.1.0"
+    ink "5.0.1"
     react "^18.3.1"
     wrap-ansi "^9.0.0"
 
@@ -3965,11 +3965,6 @@ es-to-primitive@^1.3.0:
     is-date-object "^1.0.5"
     is-symbol "^1.0.4"
 
-es-toolkit@^1.22.0:
-  version "1.36.0"
-  resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.36.0.tgz#98a9ddba346cde1aeca099f9bc27c05838c68b9a"
-  integrity sha512-5lpkRpDELuTSeAL//Rcg5urg+K/yOD1BobJSiNeCc89snMqgrhckmj8jdljqraDbpREiXTNW311RN518eVHBng==
-
 es6-error@^4.0.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-4.1.1.tgz#9e3af407459deed47e9a91f9b885a84eb05c561d"
@@ -5220,36 +5215,6 @@ ink@5.0.1:
     ws "^8.15.0"
     yoga-wasm-web "~0.3.3"
 
-ink@^5.1.0:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/ink/-/ink-5.2.1.tgz#b9ea59f0d1eab2b4566903b35b54fd34323d1694"
-  integrity sha512-BqcUyWrG9zq5HIwW6JcfFHsIYebJkWWb4fczNah1goUO0vv5vneIlfwuS85twyJ5hYR/y18FlAYUxrO9ChIWVg==
-  dependencies:
-    "@alcalzone/ansi-tokenize" "^0.1.3"
-    ansi-escapes "^7.0.0"
-    ansi-styles "^6.2.1"
-    auto-bind "^5.0.1"
-    chalk "^5.3.0"
-    cli-boxes "^3.0.0"
-    cli-cursor "^4.0.0"
-    cli-truncate "^4.0.0"
-    code-excerpt "^4.0.0"
-    es-toolkit "^1.22.0"
-    indent-string "^5.0.0"
-    is-in-ci "^1.0.0"
-    patch-console "^2.0.0"
-    react-reconciler "^0.29.0"
-    scheduler "^0.23.0"
-    signal-exit "^3.0.7"
-    slice-ansi "^7.1.0"
-    stack-utils "^2.0.6"
-    string-width "^7.2.0"
-    type-fest "^4.27.0"
-    widest-line "^5.0.0"
-    wrap-ansi "^9.0.0"
-    ws "^8.18.0"
-    yoga-layout "~3.2.1"
-
 inquirer-autocomplete-standalone@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/inquirer-autocomplete-standalone/-/inquirer-autocomplete-standalone-0.8.1.tgz#540ac162d5dd01f83d0f4016b76bf0bb64e2fff8"
@@ -5420,11 +5385,6 @@ is-in-ci@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/is-in-ci/-/is-in-ci-0.1.0.tgz#5e07d6a02ec3a8292d3f590973357efa3fceb0d3"
   integrity sha512-d9PXLEY0v1iJ64xLiQMJ51J128EYHAaOR4yZqQi8aHGfw6KgifM3/Viw1oZZ1GCVmb3gBuyhLyHj0HgR2DhSXQ==
-
-is-in-ci@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/is-in-ci/-/is-in-ci-1.0.0.tgz#9a86bbda7e42c6129902e0574c54b018fbb6ab88"
-  integrity sha512-eUuAjybVTHMYWm/U+vBO1sY/JOCgoPCXRxzdju0K+K0BiGW0SChEL1MLC0PoCIR1OlPo5YAp8HuQoUlsWEICwg==
 
 is-map@^2.0.3:
   version "2.0.3"
@@ -8333,7 +8293,7 @@ type-fest@^1.0.2:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-1.4.0.tgz#e9fb813fe3bf1744ec359d55d1affefa76f14be1"
   integrity sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==
 
-type-fest@^4.18.2, type-fest@^4.27.0, type-fest@^4.8.3:
+type-fest@^4.18.2, type-fest@^4.8.3:
   version "4.40.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.40.1.tgz#d78a09f08dd1081a434dd377967650cfd565401d"
   integrity sha512-9YvLNnORDpI+vghLU/Nf+zSv0kL47KbVJ1o3sKgoTefl6i+zebxbiDQWoe/oWWqPhIgQdRZRT1KA9sCPL810SA==
@@ -8774,7 +8734,7 @@ write-file-atomic@^3.0.0:
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
 
-ws@^8.15.0, ws@^8.18.0:
+ws@^8.15.0:
   version "8.18.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
   integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==
@@ -8907,11 +8867,6 @@ yoctocolors-cjs@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yoctocolors-cjs/-/yoctocolors-cjs-2.1.2.tgz#f4b905a840a37506813a7acaa28febe97767a242"
   integrity sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA==
-
-yoga-layout@~3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/yoga-layout/-/yoga-layout-3.2.1.tgz#d2d1ba06f0e81c2eb650c3e5ad8b0b4adde1e843"
-  integrity sha512-0LPOt3AxKqMdFBZA3HBAt/t/8vIKq7VaQYbuA8WxCgung+p9TVyKRYdpvCb80HcdTN2NkbIKbhNwKUfm3tQywQ==
 
 yoga-wasm-web@~0.3.3:
   version "0.3.3"
