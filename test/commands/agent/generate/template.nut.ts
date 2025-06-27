@@ -31,11 +31,9 @@ describe('agent generate template NUTs', () => {
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
     const agentVersion = 1;
-    const agentFile = join('force-app', 'main', 'default', 'bots', 'Local_Info_Agent', 'Local_Info_Agent.bot-meta.xml');
+    const agentFile = join('force-app', 'main', 'default', 'bots', 'Bot_Agent', 'Bot_Agent.bot-meta.xml');
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
-    const output = execCmd<AgentGenerateTemplateResult>(command, {
-      ensureExitCode: 1,
-    }).jsonOutput;
+    const output = execCmd<AgentGenerateTemplateResult>(command, { ensureExitCode: 1 }).jsonOutput;
 
     expect(output?.message).to.include(
       "The 'type' attribute of this Bot metadata component XML file can't have a value of 'Bot'"
