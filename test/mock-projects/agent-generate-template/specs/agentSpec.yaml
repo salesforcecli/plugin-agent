@@ -1,0 +1,19 @@
+agentType: customer
+companyName: Test Company Name
+companyDescription: Test Company Description
+companyWebsite: https://test-company-website.org
+role: test agent role
+maxNumOfTopics: 5
+enrichLogs: false
+tone: casual
+topics:
+  - name: Customer Account Management
+    description: Enable customers to manage their account details and preferences.
+  - name: Order Tracking and Status
+    description: Provide real-time updates on order status and shipping details.
+  - name: Product Recommendations
+    description: Offer personalized product suggestions based on customer behavior.
+  - name: Customer Support and Queries
+    description: Assist customers with their inquiries and provide support solutions.
+  - name: Feedback and Reviews
+    description: Allow customers to leave feedback and reviews on products and services.

@@ -1,8 +1,14 @@
 {
   "orgName": "Agent NUTs",
   "edition": "Developer",
-  "features": ["CustomerDataPlatform", "CustomerDataPlatformLite", "Einstein1AIPlatform"],
+  "features": ["EnableSetPasswordInApi", "CustomerDataPlatform", "CustomerDataPlatformLite", "Einstein1AIPlatform"],
   "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    },
     "einsteinGptSettings": {
       "enableEinsteinGptPlatform": true
     },
