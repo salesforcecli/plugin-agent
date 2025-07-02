@@ -1,3 +1,9 @@
+## [1.23.2](https://github.com/salesforcecli/plugin-agent/compare/1.23.1...1.23.2) (2025-07-02)
+
+### Bug Fixes
+
+- combine nuts into 1 file and use a scratch org ([02dc2e1](https://github.com/salesforcecli/plugin-agent/commit/02dc2e1678b3e06cde79d251d828fa83a4bba85a))
+
 ## [1.23.1](https://github.com/salesforcecli/plugin-agent/compare/1.23.0...1.23.1) (2025-06-24)
 
 ### Bug Fixes
