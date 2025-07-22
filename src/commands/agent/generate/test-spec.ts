@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfProject } from '@salesforce/core';
+import { Messages, SfError, SfProject } from '@salesforce/core';
 import { AgentTest } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
@@ -158,7 +158,8 @@ async function getPluginsAndFunctions(
   genAiFunctions: string[];
 }> {
   const botVersions = getMetadataFilePaths(cs, 'Bot');
-  const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
+  let genAiFunctions: string[] = [];
+  let genAiPlugins: Record<string, string> = {};
 
   const parser = new XMLParser();
   const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
@@ -166,31 +167,79 @@ async function getPluginsAndFunctions(
     BotVersion: { conversationDefinitionPlanners: { genAiPlannerName: string } };
   };
 
-  const plannerXml = await readFile(
-    genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
-    'utf-8'
-  );
-  const parsedPlanner = parser.parse(plannerXml) as {
-    GenAiPlanner: {
-      genAiPlugins: Array<{ genAiPluginName: string }>;
-      genAiFunctions: Array<{ genAiFunctionName: string }>;
+  try {
+    // if the users still have genAiPlanner, not the bundle, we can work with that
+    const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
+
+    const plannerXml = await readFile(
+      genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+      'utf-8'
+    );
+    const parsedPlanner = parser.parse(plannerXml) as {
+      GenAiPlanner: {
+        genAiPlugins: Array<{ genAiPluginName: string }>;
+        genAiFunctions: Array<{ genAiFunctionName: string }>;
+      };
     };
-  };
+    genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
+      ({ genAiFunctionName }) => genAiFunctionName
+    );
 
-  const genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
-    ({ genAiFunctionName }) => genAiFunctionName
-  );
+    genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
+      (acc, { genAiPluginName }) => ({
+        ...acc,
+        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+          fullName: genAiPluginName,
+          type: 'GenAiPlugin',
+        })[0],
+      }),
+      {}
+    );
+  } catch (e) {
+    // do nothing, we were trying to read the old genAiPlanner
+  }
 
-  const genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
-    (acc, { genAiPluginName }) => ({
-      ...acc,
-      [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
-        fullName: genAiPluginName,
-        type: 'GenAiPlugin',
-      })[0],
-    }),
-    {}
-  );
+  try {
+    const genAiPlannerBundles = getMetadataFilePaths(cs, 'GenAiPlannerBundle');
+    const plannerBundleXml = await readFile(
+      genAiPlannerBundles[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+      'utf-8'
+    );
+    const parsedPlannerBundle = parser.parse(plannerBundleXml) as {
+      GenAiPlannerBundle: {
+        genAiPlugins: Array<
+          | {
+              genAiPluginName: string;
+            }
+          | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
+        >;
+        // genAiFunctions: Array<{ genAiFunctionName: string }>;
+      };
+    };
+    genAiFunctions = castArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
+      .filter((f) => 'genAiCustomizedPlugin' in f)
+      .map(
+        ({ genAiCustomizedPlugin }) =>
+          genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
+      );
+
+    genAiPlugins = castArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
+      (acc, { genAiPluginName }) => ({
+        ...acc,
+        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+          fullName: genAiPluginName,
+          type: 'GenAiPlugin',
+        })[0],
+      }),
+      {}
+    );
+  } catch (e) {
+    throw new SfError(
+      `Error parsing GenAiPlannerBundle: ${
+        parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName
+      }`
+    );
+  }
 
   return { genAiPlugins, genAiFunctions };
 }
@@ -292,7 +341,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
+        metadataEntries: ['GenAiPlannerBundle', 'GenAiPlugin', 'Bot'],
         directoryPaths,
       },
     });
