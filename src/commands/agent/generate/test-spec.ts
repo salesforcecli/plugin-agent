@@ -213,7 +213,6 @@ async function getPluginsAndFunctions(
             }
           | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
         >;
-        // genAiFunctions: Array<{ genAiFunctionName: string }>;
       };
     };
     genAiFunctions = castArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
@@ -341,7 +340,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlannerBundle', 'GenAiPlugin', 'Bot'],
+        metadataEntries: ['GenAiPlanner', 'GenAiPlannerBundle', 'GenAiPlugin', 'Bot'],
         directoryPaths,
       },
     });
