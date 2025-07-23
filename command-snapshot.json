@@ -61,14 +61,6 @@
   },
   {
     "alias": [],
-    "command": "agent:test:cancel",
-    "flagAliases": [],
-    "flagChars": ["i", "o", "r"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "target-org", "use-most-recent"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
     "flagChars": ["o"],
