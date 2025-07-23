@@ -1,3 +1,9 @@
+## [1.23.5](https://github.com/salesforcecli/plugin-agent/compare/1.23.4...1.23.5) (2025-07-23)
+
+### Bug Fixes
+
+- remove agent test cancel command ([dccfdfc](https://github.com/salesforcecli/plugin-agent/commit/dccfdfc59ca504a97c5c353cd5b2bd02025f6cd5))
+
 ## [1.23.4](https://github.com/salesforcecli/plugin-agent/compare/1.23.3...1.23.4) (2025-07-23)
 
 ### Bug Fixes
