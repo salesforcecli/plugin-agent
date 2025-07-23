@@ -53,22 +53,6 @@
   },
   {
     "alias": [],
-    "command": "agent:preview",
-    "flagAliases": [],
-    "flagChars": ["c", "d", "n", "o", "x"],
-    "flags": ["apex-debug", "api-name", "api-version", "client-app", "flags-dir", "output-dir", "target-org"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
-    "command": "agent:test:cancel",
-    "flagAliases": [],
-    "flagChars": ["i", "o", "r"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "target-org", "use-most-recent"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
     "flagChars": ["o"],
