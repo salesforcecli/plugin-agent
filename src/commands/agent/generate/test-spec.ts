@@ -4,7 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { readFile } from 'node:fs/promises';
+import * as fs from 'node:fs';
 import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
@@ -27,7 +27,7 @@ type TestCase = {
   expectedOutcome: string;
 };
 
-function castArray<T>(value: T | T[]): T[] {
+export function castArray<T>(value: T | T[]): T[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
 }
@@ -68,7 +68,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   // the actions from the plugin are read from the GenAiPlugin file
   let actions: string[] = [];
   if (genAiPlugins[expectedTopic]) {
-    const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
+    const genAiPluginXml = await fs.promises.readFile(genAiPlugins[expectedTopic], 'utf-8');
     const parser = new XMLParser();
     const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
     actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
@@ -116,7 +116,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   };
 }
 
-function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
+export function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
   return [...cs.filter((component) => component.type.name === type && component.fullName !== '*')].reduce<
     Record<string, string>
   >(
@@ -150,7 +150,7 @@ function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, st
  * - genAiPlugins: Record of plugin names to their file paths
  * - genAiFunctions: Array of function names
  */
-async function getPluginsAndFunctions(
+export async function getPluginsAndFunctions(
   subjectName: string,
   cs: ComponentSet
 ): Promise<{
@@ -162,7 +162,7 @@ async function getPluginsAndFunctions(
   let genAiPlugins: Record<string, string> = {};
 
   const parser = new XMLParser();
-  const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
+  const botVersionXml = await fs.promises.readFile(botVersions[subjectName], 'utf-8');
   const parsedBotVersion = parser.parse(botVersionXml) as {
     BotVersion: { conversationDefinitionPlanners: { genAiPlannerName: string } };
   };
@@ -171,7 +171,7 @@ async function getPluginsAndFunctions(
     // if the users still have genAiPlanner, not the bundle, we can work with that
     const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
 
-    const plannerXml = await readFile(
+    const plannerXml = await fs.promises.readFile(
       genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
       'utf-8'
     );
@@ -201,7 +201,7 @@ async function getPluginsAndFunctions(
 
   try {
     const genAiPlannerBundles = getMetadataFilePaths(cs, 'GenAiPlannerBundle');
-    const plannerBundleXml = await readFile(
+    const plannerBundleXml = await fs.promises.readFile(
       genAiPlannerBundles[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
       'utf-8'
     );
@@ -243,7 +243,7 @@ async function getPluginsAndFunctions(
   return { genAiPlugins, genAiFunctions };
 }
 
-function ensureYamlExtension(filePath: string): string {
+export function ensureYamlExtension(filePath: string): string {
   const parsedPath = parse(filePath);
 
   if (parsedPath.ext === '.yaml' || parsedPath.ext === '.yml') return filePath;
