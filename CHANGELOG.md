@@ -1,3 +1,9 @@
+## [1.23.4](https://github.com/salesforcecli/plugin-agent/compare/1.23.3...1.23.4) (2025-07-23)
+
+### Bug Fixes
+
+- remove configuration steps from "agent preview" help ([#176](https://github.com/salesforcecli/plugin-agent/issues/176)) ([cdd32a8](https://github.com/salesforcecli/plugin-agent/commit/cdd32a88ebced8d7a5f30fa7429462df60cc6969))
+
 ## [1.23.3](https://github.com/salesforcecli/plugin-agent/compare/1.23.2...1.23.3) (2025-07-13)
 
 ### Bug Fixes
