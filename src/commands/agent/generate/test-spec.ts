@@ -25,6 +25,11 @@ type TestCase = {
   expectedActions: string[];
   expectedTopic: string;
   expectedOutcome: string;
+  customEvaluation?: {
+    jsonPath: string;
+    expectedValue: string;
+    operator: string;
+  };
 };
 
 function castArray<T>(value: T | T[]): T[] {
@@ -42,6 +47,7 @@ function castArray<T>(value: T | T[]): T[] {
  * - expectedTopic: The expected topic for classification
  * - expectedActions: Array of expected action names
  * - expectedOutcome: Expected outcome string
+ * - customEvaluation: Optional custom evaluation JSONpath
  *
  * @remarks
  * This function guides users through creating a test case by:
@@ -49,6 +55,7 @@ function castArray<T>(value: T | T[]): T[] {
  * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlannerBundle)
  * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlannerBundle or GenAiPlugin)
  * 4. Defining an expected outcome
+ * 5. Optionally adding a custom evaluation JSONPath
  */
 async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
   const utterance = await input({
@@ -108,11 +115,78 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     theme,
   });
 
+  const wantsCustomEvaluation = await confirm({
+    message: 'Do you want to add a custom evaluation',
+    default: false,
+    theme,
+  });
+
+  let customEvaluation: { jsonPath: string; expectedValue: string; operator: string } | undefined;
+  if (wantsCustomEvaluation) {
+    /*
+        <expectation>
+            <label>expected recipient match</label> 
+                <name>string_comparison</name>         
+                <parameter>
+                    <name>operator</name>
+                    <value>equals</value>
+                    <isReference>false</isReference>
+                </parameter>
+                <parameter>
+                    <name>actual</name>
+                    <value>$.generatedData.invokedActions[*][?(@.function.name == 'DraftGenericReplyEmail')].function.input.recipient</value>
+                    <isReference>true</isReference>
+                </parameter>
+                <parameter>
+                    <name>expected</name>
+                    <value>Jon</value>
+                    <isReference>false</isReference>
+                </parameter>
+        </expectation>
+    */
+    const jsonPath = await input({
+      message: 'Custom evaluation JSONPath',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'JSONPath cannot be empty';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    const expectedValue = await input({
+      message: 'Expected value',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'Expected value cannot be empty';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    const operator = await select<string>({
+      message: 'Comparison operator',
+      choices: [
+        { name: 'equals (Checks for numerical equality)', value: 'equals' },
+        { name: 'greater_than_or_equal (Checks if actual >= expected)', value: 'greater_than_or_equal' },
+        { name: 'greater_than (Checks if actual > expected)', value: 'greater_than' },
+        { name: 'less_than (Checks if actual < expected)', value: 'less_than' },
+        { name: 'less_than_or_equal (Checks if actual <= expected)', value: 'less_than_or_equal' },
+      ],
+      theme,
+    });
+
+    customEvaluation = { jsonPath, expectedValue, operator };
+  }
+
   return {
     utterance,
     expectedTopic,
     expectedActions,
     expectedOutcome,
+    customEvaluation,
   };
 }
 
