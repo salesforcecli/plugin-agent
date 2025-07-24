@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'node:fs';
+import { join } from 'node:path';
 import { expect } from 'chai';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet } from '@salesforce/source-deploy-retrieve';
@@ -124,29 +125,33 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
   describe('ensureYamlExtension utility', () => {
     it('should preserve existing .yaml extension', () => {
       expect(ensureYamlExtension('test.yaml')).to.equal('test.yaml');
-      expect(ensureYamlExtension('path/to/file.yaml')).to.equal('path/to/file.yaml');
+      expect(ensureYamlExtension(join('path', 'to', 'file.yaml'))).to.equal(join('path', 'to', 'file.yaml'));
     });
 
     it('should preserve existing .yml extension', () => {
       expect(ensureYamlExtension('test.yml')).to.equal('test.yml');
-      expect(ensureYamlExtension('path/to/file.yml')).to.equal('path/to/file.yml');
+      expect(ensureYamlExtension(join('path', 'to', 'file.yml'))).to.equal(join('path', 'to', 'file.yml'));
     });
 
     it('should add .yaml extension to files without extension', () => {
       expect(ensureYamlExtension('test')).to.equal('test.yaml');
-      expect(ensureYamlExtension('path/to/file')).to.equal('path/to/file.yaml');
+      expect(ensureYamlExtension(join('path', 'to', 'file'))).to.equal(join('path', 'to', 'file.yaml'));
     });
 
     it('should replace other extensions with .yaml', () => {
       expect(ensureYamlExtension('test.txt')).to.equal('test.yaml');
       expect(ensureYamlExtension('test.json')).to.equal('test.yaml');
-      expect(ensureYamlExtension('path/to/file.xml')).to.equal('path/to/file.yaml');
+      expect(ensureYamlExtension(join('path', 'to', 'file.xml'))).to.equal(join('path', 'to', 'file.yaml'));
     });
 
     it('should handle complex paths correctly', () => {
-      expect(ensureYamlExtension('/absolute/path/file.txt')).to.equal('/absolute/path/file.yaml');
-      expect(ensureYamlExtension('../relative/path/file')).to.equal('../relative/path/file.yaml');
-      expect(ensureYamlExtension('./current/file.yaml')).to.equal('./current/file.yaml');
+      expect(ensureYamlExtension(join('/', 'absolute', 'path', 'file.txt'))).to.equal(
+        join('/', 'absolute', 'path', 'file.yaml')
+      );
+      expect(ensureYamlExtension(join('..', 'relative', 'path', 'file'))).to.equal(
+        join('..', 'relative', 'path', 'file.yaml')
+      );
+      expect(ensureYamlExtension(join('.', 'current', 'file.yaml'))).to.equal(join('.', 'current', 'file.yaml'));
     });
   });
 
@@ -375,10 +380,10 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         },
         getComponentFilenamesByNameAndType: ({ fullName }: { fullName: string }) => {
           const fileMap: Record<string, string> = {
-            Bot1: '/path/to/bot1.xml',
-            Bot2: '/path/to/bot2.xml',
-            '*': '/path/to/wildcard.xml',
-            Plugin1: '/path/to/plugin1.xml',
+            Bot1: join('/', 'path', 'to', 'bot1.xml'),
+            Bot2: join('/', 'path', 'to', 'bot2.xml'),
+            '*': join('/', 'path', 'to', 'wildcard.xml'),
+            Plugin1: join('/', 'path', 'to', 'plugin1.xml'),
           };
           return [fileMap[fullName]];
         },
@@ -387,8 +392,8 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
       const result = getMetadataFilePaths(mockComponentSet, 'Bot');
 
       expect(result).to.deep.equal({
-        Bot1: '/path/to/bot1.xml',
-        Bot2: '/path/to/bot2.xml',
+        Bot1: join('/', 'path', 'to', 'bot1.xml'),
+        Bot2: join('/', 'path', 'to', 'bot2.xml'),
       });
       expect(result).to.not.have.property('*');
     });
