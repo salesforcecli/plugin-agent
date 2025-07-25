@@ -25,11 +25,15 @@ type TestCase = {
   expectedActions: string[];
   expectedTopic: string;
   expectedOutcome: string;
-  customEvaluation?: {
-    jsonPath: string;
-    expectedValue: string;
-    operator: string;
-  };
+  customEvaluations?: Array<{
+    label: string;
+    name: string;
+    parameters: Array<
+      | { name: 'operator'; value: string; isReference: false }
+      | { name: 'actual'; value: string; isReference: true }
+      | { name: 'expected'; value: string; isReference: boolean }
+    >;
+  }>;
 };
 
 function castArray<T>(value: T | T[]): T[] {
@@ -47,7 +51,7 @@ function castArray<T>(value: T | T[]): T[] {
  * - expectedTopic: The expected topic for classification
  * - expectedActions: Array of expected action names
  * - expectedOutcome: Expected outcome string
- * - customEvaluation: Optional custom evaluation JSONpath
+ * - customEvaluations: Optional array of custom evaluation JSONpaths, names, and required information for metadata
  *
  * @remarks
  * This function guides users through creating a test case by:
@@ -55,7 +59,7 @@ function castArray<T>(value: T | T[]): T[] {
  * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlannerBundle)
  * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlannerBundle or GenAiPlugin)
  * 4. Defining an expected outcome
- * 5. Optionally adding a custom evaluation JSONPath
+ * 5. Optional array of custom evaluation JSONpaths, names, and required information for metadata
  */
 async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
   const utterance = await input({
@@ -115,46 +119,68 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     theme,
   });
 
-  const wantsCustomEvaluation = await confirm({
+  const customEvaluations = await promptForCustomEvaluations();
+
+  return {
+    utterance,
+    expectedTopic,
+    expectedActions,
+    expectedOutcome,
+    customEvaluations,
+  };
+}
+
+async function promptForCustomEvaluations(): Promise<NonNullable<TestCase['customEvaluations']>> {
+  const customEvaluations: NonNullable<TestCase['customEvaluations']> = [];
+  let wantsCustomEvaluation = await confirm({
     message: 'Do you want to add a custom evaluation',
     default: false,
     theme,
   });
 
-  let customEvaluation: { jsonPath: string; expectedValue: string; operator: string } | undefined;
-  if (wantsCustomEvaluation) {
-    /*
-        <expectation>
-            <label>expected recipient match</label> 
-                <name>string_comparison</name>         
-                <parameter>
-                    <name>operator</name>
-                    <value>equals</value>
-                    <isReference>false</isReference>
-                </parameter>
-                <parameter>
-                    <name>actual</name>
-                    <value>$.generatedData.invokedActions[*][?(@.function.name == 'DraftGenericReplyEmail')].function.input.recipient</value>
-                    <isReference>true</isReference>
-                </parameter>
-                <parameter>
-                    <name>expected</name>
-                    <value>Jon</value>
-                    <isReference>false</isReference>
-                </parameter>
-        </expectation>
-    */
-    const jsonPath = await input({
-      message: 'Custom evaluation JSONPath',
+  // we can have multiple custom evaluations, prompt until the user is done
+  while (wantsCustomEvaluation) {
+    // eslint-disable-next-line no-await-in-loop
+    const label = await input({
+      message: 'Custom evaluation label (descriptive name)',
       validate: (d: string): boolean | string => {
         if (!d.length) {
-          return 'JSONPath cannot be empty';
+          return 'Label cannot be empty';
         }
         return true;
       },
       theme,
     });
 
+    // eslint-disable-next-line no-await-in-loop
+    const jsonPath = await input({
+      message: 'Custom evaluation JSONPath (starts with $)',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'JSONPath cannot be empty';
+        }
+        if (!d.startsWith('$')) {
+          return 'JSONPath must start with $';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    const operator = await select<string>({
+      message: 'Comparison operator',
+      choices: [
+        { name: 'Equals ', value: 'equals' },
+        { name: 'Greater than or equals (>=)', value: 'greater_than_or_equal' },
+        { name: 'Greater than (>)', value: 'greater_than' },
+        { name: 'Less than (<)', value: 'less_than' },
+        { name: 'Less than or equals (<=)', value: 'less_than_or_equal' },
+      ],
+      theme,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
     const expectedValue = await input({
       message: 'Expected value',
       validate: (d: string): boolean | string => {
@@ -166,28 +192,27 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
       theme,
     });
 
-    const operator = await select<string>({
-      message: 'Comparison operator',
-      choices: [
-        { name: 'equals (Checks for numerical equality)', value: 'equals' },
-        { name: 'greater_than_or_equal (Checks if actual >= expected)', value: 'greater_than_or_equal' },
-        { name: 'greater_than (Checks if actual > expected)', value: 'greater_than' },
-        { name: 'less_than (Checks if actual < expected)', value: 'less_than' },
-        { name: 'less_than_or_equal (Checks if actual <= expected)', value: 'less_than_or_equal' },
+    customEvaluations.push({
+      label,
+      // Determine if the expected value is numeric or string comparison
+      name:
+        !isNaN(Number(expectedValue)) && !isNaN(parseFloat(expectedValue)) ? 'numeric_comparison' : 'string_comparison',
+      parameters: [
+        { name: 'operator', value: operator, isReference: false },
+        { name: 'actual', value: jsonPath, isReference: true },
+        { name: 'expected', value: expectedValue, isReference: false },
       ],
-      theme,
     });
 
-    customEvaluation = { jsonPath, expectedValue, operator };
+    // eslint-disable-next-line no-await-in-loop
+    wantsCustomEvaluation = await confirm({
+      message: 'Do you want to add another custom evaluation',
+      default: false,
+      theme,
+    });
   }
 
-  return {
-    utterance,
-    expectedTopic,
-    expectedActions,
-    expectedOutcome,
-    customEvaluation,
-  };
+  return customEvaluations;
 }
 
 function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
