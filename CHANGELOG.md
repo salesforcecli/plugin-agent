@@ -1,3 +1,9 @@
+## [1.23.6](https://github.com/salesforcecli/plugin-agent/compare/1.23.5...1.23.6) (2025-07-25)
+
+### Bug Fixes
+
+- read from genAiPlanner/Bundle ([19397d4](https://github.com/salesforcecli/plugin-agent/commit/19397d4a013a51ca7f6409828085eec9cbcd9a3f))
+
 ## [1.23.5](https://github.com/salesforcecli/plugin-agent/compare/1.23.4...1.23.5) (2025-07-23)
 
 ### Bug Fixes
