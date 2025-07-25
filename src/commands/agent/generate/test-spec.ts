@@ -126,7 +126,34 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   };
 }
 
-async function promptForCustomEvaluations(): Promise<NonNullable<TestCase['customEvaluations']>> {
+/**
+ * Creates a custom evaluation object with the provided parameters
+ *
+ * @param label - Descriptive label for the evaluation
+ * @param jsonPath - JSONPath for the actual value
+ * @param operator - Comparison operator
+ * @param expectedValue - Expected value to compare against
+ * @returns Custom evaluation object in the expected format
+ */
+export function createCustomEvaluation(
+  label: string,
+  jsonPath: string,
+  operator: string,
+  expectedValue: string
+): NonNullable<TestCase['customEvaluations']>[0] {
+  return {
+    label,
+    name:
+      !isNaN(Number(expectedValue)) && !isNaN(parseFloat(expectedValue)) ? 'numeric_comparison' : 'string_comparison',
+    parameters: [
+      { name: 'operator', value: operator, isReference: false },
+      { name: 'actual', value: jsonPath, isReference: true },
+      { name: 'expected', value: expectedValue, isReference: false },
+    ],
+  };
+}
+
+export async function promptForCustomEvaluations(): Promise<NonNullable<TestCase['customEvaluations']>> {
   const customEvaluations: NonNullable<TestCase['customEvaluations']> = [];
   let wantsCustomEvaluation = await confirm({
     message: 'Do you want to add a custom evaluation',
@@ -188,17 +215,7 @@ async function promptForCustomEvaluations(): Promise<NonNullable<TestCase['custo
       theme,
     });
 
-    customEvaluations.push({
-      label,
-      // Determine if the expected value is numeric or string comparison
-      name:
-        !isNaN(Number(expectedValue)) && !isNaN(parseFloat(expectedValue)) ? 'numeric_comparison' : 'string_comparison',
-      parameters: [
-        { name: 'operator', value: operator, isReference: false },
-        { name: 'actual', value: jsonPath, isReference: true },
-        { name: 'expected', value: expectedValue, isReference: false },
-      ],
-    });
+    customEvaluations.push(createCustomEvaluation(label, jsonPath, operator, expectedValue));
 
     // eslint-disable-next-line no-await-in-loop
     wantsCustomEvaluation = await confirm({
