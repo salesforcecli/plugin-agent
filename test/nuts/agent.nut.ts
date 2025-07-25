@@ -266,6 +266,9 @@ describe('plugin-agent NUTs', () => {
       const command = `agent create --spec ${expectedFilePath} --target-org ${username} --name "${name}" --api-name ${apiName} --json`;
       const result = execCmd<AgentCreateResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
       expect(result).to.be.ok;
+      if (!result?.isSuccess) {
+        console.dir(result, { depth: 10 });
+      }
       expect(result?.isSuccess).to.equal(true);
       expect(result?.agentId?.botId).to.be.ok;
       expect(result?.agentDefinition.sampleUtterances.length).to.be.greaterThanOrEqual(1);

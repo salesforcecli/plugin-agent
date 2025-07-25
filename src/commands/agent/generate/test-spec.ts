@@ -4,16 +4,17 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { readFile } from 'node:fs/promises';
+import * as fs from 'node:fs';
 import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfProject } from '@salesforce/core';
+import { Messages, SfError, SfProject } from '@salesforce/core';
 import { AgentTest } from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { warn } from '@oclif/core/errors';
+import { ensureArray } from '@salesforce/kit';
 import { theme } from '../../../inquirer-theme.js';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
 
@@ -26,11 +27,6 @@ type TestCase = {
   expectedTopic: string;
   expectedOutcome: string;
 };
-
-function castArray<T>(value: T | T[]): T[] {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
-}
 
 /**
  * Prompts the user for test case information through interactive prompts.
@@ -68,10 +64,10 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   // the actions from the plugin are read from the GenAiPlugin file
   let actions: string[] = [];
   if (genAiPlugins[expectedTopic]) {
-    const genAiPluginXml = await readFile(genAiPlugins[expectedTopic], 'utf-8');
+    const genAiPluginXml = await fs.promises.readFile(genAiPlugins[expectedTopic], 'utf-8');
     const parser = new XMLParser();
     const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-    actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
+    actions = ensureArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
   }
 
   const expectedActions = (
@@ -116,7 +112,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
   };
 }
 
-function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
+export function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {
   return [...cs.filter((component) => component.type.name === type && component.fullName !== '*')].reduce<
     Record<string, string>
   >(
@@ -150,7 +146,7 @@ function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, st
  * - genAiPlugins: Record of plugin names to their file paths
  * - genAiFunctions: Array of function names
  */
-async function getPluginsAndFunctions(
+export async function getPluginsAndFunctions(
   subjectName: string,
   cs: ComponentSet
 ): Promise<{
@@ -158,44 +154,95 @@ async function getPluginsAndFunctions(
   genAiFunctions: string[];
 }> {
   const botVersions = getMetadataFilePaths(cs, 'Bot');
-  const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
+  let genAiFunctions: string[] = [];
+  let genAiPlugins: Record<string, string> = {};
 
   const parser = new XMLParser();
-  const botVersionXml = await readFile(botVersions[subjectName], 'utf-8');
+  const botVersionXml = await fs.promises.readFile(botVersions[subjectName], 'utf-8');
   const parsedBotVersion = parser.parse(botVersionXml) as {
     BotVersion: { conversationDefinitionPlanners: { genAiPlannerName: string } };
   };
 
-  const plannerXml = await readFile(
-    genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
-    'utf-8'
-  );
-  const parsedPlanner = parser.parse(plannerXml) as {
-    GenAiPlanner: {
-      genAiPlugins: Array<{ genAiPluginName: string }>;
-      genAiFunctions: Array<{ genAiFunctionName: string }>;
+  try {
+    // if the users still have genAiPlanner, not the bundle, we can work with that
+    const genAiPlanners = getMetadataFilePaths(cs, 'GenAiPlanner');
+
+    const plannerXml = await fs.promises.readFile(
+      genAiPlanners[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+      'utf-8'
+    );
+    const parsedPlanner = parser.parse(plannerXml) as {
+      GenAiPlanner: {
+        genAiPlugins: Array<{ genAiPluginName: string }>;
+        genAiFunctions: Array<{ genAiFunctionName: string }>;
+      };
     };
-  };
+    genAiFunctions = ensureArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
+      ({ genAiFunctionName }) => genAiFunctionName
+    );
 
-  const genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
-    ({ genAiFunctionName }) => genAiFunctionName
-  );
+    genAiPlugins = ensureArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
+      (acc, { genAiPluginName }) => ({
+        ...acc,
+        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+          fullName: genAiPluginName,
+          type: 'GenAiPlugin',
+        })[0],
+      }),
+      {}
+    );
+  } catch (e) {
+    // do nothing, we were trying to read the old genAiPlanner
+  }
 
-  const genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
-    (acc, { genAiPluginName }) => ({
-      ...acc,
-      [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
-        fullName: genAiPluginName,
-        type: 'GenAiPlugin',
-      })[0],
-    }),
-    {}
-  );
+  try {
+    if (genAiFunctions.length === 0 && Object.keys(genAiPlugins).length === 0) {
+      // if we've already found functions and plugins from the genAiPlanner, don't try to read the bundle
+      const genAiPlannerBundles = getMetadataFilePaths(cs, 'GenAiPlannerBundle');
+      const plannerBundleXml = await fs.promises.readFile(
+        genAiPlannerBundles[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+        'utf-8'
+      );
+      const parsedPlannerBundle = parser.parse(plannerBundleXml) as {
+        GenAiPlannerBundle: {
+          genAiPlugins: Array<
+            | {
+                genAiPluginName: string;
+              }
+            | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
+          >;
+        };
+      };
+      genAiFunctions = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
+        .filter((f) => 'genAiCustomizedPlugin' in f)
+        .map(
+          ({ genAiCustomizedPlugin }) =>
+            genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
+        );
+
+      genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
+        (acc, { genAiPluginName }) => ({
+          ...acc,
+          [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+            fullName: genAiPluginName,
+            type: 'GenAiPlugin',
+          })[0],
+        }),
+        {}
+      );
+    }
+  } catch (e) {
+    throw new SfError(
+      `Error parsing GenAiPlannerBundle: ${
+        parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName
+      }`
+    );
+  }
 
   return { genAiPlugins, genAiFunctions };
 }
 
-function ensureYamlExtension(filePath: string): string {
+export function ensureYamlExtension(filePath: string): string {
   const parsedPath = parse(filePath);
 
   if (parsedPath.ext === '.yaml' || parsedPath.ext === '.yml') return filePath;
@@ -292,7 +339,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlugin', 'Bot'],
+        metadataEntries: ['GenAiPlanner', 'GenAiPlannerBundle', 'GenAiPlugin', 'Bot'],
         directoryPaths,
       },
     });
