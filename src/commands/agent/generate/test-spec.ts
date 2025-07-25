@@ -196,38 +196,41 @@ export async function getPluginsAndFunctions(
   }
 
   try {
-    const genAiPlannerBundles = getMetadataFilePaths(cs, 'GenAiPlannerBundle');
-    const plannerBundleXml = await fs.promises.readFile(
-      genAiPlannerBundles[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
-      'utf-8'
-    );
-    const parsedPlannerBundle = parser.parse(plannerBundleXml) as {
-      GenAiPlannerBundle: {
-        genAiPlugins: Array<
-          | {
-              genAiPluginName: string;
-            }
-          | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
-        >;
-      };
-    };
-    genAiFunctions = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
-      .filter((f) => 'genAiCustomizedPlugin' in f)
-      .map(
-        ({ genAiCustomizedPlugin }) =>
-          genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
+    if (genAiFunctions.length === 0 && Object.keys(genAiPlugins).length === 0) {
+      // if we've already found functions and plugins from the genAiPlanner, don't try to read the bundle
+      const genAiPlannerBundles = getMetadataFilePaths(cs, 'GenAiPlannerBundle');
+      const plannerBundleXml = await fs.promises.readFile(
+        genAiPlannerBundles[parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName],
+        'utf-8'
       );
+      const parsedPlannerBundle = parser.parse(plannerBundleXml) as {
+        GenAiPlannerBundle: {
+          genAiPlugins: Array<
+            | {
+                genAiPluginName: string;
+              }
+            | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
+          >;
+        };
+      };
+      genAiFunctions = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
+        .filter((f) => 'genAiCustomizedPlugin' in f)
+        .map(
+          ({ genAiCustomizedPlugin }) =>
+            genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
+        );
 
-    genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
-      (acc, { genAiPluginName }) => ({
-        ...acc,
-        [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
-          fullName: genAiPluginName,
-          type: 'GenAiPlugin',
-        })[0],
-      }),
-      {}
-    );
+      genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
+        (acc, { genAiPluginName }) => ({
+          ...acc,
+          [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
+            fullName: genAiPluginName,
+            type: 'GenAiPlugin',
+          })[0],
+        }),
+        {}
+      );
+    }
   } catch (e) {
     throw new SfError(
       `Error parsing GenAiPlannerBundle: ${
