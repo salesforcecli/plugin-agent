@@ -14,6 +14,7 @@ import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { warn } from '@oclif/core/errors';
+import { ensureArray } from '@salesforce/kit';
 import { theme } from '../../../inquirer-theme.js';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
 
@@ -26,11 +27,6 @@ type TestCase = {
   expectedTopic: string;
   expectedOutcome: string;
 };
-
-export function castArray<T>(value: T | T[]): T[] {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
-}
 
 /**
  * Prompts the user for test case information through interactive prompts.
@@ -71,7 +67,7 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     const genAiPluginXml = await fs.promises.readFile(genAiPlugins[expectedTopic], 'utf-8');
     const parser = new XMLParser();
     const parsed = parser.parse(genAiPluginXml) as { GenAiPlugin: { genAiFunctions: Array<{ functionName: string }> } };
-    actions = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
+    actions = ensureArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
   }
 
   const expectedActions = (
@@ -181,11 +177,11 @@ export async function getPluginsAndFunctions(
         genAiFunctions: Array<{ genAiFunctionName: string }>;
       };
     };
-    genAiFunctions = castArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
+    genAiFunctions = ensureArray(parsedPlanner.GenAiPlanner.genAiFunctions).map(
       ({ genAiFunctionName }) => genAiFunctionName
     );
 
-    genAiPlugins = castArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
+    genAiPlugins = ensureArray(parsedPlanner.GenAiPlanner.genAiPlugins).reduce(
       (acc, { genAiPluginName }) => ({
         ...acc,
         [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
@@ -215,14 +211,14 @@ export async function getPluginsAndFunctions(
         >;
       };
     };
-    genAiFunctions = castArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
+    genAiFunctions = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
       .filter((f) => 'genAiCustomizedPlugin' in f)
       .map(
         ({ genAiCustomizedPlugin }) =>
           genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
       );
 
-    genAiPlugins = castArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
+    genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
       (acc, { genAiPluginName }) => ({
         ...acc,
         [genAiPluginName]: cs.getComponentFilenamesByNameAndType({

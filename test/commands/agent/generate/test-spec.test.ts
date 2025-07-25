@@ -11,8 +11,8 @@ import { expect } from 'chai';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet } from '@salesforce/source-deploy-retrieve';
 import * as sinon from 'sinon';
+import { ensureArray } from '@salesforce/kit';
 import {
-  castArray,
   ensureYamlExtension,
   getMetadataFilePaths,
   getPluginsAndFunctions,
@@ -99,26 +99,6 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
           PluginName2: 'PluginName2.genAiPlugin-meta.xml',
         },
       });
-    });
-  });
-  describe('castArray utility', () => {
-    it('should return empty array for falsy values', () => {
-      expect(castArray(null)).to.deep.equal([]);
-      expect(castArray(undefined)).to.deep.equal([]);
-      expect(castArray('')).to.deep.equal([]);
-      expect(castArray(0)).to.deep.equal([]);
-    });
-
-    it('should return the same array when input is already an array', () => {
-      const inputArray = ['a', 'b', 'c'];
-      expect(castArray(inputArray)).to.deep.equal(inputArray);
-      expect(castArray(inputArray)).to.equal(inputArray);
-    });
-
-    it('should wrap single values in an array', () => {
-      expect(castArray('single')).to.deep.equal(['single']);
-      expect(castArray(42)).to.deep.equal([42]);
-      expect(castArray({ key: 'value' })).to.deep.equal([{ key: 'value' }]);
     });
   });
 
@@ -236,7 +216,7 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
       };
 
       // XMLParser might return a single object instead of array for single elements
-      // This is why castArray is needed in the original code
+      // This is why ensureArray is needed in the original code
       expect(parsed.GenAiPlannerBundle.genAiPlugins).to.exist;
     });
 
@@ -329,8 +309,8 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
       );
       expect(parsed.GenAiPlugin.genAiPluginInstructions[4].developerName).to.equal('instruction_suggestbes4');
 
-      // Test that castArray would work with these functions
-      const functionNames = castArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
+      // Test that ensureArray would work with these functions
+      const functionNames = ensureArray(parsed.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
 
       expect(functionNames).to.deep.equal([
         'DataCloudAgent__getCdpDataModelObjectMappingCollection',
@@ -347,7 +327,7 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         },
       };
 
-      const functionNames = castArray(mockParsedPlugin.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
+      const functionNames = ensureArray(mockParsedPlugin.GenAiPlugin.genAiFunctions ?? []).map((f) => f.functionName);
 
       expect(functionNames).to.deep.equal(['Function1', 'Function2', 'Function3']);
     });
@@ -359,7 +339,7 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         },
       };
 
-      const functionNames = castArray(mockParsedPlugin.GenAiPlugin.genAiFunctions ?? []).map(
+      const functionNames = ensureArray(mockParsedPlugin.GenAiPlugin.genAiFunctions ?? []).map(
         (f: { functionName: string }) => f.functionName
       );
 
