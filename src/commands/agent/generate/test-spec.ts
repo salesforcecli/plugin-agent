@@ -26,6 +26,15 @@ type TestCase = {
   expectedActions: string[];
   expectedTopic: string;
   expectedOutcome: string;
+  customEvaluations?: Array<{
+    label: string;
+    name: string;
+    parameters: Array<
+      | { name: 'operator'; value: string; isReference: false }
+      | { name: 'actual'; value: string; isReference: true }
+      | { name: 'expected'; value: string; isReference: boolean }
+    >;
+  }>;
 };
 
 /**
@@ -38,6 +47,7 @@ type TestCase = {
  * - expectedTopic: The expected topic for classification
  * - expectedActions: Array of expected action names
  * - expectedOutcome: Expected outcome string
+ * - customEvaluations: Optional array of custom evaluation JSONpaths, names, and required information for metadata
  *
  * @remarks
  * This function guides users through creating a test case by:
@@ -45,6 +55,7 @@ type TestCase = {
  * 2. Selecting an expected topic (from GenAiPlugins specified in the Bot's GenAiPlannerBundle)
  * 3. Choosing expected actions (from GenAiFunctions in the GenAiPlannerBundle or GenAiPlugin)
  * 4. Defining an expected outcome
+ * 5. Optional array of custom evaluation JSONpaths, names, and required information for metadata
  */
 async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunctions: string[]): Promise<TestCase> {
   const utterance = await input({
@@ -104,12 +115,117 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
     theme,
   });
 
+  const customEvaluations = await promptForCustomEvaluations();
+
   return {
     utterance,
     expectedTopic,
     expectedActions,
     expectedOutcome,
+    customEvaluations,
   };
+}
+
+/**
+ * Creates a custom evaluation object with the provided parameters
+ *
+ * @param label - Descriptive label for the evaluation
+ * @param jsonPath - JSONPath for the actual value
+ * @param operator - Comparison operator
+ * @param expectedValue - Expected value to compare against
+ * @returns Custom evaluation object in the expected format
+ */
+export function createCustomEvaluation(
+  label: string,
+  jsonPath: string,
+  operator: string,
+  expectedValue: string
+): NonNullable<TestCase['customEvaluations']>[0] {
+  return {
+    label,
+    name:
+      !isNaN(Number(expectedValue)) && !isNaN(parseFloat(expectedValue)) ? 'numeric_comparison' : 'string_comparison',
+    parameters: [
+      { name: 'operator', value: operator, isReference: false },
+      { name: 'actual', value: jsonPath, isReference: true },
+      { name: 'expected', value: expectedValue, isReference: false },
+    ],
+  };
+}
+
+export async function promptForCustomEvaluations(): Promise<NonNullable<TestCase['customEvaluations']>> {
+  const customEvaluations: NonNullable<TestCase['customEvaluations']> = [];
+  let wantsCustomEvaluation = await confirm({
+    message: 'Do you want to add a custom evaluation',
+    default: false,
+    theme,
+  });
+
+  // we can have multiple custom evaluations, prompt until the user is done
+  while (wantsCustomEvaluation) {
+    // eslint-disable-next-line no-await-in-loop
+    const label = await input({
+      message: 'Custom evaluation label (descriptive name)',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'Label cannot be empty';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    const jsonPath = await input({
+      message: 'Custom evaluation JSONPath (starts with $)',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'JSONPath cannot be empty';
+        }
+        if (!d.startsWith('$')) {
+          return 'JSONPath must start with $';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    const operator = await select<string>({
+      message: 'Comparison operator',
+      choices: [
+        { name: 'Equals ', value: 'equals' },
+        { name: 'Greater than or equals (>=)', value: 'greater_than_or_equal' },
+        { name: 'Greater than (>)', value: 'greater_than' },
+        { name: 'Less than (<)', value: 'less_than' },
+        { name: 'Less than or equals (<=)', value: 'less_than_or_equal' },
+      ],
+      theme,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    const expectedValue = await input({
+      message: 'Expected value',
+      validate: (d: string): boolean | string => {
+        if (!d.length) {
+          return 'Expected value cannot be empty';
+        }
+        return true;
+      },
+      theme,
+    });
+
+    customEvaluations.push(createCustomEvaluation(label, jsonPath, operator, expectedValue));
+
+    // eslint-disable-next-line no-await-in-loop
+    wantsCustomEvaluation = await confirm({
+      message: 'Do you want to add another custom evaluation',
+      default: false,
+      theme,
+    });
+  }
+
+  return customEvaluations;
 }
 
 export function getMetadataFilePaths(cs: ComponentSet, type: string): Record<string, string> {

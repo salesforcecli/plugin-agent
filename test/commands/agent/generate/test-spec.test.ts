@@ -16,6 +16,7 @@ import {
   ensureYamlExtension,
   getMetadataFilePaths,
   getPluginsAndFunctions,
+  createCustomEvaluation,
 } from '../../../../src/commands/agent/generate/test-spec.js';
 
 describe('AgentGenerateTestSpec Helper Methods', () => {
@@ -376,6 +377,82 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         Bot2: join('/', 'path', 'to', 'bot2.xml'),
       });
       expect(result).to.not.have.property('*');
+    });
+  });
+
+  describe('createCustomEvaluation', () => {
+    it('should create correct structure for string comparison', () => {
+      const evaluation = createCustomEvaluation('Test Label', '$.response.message', 'equals', 'expected text');
+
+      expect(evaluation).to.deep.equal({
+        label: 'Test Label',
+        name: 'string_comparison',
+        parameters: [
+          { name: 'operator', value: 'equals', isReference: false },
+          { name: 'actual', value: '$.response.message', isReference: true },
+          { name: 'expected', value: 'expected text', isReference: false },
+        ],
+      });
+    });
+
+    it('should create correct structure for numeric comparison', () => {
+      const evaluation = createCustomEvaluation('Numeric Test', '$.metrics.score', 'greater_than_or_equal', '85');
+
+      expect(evaluation).to.deep.equal({
+        label: 'Numeric Test',
+        name: 'numeric_comparison',
+        parameters: [
+          { name: 'operator', value: 'greater_than_or_equal', isReference: false },
+          { name: 'actual', value: '$.metrics.score', isReference: true },
+          { name: 'expected', value: '85', isReference: false },
+        ],
+      });
+    });
+
+    it('should handle all supported operators', () => {
+      const operators = ['equals', 'greater_than_or_equal', 'greater_than', 'less_than', 'less_than_or_equal'];
+
+      operators.forEach((operator) => {
+        const evaluation = createCustomEvaluation(`Test ${operator}`, '$.test.value', operator, '100');
+
+        expect(evaluation.parameters[0]).to.deep.equal({
+          name: 'operator',
+          value: operator,
+          isReference: false,
+        });
+      });
+    });
+
+    it('should always set correct isReference flags', () => {
+      const evaluation = createCustomEvaluation('Reference Test', '$.actual.path', 'equals', 'expected');
+
+      const [operatorParam, actualParam, expectedParam] = evaluation.parameters;
+
+      expect(operatorParam.isReference).to.be.false;
+      expect(actualParam.isReference).to.be.true; // actual is always a reference (JSONPath)
+      expect(expectedParam.isReference).to.be.false; // expected is always a literal value
+    });
+
+    it('should correctly determine comparison type based on expected value', () => {
+      const numericEvaluation = createCustomEvaluation('Test', '$.path', 'equals', '42');
+      expect(numericEvaluation.name).to.equal('numeric_comparison');
+
+      const stringEvaluation = createCustomEvaluation('Test', '$.path', 'equals', 'text');
+      expect(stringEvaluation.name).to.equal('string_comparison');
+    });
+
+    it('should handle complex JSONPaths and values', () => {
+      const evaluation = createCustomEvaluation(
+        'Complex Test',
+        '$.response.data[0].nested["special-key"].value',
+        'less_than',
+        '3.14159'
+      );
+
+      expect(evaluation.label).to.equal('Complex Test');
+      expect(evaluation.name).to.equal('numeric_comparison');
+      expect(evaluation.parameters[1].value).to.equal('$.response.data[0].nested["special-key"].value');
+      expect(evaluation.parameters[2].value).to.equal('3.14159');
     });
   });
 });
