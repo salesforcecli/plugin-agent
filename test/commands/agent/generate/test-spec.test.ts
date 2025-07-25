@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet } from '@salesforce/source-deploy-retrieve';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { ensureArray } from '@salesforce/kit';
 import {
   ensureYamlExtension,
