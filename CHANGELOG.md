@@ -1,3 +1,5 @@
+## [1.23.7](https://github.com/salesforcecli/plugin-agent/compare/1.23.6...1.23.7) (2025-07-29)
+
 ## [1.23.6](https://github.com/salesforcecli/plugin-agent/compare/1.23.5...1.23.6) (2025-07-25)
 
 ### Bug Fixes
