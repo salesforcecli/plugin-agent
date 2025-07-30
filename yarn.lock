@@ -1462,10 +1462,10 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@0.15.3":
-  version "0.15.3"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.15.3.tgz#1a0936e6908e36459dcee1471fda13b3d560b5d1"
-  integrity sha512-M/wMK9ok2ytzf6ZV9DiQG+LKMoaXtoXheZKsxJVYJOxLcCL4SSy5IQNtXdqGbZ23TzbWdSBrp73WffIGWkD4Jw==
+"@salesforce/agents@^0.15.4":
+  version "0.15.4"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.15.4.tgz#a5c96abcf603acc7b2727902133feda7c67678c3"
+  integrity sha512-GIX36TZjbjxTHw/kLf1+JmSl7sN+f00LH1biuvwCKyKXXFyHyrykt+dXL58Xeo6NvJcj7IouC+ntxsvV3ApS9w==
   dependencies:
     "@salesforce/core" "^8.10.3"
     "@salesforce/kit" "^3.2.3"
@@ -1491,7 +1491,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.10.3", "@salesforce/core@^8.14.0", "@salesforce/core@^8.15.0", "@salesforce/core@^8.18.1", "@salesforce/core@^8.18.3", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
+"@salesforce/core@^8.10.3", "@salesforce/core@^8.14.0", "@salesforce/core@^8.15.0", "@salesforce/core@^8.18.1", "@salesforce/core@^8.18.5", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
   version "8.18.5"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.18.5.tgz#8205f3b1ee9ef63740128bef81cc32213a76296a"
   integrity sha512-zQSIjo0L0ddcZbj3Oxxig2J6aYL5H5FY45TpXAXpjGe0UPWNxXkU2mrcDfs9OSn0MhM3uMj4fUIM1a158/3Lug==
