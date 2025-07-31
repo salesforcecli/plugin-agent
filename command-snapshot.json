@@ -1,10 +1,26 @@
 [
   {
     "alias": [],
+    "command": "agent:activate",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:create",
     "flagAliases": [],
     "flagChars": ["o"],
     "flags": ["api-name", "api-version", "flags-dir", "json", "name", "planner-id", "preview", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:deactivate",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
