@@ -1,6 +1,6 @@
 # error.noAgentsInOrg
 
-No Agents found in org %s.
+No agents found in org %s.
 
 # error.missingAgentInOrg
 
@@ -8,8 +8,8 @@ Agent %s not found in org %s.
 
 # error.agentIsDeleted
 
-Agent %s is deleted and cannot be activated.
+Agent %s has been deleted and can't be activated.
 
 # error.agentIsDefault
 
-Agent %s is an org default agent and cannot be activated.
+Agent %s is the default Agentforce agent in your org and you can't change its activation status. 

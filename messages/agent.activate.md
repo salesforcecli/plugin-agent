@@ -1,18 +1,20 @@
 # summary
 
-Activate an agent in the org.
+Activate an agent in an org.
 
 # description
 
-An agent can be active or inactive within an org. Active agents are available in the org and can be previewed using the CLI or VS Code while inactive agents cannot.
+Activating an agent makes it immediately available to your users. An agent must be active before you can preview it with the "agent preview" CLI command or VS Code.
+
+You must know the agent's API name to activate it; you can either be prompted for it or you can specify it with the --api-name flag. Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup.
 
 # examples
 
-- Activate an agent in the default target org by being prompted:
+- Activate an agent in your default target org by being prompted:
 
   <%= config.bin %> <%= command.id %>
 
-- Activate an agent by specifying the agent API name and target org:
+- Activate an agent with API name Resort_Manager in the org with alias "my-org":
 
   <%= config.bin %> <%= command.id %> --api-name Resort_Manager --target-org my-org
 

@@ -1,18 +1,20 @@
 # summary
 
-Deactivate an agent in the org.
+Deactivate an agent in an org.
 
 # description
 
-An agent can be active or inactive within an org. Active agents are available in the org and can be previewed using the CLI or VS Code while inactive agents cannot.
+Deactivating an agent makes it unavailable to your users. To make changes to an agent, such as adding or removing topics or actions, you must deactivate it. You can't preview an agent with the "agent preview" CLI command or VS Code if it's deactivated.
+
+You must know the agent's API name to deactivate it; you can either be prompted for it or you can specify it with the --api-name flag. Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup.
 
 # examples
 
-- Deactivate an agent in the default target org by being prompted:
+- Deactivate an agent in your default target org by being prompted:
 
   <%= config.bin %> <%= command.id %>
 
-- Deactivate an agent by specifying the agent API name and target org:
+- Deactivate the agent Resort_Manager in the org with alias "my_org":
 
   <%= config.bin %> <%= command.id %> --api-name Resort_Manager --target-org my-org
 
