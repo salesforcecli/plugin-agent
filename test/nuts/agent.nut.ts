@@ -121,6 +121,10 @@ describe('plugin-agent NUTs', () => {
         console.dir(deployResult2.response, { depth: 10 });
       }
       expect(deployResult2.response.success, 'expected Agent Test deploy to succeed').to.equal(true);
+
+      // wait for the agent to be provisioned
+      console.log('\nwaiting 2 minutes for agent provisioning...');
+      await sleep(120_000);
     });
 
     describe('agent test list', () => {
@@ -220,6 +224,42 @@ describe('plugin-agent NUTs', () => {
         // check that cache does not have an entry
         expect(() => cache.resolveFromCache()).to.throw('Could not find a runId to resume');
       });
+    });
+  });
+
+  describe('agent activate/deactivate', () => {
+    const botApiName = 'Local_Info_Agent';
+    const botStatusQuery = `SELECT Status FROM BotVersion WHERE BotDefinitionId IN (SELECT Id FROM BotDefinition WHERE DeveloperName = '${botApiName}') LIMIT 1`;
+
+    it('should activate the agent', async () => {
+      // Verify the BotVersion status has 'Inactive' initial state
+      const botVersionInitalState = await connection.singleRecordQuery<{ Status: string }>(botStatusQuery);
+      expect(botVersionInitalState.Status).to.equal('Inactive');
+
+      try {
+        execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'unknown';
+        console.log(`Error activating agent due to ${errMsg}. \nWaiting 2 minutes and trying again...`);
+        await sleep(120_000);
+        execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+      }
+
+      // Verify the BotVersion status is now 'Active'
+      const botVersionResult = await connection.singleRecordQuery<{ Status: string }>(botStatusQuery);
+      expect(botVersionResult.Status).to.equal('Active');
+    });
+
+    it('should deactivate the agent', async () => {
+      // Verify the BotVersion status has 'Active' initial state
+      const botVersionInitalState = await connection.singleRecordQuery<{ Status: string }>(botStatusQuery);
+      expect(botVersionInitalState.Status).to.equal('Active');
+
+      execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+
+      // Verify the BotVersion status is now 'Inactive'
+      const botVersionResult = await connection.singleRecordQuery<{ Status: string }>(botStatusQuery);
+      expect(botVersionResult.Status).to.equal('Inactive');
     });
   });
 
