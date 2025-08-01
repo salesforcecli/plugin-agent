@@ -26,6 +26,7 @@ type TestCase = {
   expectedActions: string[];
   expectedTopic: string;
   expectedOutcome: string;
+  conversationHistory?: Array<{ role: 'user'; message: string } | { role: 'agent'; message: string; topic: string }>;
   customEvaluations?: Array<{
     label: string;
     name: string;
@@ -117,12 +118,27 @@ async function promptForTestCase(genAiPlugins: Record<string, string>, genAiFunc
 
   const customEvaluations = await promptForCustomEvaluations();
 
+  const conversationHistory = (await confirm({
+    message: 'Do you want to generate a boilerplate conversation history',
+    theme,
+  }))
+    ? ([
+        { role: 'user', message: 'example user message' },
+        {
+          role: 'agent',
+          message: 'example agent message',
+          topic: 'Example_agent_topic',
+        },
+      ] as NonNullable<TestCase['conversationHistory']>)
+    : [];
+
   return {
     utterance,
     expectedTopic,
     expectedActions,
     expectedOutcome,
     customEvaluations,
+    conversationHistory,
   };
 }
 
