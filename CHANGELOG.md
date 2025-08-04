@@ -1,3 +1,11 @@
+## [1.23.8](https://github.com/salesforcecli/plugin-agent/compare/1.23.7...1.23.8) (2025-08-01)
+
+### Bug Fixes
+
+- add boilerplate conversation history prompt and values ([df70066](https://github.com/salesforcecli/plugin-agent/commit/df700660b6832840376fc684f203347dee9d43f7))
+
+## [1.23.7](https://github.com/salesforcecli/plugin-agent/compare/1.23.6...1.23.7) (2025-07-29)
+
 ## [1.23.6](https://github.com/salesforcecli/plugin-agent/compare/1.23.5...1.23.6) (2025-07-25)
 
 ### Bug Fixes
