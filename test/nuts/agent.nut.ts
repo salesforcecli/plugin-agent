@@ -28,6 +28,7 @@ describe('plugin-agent NUTs', () => {
   let connection: Connection;
   let defaultOrg: Org;
   let username: string;
+  const botApiName = 'Local_Info_Agent';
 
   before(async () => {
     session = await TestSession.create({
@@ -52,6 +53,16 @@ describe('plugin-agent NUTs', () => {
     );
     const user = await User.create({ org: defaultOrg });
     await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
+
+    // create a bot user
+    await createBotUser(connection, defaultOrg, botApiName);
+
+    // deploy metadata
+    await deployMetadata(connection);
+
+    // wait for the agent to be provisioned
+    console.log('\nWaiting 4 minutes for agent provisioning...\n');
+    await sleep(240_000);
   });
 
   after(async () => {
@@ -59,73 +70,7 @@ describe('plugin-agent NUTs', () => {
   });
 
   describe('agent test', () => {
-    const botApiName = 'Local_Info_Agent';
     const agentTestName = 'Local_Info_Agent_Test';
-
-    before(async () => {
-      // Query for the agent user profile
-      const queryResult = await connection.singleRecordQuery<{ Id: string }>(
-        "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
-      );
-      const profileId = queryResult.Id;
-
-      // create a new unique bot user
-      const botUsername = genUniqueString('botUser_%s@test.org');
-      const botUser = await User.create({ org: defaultOrg });
-      // @ts-expect-error - private method. Must use this to prevent the auth flow that happens with the createUser method
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const { userId } = (await botUser.createUserInternal({
-        username: botUsername,
-        lastName: 'AgentUser',
-        alias: 'botUser',
-        timeZoneSidKey: 'America/Denver',
-        email: botUsername,
-        emailEncodingKey: 'UTF-8',
-        languageLocaleKey: 'en_US',
-        localeSidKey: 'en_US',
-        profileId,
-      } as UserFields)) as { userId: string };
-
-      await botUser.assignPermissionSets(userId, ['AgentforceServiceAgentUser']);
-
-      // Replace the botUser with the current user's username
-      const botDir = join(session.project.dir, 'force-app', 'main', 'default', 'bots', botApiName);
-      const botFile = readFileSync(join(botDir, 'Local_Info_Agent.bot-meta.xml'), 'utf8');
-      const updatedBotFile = botFile.replace('%BOT_USER%', botUsername);
-      writeFileSync(join(botDir, 'Local_Info_Agent.bot-meta.xml'), updatedBotFile);
-
-      // deploy Local_Info_Agent to scratch org
-      const compSet1 = await ComponentSetBuilder.build({
-        metadata: {
-          metadataEntries: ['Agent:Local_Info_Agent'],
-          directoryPaths: [join(session.project.dir, 'force-app', 'main', 'default')],
-        },
-      });
-      const deploy1 = await compSet1.deploy({ usernameOrConnection: connection });
-      const deployResult1 = await deploy1.pollStatus();
-      if (!deployResult1.response.success) {
-        console.dir(deployResult1.response, { depth: 10 });
-      }
-      expect(deployResult1.response.success, 'expected Agent deploy to succeed').to.equal(true);
-
-      // deploy Local_Info_Agent_Test to scratch org
-      const compSet2 = await ComponentSetBuilder.build({
-        metadata: {
-          metadataEntries: ['AiEvaluationDefinition:Local_Info_Agent_Test'],
-          directoryPaths: [join(session.project.dir, 'force-app', 'main', 'default')],
-        },
-      });
-      const deploy2 = await compSet2.deploy({ usernameOrConnection: connection });
-      const deployResult2 = await deploy2.pollStatus();
-      if (!deployResult2.response.success) {
-        console.dir(deployResult2.response, { depth: 10 });
-      }
-      expect(deployResult2.response.success, 'expected Agent Test deploy to succeed').to.equal(true);
-
-      // wait for the agent to be provisioned
-      console.log('\nwaiting 4 minutes for agent provisioning...');
-      await sleep(240_000);
-    });
 
     describe('agent test list', () => {
       it('should list agent tests in org', async () => {
@@ -228,7 +173,6 @@ describe('plugin-agent NUTs', () => {
   });
 
   describe('agent activate/deactivate', () => {
-    const botApiName = 'Local_Info_Agent';
     const botStatusQuery = `SELECT Status FROM BotVersion WHERE BotDefinitionId IN (SELECT Id FROM BotDefinition WHERE DeveloperName = '${botApiName}') LIMIT 1`;
 
     it('should activate the agent', async () => {
@@ -321,3 +265,66 @@ describe('plugin-agent NUTs', () => {
     });
   });
 });
+
+const createBotUser = async (connection: Connection, defaultOrg: Org, botApiName: string) => {
+  // Query for the agent user profile
+  const queryResult = await connection.singleRecordQuery<{ Id: string }>(
+    "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
+  );
+  const profileId = queryResult.Id;
+
+  // create a new unique bot user
+  const botUsername = genUniqueString('botUser_%s@test.org');
+  const botUser = await User.create({ org: defaultOrg });
+  // @ts-expect-error - private method. Must use this to prevent the auth flow that happens with the createUser method
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const { userId } = (await botUser.createUserInternal({
+    username: botUsername,
+    lastName: 'AgentUser',
+    alias: 'botUser',
+    timeZoneSidKey: 'America/Denver',
+    email: botUsername,
+    emailEncodingKey: 'UTF-8',
+    languageLocaleKey: 'en_US',
+    localeSidKey: 'en_US',
+    profileId,
+  } as UserFields)) as { userId: string };
+
+  await botUser.assignPermissionSets(userId, ['AgentforceServiceAgentUser']);
+
+  // Replace the botUser with the current user's username
+  const botDir = join(session.project.dir, 'force-app', 'main', 'default', 'bots', botApiName);
+  const botFile = readFileSync(join(botDir, 'Local_Info_Agent.bot-meta.xml'), 'utf8');
+  const updatedBotFile = botFile.replace('%BOT_USER%', botUsername);
+  writeFileSync(join(botDir, 'Local_Info_Agent.bot-meta.xml'), updatedBotFile);
+};
+
+const deployMetadata = async (connection: Connection) => {
+  // deploy Local_Info_Agent to scratch org
+  const compSet1 = await ComponentSetBuilder.build({
+    metadata: {
+      metadataEntries: ['Agent:Local_Info_Agent'],
+      directoryPaths: [join(session.project.dir, 'force-app', 'main', 'default')],
+    },
+  });
+  const deploy1 = await compSet1.deploy({ usernameOrConnection: connection });
+  const deployResult1 = await deploy1.pollStatus();
+  if (!deployResult1.response.success) {
+    console.dir(deployResult1.response, { depth: 10 });
+  }
+  expect(deployResult1.response.success, 'expected Agent deploy to succeed').to.equal(true);
+
+  // deploy Local_Info_Agent_Test to scratch org
+  const compSet2 = await ComponentSetBuilder.build({
+    metadata: {
+      metadataEntries: ['AiEvaluationDefinition:Local_Info_Agent_Test'],
+      directoryPaths: [join(session.project.dir, 'force-app', 'main', 'default')],
+    },
+  });
+  const deploy2 = await compSet2.deploy({ usernameOrConnection: connection });
+  const deployResult2 = await deploy2.pollStatus();
+  if (!deployResult2.response.success) {
+    console.dir(deployResult2.response, { depth: 10 });
+  }
+  expect(deployResult2.response.success, 'expected Agent Test deploy to succeed').to.equal(true);
+};
