@@ -123,8 +123,8 @@ describe('plugin-agent NUTs', () => {
       expect(deployResult2.response.success, 'expected Agent Test deploy to succeed').to.equal(true);
 
       // wait for the agent to be provisioned
-      console.log('\nwaiting 2 minutes for agent provisioning...');
-      await sleep(120_000);
+      console.log('\nwaiting 4 minutes for agent provisioning...');
+      await sleep(240_000);
     });
 
     describe('agent test list', () => {
