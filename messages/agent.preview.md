@@ -10,7 +10,7 @@ This command is useful to test if the agent responds to your utterances as you e
 
 When the session concludes, the command asks if you want to save the API responses and chat transcripts. By default, the files are saved to the "./temp/agent-preview" directory. Specify a new default directory by setting the environment variable "SF_AGENT_PREVIEW_OUTPUT_DIR" to the directory. Or you can pass the directory to the --output-dir flag.
 
-Find the agent's API name in its main details page in your org's Agent page in Setup.
+Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup. If your agent is currently deactivated, use the "agent activate" CLI command to activate it.
 
 IMPORTANT: Before you use this command, you must complete a number of configuration steps in your org and your DX project. The examples in this help assume you've completed the steps. See "Preview an Agent" in the "Agentforce Developer Guide" for complete documentation: https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
 
@@ -32,7 +32,7 @@ Enable Apex debug logging during the agent preview conversation.
 
 # examples
 
-- Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app" connected app:
+- Interact with an agent with API name Resort_Manager in the org with alias "my-org" and the linked "agent-app" connected app:
 
   <%= config.bin %> <%= command.id %> --api-name Resort_Manager --target-org my-org --client-app agent-app
 
