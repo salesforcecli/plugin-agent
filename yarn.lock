@@ -1290,7 +1290,7 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@jsforce/jsforce-node@^3.10.0":
+"@jsforce/jsforce-node@^3.9.1":
   version "3.10.0"
   resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.0.tgz#1bf75e9d322434f99fc38a3b60738205051144c5"
   integrity sha512-hNExEqzvJ/ixnsfZlrYh/FqEOYfn4vKmeBMqIdrEjeYciIsSaOeggghFl+1w0m2u7TNGr1+8jPUBvki3nebPSw==
@@ -1578,7 +1578,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/prettier-config/-/prettier-config-0.0.3.tgz#ba648d4886bb38adabe073dbea0b3a91b3753bb0"
   integrity sha512-hYOhoPTCSYMDYn+U1rlEk16PoBeAJPkrdg4/UtAzupM1mRRJOwEPMG1d7U8DxJFKuXW3DMEYWr2MwAIBDaHmFg==
 
-"@salesforce/schemas@^1.9.1":
+"@salesforce/schemas@^1.9.0":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@salesforce/schemas/-/schemas-1.9.1.tgz#ea843c732068c4ac2dadbe1d22b44e714cfe661d"
   integrity sha512-9I8kZBYT7HFXsbz2ukkSyZDRPjSsfRyx3pKGCsjWe2av8wuNm6tYUnmuXzMH5JoVSu3MvtOeIlwp5fFURdsNjg==

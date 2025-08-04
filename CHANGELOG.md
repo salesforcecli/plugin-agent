@@ -1,3 +1,14 @@
+# [1.24.0](https://github.com/salesforcecli/plugin-agent/compare/1.23.8...1.24.0) (2025-08-04)
+
+### Bug Fixes
+
+- add tests for activate and deactivate ([400a1e6](https://github.com/salesforcecli/plugin-agent/commit/400a1e6bd33c17befe0bf1717feeafebd26104e5))
+- Update agent.deactivate.md ([c4c4e5c](https://github.com/salesforcecli/plugin-agent/commit/c4c4e5c286d463ea44daaa658a9eaac01fc55146))
+
+### Features
+
+- adds agent activate and deactivate commands ([fbad38c](https://github.com/salesforcecli/plugin-agent/commit/fbad38c7405357f3caf786d2c6cc17af40c3a161))
+
 ## [1.23.8](https://github.com/salesforcecli/plugin-agent/compare/1.23.7...1.23.8) (2025-08-01)
 
 ### Bug Fixes
