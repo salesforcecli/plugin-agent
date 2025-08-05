@@ -1,3 +1,9 @@
+## [1.24.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.0...1.24.1) (2025-08-05)
+
+### Bug Fixes
+
+- add custom eval and conv history to help ([eda25d3](https://github.com/salesforcecli/plugin-agent/commit/eda25d37389c2c1b88addcb5350763cb47ae6bc0))
+
 # [1.24.0](https://github.com/salesforcecli/plugin-agent/compare/1.23.8...1.24.0) (2025-08-04)
 
 ### Bug Fixes
