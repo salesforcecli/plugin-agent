@@ -9,6 +9,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName, metric } from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
+import { ux as ocux } from '@oclif/core';
 import ansis from 'ansis';
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
@@ -125,6 +126,31 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       tables.push(table);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       metricResults.push(...metrics);
+    }
+    // it's not a real string[], more like just a string  "[&#39;IdentifyRecordByName&#39;]"
+    if (testCase.generatedData.actionsSequence.length > 2) {
+      tables.push(
+        ux.makeTable({
+          title: 'Generated Data',
+          columns: ['Data'],
+          overflow: 'wrap',
+          trimWhitespace: false,
+          data: [
+            {
+              Data: ocux.colorizeJson(testCase.generatedData.invokedActions, {
+                pretty: true,
+                theme: {
+                  key: 'blueBright',
+                  string: 'greenBright',
+                  number: 'redBright',
+                  boolean: 'redBright',
+                  null: 'blackBright',
+                },
+              }),
+            },
+          ],
+        })
+      );
     }
     // add a line break between end of the first table and the utterance of the next
     tables.push('\n');
