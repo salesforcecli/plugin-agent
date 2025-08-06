@@ -12,6 +12,8 @@ To generate a specific agent test case, this command prompts you for this inform
 - Expected topic: API name of the topic you expect the agent to use when responding to the utterance.
 - Expected actions: One or more API names of the expection actions the agent takes.
 - Expected outcome: Natural language description of the outcome you expect.
+- (Optional) Custom evaluation: Test an agent's response for specific strings or numbers.
+- (Optional) Conversation history: Boilerplate for additional context you can add to the test in the form of a conversation history.
 
 When your test spec is ready, you then run the "agent test create" command to actually create the test in your org and synchronize the metadata with your DX project. The metadata type for an agent test is AiEvaluationDefinition.
 

@@ -4,6 +4,10 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": "..",
+    "paths": {
+      "@salesforce/core": ["node_modules/@salesforce/core"]
+    }
   }
 }

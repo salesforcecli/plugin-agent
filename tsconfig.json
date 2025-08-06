@@ -4,7 +4,11 @@
     "outDir": "lib",
     "rootDir": "src",
     "jsx": "react",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@salesforce/core": ["node_modules/@salesforce/core"]
+    }
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

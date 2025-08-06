@@ -59,7 +59,9 @@ sf plugins
 
 <!-- commands -->
 
+- [`sf agent activate`](#sf-agent-activate)
 - [`sf agent create`](#sf-agent-create)
+- [`sf agent deactivate`](#sf-agent-deactivate)
 - [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
 - [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
@@ -69,6 +71,45 @@ sf plugins
 - [`sf agent test results`](#sf-agent-test-results)
 - [`sf agent test resume`](#sf-agent-test-resume)
 - [`sf agent test run`](#sf-agent-test-run)
+
+## `sf agent activate`
+
+Activate an agent in an org.
+
+```
+USAGE
+  $ sf agent activate -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
+
+FLAGS
+  -n, --api-name=<value>     API name of the agent to activate.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Activate an agent in an org.
+
+  Activating an agent makes it immediately available to your users. An agent must be active before you can preview it
+  with the "agent preview" CLI command or VS Code.
+
+  You must know the agent's API name to activate it; you can either be prompted for it or you can specify it with the
+  --api-name flag. Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup.
+
+EXAMPLES
+  Activate an agent in your default target org by being prompted:
+
+    $ sf agent activate
+
+  Activate an agent with API name Resort_Manager in the org with alias "my-org":
+
+    $ sf agent activate --api-name Resort_Manager --target-org my-org
+```
+
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -130,7 +171,47 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/create.ts)_
+
+## `sf agent deactivate`
+
+Deactivate an agent in an org.
+
+```
+USAGE
+  $ sf agent deactivate -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
+
+FLAGS
+  -n, --api-name=<value>     API name of the agent to deactivate.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Deactivate an agent in an org.
+
+  Deactivating an agent makes it unavailable to your users. To make changes to an agent, such as adding or removing
+  topics or actions, you must deactivate it. You can't preview an agent with the "agent preview" CLI command or VS Code
+  if it's deactivated.
+
+  You must know the agent's API name to deactivate it; you can either be prompted for it or you can specify it with the
+  --api-name flag. Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup.
+
+EXAMPLES
+  Deactivate an agent in your default target org by being prompted:
+
+    $ sf agent deactivate
+
+  Deactivate the agent Resort_Manager in the org with alias "my_org":
+
+    $ sf agent deactivate --api-name Resort_Manager --target-org my-org
+```
+
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -235,7 +316,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -283,7 +364,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -318,6 +399,9 @@ DESCRIPTION
   - Expected topic: API name of the topic you expect the agent to use when responding to the utterance.
   - Expected actions: One or more API names of the expection actions the agent takes.
   - Expected outcome: Natural language description of the outcome you expect.
+  - (Optional) Custom evaluation: Test an agent's response for specific strings or numbers.
+  - (Optional) Conversation history: Boilerplate for additional context you can add to the test in the form of a
+  conversation history.
 
   When your test spec is ready, you then run the "agent test create" command to actually create the test in your org and
   synchronize the metadata with your DX project. The metadata type for an agent test is AiEvaluationDefinition.
@@ -341,7 +425,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -384,7 +468,8 @@ DESCRIPTION
   environment variable "SF_AGENT_PREVIEW_OUTPUT_DIR" to the directory. Or you can pass the directory to the --output-dir
   flag.
 
-  Find the agent's API name in its main details page in your org's Agent page in Setup.
+  Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup. If your agent is
+  currently deactivated, use the "agent activate" CLI command to activate it.
 
   IMPORTANT: Before you use this command, you must complete a number of configuration steps in your org and your DX
   project. The examples in this help assume you've completed the steps. See "Preview an Agent" in the "Agentforce
@@ -392,7 +477,7 @@ DESCRIPTION
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
 
 EXAMPLES
-  Interact with an agent with API name "Resort_Manager" in the org with alias "my-org" and the linked "agent-app"
+  Interact with an agent with API name Resort_Manager in the org with alias "my-org" and the linked "agent-app"
   connected app:
 
     $ sf agent preview --api-name Resort_Manager --target-org my-org --client-app agent-app
@@ -404,7 +489,7 @@ EXAMPLES
       transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -459,7 +544,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -494,7 +579,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -550,7 +635,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -613,7 +698,7 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -677,6 +762,6 @@ FLAG DESCRIPTIONS
     test results aren't written.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.23.8/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.1/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
