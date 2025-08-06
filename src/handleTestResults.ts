@@ -127,8 +127,8 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       metricResults.push(...metrics);
     }
-    // it's not a real string[], more like just a string  "[&#39;IdentifyRecordByName&#39;]"
-    if (testCase.generatedData.actionsSequence.length > 2) {
+    // it's not a real string[], more like just a string  "[&#39;IdentifyRecordByName&#39;]", so >2 means more than "[]"
+    if (testCase.generatedData?.actionsSequence?.length > 2) {
       tables.push(
         ux.makeTable({
           title: 'Generated Data',
