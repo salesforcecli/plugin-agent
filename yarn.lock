@@ -1306,22 +1306,6 @@
     node-fetch "^2.6.1"
     xml2js "^0.6.2"
 
-"@jsforce/jsforce-node@^3.9.1":
-  version "3.9.4"
-  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.9.4.tgz#0d0e13d271c3921a3d5d58d5ee30a83c3d5f8f90"
-  integrity sha512-Lsq0DX2101QyJGzQDf0oKW5BdnheQPWTWZ294DnjBF4ooNlU9ClqFjiMvi0gE2AdGorc3P1fkCdLSzUCCrHVfg==
-  dependencies:
-    "@sindresorhus/is" "^4"
-    base64url "^3.0.1"
-    csv-parse "^5.5.2"
-    csv-stringify "^6.4.4"
-    faye "^1.4.0"
-    form-data "^4.0.4"
-    https-proxy-agent "^5.0.0"
-    multistream "^3.1.0"
-    node-fetch "^2.6.1"
-    xml2js "^0.6.2"
-
 "@jsonjoy.com/base64@^1.1.1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@jsonjoy.com/base64/-/base64-1.1.2.tgz#cf8ea9dcb849b81c95f14fc0aaa151c6b54d2578"
@@ -1519,10 +1503,10 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.16.0.tgz#631d11b0b69808c68500bfb82019c19b23c2779c"
-  integrity sha512-FS6Mr8a3+MIZ1yciE/6AnLAhSwPivwT3e/ZTQVuvWMZUMT7Z4TuIqVFijN/r76YdprN/lFGM8KNLpIplNX7tjw==
+"@salesforce/agents@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.17.1.tgz#bdf4afe2d09ebb01e73693ffb8a4a34212a6e871"
+  integrity sha512-X1K2G5WyX3oqj4Q54pq2aSsk/UrmAE3wa0GrePlwOInOGC/MkuIMqOqIAa1r138x9uSWpKSWapj5LXVpNm/wnw==
   dependencies:
     "@salesforce/core" "^8.18.5"
     "@salesforce/kit" "^3.2.3"
@@ -1548,31 +1532,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.14.0", "@salesforce/core@^8.18.1", "@salesforce/core@^8.18.5", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
-  version "8.18.5"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.18.5.tgz#8205f3b1ee9ef63740128bef81cc32213a76296a"
-  integrity sha512-zQSIjo0L0ddcZbj3Oxxig2J6aYL5H5FY45TpXAXpjGe0UPWNxXkU2mrcDfs9OSn0MhM3uMj4fUIM1a158/3Lug==
-  dependencies:
-    "@jsforce/jsforce-node" "^3.9.1"
-    "@salesforce/kit" "^3.2.2"
-    "@salesforce/schemas" "^1.9.0"
-    "@salesforce/ts-types" "^2.0.10"
-    ajv "^8.17.1"
-    change-case "^4.1.2"
-    fast-levenshtein "^3.0.0"
-    faye "^1.4.0"
-    form-data "^4.0.4"
-    js2xmlparser "^4.0.1"
-    jsonwebtoken "9.0.2"
-    jszip "3.10.1"
-    pino "^9.7.0"
-    pino-abstract-transport "^1.2.0"
-    pino-pretty "^11.3.0"
-    proper-lockfile "^4.1.2"
-    semver "^7.6.3"
-    ts-retry-promise "^0.8.1"
-
-"@salesforce/core@^8.18.7":
+"@salesforce/core@^8.14.0", "@salesforce/core@^8.18.1", "@salesforce/core@^8.18.5", "@salesforce/core@^8.18.7", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
   version "8.19.0"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.19.0.tgz#e385091fff4d79d31f18ce795ad497b90f9d34d4"
   integrity sha512-vbP17lr0eT+oujNYsr1DcTCR81JDtCKiJqCY4C3LGofKsTMC1akdS05kLnqM2vSiS32oiTaQ6EAa+Bct37Z4FQ==
@@ -1660,7 +1620,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/prettier-config/-/prettier-config-0.0.3.tgz#ba648d4886bb38adabe073dbea0b3a91b3753bb0"
   integrity sha512-hYOhoPTCSYMDYn+U1rlEk16PoBeAJPkrdg4/UtAzupM1mRRJOwEPMG1d7U8DxJFKuXW3DMEYWr2MwAIBDaHmFg==
 
-"@salesforce/schemas@^1.9.0", "@salesforce/schemas@^1.9.1":
+"@salesforce/schemas@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@salesforce/schemas/-/schemas-1.9.1.tgz#ea843c732068c4ac2dadbe1d22b44e714cfe661d"
   integrity sha512-9I8kZBYT7HFXsbz2ukkSyZDRPjSsfRyx3pKGCsjWe2av8wuNm6tYUnmuXzMH5JoVSu3MvtOeIlwp5fFURdsNjg==
@@ -1720,7 +1680,7 @@
     proxy-agent "^6.4.0"
     yaml "^2.7.1"
 
-"@salesforce/ts-types@^2.0.10", "@salesforce/ts-types@^2.0.11", "@salesforce/ts-types@^2.0.12":
+"@salesforce/ts-types@^2.0.11", "@salesforce/ts-types@^2.0.12":
   version "2.0.12"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-2.0.12.tgz#60420622812a7ec7e46d220667bc29b42dc247ff"
   integrity sha512-BIJyduJC18Kc8z+arUm5AZ9VkPRyw1KKAm+Tk+9LT99eOzhNilyfKzhZ4t+tG2lIGgnJpmytZfVDZ0e2kFul8g==
