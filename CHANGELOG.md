@@ -1,3 +1,9 @@
+## [1.24.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.1...1.24.2) (2025-08-07)
+
+### Bug Fixes
+
+- optionally print new table when invoked actions exist ([91dab17](https://github.com/salesforcecli/plugin-agent/commit/91dab1797235bd1bf5532ddab580fe23fe79ec5f))
+
 ## [1.24.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.0...1.24.1) (2025-08-05)
 
 ### Bug Fixes
