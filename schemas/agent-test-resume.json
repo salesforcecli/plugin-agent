@@ -103,6 +103,12 @@
                 "type": "string"
               }
             },
+            "invokedActions": {
+              "type": "string"
+            },
+            "sessionId": {
+              "type": "string"
+            },
             "outcome": {
               "type": "string"
             },
@@ -110,7 +116,7 @@
               "type": "string"
             }
           },
-          "required": ["actionsSequence", "outcome", "topic"],
+          "required": ["actionsSequence", "invokedActions", "sessionId", "outcome", "topic"],
           "additionalProperties": false
         },
         "testResults": {
