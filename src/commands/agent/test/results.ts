@@ -8,7 +8,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
-import { resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import { resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -31,6 +31,7 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    verbose: verboseFlag,
   };
 
   public async run(): Promise<AgentTestResultsResult> {
@@ -44,6 +45,7 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
       results: response,
       jsonEnabled: this.jsonEnabled(),
       outputDir: flags['output-dir'],
+      verbose: flags.verbose,
     });
     return response;
   }

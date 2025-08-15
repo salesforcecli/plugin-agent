@@ -53,6 +53,11 @@ export const testOutputDirFlag = Flags.custom<string>({
   summary: messages.getMessage('flags.output-dir.summary'),
 });
 
+export const verboseFlag = Flags.boolean({
+  summary: messages.getMessage('flags.verbose.summary'),
+  description: messages.getMessage('flags.verbose.description'),
+});
+
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {
   const result = validate(input);
   if (typeof result === 'string') throw new Error(result);
