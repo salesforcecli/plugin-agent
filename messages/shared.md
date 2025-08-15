@@ -10,6 +10,14 @@ Directory to write the agent test results into.
 
 If the agent test run completes, write the results to the specified directory. If the test is still running, the test results aren't written.
 
+# flags.verbose.summary
+
+Show generated data in the test results output.
+
+# flags.verbose.description
+
+When enabled, includes detailed generated data (such as invoked actions) in the human-readable test results output. This is useful for debugging test failures and understanding what actions were actually invoked during the test run.
+
 # error.invalidAgentType
 
 agentType must be either "customer" or "internal". Found: [%s]

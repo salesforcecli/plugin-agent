@@ -96,7 +96,7 @@
     "command": "agent:test:results",
     "flagAliases": [],
     "flagChars": ["d", "i", "o"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org"],
+    "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org", "verbose"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -113,6 +113,7 @@
       "result-format",
       "target-org",
       "use-most-recent",
+      "verbose",
       "wait"
     ],
     "plugin": "@salesforce/plugin-agent"
@@ -122,7 +123,17 @@
     "command": "agent:test:run",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "w"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "output-dir", "result-format", "target-org", "wait"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "flags-dir",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "verbose",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-agent"
   }
 ]
