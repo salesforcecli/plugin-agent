@@ -1290,10 +1290,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@jsforce/jsforce-node@^3.10.0":
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.0.tgz#1bf75e9d322434f99fc38a3b60738205051144c5"
-  integrity sha512-hNExEqzvJ/ixnsfZlrYh/FqEOYfn4vKmeBMqIdrEjeYciIsSaOeggghFl+1w0m2u7TNGr1+8jPUBvki3nebPSw==
+"@jsforce/jsforce-node@^3.10.1":
+  version "3.10.3"
+  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.3.tgz#76ac09cfc9565ccc953928c86733c787e4908928"
+  integrity sha512-Q6kgPNP/xiP8gzZLwquTLFKNUC9AbDIxrC9bhRsK1YgyDF4V64V/muxHVeCHR4rtXre658eLOgz6kRgoeBHTVg==
   dependencies:
     "@sindresorhus/is" "^4"
     base64url "^3.0.1"
@@ -1532,12 +1532,12 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.18.1", "@salesforce/core@^8.18.5", "@salesforce/core@^8.18.7", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
-  version "8.19.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.19.0.tgz#e385091fff4d79d31f18ce795ad497b90f9d34d4"
-  integrity sha512-vbP17lr0eT+oujNYsr1DcTCR81JDtCKiJqCY4C3LGofKsTMC1akdS05kLnqM2vSiS32oiTaQ6EAa+Bct37Z4FQ==
+"@salesforce/core@^8.18.1", "@salesforce/core@^8.18.5", "@salesforce/core@^8.18.7", "@salesforce/core@^8.19.1", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
+  version "8.19.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.19.1.tgz#300b37db32e29a7b1055091cc13d04a6ccc4d8c1"
+  integrity sha512-HPJxus0W4S1aoT4Qn6mG2s9Ik/mZ59rXNUFc2c+BgEAs28khbZOLR2uiZYexNpXIIZnCrSbb+v1t8IW/idIyCA==
   dependencies:
-    "@jsforce/jsforce-node" "^3.10.0"
+    "@jsforce/jsforce-node" "^3.10.1"
     "@salesforce/kit" "^3.2.2"
     "@salesforce/schemas" "^1.9.1"
     "@salesforce/ts-types" "^2.0.11"
@@ -1601,17 +1601,17 @@
   dependencies:
     "@salesforce/ts-types" "^2.0.12"
 
-"@salesforce/plugin-command-reference@^3.1.29":
-  version "3.1.63"
-  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.1.63.tgz#fd3d0c9577993035717ca3867767c66d7b8374f5"
-  integrity sha512-LWOdmRJqBzW0OexLkiJG1NEDWxvc9ejFeCT7YVBLTI8J0nCmY3bISX43RqRv1fOLrbjHqSb0hBvN/D9XLIdLnQ==
+"@salesforce/plugin-command-reference@^3.1.65":
+  version "3.1.65"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.1.65.tgz#af6cd928b9d4e4abb80caed5f8522a78da80f4b8"
+  integrity sha512-OuUdv7oAfWyVKKeFAua7j5bpQNeBl25I5SDXnF56m4YHnHhEIgsLP3oj7Ukw291ucpLKkeBkyiBv170bAjJHgg==
   dependencies:
     "@oclif/core" "^4"
-    "@salesforce/core" "^8.18.5"
+    "@salesforce/core" "^8.19.1"
     "@salesforce/kit" "^3.2.3"
     "@salesforce/sf-plugins-core" "^11.3.12"
     "@salesforce/ts-types" "^2.0.11"
-    chalk "^5.4.1"
+    chalk "^5.5.0"
     debug "^4.4.1"
     handlebars "^4.7.8"
 
@@ -3241,7 +3241,7 @@ chalk@^4.0.0, chalk@^4.1.0, chalk@^4.1.2:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-chalk@^5.0.0, chalk@^5.3.0, chalk@^5.4.1:
+chalk@^5.0.0, chalk@^5.3.0, chalk@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-5.5.0.tgz#67ada1df5ca809dc84c9b819d76418ddcf128428"
   integrity sha512-1tm8DTaJhPBG3bIkVeZt1iZM9GfSX2lzOeDVZH9R9ffRHpmHvxZ/QhgQH/aDTkswQVt+YHdXAdS/In/30OjCbg==
