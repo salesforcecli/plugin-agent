@@ -27,7 +27,7 @@
     "@oclif/plugin-command-snapshot": "^5.2.19",
     "@oclif/test": "^4.1.0",
     "@salesforce/cli-plugins-testkit": "^5.3.35",
-    "@salesforce/dev-scripts": "^10.2.12",
+    "@salesforce/dev-scripts": "^11.0.2",
     "@salesforce/plugin-command-reference": "^3.1.65",
     "@types/inquirer": "^9.0.7",
     "@types/react": "^18.3.3",
@@ -62,7 +62,7 @@
     "sfdx",
     "sfdx-plugin"
   ],
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "oclif": {
     "commands": "./lib/commands",
     "bin": "sf",
@@ -98,6 +98,7 @@
     "clean-all": "sf-clean all",
     "compile": "wireit",
     "docs": "sf-docs",
+    "fix-license": "eslint src test --fix --rule \"header/header: [2]\"",
     "format": "wireit",
     "link-check": "wireit",
     "lint": "wireit",
