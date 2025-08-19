@@ -1,3 +1,9 @@
+## [1.24.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.3...1.24.4) (2025-08-19)
+
+### Bug Fixes
+
+- add --verbose to agent test results/resume/run for generatedData ([0f9bd56](https://github.com/salesforcecli/plugin-agent/commit/0f9bd5621bc589675ba4785c03b00902512a0007))
+
 ## [1.24.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.2...1.24.3) (2025-08-17)
 
 ### Bug Fixes
