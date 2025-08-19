@@ -69,7 +69,7 @@ export function readableTime(time: number, decimalPlaces = 2): string {
   return `${hours}h ${minutes}m`;
 }
 
-export function humanFormat(results: AgentTestResultsResponse): string {
+export function humanFormat(results: AgentTestResultsResponse, verbose = false): string {
   const ux = new Ux();
 
   const tables: string[] = [];
@@ -128,7 +128,7 @@ export function humanFormat(results: AgentTestResultsResponse): string {
       metricResults.push(...metrics);
     }
     // it's not a real string[], more like just a string  "[&#39;IdentifyRecordByName&#39;]", so >2 means more than "[]"
-    if (testCase.generatedData?.actionsSequence?.length > 2) {
+    if (verbose && testCase.generatedData?.actionsSequence?.length > 2) {
       tables.push(
         ux.makeTable({
           title: 'Generated Data',
@@ -214,12 +214,14 @@ export async function handleTestResults({
   results,
   jsonEnabled,
   outputDir,
+  verbose = false,
 }: {
   id: string;
   format: 'human' | 'json' | 'junit' | 'tap';
   results: AgentTestResultsResponse | undefined;
   jsonEnabled: boolean;
   outputDir?: string;
+  verbose?: boolean;
 }): Promise<void> {
   if (!results) {
     // do nothing since there are no results to handle
@@ -229,7 +231,7 @@ export async function handleTestResults({
   const ux = new Ux({ jsonEnabled });
 
   if (format === 'human') {
-    const formatted = humanFormat(results);
+    const formatted = humanFormat(results, verbose);
     if (outputDir) {
       const file = `test-result-${id}.txt`;
       await writeFileToDir(outputDir, file, stripVTControlCharacters(formatted));

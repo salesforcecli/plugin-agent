@@ -17,6 +17,7 @@ import {
   promptForAiEvaluationDefinitionApiName,
   resultFormatFlag,
   testOutputDirFlag,
+  verboseFlag,
 } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
@@ -65,6 +66,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    verbose: verboseFlag,
   };
 
   private mso: TestStages | undefined;
@@ -109,6 +111,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         results: detailsResponse,
         jsonEnabled: this.jsonEnabled(),
         outputDir: flags['output-dir'],
+        verbose: flags.verbose,
       });
 
       return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId };

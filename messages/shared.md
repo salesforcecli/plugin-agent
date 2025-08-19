@@ -10,6 +10,16 @@ Directory to write the agent test results into.
 
 If the agent test run completes, write the results to the specified directory. If the test is still running, the test results aren't written.
 
+# flags.verbose.summary
+
+Show generated data in the test results output.
+
+# flags.verbose.description
+
+When enabled, includes detailed generated data (such as invoked actions) in the human-readable test results output. This is useful for debugging test failures and understanding what actions were actually invoked during the test run.
+
+The generated data is in JSON format and includes the Apex classes or Flows that were invoked, the Salesforce objects that were touched, and so on. Use the JSON structure of this information to build the test case JSONPath expression when using custom evaluations.
+
 # error.invalidAgentType
 
 agentType must be either "customer" or "internal". Found: [%s]

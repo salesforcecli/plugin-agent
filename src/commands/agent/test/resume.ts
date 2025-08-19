@@ -10,7 +10,7 @@ import { Messages } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
-import { AgentTestRunResult, resultFormatFlag, testOutputDirFlag } from '../../../flags.js';
+import { AgentTestRunResult, resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -43,6 +43,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    verbose: verboseFlag,
   };
 
   public async run(): Promise<AgentTestRunResult> {
@@ -72,6 +73,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       results: response,
       jsonEnabled: this.jsonEnabled(),
       outputDir: outputDir ?? flags['output-dir'],
+      verbose: flags.verbose,
     });
 
     return { ...response!, runId, status: 'COMPLETED' };
