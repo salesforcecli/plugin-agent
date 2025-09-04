@@ -6,7 +6,6 @@
         <name>Guest_Experience_Agent</name>
     </botMlDomain>
     <botUser>ge.agent@afdx-usa1000-02.testorg</botUser>
-    <AgentTemplate>Bot_Agent</AgentTemplate>
     <contextVariables>
         <contextVariableMappings>
             <SObjectType>MessagingEndUser</SObjectType>
