@@ -102,6 +102,12 @@ describe('agent generate template NUTs', () => {
     const mockBotTemplateFile = parser.parse(readFileSync(mockBotTemplateFilePath, 'utf-8')) as BotTemplateExt;
     expect(generatedBotTemplateFile).to.deep.equal(mockBotTemplateFile);
 
+    // Verify that mainMenuDialog and Main_Menu dialog are not present in the generated template
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('mainMenuDialog');
+    expect(generatedBotTemplateFile.BotTemplate.botDialogs).to.have.lengthOf(1);
+    expect(generatedBotTemplateFile.BotTemplate.botDialogs[0].developerName).to.not.equal('Main_Menu');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.include('<AgentTemplate>Bot_Agent</AgentTemplate>');
+
     const generatedGenAiPlannerBundleFile = parser.parse(
       readFileSync(generatedGenAiPlannerBundleFilePath, 'utf-8')
     ) as GenAiPlannerBundleExt;
