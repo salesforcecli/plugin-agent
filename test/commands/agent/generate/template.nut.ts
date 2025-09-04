@@ -93,7 +93,10 @@ describe('agent generate template NUTs', () => {
       genAiPlannerBundleFilePath
     );
 
-    const parser = new XMLParser({ ignoreAttributes: false });
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      isArray: (name) => ['botDialogs', 'contextVariables', 'contextVariableMappings', 'botSteps'].includes(name),
+    });
 
     // read both files and compare them
     const generatedBotTemplateFile = parser.parse(
@@ -101,6 +104,15 @@ describe('agent generate template NUTs', () => {
     ) as BotTemplateExt;
     const mockBotTemplateFile = parser.parse(readFileSync(mockBotTemplateFilePath, 'utf-8')) as BotTemplateExt;
     expect(generatedBotTemplateFile).to.deep.equal(mockBotTemplateFile);
+
+    // Verify that mainMenuDialog and Main_Menu dialog are not present in the generated template
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('mainMenuDialog');
+    expect(generatedBotTemplateFile.BotTemplate.botDialogs).to.be.an('array').with.lengthOf(1);
+    expect(generatedBotTemplateFile.BotTemplate.botDialogs[0].developerName).to.not.equal('Main_Menu');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('agentTemplate');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('agentDSLEnabled');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('Main_Menu_Dialog');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('botSource');
 
     const generatedGenAiPlannerBundleFile = parser.parse(
       readFileSync(generatedGenAiPlannerBundleFilePath, 'utf-8')

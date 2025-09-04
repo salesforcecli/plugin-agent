@@ -35,7 +35,11 @@ export type BotTemplateExt = {
 };
 
 type BotExt = {
-  Bot: Bot;
+  Bot: Bot & {
+    agentDSLEnabled?: boolean;
+    botSource?: string;
+    agentTemplate?: string;
+  };
 };
 
 type BotVersionExt = {
@@ -155,23 +159,16 @@ const convertBotToBotTemplate = (
   delete bot.Bot.botUser;
   delete bot.Bot.logPrivateConversationData;
   delete bot.Bot.sessionTimeout;
+  delete bot.Bot.agentDSLEnabled;
+  delete bot.Bot.botSource;
+  delete bot.Bot.agentTemplate;
 
   const botTemplate: BotTemplateExt = {
     '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
     BotTemplate: {
       masterLabel,
       conversationLanguages: 'en_US',
-      mainMenuDialog: 'Main_Menu',
-      botDialogs: [
-        {
-          developerName: 'Main_Menu',
-          isPlaceholderDialog: false,
-          label: 'Main_Menu',
-          showInFooterMenu: false,
-          botSteps: [],
-        },
-        entryDialogJson,
-      ],
+      botDialogs: [entryDialogJson],
       conversationSystemDialogs,
       conversationVariables,
       entryDialog,
