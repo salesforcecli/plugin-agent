@@ -110,7 +110,7 @@ describe('agent generate template NUTs', () => {
     expect(generatedBotTemplateFile.BotTemplate.botDialogs).to.be.an('array').with.lengthOf(1);
     expect(generatedBotTemplateFile.BotTemplate.botDialogs[0].developerName).to.not.equal('Main_Menu');
     expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('agentTemplate');
-    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('AgentDSL');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('agentDSLEnabled');
     expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('Main_Menu_Dialog');
     expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('botSource');
 
