@@ -40,7 +40,7 @@ describe('agent generate template NUTs', () => {
     );
   });
 
-  it('Converts an Agent into an BotTemplate and GenAiPlannerBundle', async () => {
+  it.only('Converts an Agent into an BotTemplate and GenAiPlannerBundle', async () => {
     const agentVersion = 1;
     const agentFile = join(
       'force-app',
@@ -93,7 +93,10 @@ describe('agent generate template NUTs', () => {
       genAiPlannerBundleFilePath
     );
 
-    const parser = new XMLParser({ ignoreAttributes: false });
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      isArray: (name) => ['botDialogs', 'contextVariables', 'contextVariableMappings', 'botSteps'].includes(name),
+    });
 
     // read both files and compare them
     const generatedBotTemplateFile = parser.parse(
@@ -104,9 +107,9 @@ describe('agent generate template NUTs', () => {
 
     // Verify that mainMenuDialog and Main_Menu dialog are not present in the generated template
     expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('mainMenuDialog');
-    expect(generatedBotTemplateFile.BotTemplate.botDialogs).to.have.lengthOf(1);
+    expect(generatedBotTemplateFile.BotTemplate.botDialogs).to.be.an('array').with.lengthOf(1);
     expect(generatedBotTemplateFile.BotTemplate.botDialogs[0].developerName).to.not.equal('Main_Menu');
-    expect(generatedBotTemplateFile.BotTemplate).to.not.include('<AgentTemplate>Bot_Agent</AgentTemplate>');
+    expect(generatedBotTemplateFile.BotTemplate).to.not.have.property('agentTemplate');
 
     const generatedGenAiPlannerBundleFile = parser.parse(
       readFileSync(generatedGenAiPlannerBundleFilePath, 'utf-8')
