@@ -1841,10 +1841,10 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^0.17.6":
-  version "0.17.6"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.17.6.tgz#74ea4286476901e5c9c5e98889dace72c9c18733"
-  integrity sha512-X00+qD5jwbOhns8e1RfmfjA62TldUrjHbCjmiSTj/iVbktCC2YonMPSKg/AUYtrwjrGpPHeCxsA/6TueLSK8xg==
+"@salesforce/agents@^0.17.8":
+  version "0.17.8"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.17.8.tgz#05931245140248206b7ca90bacab0ad746c9d66d"
+  integrity sha512-njG/C9WiMSTJS+r/2nIveQlOxUppB47L7q+HWar4JuVhL8yN9RAxdwKuaDIv6gpU6v/i17AvKMgXVHAxBRyq2Q==
   dependencies:
     "@salesforce/core" "^8.19.1"
     "@salesforce/kit" "^3.2.3"
