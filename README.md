@@ -59,18 +59,24 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf agent activate`](#sf-agent-activate)
-- [`sf agent create`](#sf-agent-create)
-- [`sf agent deactivate`](#sf-agent-deactivate)
-- [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
-- [`sf agent generate template`](#sf-agent-generate-template)
-- [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
-- [`sf agent preview`](#sf-agent-preview)
-- [`sf agent test create`](#sf-agent-test-create)
-- [`sf agent test list`](#sf-agent-test-list)
-- [`sf agent test results`](#sf-agent-test-results)
-- [`sf agent test resume`](#sf-agent-test-resume)
-- [`sf agent test run`](#sf-agent-test-run)
+- [plugin-agent](#plugin-agent)
+  - [Install](#install)
+  - [Contributing](#contributing)
+    - [CLA](#cla)
+    - [Build](#build)
+  - [Commands](#commands)
+  - [`sf agent activate`](#sf-agent-activate)
+  - [`sf agent create`](#sf-agent-create)
+  - [`sf agent deactivate`](#sf-agent-deactivate)
+  - [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
+  - [`sf agent generate template`](#sf-agent-generate-template)
+  - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
+  - [`sf agent preview`](#sf-agent-preview)
+  - [`sf agent test create`](#sf-agent-test-create)
+  - [`sf agent test list`](#sf-agent-test-list)
+  - [`sf agent test results`](#sf-agent-test-results)
+  - [`sf agent test resume`](#sf-agent-test-resume)
+  - [`sf agent test run`](#sf-agent-test-run)
 
 ## `sf agent activate`
 
