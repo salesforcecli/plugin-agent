@@ -1,8 +1,28 @@
-## [1.24.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.7...1.24.8) (2025-09-07)
+## [1.24.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.8...1.24.9) (2025-09-09)
+
+### Bug Fixes
+
+- update package version ([f0d305e](https://github.com/salesforcecli/plugin-agent/commit/f0d305e3c79eaa4541475fc9eded45d3fcd163b7))
+
+## [1.24.8-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.7...1.24.8-dev.0) (2025-09-04)
+
+### Bug Fixes
+
+- delete agentDSL/botSource from Bot ([ef7e61f](https://github.com/salesforcecli/plugin-agent/commit/ef7e61f9e9897697bf05848c9e8e6a8b789c4562))
+- delete botTemplate/MainMenu/Dialog from generated BotTemplate ([833bcf9](https://github.com/salesforcecli/plugin-agent/commit/833bcf9aa0212b595a0d82e037eabade756c9215))
+
+## [1.24.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.8-dev.0...1.24.8) (2025-09-07)
 
 ### Bug Fixes
 
 - **deps:** bump @salesforce/agents from 0.17.6 to 0.17.8 ([687dc17](https://github.com/salesforcecli/plugin-agent/commit/687dc17e5c5feef7277aee05b820e3902af3f695))
+
+## [1.24.8-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.7...1.24.8-dev.0) (2025-09-04)
+
+### Bug Fixes
+
+- delete agentDSL/botSource from Bot ([ef7e61f](https://github.com/salesforcecli/plugin-agent/commit/ef7e61f9e9897697bf05848c9e8e6a8b789c4562))
+- delete botTemplate/MainMenu/Dialog from generated BotTemplate ([833bcf9](https://github.com/salesforcecli/plugin-agent/commit/833bcf9aa0212b595a0d82e037eabade756c9215))
 
 ## [1.24.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.6...1.24.7) (2025-08-27)
 

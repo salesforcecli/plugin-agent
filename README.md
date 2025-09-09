@@ -59,24 +59,18 @@ sf plugins
 
 <!-- commands -->
 
-- [plugin-agent](#plugin-agent)
-  - [Install](#install)
-  - [Contributing](#contributing)
-    - [CLA](#cla)
-    - [Build](#build)
-  - [Commands](#commands)
-  - [`sf agent activate`](#sf-agent-activate)
-  - [`sf agent create`](#sf-agent-create)
-  - [`sf agent deactivate`](#sf-agent-deactivate)
-  - [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
-  - [`sf agent generate template`](#sf-agent-generate-template)
-  - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
-  - [`sf agent preview`](#sf-agent-preview)
-  - [`sf agent test create`](#sf-agent-test-create)
-  - [`sf agent test list`](#sf-agent-test-list)
-  - [`sf agent test results`](#sf-agent-test-results)
-  - [`sf agent test resume`](#sf-agent-test-resume)
-  - [`sf agent test run`](#sf-agent-test-run)
+- [`sf agent activate`](#sf-agent-activate)
+- [`sf agent create`](#sf-agent-create)
+- [`sf agent deactivate`](#sf-agent-deactivate)
+- [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
+- [`sf agent generate template`](#sf-agent-generate-template)
+- [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
+- [`sf agent preview`](#sf-agent-preview)
+- [`sf agent test create`](#sf-agent-test-create)
+- [`sf agent test list`](#sf-agent-test-list)
+- [`sf agent test results`](#sf-agent-test-results)
+- [`sf agent test resume`](#sf-agent-test-resume)
+- [`sf agent test run`](#sf-agent-test-run)
 
 ## `sf agent activate`
 
@@ -115,7 +109,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -177,7 +171,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -217,7 +211,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -322,7 +316,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate template`
 
@@ -370,7 +364,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -431,7 +425,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -495,7 +489,7 @@ EXAMPLES
       transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/preview.ts)_
 
 ## `sf agent test create`
 
@@ -550,7 +544,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -585,7 +579,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -651,7 +645,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -724,7 +718,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -798,6 +792,6 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.8/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.9/src/commands/agent/test/run.ts)_
 
 <!-- commandsstop -->
