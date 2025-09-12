@@ -23,6 +23,9 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
   describe('getPluginsAndFunctions', () => {
     const $$ = sinon.createSandbox();
 
+    afterEach(() => {
+      $$.restore();
+    });
     it('should getPluginsAndFunctions for a name and CS', async () => {
       const name = 'myAgent';
       const cs = new ComponentSet([
@@ -100,6 +103,67 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
           PluginName2: 'PluginName2.genAiPlugin-meta.xml',
         },
       });
+    });
+
+    it('should not fail when theres no actions', async () => {
+      const name = 'myAgent';
+      const cs = new ComponentSet([
+        { fullName: name, type: { name: 'Bot', id: 'bot', directoryName: 'bot' } },
+        {
+          fullName: 'myGenAiPlannerBundle',
+          type: { name: 'GenAiPlannerBundle', id: 'genaiplannerbundle', directoryName: 'genaiplannerbundle' },
+        },
+      ]);
+
+      $$.stub(cs, 'getComponentFilenamesByNameAndType')
+        .onFirstCall()
+        .returns(['myBot.bot-meta.xml'])
+        .onSecondCall()
+        .rejects() // genAiPlanner attempt
+        .onThirdCall()
+        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml']);
+
+      $$.stub(fs.promises, 'readFile')
+        .onFirstCall()
+        .resolves(
+          `<?xml version="1.0" encoding="UTF-8"?>
+<BotVersion xmlns="http://soap.sforce.com/2006/04/metadata">
+    <conversationDefinitionPlanners>
+        <genAiPlannerName>App_Dev_Agent</genAiPlannerName>
+    </conversationDefinitionPlanners>
+</BotVersion>
+`
+        )
+        .onSecondCall()
+        .rejects() // genAiPlanner attempt
+        .onThirdCall()
+        .resolves(
+          `<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <genAiPlugins>
+        <genAiCustomizedPlugin>
+            <canEscalate>false</canEscalate>
+            <description>System level instructions for config.</description>
+            <genAiPluginInstructions>
+                <description>...</description>
+                <developerName>instruction_0_1756241650786</developerName>
+                <language xsi:nil="true"/>
+                <masterLabel>instruction_0_1756241650786</masterLabel>
+            </genAiPluginInstructions>
+            <language>en_US</language>
+            <masterLabel>B2C Global Instructions</masterLabel>
+            <name>B2CGlobalInstructions1</name>
+            <pluginType>Topic</pluginType>
+            <scope>Define system-level instructions, including hardcoded values.</scope>
+        </genAiCustomizedPlugin>
+        <genAiPluginName>COMMERCE_SHOPPER_COPILOT_B2C__B2CGlobalInstructions</genAiPluginName>
+    </genAiPlugins>
+</GenAiPlannerBundle>
+`
+        );
+
+      const result = await getPluginsAndFunctions(name, cs);
+      expect(result.genAiFunctions).to.deep.equal([undefined]);
     });
   });
 
