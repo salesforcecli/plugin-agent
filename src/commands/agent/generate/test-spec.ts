@@ -349,7 +349,7 @@ export async function getPluginsAndFunctions(
         .filter((f) => 'genAiCustomizedPlugin' in f)
         .map(
           ({ genAiCustomizedPlugin }) =>
-            genAiCustomizedPlugin.genAiFunctions.find((plugin) => plugin.functionName !== '')!.functionName
+            genAiCustomizedPlugin.genAiFunctions?.find((plugin) => plugin.functionName !== '')!.functionName
         );
 
       genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
