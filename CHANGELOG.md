@@ -1,3 +1,9 @@
+## [1.24.10](https://github.com/salesforcecli/plugin-agent/compare/1.24.9...1.24.10) (2025-09-14)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.3 to 7.8.4 ([a6891a0](https://github.com/salesforcecli/plugin-agent/commit/a6891a008720549ea5d1efd12ae5272e1341d352))
+
 ## [1.24.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.8...1.24.9) (2025-09-09)
 
 ### Bug Fixes
