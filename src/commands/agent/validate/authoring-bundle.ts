@@ -4,10 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
-import { Agent } from '@salesforce/agents';
-import { findAndReadAfScript } from '../../../utils/afscriptFinder.js';
+import { Agent, findAuthoringBundle } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.validate.authoring-bundle');
@@ -34,9 +35,10 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
-    const afScript = findAndReadAfScript(this.project!.getPath(), flags['api-name']);
-
-    if (!afScript) {
+    // todo: this eslint warning can be removed once published
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), flags['api-name']);
+    if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
         messages.getMessage('error.afscriptNotFoundAction'),
       ]);
@@ -46,7 +48,10 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
-      await Agent.compileAfScript(conn, afScript);
+      await Agent.compileAfScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+      );
       this.log('Successfully compiled');
       return {
         success: true,

@@ -5,12 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { EOL } from 'node:os';
+import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
-import { Agent } from '@salesforce/agents';
+import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RetrieveResult, RequestStatus } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
-import { findAndReadAfScript } from '../../../utils/afscriptFinder.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -39,9 +40,11 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
   public async run(): Promise<AgentPublishAuthoringBundleResult> {
     const { flags } = await this.parse(AgentPublishAuthoringBundle);
-    const afScript = findAndReadAfScript(this.project!.getPath(), flags['api-name']);
+    // todo: this eslint warning can be removed once published
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), flags['api-name']);
 
-    if (!afScript) {
+    if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
         messages.getMessage('error.afscriptNotFoundAction'),
       ]);
@@ -66,7 +69,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
       // First compile the AF script to get the Agent JSON
       this.log('Compiling authoring bundle...');
-      const agentJson = await Agent.compileAfScript(conn, afScript);
+      const agentJson = await Agent.compileAfScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+      );
 
       // Then publish the Agent JSON to create the agent
       this.log('Publishing agent...');
