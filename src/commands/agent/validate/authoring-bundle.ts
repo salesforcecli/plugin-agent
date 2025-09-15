@@ -4,11 +4,10 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { resolve } from 'node:path';
-import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { Agent } from '@salesforce/agents';
+import { findAndReadAfScript } from '../../../utils/afscriptFinder.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.validate.authoring-bundle');
@@ -35,18 +34,19 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
-    const bundlePath = resolve(flags['api-name']);
+    const afScript = findAndReadAfScript(this.project!.getPath(), flags['api-name']);
 
-    // Validate bundle path exists
-    if (!existsSync(bundlePath)) {
-      throw messages.createError('error.invalidBundlePath');
+    if (!afScript) {
+      throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
+        messages.getMessage('error.afscriptNotFoundAction'),
+      ]);
     }
 
     try {
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
-      await Agent.compileAfScript(conn, bundlePath);
+      await Agent.compileAfScript(conn, afScript);
       this.log('Successfully compiled');
       return {
         success: true,

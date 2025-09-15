@@ -4,14 +4,13 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { resolve } from 'node:path';
-import { existsSync } from 'node:fs';
 import { EOL } from 'node:os';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, Lifecycle } from '@salesforce/core';
+import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent } from '@salesforce/agents';
 import { RetrieveResult, RequestStatus } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
+import { findAndReadAfScript } from '../../../utils/afscriptFinder.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -40,11 +39,12 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
   public async run(): Promise<AgentPublishAuthoringBundleResult> {
     const { flags } = await this.parse(AgentPublishAuthoringBundle);
-    const bundlePath = resolve(flags['api-name']);
+    const afScript = findAndReadAfScript(this.project!.getPath(), flags['api-name']);
 
-    // Validate bundle path exists
-    if (!existsSync(bundlePath)) {
-      throw messages.createError('error.invalidBundlePath');
+    if (!afScript) {
+      throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
+        messages.getMessage('error.afscriptNotFoundAction'),
+      ]);
     }
 
     try {
@@ -66,7 +66,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
       // First compile the AF script to get the Agent JSON
       this.log('Compiling authoring bundle...');
-      const agentJson = await Agent.compileAfScript(conn, bundlePath);
+      const agentJson = await Agent.compileAfScript(conn, afScript);
 
       // Then publish the Agent JSON to create the agent
       this.log('Publishing agent...');

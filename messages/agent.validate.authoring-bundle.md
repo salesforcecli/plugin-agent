@@ -27,3 +27,11 @@ Invalid bundle path. Please provide a valid path to an Agent Authoring Bundle.
 
 AF Script compilation failed with the following errors:
 %s
+
+# error.afscriptNotFound
+
+Could not find an .afscript file with API name '%s' in the project.
+
+# error.afscriptNotFoundAction
+
+Please check that the API name is correct and that the .afscript file exists in your project directory.
