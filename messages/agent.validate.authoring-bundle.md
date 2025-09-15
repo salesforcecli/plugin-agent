@@ -9,9 +9,9 @@ Validates an Agent Authoring Bundle by compiling the AF script and checking for 
 # examples
 
 - Validate an Agent Authoring Bundle:
-  <%= config.bin %> <%= command.id %> --bundle-path path/to/bundle
+  <%= config.bin %> <%= command.id %> --api-name path/to/bundle
 
-# flags.bundle-path.summary
+# flags.api-name.summary
 
 Path to the Agent Authoring Bundle to validate
 

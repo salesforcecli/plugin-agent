@@ -26,16 +26,16 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'bundle-path': Flags.string({
-      char: 'p',
-      summary: messages.getMessage('flags.bundle-path.summary'),
+    'api-name': Flags.string({
+      char: 'n',
+      summary: messages.getMessage('flags.api-name.summary'),
       required: true,
     }),
   };
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
-    const bundlePath = resolve(flags['bundle-path']);
+    const bundlePath = resolve(flags['api-name']);
 
     // Validate bundle path exists
     if (!existsSync(bundlePath)) {

@@ -36,7 +36,7 @@ describe.skip('agent publish authoring-bundle NUTs', () => {
     const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'authoringbundles');
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --bundle-path ${bundlePath} --json`,
+      `agent publish authoring-bundle --api-name ${bundlePath} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -52,7 +52,7 @@ describe.skip('agent publish authoring-bundle NUTs', () => {
     const agentName = 'Test Agent';
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --bundle-path ${bundlePath} --agent-name "${agentName}" --target-org ${username} --json`,
+      `agent publish authoring-bundle --api-name ${bundlePath} --agent-name "${agentName}" --target-org ${username} --json`,
       { ensureExitCode: 1 }
     ).jsonOutput;
 

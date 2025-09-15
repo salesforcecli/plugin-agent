@@ -9,9 +9,9 @@ Publishes an Agent Authoring Bundle by compiling the AF script and creating a ne
 # examples
 
 - Publish an Agent Authoring Bundle:
-  <%= config.bin %> <%= command.id %> --bundle-path path/to/bundle --agent-name "My New Agent" --target-org myorg@example.com
+  <%= config.bin %> <%= command.id %> --api-name path/to/bundle --agent-name "My New Agent" --target-org myorg@example.com
 
-# flags.bundle-path.summary
+# flags.api-name.summary
 
 Path to the Agent Authoring Bundle to publish
 

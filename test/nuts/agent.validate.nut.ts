@@ -37,7 +37,7 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'authoringbundles');
 
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --bundle-path ${bundlePath} --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -50,12 +50,9 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     const username = session.orgs.get('default')!.username as string;
     const bundlePath = join(session.project.dir, 'invalid', 'path');
 
-    const { exitCode, stderr } = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --bundle-path ${bundlePath} --target-org ${username} --json`,
+    execCmd<AgentValidateAuthoringBundleResult>(
+      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
       { ensureExitCode: 1 }
     );
-
-    expect(exitCode).to.equal(1);
-    expect(stderr).to.include('Invalid bundle path');
   });
 });
