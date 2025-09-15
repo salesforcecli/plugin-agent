@@ -10,7 +10,7 @@ import { type AfScript } from '@salesforce/agents';
 
 /**
  * Finds an .afscript file with the given API name in the project directory.
- * Searches for pattern: any/file/path/authoringbundles/<apiName>/<apiName>.afscript
+ * Searches for pattern: any/file/path/aiAuthoringBundle/<apiName>/<apiName>.afscript
  *
  * @param projectDir - The root directory to start searching from
  * @param apiName - The API name to search for
@@ -20,9 +20,9 @@ export function findAndReadAfScript(projectDir: string, apiName: string): AfScri
   const walk = (dir: string): string | undefined => {
     const files = readdirSync(dir);
 
-    // If we find authoringbundles dir, check for the expected file structure
-    if (files.includes('authoringbundles')) {
-      const expectedPath = join(dir, 'authoringbundles', apiName, `${apiName}.afscript`);
+    // If we find aiAuthoringBundle dir, check for the expected file structure
+    if (files.includes('aiAuthoringBundle')) {
+      const expectedPath = join(dir, 'aiAuthoringBundle', apiName, `${apiName}.afscript`);
       if (statSync(expectedPath, { throwIfNoEntry: false })?.isFile()) {
         return readFileSync(expectedPath, 'utf-8');
       }
