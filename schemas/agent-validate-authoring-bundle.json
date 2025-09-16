@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent-validate-authoring-bundle",
+  "type": "object",
+  "description": "Command to validate an agent authoring bundle",
+  "properties": {
+    "target-org": {
+      "type": "string",
+      "description": "The target org to validate against"
+    },
+    "api-version": {
+      "type": "string",
+      "description": "The API version to use"
+    },
+    "api-name": {
+      "type": "string",
+      "description": "The API name of the agent to validate"
+    }
+  },
+  "required": ["target-org", "api-name"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "target-org": "myorg@example.com",
+      "api-name": "MyAgent"
+    }
+  ]
+}

@@ -69,10 +69,10 @@
   },
   {
     "alias": [],
-    "command": "agent:preview",
+    "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
-    "flagChars": ["c", "d", "n", "o", "x"],
-    "flags": ["apex-debug", "api-name", "api-version", "client-app", "flags-dir", "output-dir", "target-org"],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -134,6 +134,14 @@
       "verbose",
       "wait"
     ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:validate:authoring-bundle",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   }
 ]
