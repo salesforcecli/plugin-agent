@@ -11,7 +11,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
-import { RetrieveResult, RequestStatus } from '@salesforce/source-deploy-retrieve';
+import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -77,11 +77,13 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
-      Lifecycle.getInstance().on('scopedPostRetrieve', (result: RetrieveResult) => {
-        if (result.response.status === RequestStatus.Succeeded) {
+      Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
+        if (result.retrieveResult.response.status === RequestStatus.Succeeded) {
           mso.stop();
         } else {
-          const errorMessage = `Metadata retrieval failed: ${ensureArray(result?.response?.messages).join(EOL)}`;
+          const errorMessage = `Metadata retrieval failed: ${ensureArray(
+            result?.retrieveResult.response?.messages
+          ).join(EOL)}`;
           mso.error();
           throw new SfError(errorMessage);
         }
