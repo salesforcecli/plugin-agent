@@ -28,6 +28,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
+  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
