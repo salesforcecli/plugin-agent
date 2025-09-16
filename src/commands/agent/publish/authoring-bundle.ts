@@ -8,6 +8,7 @@ import { EOL } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RetrieveResult, RequestStatus } from '@salesforce/source-deploy-retrieve';
@@ -49,36 +50,55 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         messages.getMessage('error.afscriptNotFoundAction'),
       ]);
     }
-
+    // Create multi-stage output
+    const mso = new MultiStageOutput<{ agentName: string }>({
+      stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata'],
+      title: 'Publishing Agent',
+      data: { agentName: flags['api-name'] },
+      jsonEnabled: this.jsonEnabled(),
+      postStagesBlock: [
+        {
+          label: 'Agent Name',
+          type: 'static-key-value',
+          get: (data) => data?.agentName,
+          bold: true,
+          color: 'cyan',
+        },
+      ],
+    });
     try {
+      mso.goto('Validate Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
 
       // Set up lifecycle listeners for retrieve events
-      Lifecycle.getInstance().on('scopedPreRetrieve', () =>
-        Promise.resolve(this.log('Starting metadata retrieval...'))
-      );
+      Lifecycle.getInstance().on('scopedPreRetrieve', () => {
+        mso.skipTo('Retrieve Metadata');
+        return Promise.resolve();
+      });
 
       Lifecycle.getInstance().on('scopedPostRetrieve', (result: RetrieveResult) => {
-        const message =
-          result.response.status === RequestStatus.Succeeded
-            ? 'Successfully retrieved metadata'
-            : `Metadata retrieval failed: ${ensureArray(result?.response?.messages).join(EOL)}`;
-        return Promise.resolve(this.log(message));
+        if (result.response.status === RequestStatus.Succeeded) {
+          mso.stop();
+        } else {
+          const errorMessage = `Metadata retrieval failed: ${ensureArray(result?.response?.messages).join(EOL)}`;
+          mso.error();
+          throw new SfError(errorMessage);
+        }
+        return Promise.resolve();
       });
 
       // First compile the AF script to get the Agent JSON
-      this.log('Compiling authoring bundle...');
       const agentJson = await Agent.compileAfScript(
         conn,
         readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
       );
+      mso.skipTo('Publish Agent');
 
       // Then publish the Agent JSON to create the agent
-      this.log('Publishing agent...');
       const result = await Agent.publishAgentJson(conn, this.project!, agentJson);
+      mso.stop();
 
-      this.log('Successfully published agent');
       return {
         success: true,
         botDeveloperName: result.botDeveloperName,
@@ -86,8 +106,12 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     } catch (error) {
       // Handle validation errors
       const err = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = messages.getMessage('error.publishFailed', [err.message]);
 
-      this.error(messages.getMessage('error.publishFailed', [err.message]));
+      // Stop the multi-stage output on error
+      mso.error();
+
+      this.error(errorMessage);
 
       return {
         success: false,
