@@ -54,7 +54,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
         conn,
         readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
       );
-      this.log('Successfully compiled');
+      this.logSuccess('Successfully compiled');
       return {
         success: true,
       };
