@@ -72,6 +72,14 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
 
+      // First compile the AF script to get the Agent JSON
+      const agentJson = await Agent.compileAfScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+      );
+      mso.skipTo('Publish Agent');
+
+      // Then publish the Agent JSON to create the agent
       // Set up lifecycle listeners for retrieve events
       Lifecycle.getInstance().on('scopedPreRetrieve', () => {
         mso.skipTo('Retrieve Metadata');
@@ -83,28 +91,20 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
           mso.stop();
         } else {
           const errorMessage = `Metadata retrieval failed: ${ensureArray(
-            result?.retrieveResult.response?.messages
+            // @ts-expect-error I saw errorMessages populated with useful information during testing
+            result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
           ).join(EOL)}`;
           mso.error();
           throw new SfError(errorMessage);
         }
         return Promise.resolve();
       });
-
-      // First compile the AF script to get the Agent JSON
-      const agentJson = await Agent.compileAfScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
-      );
-      mso.skipTo('Publish Agent');
-
-      // Then publish the Agent JSON to create the agent
       const result = await Agent.publishAgentJson(conn, this.project!, agentJson);
       mso.stop();
 
       return {
         success: true,
-        botDeveloperName: result.botDeveloperName,
+        botDeveloperName: result.developerName,
       };
     } catch (error) {
       // Handle validation errors
