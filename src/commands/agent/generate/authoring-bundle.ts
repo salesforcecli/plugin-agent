@@ -19,6 +19,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.genera
 export type AgentGenerateAuthoringBundleResult = {
   afScriptPath: string;
   metaXmlPath: string;
+  outputDir: string;
 };
 
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
@@ -97,6 +98,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       return {
         afScriptPath,
         metaXmlPath,
+        outputDir: targetOutputDir,
       };
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
