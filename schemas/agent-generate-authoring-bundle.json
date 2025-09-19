@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent-generate-authoring-bundle",
+  "type": "object",
+  "properties": {
+    "spec-file": {
+      "type": "string",
+      "description": "Path to the agent specification file"
+    },
+    "output-dir": {
+      "type": "string",
+      "description": "Directory where the authoring bundle files will be generated. If not specified, defaults to force-app/main/default/aiAuthoringBundles"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name (label) of the authoring bundle"
+    }
+  },
+  "required": ["spec-file"]
+}
