@@ -1,6 +1,14 @@
 [
   {
     "alias": [],
+    "command": "agent:generate:authoring-bundle",
+    "flagAliases": [],
+    "flagChars": ["d", "f", "n", "o"],
+    "flags": ["api-version", "flags-dir", "json", "name", "output-dir", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:activate",
     "flagAliases": [],
     "flagChars": ["n", "o"],

@@ -3,18 +3,26 @@
   "$id": "agent-generate-authoring-bundle",
   "type": "object",
   "properties": {
-    "spec-file": {
+    "spec": {
       "type": "string",
       "description": "Path to the agent specification file"
     },
     "output-dir": {
       "type": "string",
-      "description": "Directory where the authoring bundle files will be generated. If not specified, defaults to force-app/main/default/aiAuthoringBundles"
+      "description": "Directory where the authoring bundle files will be generated. If not specified, defaults to force-app/main/default/aiAuthoringBundle"
     },
     "name": {
       "type": "string",
-      "description": "Name (label) of the authoring bundle"
+      "description": "Name (label) of the authoring bundle. If not provided, you will be prompted for it."
+    },
+    "target-org": {
+      "type": "string",
+      "description": "A username or alias for the target org"
+    },
+    "api-version": {
+      "type": "string",
+      "description": "Override the api version used for api requests made by this command"
     }
   },
-  "required": ["spec-file"]
+  "required": ["target-org"]
 }

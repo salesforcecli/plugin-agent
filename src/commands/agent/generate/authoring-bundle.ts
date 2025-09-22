@@ -34,7 +34,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     spec: Flags.file({
       summary: messages.getMessage('flags.spec.summary'),
       char: 'f',
-      required: true,
       exists: true,
     }),
     'output-dir': Flags.directory({
@@ -53,11 +52,19 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
       required: true,
     },
+    spec: {
+      message: messages.getMessage('flags.spec.summary'),
+      validate: (d: string): boolean | string => d.length > 0 || 'Spec file path cannot be empty',
+      required: true,
+    },
   } satisfies Record<string, FlaggablePrompt>;
 
   public async run(): Promise<AgentGenerateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
-    const { spec: spec, 'output-dir': outputDir, 'target-org': targetOrg } = flags;
+    const { 'output-dir': outputDir, 'target-org': targetOrg } = flags;
+
+    // If we don't have a spec yet, prompt for it
+    const spec = flags['spec'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
 
     // If we don't have a name yet, prompt for it
     const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));
