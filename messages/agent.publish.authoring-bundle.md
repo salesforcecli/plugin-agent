@@ -13,7 +13,7 @@ Publishes an Agent Authoring Bundle by compiling the AF script and creating a ne
 
 # flags.api-name.summary
 
-Path to the Agent Authoring Bundle to publish
+API name of the Agent Authoring Bundle to publish
 
 # flags.agent-name.summary
 

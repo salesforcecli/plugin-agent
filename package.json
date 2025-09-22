@@ -1,16 +1,16 @@
 {
   "name": "@salesforce/plugin-agent",
   "description": "Commands to interact with Salesforce agents",
-  "version": "1.24.9",
+  "version": "1.24.13",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
-    "@inquirer/core": "^10.1.6",
-    "@inquirer/prompts": "^7.8.3",
+    "@inquirer/core": "^10.2.2",
+    "@inquirer/prompts": "^7.8.6",
     "@oclif/core": "^4",
-    "@oclif/multi-stage-output": "^0.8.20",
-    "@salesforce/agents": "^0.17.8",
-    "@salesforce/core": "^8.18.5",
+    "@oclif/multi-stage-output": "^0.8.23",
+    "@salesforce/agents": "^0.17.10",
+    "@salesforce/core": "^8.23.1",
     "@salesforce/kit": "^3.2.3",
     "@salesforce/sf-plugins-core": "^12.2.4",
     "@salesforce/source-deploy-retrieve": "^12.22.1",
@@ -26,8 +26,8 @@
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.2.19",
     "@oclif/test": "^4.1.0",
-    "@salesforce/cli-plugins-testkit": "^5.3.35",
-    "@salesforce/dev-scripts": "^10.2.12",
+    "@salesforce/cli-plugins-testkit": "^5.3.41",
+    "@salesforce/dev-scripts": "^11.0.4",
     "@salesforce/plugin-command-reference": "^3.1.67",
     "@types/inquirer": "^9.0.9",
     "@types/react": "^18.3.3",
@@ -47,8 +47,6 @@
   "files": [
     "/lib",
     "/messages",
-    "/npm-shrinkwrap.json",
-    "/oclif.lock",
     "/oclif.manifest.json",
     "/schemas"
   ],
@@ -62,7 +60,7 @@
     "sfdx",
     "sfdx-plugin"
   ],
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "oclif": {
     "commands": "./lib/commands",
     "bin": "sf",
@@ -98,6 +96,7 @@
     "clean-all": "sf-clean all",
     "compile": "wireit",
     "docs": "sf-docs",
+    "fix-license": "eslint src test --fix --rule \"header/header: [2]\"",
     "format": "wireit",
     "link-check": "wireit",
     "lint": "wireit",

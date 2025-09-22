@@ -77,6 +77,14 @@
   },
   {
     "alias": [],
+    "command": "agent:preview",
+    "flagAliases": [],
+    "flagChars": ["c", "d", "n", "o", "x"],
+    "flags": ["apex-debug", "api-name", "api-version", "client-app", "flags-dir", "output-dir", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],

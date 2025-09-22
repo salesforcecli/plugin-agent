@@ -1,3 +1,27 @@
+## [1.24.13](https://github.com/salesforcecli/plugin-agent/compare/1.24.12...1.24.13) (2025-09-22)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.20 to 0.8.22 ([d584ce9](https://github.com/salesforcecli/plugin-agent/commit/d584ce94680afe2689e4011155f508040970759d))
+
+## [1.24.12](https://github.com/salesforcecli/plugin-agent/compare/1.24.11...1.24.12) (2025-09-21)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.2 to 4.5.4 ([0e45558](https://github.com/salesforcecli/plugin-agent/commit/0e455580f9b8755cf5e76d236aa7955a87780f60))
+
+## [1.24.11](https://github.com/salesforcecli/plugin-agent/compare/1.24.10...1.24.11) (2025-09-21)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.1.15 to 10.2.2 ([c7fb6c1](https://github.com/salesforcecli/plugin-agent/commit/c7fb6c101d61e651d41c5c35933920ccdc72e4e1))
+
+## [1.24.10](https://github.com/salesforcecli/plugin-agent/compare/1.24.9...1.24.10) (2025-09-14)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.3 to 7.8.4 ([a6891a0](https://github.com/salesforcecli/plugin-agent/commit/a6891a008720549ea5d1efd12ae5272e1341d352))
+
 ## [1.24.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.8...1.24.9) (2025-09-09)
 
 ### Bug Fixes
