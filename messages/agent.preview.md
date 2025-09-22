@@ -18,6 +18,10 @@ IMPORTANT: Before you use this command, you must complete a number of configurat
 
 API name of the agent you want to interact with.
 
+# flags.authoring-bundle.summary
+
+Preview an ephemeral afscript agent by specifying the API name of the Authoring Bundle metadata
+
 # flags.client-app.summary
 
 Name of the linked client app to use for the agent connection. You must have previously created this link with "org login web --client-app". Run "org display" to see the available linked client apps.
