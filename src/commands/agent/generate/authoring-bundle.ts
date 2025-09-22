@@ -1,8 +1,17 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { join } from 'node:path';
@@ -70,12 +79,8 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));
 
     try {
-      const conn = targetOrg.getConnection(flags['api-version']);
-      const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
-      const afScript = await Agent.createAfScript(conn, specContents);
       // Get default output directory if not specified
       const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default', 'aiAuthoringBundle');
-
       const targetOutputDir = join(outputDir ?? defaultOutputDir, name);
 
       // Create output directory if it doesn't exist
@@ -86,6 +91,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const metaXmlPath = join(targetOutputDir, `${name}.authoring-bundle-meta.xml`);
 
       // Write AFScript file
+      const conn = targetOrg.getConnection(flags['api-version']);
+      const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
+      const afScript = await Agent.createAfScript(conn, specContents);
       writeFileSync(afScriptPath, afScript);
 
       // Write meta.xml file
@@ -108,7 +116,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         outputDir: targetOutputDir,
       };
     } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+      const err = SfError.wrap(error);
       throw new SfError(messages.getMessage('error.failed-to-create-afscript'), 'AfScriptGenerationError', [
         err.message,
       ]);
