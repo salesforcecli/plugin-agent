@@ -15,6 +15,7 @@
  */
 
 import { resolve, join } from 'node:path';
+import * as process from 'node:process';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
 import React from 'react';
@@ -73,6 +74,9 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
     }),
+    'authoring-bundle': Flags.string({
+      summary: messages.getMessage('flags.authoring-bundle.summary'),
+    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       char: 'd',
@@ -108,7 +112,12 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     let selectedAgent;
 
-    if (apiNameFlag) {
+    if (flags['authoring-bundle']) {
+      selectedAgent = {
+        Id: process.env.SF_DEMO_AGENT_ID ?? 'SF_DEMO_AGENT_ID is unset',
+        DeveloperName: flags['authoring-bundle'],
+      };
+    } else if (apiNameFlag) {
       selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
       validateAgent(selectedAgent);
