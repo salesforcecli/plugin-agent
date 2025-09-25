@@ -1,0 +1,134 @@
+/*
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { EOL } from 'node:os';
+import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
+import { Messages, Lifecycle, SfError } from '@salesforce/core';
+import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
+import { ensureArray } from '@salesforce/kit';
+
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
+
+export type AgentPublishAuthoringBundleResult = {
+  success: boolean;
+  botDeveloperName?: string;
+  errors?: string[];
+};
+
+export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishAuthoringBundleResult> {
+  public static readonly summary = messages.getMessage('summary');
+  public static readonly description = messages.getMessage('description');
+  public static readonly examples = messages.getMessages('examples');
+  public static readonly requiresProject = true;
+  public static state = 'beta';
+
+  public static readonly flags = {
+    'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
+    'api-name': Flags.string({
+      char: 'n',
+      summary: messages.getMessage('flags.api-name.summary'),
+      required: true,
+    }),
+  };
+
+  public async run(): Promise<AgentPublishAuthoringBundleResult> {
+    const { flags } = await this.parse(AgentPublishAuthoringBundle);
+    // todo: this eslint warning can be removed once published
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), flags['api-name']);
+
+    if (!authoringBundleDir) {
+      throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
+        messages.getMessage('error.afscriptNotFoundAction'),
+      ]);
+    }
+    // Create multi-stage output
+    const mso = new MultiStageOutput<{ agentName: string }>({
+      stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata'],
+      title: 'Publishing Agent',
+      data: { agentName: flags['api-name'] },
+      jsonEnabled: this.jsonEnabled(),
+      postStagesBlock: [
+        {
+          label: 'Agent Name',
+          type: 'static-key-value',
+          get: (data) => data?.agentName,
+          bold: true,
+          color: 'cyan',
+        },
+      ],
+    });
+    try {
+      mso.goto('Validate Bundle');
+      const targetOrg = flags['target-org'];
+      const conn = targetOrg.getConnection(flags['api-version']);
+
+      // First compile the AF script to get the Agent JSON
+      const agentJson = await Agent.compileAfScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+      );
+      mso.skipTo('Publish Agent');
+
+      // Then publish the Agent JSON to create the agent
+      // Set up lifecycle listeners for retrieve events
+      Lifecycle.getInstance().on('scopedPreRetrieve', () => {
+        mso.skipTo('Retrieve Metadata');
+        return Promise.resolve();
+      });
+
+      Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
+        if (result.retrieveResult.response.status === RequestStatus.Succeeded) {
+          mso.stop();
+        } else {
+          const errorMessage = `Metadata retrieval failed: ${ensureArray(
+            // @ts-expect-error I saw errorMessages populated with useful information during testing
+            result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
+          ).join(EOL)}`;
+          mso.error();
+          throw new SfError(errorMessage);
+        }
+        return Promise.resolve();
+      });
+      const result = await Agent.publishAgentJson(conn, this.project!, agentJson);
+      mso.stop();
+
+      return {
+        success: true,
+        botDeveloperName: result.developerName,
+      };
+    } catch (error) {
+      // Handle validation errors
+      const err = SfError.wrap(error);
+      const errorMessage = messages.getMessage('error.publishFailed', [err.message]);
+
+      // Stop the multi-stage output on error
+      mso.error();
+
+      this.error(errorMessage);
+
+      return {
+        success: false,
+        errors: err.message.split('\n'),
+      };
+    }
+  }
+}

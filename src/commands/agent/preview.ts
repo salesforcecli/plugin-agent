@@ -1,11 +1,21 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { resolve, join } from 'node:path';
+import * as process from 'node:process';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
 import React from 'react';
@@ -64,6 +74,9 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
     }),
+    'authoring-bundle': Flags.string({
+      summary: messages.getMessage('flags.authoring-bundle.summary'),
+    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       char: 'd',
@@ -99,7 +112,12 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     let selectedAgent;
 
-    if (apiNameFlag) {
+    if (flags['authoring-bundle']) {
+      selectedAgent = {
+        Id: process.env.SF_DEMO_AGENT_ID ?? 'SF_DEMO_AGENT_ID is unset',
+        DeveloperName: flags['authoring-bundle'],
+      };
+    } else if (apiNameFlag) {
       selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
       validateAgent(selectedAgent);

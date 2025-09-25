@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentGenerateAuthoringBundleResult",
+  "definitions": {
+    "AgentGenerateAuthoringBundleResult": {
+      "type": "object",
+      "properties": {
+        "afScriptPath": {
+          "type": "string"
+        },
+        "metaXmlPath": {
+          "type": "string"
+        },
+        "outputDir": {
+          "type": "string"
+        }
+      },
+      "required": ["afScriptPath", "metaXmlPath", "outputDir"],
+      "additionalProperties": false
+    }
+  }
+}
