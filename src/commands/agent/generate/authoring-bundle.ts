@@ -77,7 +77,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const spec = flags['spec'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
 
     // If we don't have a name yet, prompt for it
-    const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));
+    const name = (
+      flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']))
+    ).replaceAll(' ', '_');
 
     try {
       // Get default output directory if not specified
