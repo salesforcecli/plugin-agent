@@ -83,8 +83,8 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
 
     try {
       // Get default output directory if not specified
-      const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default', 'aiAuthoringBundle');
-      const targetOutputDir = join(outputDir ?? defaultOutputDir, name);
+      const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
+      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundle', name);
 
       // Generate file paths
       const afScriptPath = join(targetOutputDir, `${name}.afscript`);
