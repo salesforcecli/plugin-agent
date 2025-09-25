@@ -84,9 +84,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default', 'aiAuthoringBundle');
       const targetOutputDir = join(outputDir ?? defaultOutputDir, name);
 
-      // Create output directory if it doesn't exist
-      mkdirSync(targetOutputDir, { recursive: true });
-
       // Generate file paths
       const afScriptPath = join(targetOutputDir, `${name}.afscript`);
       const metaXmlPath = join(targetOutputDir, `${name}.authoring-bundle-meta.xml`);
@@ -95,10 +92,12 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const conn = targetOrg.getConnection(flags['api-version']);
       const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
       const afScript = await Agent.createAfScript(conn, specContents);
+      // Create output directory if it doesn't exist
+      mkdirSync(targetOutputDir, { recursive: true });
       writeFileSync(afScriptPath, afScript);
 
       // Write meta.xml file
-      const metaXml = `<?xml version="1" encoding="UTF-8"?>
+      const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
 <aiAuthoringBundle>
   <Label>${specContents.role}</Label>
   <BundleType>${specContents.agentType}</BundleType>
