@@ -15,7 +15,6 @@
  */
 
 import { resolve, join } from 'node:path';
-import * as process from 'node:process';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
 import React from 'react';
@@ -113,8 +112,14 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     let selectedAgent;
 
     if (flags['authoring-bundle']) {
+      const envAgentName = env.getString('SF_DEMO_AGENT');
+      const agent = agentsQuery.records.find((a) => a.DeveloperName === envAgentName);
       selectedAgent = {
-        Id: process.env.SF_DEMO_AGENT_ID ?? 'SF_DEMO_AGENT_ID is unset',
+        Id:
+          agent?.Id ??
+          `Couldn't find an agent in ${agentsQuery.records.map((a) => a.DeveloperName).join(', ')} matching ${
+            envAgentName ?? '!SF_DEMO_AGENT is unset!'
+          }`,
         DeveloperName: flags['authoring-bundle'],
       };
     } else if (apiNameFlag) {
