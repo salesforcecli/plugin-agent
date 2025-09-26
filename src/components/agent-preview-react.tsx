@@ -16,10 +16,11 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
+import * as process from 'node:process';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { Connection } from '@salesforce/core';
+import { Connection, SfError } from '@salesforce/core';
 import { AgentPreview, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
 import { sleep } from '@salesforce/kit';
 
@@ -106,9 +107,14 @@ export function AgentPreviewReact(props: {
   React.useEffect(() => {
     const endSession = async (): Promise<void> => {
       if (sessionEnded) {
-        // TODO: Support other end types (such as Escalate)
-        await agent.end(sessionId, 'UserRequest');
-        process.exit(0);
+        try {
+          // TODO: Support other end types (such as Escalate)
+          await agent.end(sessionId, 'UserRequest');
+          process.exit(0);
+        } catch (e) {
+          // in case the agent session never started, calling agent.end will throw an error, but we've already shown the error to the user
+          process.exit(0);
+        }
       }
     };
     void endSession();
@@ -116,16 +122,24 @@ export function AgentPreviewReact(props: {
 
   React.useEffect(() => {
     const startSession = async (): Promise<void> => {
-      const session = await agent.start();
-      setSessionId(session.sessionId);
-      setHeader(`New session started with "${props.name}" (${session.sessionId})`);
-      await sleep(500); // Add a short delay to make it feel more natural
-      setIsTyping(false);
-      if (outputDir) {
-        const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        setTempDir(path.join(outputDir, `${dateForDir}--${session.sessionId}`));
+      try {
+        const session = await agent.start();
+        setSessionId(session.sessionId);
+        setHeader(`New session started with "${props.name}" (${session.sessionId})`);
+        await sleep(500); // Add a short delay to make it feel more natural
+        setIsTyping(false);
+        if (outputDir) {
+          const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+          setTempDir(path.join(outputDir, `${dateForDir}--${session.sessionId}`));
+        }
+        setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
+      } catch (e) {
+        const sfError = SfError.wrap(e);
+        setIsTyping(false);
+        setHeader('Error starting session');
+        setMessages([{ role: name, content: `${sfError.name} - ${sfError.message}`, timestamp: new Date() }]);
+        setSessionEnded(true);
       }
-      setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
     };
 
     void startSession();
@@ -194,45 +208,47 @@ export function AgentPreviewReact(props: {
         <Text dimColor>{'─'.repeat(process.stdout.columns - 2)}</Text>
       </Box>
 
-      <Box marginBottom={1}>
-        <Text>&gt; </Text>
-        <TextInput
-          showCursor
-          value={query}
-          placeholder="Start typing (press ESC to exit)"
-          onChange={setQuery}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onSubmit={async (content) => {
-            if (!content) return;
-            setQuery('');
+      {sessionEnded ? null : (
+        <Box marginBottom={1}>
+          <Text>&gt; </Text>
+          <TextInput
+            showCursor
+            value={query}
+            placeholder="Start typing (press ESC to exit)"
+            onChange={setQuery}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onSubmit={async (content) => {
+              if (!content) return;
+              setQuery('');
 
-            // Add the most recent user message to the chat window
-            setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
-            setIsTyping(true);
-            const response = await agent.send(sessionId, content);
-            setResponses((prev) => [...prev, response]);
-            const message = response.messages[0].message;
+              // Add the most recent user message to the chat window
+              setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
+              setIsTyping(true);
+              const response = await agent.send(sessionId, content);
+              setResponses((prev) => [...prev, response]);
+              const message = response.messages[0].message;
 
-            if (!message) {
-              throw new Error('Failed to send message');
-            }
-            setIsTyping(false);
-
-            // Add the agent's response to the chat
-            setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
-
-            // If there is an apex debug log entry, get the log and write it to the output dir
-            if (response.apexDebugLog && tempDir) {
-              // Write the apex debug to the output dir
-              await writeDebugLog(connection, response.apexDebugLog, tempDir);
-              const logId = response.apexDebugLog.Id;
-              if (logId) {
-                setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+              if (!message) {
+                throw new Error('Failed to send message');
               }
-            }
-          }}
-        />
-      </Box>
+              setIsTyping(false);
+
+              // Add the agent's response to the chat
+              setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+
+              // If there is an apex debug log entry, get the log and write it to the output dir
+              if (response.apexDebugLog && tempDir) {
+                // Write the apex debug to the output dir
+                await writeDebugLog(connection, response.apexDebugLog, tempDir);
+                const logId = response.apexDebugLog.Id;
+                if (logId) {
+                  setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+                }
+              }
+            }}
+          />
+        </Box>
+      )}
 
       {sessionEnded ? (
         <Box
