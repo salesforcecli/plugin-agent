@@ -221,29 +221,37 @@ export function AgentPreviewReact(props: {
               if (!content) return;
               setQuery('');
 
-              // Add the most recent user message to the chat window
-              setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
-              setIsTyping(true);
-              const response = await agent.send(sessionId, content);
-              setResponses((prev) => [...prev, response]);
-              const message = response.messages[0].message;
+              try {
+                // Add the most recent user message to the chat window
+                setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
+                setIsTyping(true);
+                const response = await agent.send(sessionId, content);
+                setResponses((prev) => [...prev, response]);
+                const message = response.messages[0].message;
 
-              if (!message) {
-                throw new Error('Failed to send message');
-              }
-              setIsTyping(false);
-
-              // Add the agent's response to the chat
-              setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
-
-              // If there is an apex debug log entry, get the log and write it to the output dir
-              if (response.apexDebugLog && tempDir) {
-                // Write the apex debug to the output dir
-                await writeDebugLog(connection, response.apexDebugLog, tempDir);
-                const logId = response.apexDebugLog.Id;
-                if (logId) {
-                  setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+                if (!message) {
+                  throw new Error('Failed to send message');
                 }
+                setIsTyping(false);
+
+                // Add the agent's response to the chat
+                setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+
+                // If there is an apex debug log entry, get the log and write it to the output dir
+                if (response.apexDebugLog && tempDir) {
+                  // Write the apex debug to the output dir
+                  await writeDebugLog(connection, response.apexDebugLog, tempDir);
+                  const logId = response.apexDebugLog.Id;
+                  if (logId) {
+                    setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+                  }
+                }
+              } catch (e) {
+                const sfError = SfError.wrap(e);
+                setIsTyping(false);
+                setHeader(`Error: ${sfError.name}`);
+                setMessages([{ role: name, content: `${sfError.name} - ${sfError.message}`, timestamp: new Date() }]);
+                setSessionEnded(true);
               }
             }}
           />
