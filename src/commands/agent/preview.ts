@@ -66,7 +66,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     'client-app': Flags.string({
       char: 'c',
       summary: messages.getMessage('flags.client-app.summary'),
-      required: true,
       dependsOn: ['target-org'],
     }),
     'api-name': Flags.string({
@@ -95,10 +94,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const authInfo = await AuthInfo.create({
       username: flags['target-org'].getUsername(),
     });
+    if (!(flags['client-app'] ?? env.getString('SF_DEMO_AGENT_CLIENT_APP'))) {
+      throw new SfError('SF_DEMO_AGENT_CLIENT_APP is unset!');
+    }
 
     const jwtConn = await Connection.create({
       authInfo,
-      clientApp: flags['client-app'],
+      clientApp: env.getString('SF_DEMO_AGENT_CLIENT_APP') ?? flags['client-app'],
     });
 
     const agentsQuery = await conn.query<AgentData>(
