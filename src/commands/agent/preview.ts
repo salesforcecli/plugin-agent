@@ -131,8 +131,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       });
     }
 
-    // eslint-disable-next-line no-console
-    console.log('clientApp', clientApp);
     const jwtConn = await Connection.create({
       authInfo,
       clientApp,
