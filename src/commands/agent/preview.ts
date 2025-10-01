@@ -94,6 +94,14 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const authInfo = await AuthInfo.create({
       username: flags['target-org'].getUsername(),
     });
+    if (!(flags['client-app'] ?? env.getString('SF_DEMO_AGENT_CLIENT_APP'))) {
+      throw new SfError('SF_DEMO_AGENT_CLIENT_APP is unset!');
+    }
+
+    const jwtConn = await Connection.create({
+      authInfo,
+      clientApp: env.getString('SF_DEMO_AGENT_CLIENT_APP') ?? flags['client-app'],
+    });
 
     const agentsQuery = await conn.query<AgentData>(
       'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
@@ -104,7 +112,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const agentsInOrg = agentsQuery.records;
 
     let selectedAgent;
-    let clientApp = flags['client-app'];
+
     if (flags['authoring-bundle']) {
       const envAgentName = env.getString('SF_DEMO_AGENT');
       const agent = agentsQuery.records.find((a) => a.DeveloperName === envAgentName);
@@ -116,10 +124,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
           }`,
         DeveloperName: flags['authoring-bundle'],
       };
-      clientApp = process.env.SF_DEMO_AGENT_CLIENT_APP;
-      if (!clientApp) {
-        throw new Error('SF_DEMO_AGENT_CLIENT_APP is unset!');
-      }
     } else if (apiNameFlag) {
       selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
@@ -130,11 +134,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         choices: getAgentChoices(agentsInOrg),
       });
     }
-
-    const jwtConn = await Connection.create({
-      authInfo,
-      clientApp,
-    });
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
     const agentPreview = new Preview(jwtConn, selectedAgent.Id);
