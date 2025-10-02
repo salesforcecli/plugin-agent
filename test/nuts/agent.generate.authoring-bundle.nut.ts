@@ -79,7 +79,7 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
     it('should use default output directory when not specified', async () => {
       const username = session.orgs.get('default')!.username as string;
       const specPath = join(session.project.dir, 'specs', specFileName);
-      const defaultPath = join('force-app', 'main', 'default', 'aiAuthoringBundle');
+      const defaultPath = join('force-app', 'main', 'default', 'aiAuthoringBundles');
 
       const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --target-org ${username} --json`;
       const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;

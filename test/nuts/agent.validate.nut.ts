@@ -43,7 +43,7 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
 
   it('should validate a valid authoring bundle', () => {
     const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundle');
+    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
 
     const result = execCmd<AgentValidateAuthoringBundleResult>(
       `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,

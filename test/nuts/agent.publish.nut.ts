@@ -42,7 +42,7 @@ describe.skip('agent publish authoring-bundle NUTs', () => {
   });
 
   it('should publish a valid authoring bundle', () => {
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundle');
+    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundlePath} --json`,
