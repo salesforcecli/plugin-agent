@@ -16,11 +16,15 @@ Directory where the authoring bundle files will be generated.
 
 # flags.name.summary
 
-Name (label) of the authoring bundle. If not provided, you will be prompted for it.
+Name (label) of the authoring bundle.
 
-# flags.name.prompt
+# flags.api-name.summary
 
-Name (label) of the authoring bundle
+API name of the new authoring bundle; if not specified, the API name is derived from the authoring bundle name (label); the API name must not exist in the org.
+
+# flags.api-name.prompt
+
+API name of the new authoring bundle
 
 # examples
 
