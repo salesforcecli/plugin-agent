@@ -32,7 +32,6 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
