@@ -58,6 +58,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   private static readonly FLAGGABLE_PROMPTS = {
     name: {
       message: messages.getMessage('flags.name.summary'),
+      promptMessage: messages.getMessage('flags.name.prompt'),
       validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
       required: true,
     },

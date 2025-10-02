@@ -18,6 +18,10 @@ Directory where the authoring bundle files will be generated.
 
 Name (label) of the authoring bundle. If not provided, you will be prompted for it.
 
+# flags.name.prompt
+
+Name (label) of the authoring bundle
+
 # examples
 
 - Generate an authoring bundle from a specification file:
