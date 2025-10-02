@@ -86,7 +86,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundle', name);
 
       // Generate file paths
-      const afScriptPath = join(targetOutputDir, `${name}.afscript`);
+      const afScriptPath = join(targetOutputDir, `${name}.agent`);
       const metaXmlPath = join(targetOutputDir, `${name}.authoring-bundle-meta.xml`);
 
       // Write AFScript file

@@ -58,10 +58,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
-      await Agent.compileAfScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
-      );
+      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8'));
       this.logSuccess('Successfully compiled');
       return {
         success: true,

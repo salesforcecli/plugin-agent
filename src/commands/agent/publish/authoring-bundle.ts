@@ -83,7 +83,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       // First compile the AF script to get the Agent JSON
       const agentJson = await Agent.compileAfScript(
         conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8')
       );
       mso.skipTo('Publish Agent');
 

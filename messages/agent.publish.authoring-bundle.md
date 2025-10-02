@@ -34,8 +34,8 @@ Failed to publish agent with the following errors:
 
 # error.afscriptNotFound
 
-Could not find an .afscript file with API name '%s' in the project.
+Could not find an .agent file with API name '%s' in the project.
 
 # error.afscriptNotFoundAction
 
-Please check that the API name is correct and that the .afscript file exists in your project directory.
+Please check that the API name is correct and that the .agent file exists in your project directory.
