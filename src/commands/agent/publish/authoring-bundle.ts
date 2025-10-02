@@ -37,7 +37,6 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -84,7 +83,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       // First compile the AF script to get the Agent JSON
       const agentJson = await Agent.compileAfScript(
         conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
+        readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8')
       );
       mso.skipTo('Publish Agent');
 

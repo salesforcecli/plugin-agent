@@ -32,7 +32,6 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -59,10 +58,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
-      await Agent.compileAfScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.afscript`), 'utf8')
-      );
+      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8'));
       this.logSuccess('Successfully compiled');
       return {
         success: true,

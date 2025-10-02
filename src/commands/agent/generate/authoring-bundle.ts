@@ -36,7 +36,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -59,6 +58,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   private static readonly FLAGGABLE_PROMPTS = {
     name: {
       message: messages.getMessage('flags.name.summary'),
+      promptMessage: messages.getMessage('flags.name.prompt'),
       validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
       required: true,
     },
@@ -84,11 +84,11 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     try {
       // Get default output directory if not specified
       const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
-      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundle', name);
+      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundles', name);
 
       // Generate file paths
-      const afScriptPath = join(targetOutputDir, `${name}.afscript`);
-      const metaXmlPath = join(targetOutputDir, `${name}.authoring-bundle-meta.xml`);
+      const afScriptPath = join(targetOutputDir, `${name}.agent`);
+      const metaXmlPath = join(targetOutputDir, `${name}.aiAuthoringBundle-meta.xml`);
 
       // Write AFScript file
       const conn = targetOrg.getConnection(flags['api-version']);
