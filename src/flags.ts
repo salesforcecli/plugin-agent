@@ -91,6 +91,17 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
   ) as FlagsOfPrompts<T>;
 }
 
+export async function getHiddenDirs(projectRoot?: string): Promise<string[]> {
+  const rootDir = projectRoot ?? process.cwd();
+
+  try {
+    const files = await readdir(rootDir, { withFileTypes: true });
+    return files.filter((file) => file.isDirectory() && file.name.startsWith('.')).map((file) => file.name);
+  } catch (error) {
+    return [];
+  }
+}
+
 export async function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): Promise<string[]> {
   const files = await readdir(dir, { withFileTypes: true });
   const results: string[] = [];
@@ -141,7 +152,8 @@ export const promptForAiEvaluationDefinitionApiName = async (
 };
 
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules']);
+  const hiddenDirs = await getHiddenDirs();
+  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules', ...hiddenDirs]);
   return autocomplete({
     message: flagDef.message,
     // eslint-disable-next-line @typescript-eslint/require-await

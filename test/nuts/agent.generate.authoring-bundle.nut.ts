@@ -56,7 +56,7 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
       execCmd(specCommand, { ensureExitCode: 0 });
 
       // Now generate the authoring bundle
-      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --target-org ${username} --json`;
+      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --api-name ${bundleName} --target-org ${username} --json`;
       const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
       expect(result).to.be.ok;
