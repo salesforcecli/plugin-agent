@@ -17,7 +17,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { Duration, sleep } from '@salesforce/kit';
+import { colorize } from '@oclif/core/ux';
 import { FlaggablePrompt, promptForFlag } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -73,25 +76,57 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
         messages.getMessage('error.agentNotFoundAction'),
       ]);
     }
+    const mso = new MultiStageOutput<{ status: string; errors: string }>({
+      jsonEnabled: this.jsonEnabled(),
+      title: `Validating ${apiName} Authoring Bundle`,
+      showTitle: true,
+      stages: ['Validating Authoring Bundle'],
+      stageSpecificBlock: [
+        {
+          stage: 'Validating Authoring Bundle',
+          label: 'Status',
+          type: 'dynamic-key-value',
+          get: (data): string => data?.status ?? 'IN PROGRESS',
+        },
+        {
+          stage: 'Validating Authoring Bundle',
+          label: 'Errors',
+          type: 'dynamic-key-value',
+          get: (data): string => data?.errors ?? '0',
+        },
+      ],
+    });
 
     try {
+      mso.skipTo('Validating Authoring Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
+      await sleep(Duration.seconds(2));
       await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${!apiName}.agent`), 'utf8'));
-      this.logSuccess('Successfully compiled');
+      mso.updateData({ status: 'COMPLETED' });
+      mso.stop('completed');
       return {
         success: true,
       };
     } catch (error) {
       // Handle validation errors
       const err = SfError.wrap(error);
+      let count = 0;
       const formattedError = err.message
         .split('\n')
-        .map((line) => `- ${line}`)
+        .map((line) => {
+          count += 1;
+          const type = line.split(':')[0];
+          const rest = line.substring(line.indexOf(':')).trim();
+          return `- ${colorize('red', type)} ${rest}`;
+        })
         .join('\n');
-      this.error(messages.getMessage('error.compilationFailed', [formattedError]));
 
+      mso.updateData({ errors: count.toString(), status: 'ERROR' });
+      mso.error();
+
+      this.log(messages.getMessage('error.compilationFailed', [formattedError]));
       return {
         success: false,
         errors: err.message.split('\n'),
