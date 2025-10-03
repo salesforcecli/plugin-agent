@@ -4,7 +4,7 @@ Generate an authoring bundle from an agent specification.
 
 # description
 
-Generates an authoring bundle containing AFScript and its meta.xml file from an agent specification file.
+Generates an authoring bundle containing Agent and its meta.xml file from an agent specification file.
 
 # flags.spec.summary
 
@@ -16,11 +16,15 @@ Directory where the authoring bundle files will be generated.
 
 # flags.name.summary
 
-Name (label) of the authoring bundle. If not provided, you will be prompted for it.
+Name (label) of the authoring bundle.
 
-# flags.name.prompt
+# flags.api-name.summary
 
-Name (label) of the authoring bundle
+API name of the new authoring bundle; if not specified, the API name is derived from the authoring bundle name (label); the API name must not exist in the org.
+
+# flags.api-name.prompt
+
+API name of the new authoring bundle
 
 # examples
 
@@ -38,6 +42,6 @@ No agent specification file found at the specified path.
 
 The specified file is not a valid agent specification file.
 
-# error.failed-to-create-afscript
+# error.failed-to-create-agent
 
-Failed to create AFScript from the agent specification.
+Failed to create Agent from the agent specification.

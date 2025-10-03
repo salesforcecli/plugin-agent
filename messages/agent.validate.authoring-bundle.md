@@ -15,6 +15,10 @@ Validates an Agent Authoring Bundle by compiling the AF script and checking for 
 
 Path to the Agent Authoring Bundle to validate
 
+# flags.api-name.prompt
+
+API name of the authoring bundle to validate
+
 # error.missingRequiredFlags
 
 Required flag(s) missing: %s
@@ -28,10 +32,10 @@ Invalid bundle path. Please provide a valid path to an Agent Authoring Bundle.
 AF Script compilation failed with the following errors:
 %s
 
-# error.afscriptNotFound
+# error.agentNotFound
 
 Could not find an .agent file with API name '%s' in the project.
 
-# error.afscriptNotFoundAction
+# error.agentNotFoundAction
 
 Please check that the API name is correct and that the .agent file exists in your project directory.
