@@ -64,13 +64,13 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
           stage: 'Validating Authoring Bundle',
           label: 'Status',
           type: 'dynamic-key-value',
-          get: (data): string | undefined => data?.status ?? 'In Progress',
+          get: (data): string => data?.status ?? 'IN PROGRESS',
         },
         {
           stage: 'Validating Authoring Bundle',
           label: 'Errors',
           type: 'dynamic-key-value',
-          get: (data): string | undefined => data?.errors ?? '0',
+          get: (data): string => data?.errors ?? '0',
         },
       ],
     });
@@ -81,11 +81,8 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
       await sleep(Duration.seconds(2));
-      const result = await Agent.compileAfScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8')
-      );
-      mso.updateData({ status: result !== undefined ? 'Success' : 'Failure' });
+      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8'));
+      mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
         success: true,
@@ -104,8 +101,8 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
         })
         .join('\n');
 
-      mso.updateData({ errors: count.toString(), status: 'Failure' });
-      mso.stop();
+      mso.updateData({ errors: count.toString(), status: 'ERROR' });
+      mso.error();
 
       this.log(messages.getMessage('error.compilationFailed', [formattedError]));
       return {
