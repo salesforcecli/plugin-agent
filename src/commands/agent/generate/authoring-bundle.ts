@@ -63,7 +63,8 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   private static readonly FLAGGABLE_PROMPTS = {
     name: {
       message: messages.getMessage('flags.name.summary'),
-      validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
+      validate: (d: string): boolean | string =>
+        d.trim().length > 0 || 'Name cannot be empty or contain only whitespace',
       required: true,
     },
     'api-name': {
