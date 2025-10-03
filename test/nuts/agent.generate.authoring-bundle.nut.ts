@@ -60,18 +60,18 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
       const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
       expect(result).to.be.ok;
-      expect(result?.afScriptPath).to.be.ok;
+      expect(result?.agentPath).to.be.ok;
       expect(result?.metaXmlPath).to.be.ok;
       expect(result?.outputDir).to.be.ok;
 
       // Verify files exist
-      expect(existsSync(result!.afScriptPath)).to.be.true;
+      expect(existsSync(result!.agentPath)).to.be.true;
       expect(existsSync(result!.metaXmlPath)).to.be.true;
 
       // Verify file contents
-      const afScript = readFileSync(result!.afScriptPath, 'utf8');
+      const agent = readFileSync(result!.agentPath, 'utf8');
       const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
-      expect(afScript).to.be.ok;
+      expect(agent).to.be.ok;
       expect(metaXml).to.include('<aiAuthoringBundle>');
       expect(metaXml).to.include(bundleName);
     });

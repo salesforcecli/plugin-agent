@@ -28,7 +28,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.authoring-bundle');
 
 export type AgentGenerateAuthoringBundleResult = {
-  afScriptPath: string;
+  agentPath: string;
   metaXmlPath: string;
   outputDir: string;
 };
@@ -128,16 +128,16 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundles', name);
 
       // Generate file paths
-      const afScriptPath = join(targetOutputDir, `${name}.agent`);
+      const agentPath = join(targetOutputDir, `${name}.agent`);
       const metaXmlPath = join(targetOutputDir, `${name}.aiAuthoringBundle-meta.xml`);
 
-      // Write AFScript file
+      // Write Agent file
       const conn = targetOrg.getConnection(flags['api-version']);
       const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
-      const afScript = await Agent.createAfScript(conn, specContents);
+      const agent = await Agent.createAfScript(conn, specContents);
       // Create output directory if it doesn't exist
       mkdirSync(targetOutputDir, { recursive: true });
-      writeFileSync(afScriptPath, afScript);
+      writeFileSync(agentPath, agent);
 
       // Write meta.xml file
       const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -154,15 +154,13 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       this.logSuccess(`Successfully generated ${name} Authoring Bundle`);
 
       return {
-        afScriptPath,
+        agentPath,
         metaXmlPath,
         outputDir: targetOutputDir,
       };
     } catch (error) {
       const err = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.failed-to-create-afscript'), 'AfScriptGenerationError', [
-        err.message,
-      ]);
+      throw new SfError(messages.getMessage('error.failed-to-create-agent'), 'AgentGenerationError', [err.message]);
     }
   }
 }

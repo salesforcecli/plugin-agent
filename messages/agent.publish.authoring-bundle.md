@@ -15,6 +15,10 @@ Publishes an Agent Authoring Bundle by compiling the AF script and creating a ne
 
 API name of the Agent Authoring Bundle to publish
 
+# flags.api-name.prompt
+
+API name of the authoring bundle to publish
+
 # flags.agent-name.summary
 
 Name for the new agent to be created
@@ -32,10 +36,10 @@ Invalid bundle path. Please provide a valid path to an Agent Authoring Bundle.
 Failed to publish agent with the following errors:
 %s
 
-# error.afscriptNotFound
+# error.agentNotFound
 
 Could not find an .agent file with API name '%s' in the project.
 
-# error.afscriptNotFoundAction
+# error.agentNotFoundAction
 
 Please check that the API name is correct and that the .agent file exists in your project directory.

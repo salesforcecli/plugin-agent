@@ -5,7 +5,7 @@
     "AgentGenerateAuthoringBundleResult": {
       "type": "object",
       "properties": {
-        "afScriptPath": {
+        "agentPath": {
           "type": "string"
         },
         "metaXmlPath": {
@@ -15,7 +15,7 @@
           "type": "string"
         }
       },
-      "required": ["afScriptPath", "metaXmlPath", "outputDir"],
+      "required": ["agentPath", "metaXmlPath", "outputDir"],
       "additionalProperties": false
     }
   }
