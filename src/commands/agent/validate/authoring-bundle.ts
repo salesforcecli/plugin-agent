@@ -78,7 +78,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
     }
     const mso = new MultiStageOutput<{ status: string; errors: string }>({
       jsonEnabled: this.jsonEnabled(),
-      title: `Validating ${flags['api-name']} Authoring Bundle`,
+      title: `Validating ${apiName} Authoring Bundle`,
       showTitle: true,
       stages: ['Validating Authoring Bundle'],
       stageSpecificBlock: [
