@@ -22,6 +22,7 @@ import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
+import { FlaggablePrompt, promptForFlag } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -44,26 +45,45 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     'api-name': Flags.string({
       char: 'n',
       summary: messages.getMessage('flags.api-name.summary'),
-      required: true,
     }),
   };
 
+  private static readonly FLAGGABLE_PROMPTS = {
+    'api-name': {
+      message: messages.getMessage('flags.api-name.summary'),
+      promptMessage: messages.getMessage('flags.api-name.prompt'),
+      validate: (d: string): boolean | string => {
+        if (d.length > 80) {
+          return 'API name cannot be over 80 characters.';
+        }
+        const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+        if (d.length === 0 || !regex.test(d)) {
+          return 'Invalid API name.';
+        }
+        return true;
+      },
+    },
+  } satisfies Record<string, FlaggablePrompt>;
+
   public async run(): Promise<AgentPublishAuthoringBundleResult> {
     const { flags } = await this.parse(AgentPublishAuthoringBundle);
+    // If we don't have an api name yet, prompt for it
+    const apiName =
+      flags['api-name'] ?? (await promptForFlag(AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
     // todo: this eslint warning can be removed once published
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), flags['api-name']);
+    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
 
     if (!authoringBundleDir) {
-      throw new SfError(messages.getMessage('error.afscriptNotFound', [flags['api-name']]), 'AfScriptNotFoundError', [
-        messages.getMessage('error.afscriptNotFoundAction'),
+      throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
+        messages.getMessage('error.agentNotFoundAction'),
       ]);
     }
     // Create multi-stage output
     const mso = new MultiStageOutput<{ agentName: string }>({
       stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata'],
       title: 'Publishing Agent',
-      data: { agentName: flags['api-name'] },
+      data: { agentName: apiName },
       jsonEnabled: this.jsonEnabled(),
       postStagesBlock: [
         {
@@ -83,7 +103,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       // First compile the AF script to get the Agent JSON
       const agentJson = await Agent.compileAfScript(
         conn,
-        readFileSync(join(authoringBundleDir, `${flags['api-name']}.agent`), 'utf8')
+        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
       );
       mso.skipTo('Publish Agent');
 

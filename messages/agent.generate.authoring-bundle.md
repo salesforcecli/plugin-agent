@@ -4,7 +4,7 @@ Generate an authoring bundle from an agent specification.
 
 # description
 
-Generates an authoring bundle containing AFScript and its meta.xml file from an agent specification file.
+Generates an authoring bundle containing Agent and its meta.xml file from an agent specification file.
 
 # flags.spec.summary
 
@@ -42,6 +42,6 @@ No agent specification file found at the specified path.
 
 The specified file is not a valid agent specification file.
 
-# error.failed-to-create-afscript
+# error.failed-to-create-agent
 
-Failed to create AFScript from the agent specification.
+Failed to create Agent from the agent specification.
