@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { readFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
@@ -65,23 +65,17 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
-    let apiName = flags['api-name'];
-    let agentFilePath;
-    if (apiName) {
-      const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
-      if (!authoringBundleDir) {
-        throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
-          messages.getMessage('error.agentNotFoundAction'),
-        ]);
-      }
-      agentFilePath = join(authoringBundleDir, `${apiName}.agent`);
-    } else {
-      // Prompt user to select an .agent file from the project and extract the API name from it
-      agentFilePath = await promptForFileByExtensions(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], [
-        '.agent',
+    // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
+    const apiName =
+      flags['api-name'] ??
+      (await promptForFileByExtensions(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], ['.agent'], true));
+    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
+    if (!authoringBundleDir) {
+      throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
+        messages.getMessage('error.agentNotFoundAction'),
       ]);
-      apiName = basename(agentFilePath, '.agent');
     }
+
     const mso = new MultiStageOutput<{ status: string; errors: string }>({
       jsonEnabled: this.jsonEnabled(),
       title: `Validating ${apiName} Authoring Bundle`,
@@ -109,7 +103,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAfScript(conn, readFileSync(agentFilePath, 'utf8'));
+      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
       mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
