@@ -68,8 +68,6 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
     // If we don't have an api name yet, prompt for it
     const apiName =
       flags['api-name'] ?? (await promptForFlag(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    // todo: this eslint warning can be removed once published
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
     if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
@@ -103,7 +101,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${!apiName}.agent`), 'utf8'));
+      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
       mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
