@@ -155,7 +155,7 @@ export const promptForFileByExtensions = async (flagDef: FlaggablePrompt, extens
   const hiddenDirs = await getHiddenDirs();
   const yamlFiles = await traverseForFiles(process.cwd(), extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
-    message: flagDef.message,
+    message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
     // eslint-disable-next-line @typescript-eslint/require-await
     source: async (input) => {
       const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
