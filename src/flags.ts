@@ -151,9 +151,9 @@ export const promptForAiEvaluationDefinitionApiName = async (
   });
 };
 
-export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
+export const promptForFileByExtensions = async (flagDef: FlaggablePrompt, extensions: string[]): Promise<string> => {
   const hiddenDirs = await getHiddenDirs();
-  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules', ...hiddenDirs]);
+  const yamlFiles = await traverseForFiles(process.cwd(), extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
     message: flagDef.message,
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -165,6 +165,9 @@ export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<strin
     },
   });
 };
+
+export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> =>
+  promptForFileByExtensions(flagDef, ['.yml', '.yaml']);
 
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');

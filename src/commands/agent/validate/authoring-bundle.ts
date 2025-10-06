@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { Duration, sleep } from '@salesforce/kit';
 import { colorize } from '@oclif/core/ux';
-import { FlaggablePrompt, promptForFlag } from '../../../flags.js';
+import { FlaggablePrompt, promptForFileByExtensions } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.validate.authoring-bundle');
@@ -65,14 +65,22 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
-    // If we don't have an api name yet, prompt for it
-    const apiName =
-      flags['api-name'] ?? (await promptForFlag(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
-    if (!authoringBundleDir) {
-      throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
-        messages.getMessage('error.agentNotFoundAction'),
+    let apiName = flags['api-name'];
+    let agentFilePath;
+    if (apiName) {
+      const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
+      if (!authoringBundleDir) {
+        throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
+          messages.getMessage('error.agentNotFoundAction'),
+        ]);
+      }
+      agentFilePath = join(authoringBundleDir, `${apiName}.agent`);
+    } else {
+      // Prompt user to select an .agent file from the project and extract the API name from it
+      agentFilePath = await promptForFileByExtensions(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], [
+        '.agent',
       ]);
+      apiName = basename(agentFilePath, '.agent');
     }
     const mso = new MultiStageOutput<{ status: string; errors: string }>({
       jsonEnabled: this.jsonEnabled(),
@@ -101,7 +109,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAfScript() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
+      await Agent.compileAfScript(conn, readFileSync(agentFilePath, 'utf8'));
       mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
