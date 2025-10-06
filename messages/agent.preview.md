@@ -12,7 +12,7 @@ When the session concludes, the command asks if you want to save the API respons
 
 Find the agent's API name in its Agent Details page of your org's Agentforce Studio UI in Setup. If your agent is currently deactivated, use the "agent activate" CLI command to activate it.
 
-IMPORTANT: Before you use this command, you must complete a number of configuration steps in your org and your DX project. The examples in this help assume you've completed the steps. See "Preview an Agent" in the "Agentforce Developer Guide" for complete documentation: https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
+IMPORTANT: Before you use this command, you must complete a number of configuration steps in your org and your DX project. For example, you must first create the link to a client connected app using the "org login web --client-app" CLI command to then get the value of the --client-app flag of this command. The examples in this help assume you've completed the steps. See "Preview an Agent" in the "Agentforce Developer Guide" for complete documentation: https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
 
 # flags.api-name.summary
 
@@ -20,11 +20,11 @@ API name of the agent you want to interact with.
 
 # flags.authoring-bundle.summary
 
-Preview an ephemeral agent by specifying the API name of the Authoring Bundle metadata
+Preview an ephemeral afscript agent by specifying the API name of the Authoring Bundle metadata
 
 # flags.client-app.summary
 
-Name of the linked client app to use for the agent connection. You must have previously created this link with "org login web --client-app". Run "org display" to see the available linked client apps.
+Name of the linked client app to use for the agent connection.
 
 # flags.output-dir.summary
 
