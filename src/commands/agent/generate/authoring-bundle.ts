@@ -125,11 +125,11 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     try {
       // Get default output directory if not specified
       const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
-      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundles', name);
+      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundles', bundleApiName);
 
       // Generate file paths
-      const agentPath = join(targetOutputDir, `${name}.agent`);
-      const metaXmlPath = join(targetOutputDir, `${name}.aiAuthoringBundle-meta.xml`);
+      const agentPath = join(targetOutputDir, `${bundleApiName}.agent`);
+      const metaXmlPath = join(targetOutputDir, `${bundleApiName}.aiAuthoringBundle-meta.xml`);
 
       // Write Agent file
       const conn = targetOrg.getConnection(flags['api-version']);
@@ -145,13 +145,13 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   <Label>${specContents.role}</Label>
   <BundleType>${specContents.agentType}</BundleType>
   <VersionTag>Spring2026</VersionTag>
-  <VersionDescription>Initial release for ${name}</VersionDescription>
+  <VersionDescription>Initial release for ${bundleApiName}</VersionDescription>
   <SourceBundleVersion></SourceBundleVersion>
   <Target></Target>
 </aiAuthoringBundle>`;
       writeFileSync(metaXmlPath, metaXml);
 
-      this.logSuccess(`Successfully generated ${name} Authoring Bundle`);
+      this.logSuccess(`Successfully generated ${bundleApiName} Authoring Bundle`);
 
       return {
         agentPath,
