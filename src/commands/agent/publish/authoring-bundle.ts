@@ -22,7 +22,7 @@ import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
-import { FlaggablePrompt, promptForFlag } from '../../../flags.js';
+import { FlaggablePrompt, promptForFileByExtensions } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -67,9 +67,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
   public async run(): Promise<AgentPublishAuthoringBundleResult> {
     const { flags } = await this.parse(AgentPublishAuthoringBundle);
-    // If we don't have an api name yet, prompt for it
+    // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
     const apiName =
-      flags['api-name'] ?? (await promptForFlag(AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
+      flags['api-name'] ??
+      (await promptForFileByExtensions(AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], ['.agent'], true));
     // todo: this eslint warning can be removed once published
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
