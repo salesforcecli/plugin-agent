@@ -75,7 +75,6 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
         messages.getMessage('error.agentNotFoundAction'),
       ]);
     }
-
     const mso = new MultiStageOutput<{ status: string; errors: string }>({
       jsonEnabled: this.jsonEnabled(),
       title: `Validating ${apiName} Authoring Bundle`,
