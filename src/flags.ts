@@ -15,7 +15,7 @@
  */
 
 import { readdir } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { basename, join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Connection, Messages, SfError } from '@salesforce/core';
@@ -151,20 +151,31 @@ export const promptForAiEvaluationDefinitionApiName = async (
   });
 };
 
-export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
+export const promptForFileByExtensions = async (
+  flagDef: FlaggablePrompt,
+  extensions: string[],
+  fileNameOnly = false
+): Promise<string> => {
   const hiddenDirs = await getHiddenDirs();
-  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules', ...hiddenDirs]);
+  const files = await traverseForFiles(process.cwd(), extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
-    message: flagDef.message,
+    message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
     // eslint-disable-next-line @typescript-eslint/require-await
     source: async (input) => {
-      const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
-
+      let arr;
+      if (fileNameOnly) {
+        arr = files.map((o) => ({ name: basename(o).split('.')[0], value: basename(o).split('.')[0] }));
+      } else {
+        arr = files.map((o) => ({ name: relative(process.cwd(), o), value: o }));
+      }
       if (!input) return arr;
       return arr.filter((o) => o.name.includes(input));
     },
   });
 };
+
+export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> =>
+  promptForFileByExtensions(flagDef, ['.yml', '.yaml']);
 
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
