@@ -129,7 +129,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
 
       // Generate file paths
       const agentPath = join(targetOutputDir, `${bundleApiName}.agent`);
-      const metaXmlPath = join(targetOutputDir, `${bundleApiName}.aiAuthoringBundle-meta.xml`);
+      const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml.xml`);
 
       // Write Agent file
       const conn = targetOrg.getConnection(flags['api-version']);
