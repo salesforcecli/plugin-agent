@@ -148,7 +148,7 @@ export const promptForAiEvaluationDefinitionApiName = async (
 
   return Promise.race([
     autocomplete({
-      message: flagDef.message,
+      message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
         const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
