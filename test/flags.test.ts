@@ -47,7 +47,7 @@ describe('traverseForFiles', () => {
   });
 
   it('should find all yaml files when no excludeDirs is provided', async () => {
-    const results = await traverseForFiles(testDir, ['.yml', '.yaml']);
+    const results = traverseForFiles(testDir, ['.yml', '.yaml']);
     expect(results).to.have.lengthOf(6);
     expect(results).to.include(join(testDir, 'file1.yml'));
     expect(results).to.include(join(testDir, 'file2.yaml'));
@@ -58,7 +58,7 @@ describe('traverseForFiles', () => {
   });
 
   it('should exclude specified directories', async () => {
-    const results = await traverseForFiles(testDir, ['.yml', '.yaml'], ['node_modules', 'excluded']);
+    const results = traverseForFiles(testDir, ['.yml', '.yaml'], ['node_modules', 'excluded']);
     expect(results).to.have.lengthOf(4);
     expect(results).to.include(join(testDir, 'file1.yml'));
     expect(results).to.include(join(testDir, 'file2.yaml'));
@@ -69,7 +69,7 @@ describe('traverseForFiles', () => {
   });
 
   it('should handle empty excludeDirs array', async () => {
-    const results = await traverseForFiles(testDir, ['.yml', '.yaml'], []);
+    const results = traverseForFiles(testDir, ['.yml', '.yaml'], []);
     expect(results).to.have.lengthOf(6);
   });
 });

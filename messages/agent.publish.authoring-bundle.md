@@ -4,7 +4,7 @@ Publish an Agent Authoring Bundle as a new agent
 
 # description
 
-Publishes an Agent Authoring Bundle by compiling the AF script and creating a new agent in your org.
+Publishes an Agent Authoring Bundle by compiling the .agent file and creating a new agent in your org.
 
 # examples
 
@@ -13,7 +13,7 @@ Publishes an Agent Authoring Bundle by compiling the AF script and creating a ne
 
 # flags.api-name.summary
 
-API name of the Agent Authoring Bundle to publish
+API name of the Agent Authoring Bundle to publish.
 
 # flags.api-name.prompt
 
@@ -38,7 +38,7 @@ Failed to publish agent with the following errors:
 
 # error.agentNotFound
 
-Could not find an .agent file with API name '%s' in the project.
+Could not find a .bundle-meta.xml file with API name '%s' in the project.
 
 # error.agentNotFoundAction
 

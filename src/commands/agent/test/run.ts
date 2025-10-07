@@ -40,6 +40,7 @@ const FLAGGABLE_PROMPTS = {
     char: 'n',
     required: true,
     message: messages.getMessage('flags.api-name.summary'),
+    promptMessage: messages.getMessage('flags.api-name.prompt'),
     validate: (d: string): boolean | string => {
       if (d.length === 0) {
         return true;

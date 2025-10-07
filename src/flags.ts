@@ -15,10 +15,11 @@
  */
 
 import { readdir } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { Connection, Messages, SfError } from '@salesforce/core';
+import { Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
@@ -102,18 +103,25 @@ export async function getHiddenDirs(projectRoot?: string): Promise<string[]> {
   }
 }
 
-export async function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): Promise<string[]> {
-  const files = await readdir(dir, { withFileTypes: true });
+export function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): string[];
+// eslint-disable-next-line @typescript-eslint/unified-signatures
+export function traverseForFiles(dirs: string[], suffixes: string[], excludeDirs?: string[]): string[];
+
+export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[], excludeDirs?: string[]): string[] {
+  const dirs = Array.isArray(dirOrDirs) ? dirOrDirs : [dirOrDirs];
   const results: string[] = [];
 
-  for (const file of files) {
-    const fullPath = join(dir, file.name);
+  for (const dir of dirs) {
+    const files = readdirSync(dir, { withFileTypes: true });
 
-    if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
-      // eslint-disable-next-line no-await-in-loop
-      results.push(...(await traverseForFiles(fullPath, suffixes, excludeDirs)));
-    } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
-      results.push(fullPath);
+    for (const file of files) {
+      const fullPath = join(dir, file.name);
+
+      if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
+        results.push(...traverseForFiles(fullPath, suffixes, excludeDirs));
+      } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
+        results.push(fullPath);
+      }
     }
   }
 
@@ -135,7 +143,7 @@ export const promptForAiEvaluationDefinitionApiName = async (
 
   return Promise.race([
     autocomplete({
-      message: flagDef.message,
+      message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
         const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
@@ -154,10 +162,12 @@ export const promptForAiEvaluationDefinitionApiName = async (
 export const promptForFileByExtensions = async (
   flagDef: FlaggablePrompt,
   extensions: string[],
-  fileNameOnly = false
+  fileNameOnly = false,
+  dirs?: string[]
 ): Promise<string> => {
   const hiddenDirs = await getHiddenDirs();
-  const files = await traverseForFiles(process.cwd(), extensions, ['node_modules', ...hiddenDirs]);
+  const dirsToTraverse = dirs ?? [process.cwd()];
+  const files = traverseForFiles(dirsToTraverse, extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
     message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -192,6 +202,11 @@ export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> =
     validate: flagDef.validate,
     theme,
   });
+};
+
+export const promptForAgentFiles = (project: SfProject, flagDef: FlaggablePrompt): Promise<string> => {
+  const dirs = project.getPackageDirectories().map((dir) => dir.fullPath);
+  return promptForFileByExtensions(flagDef, ['.bundle-meta.xml'], true, dirs);
 };
 
 export const validateAgentType = (agentType?: string, required = false): string | undefined => {

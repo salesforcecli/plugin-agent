@@ -22,7 +22,7 @@ import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
-import { FlaggablePrompt, promptForFileByExtensions } from '../../../flags.js';
+import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -70,10 +70,11 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
     const apiName =
       flags['api-name'] ??
-      (await promptForFileByExtensions(AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], ['.agent'], true));
-    // todo: this eslint warning can be removed once published
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
+      (await promptForAgentFiles(this.project!, AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
+    const authoringBundleDir = findAuthoringBundle(
+      this.project!.getPackageDirectories().map((dir) => dir.fullPath),
+      apiName
+    );
 
     if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
@@ -101,8 +102,8 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
 
-      // First compile the AF script to get the Agent JSON
-      const agentJson = await Agent.compileAfScript(
+      // First compile the .agent file to get the Agent JSON
+      const agentJson = await Agent.compileAgent(
         conn,
         readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
       );
