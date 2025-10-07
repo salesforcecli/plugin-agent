@@ -18,10 +18,11 @@ import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { Agent } from '@salesforce/agents';
 import { Duration, sleep } from '@salesforce/kit';
 import { colorize } from '@oclif/core/ux';
-import { FlaggablePrompt, promptForFileByExtensions } from '../../../flags.js';
+import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
+import { findAuthoringBundleInProject } from '../../../utils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.validate.authoring-bundle');
@@ -68,8 +69,8 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
     const apiName =
       flags['api-name'] ??
-      (await promptForFileByExtensions(AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name'], ['.agent'], true));
-    const authoringBundleDir = findAuthoringBundle(this.project!.getPath(), apiName);
+      (await promptForAgentFiles(this.project!, AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
+    const authoringBundleDir = findAuthoringBundleInProject(this.project!, apiName);
     if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
         messages.getMessage('error.agentNotFoundAction'),
