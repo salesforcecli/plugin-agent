@@ -4,7 +4,7 @@ Validate an Agent Authoring Bundle
 
 # description
 
-Validates an Agent Authoring Bundle by compiling the AF script and checking for errors.
+Validates an Agent Authoring Bundle by compiling the .agent file and checking for errors.
 
 # examples
 
@@ -13,7 +13,7 @@ Validates an Agent Authoring Bundle by compiling the AF script and checking for 
 
 # flags.api-name.summary
 
-Path to the Agent Authoring Bundle to validate
+API name of the Agent Authoring Bundle to validate.
 
 # flags.api-name.prompt
 
@@ -29,7 +29,7 @@ Invalid bundle path. Please provide a valid path to an Agent Authoring Bundle.
 
 # error.compilationFailed
 
-AF Script compilation failed with the following errors:
+Agent compilation failed with the following errors:
 %s
 
 # error.agentNotFound
