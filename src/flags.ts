@@ -15,6 +15,7 @@
  */
 
 import { readdir } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
@@ -102,28 +103,22 @@ export async function getHiddenDirs(projectRoot?: string): Promise<string[]> {
   }
 }
 
-export async function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): Promise<string[]>;
+export function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): string[];
 // eslint-disable-next-line @typescript-eslint/unified-signatures
-export async function traverseForFiles(dirs: string[], suffixes: string[], excludeDirs?: string[]): Promise<string[]>;
+export function traverseForFiles(dirs: string[], suffixes: string[], excludeDirs?: string[]): string[];
 
-export async function traverseForFiles(
-  dirOrDirs: string | string[],
-  suffixes: string[],
-  excludeDirs?: string[]
-): Promise<string[]> {
+export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[], excludeDirs?: string[]): string[] {
   const dirs = Array.isArray(dirOrDirs) ? dirOrDirs : [dirOrDirs];
   const results: string[] = [];
 
   for (const dir of dirs) {
-    // eslint-disable-next-line no-await-in-loop
-    const files = await readdir(dir, { withFileTypes: true });
+    const files = readdirSync(dir, { withFileTypes: true });
 
     for (const file of files) {
       const fullPath = join(dir, file.name);
 
       if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
-        // eslint-disable-next-line no-await-in-loop
-        results.push(...(await traverseForFiles(fullPath, suffixes, excludeDirs)));
+        results.push(...traverseForFiles(fullPath, suffixes, excludeDirs));
       } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
         results.push(fullPath);
       }
@@ -172,7 +167,7 @@ export const promptForFileByExtensions = async (
 ): Promise<string> => {
   const hiddenDirs = await getHiddenDirs();
   const dirsToTraverse = dirs ?? [process.cwd()];
-  const files = await traverseForFiles(dirsToTraverse, extensions, ['node_modules', ...hiddenDirs]);
+  const files = traverseForFiles(dirsToTraverse, extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
     message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
     // eslint-disable-next-line @typescript-eslint/require-await
