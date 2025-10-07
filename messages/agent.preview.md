@@ -20,7 +20,7 @@ API name of the agent you want to interact with.
 
 # flags.authoring-bundle.summary
 
-Preview an ephemeral afscript agent by specifying the API name of the Authoring Bundle metadata
+Preview a next-gen agent by specifying the API name of the authoring bundle metadata component that implements it. 
 
 # flags.client-app.summary
 
