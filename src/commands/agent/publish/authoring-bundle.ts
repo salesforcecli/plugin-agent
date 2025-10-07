@@ -19,11 +19,10 @@ import { readFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
-import { Agent } from '@salesforce/agents';
+import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
-import { findAuthoringBundleInProject } from '../../../utils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -72,7 +71,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     const apiName =
       flags['api-name'] ??
       (await promptForAgentFiles(this.project!, AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    const authoringBundleDir = findAuthoringBundleInProject(this.project!, apiName);
+    const authoringBundleDir = findAuthoringBundle(
+      this.project!.getPackageDirectories().map((dir) => dir.fullPath),
+      apiName
+    );
 
     if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
@@ -101,7 +103,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const conn = targetOrg.getConnection(flags['api-version']);
 
       // First compile the .agent file to get the Agent JSON
-      const agentJson = await Agent.compileAfScript(
+      const agentJson = await Agent.compileAgent(
         conn,
         readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
       );

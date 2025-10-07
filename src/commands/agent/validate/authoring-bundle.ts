@@ -18,11 +18,10 @@ import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { Agent } from '@salesforce/agents';
+import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { Duration, sleep } from '@salesforce/kit';
 import { colorize } from '@oclif/core/ux';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
-import { findAuthoringBundleInProject } from '../../../utils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.validate.authoring-bundle');
@@ -70,7 +69,10 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
     const apiName =
       flags['api-name'] ??
       (await promptForAgentFiles(this.project!, AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    const authoringBundleDir = findAuthoringBundleInProject(this.project!, apiName);
+    const authoringBundleDir = findAuthoringBundle(
+      this.project!.getPackageDirectories().map((dir) => dir.fullPath),
+      apiName
+    );
     if (!authoringBundleDir) {
       throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
         messages.getMessage('error.agentNotFoundAction'),
@@ -101,9 +103,9 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       mso.skipTo('Validating Authoring Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
-      // Call Agent.compileAfScript() API
+      // Call Agent.compileAgent() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAfScript(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
+      await Agent.compileAgent(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
       mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
