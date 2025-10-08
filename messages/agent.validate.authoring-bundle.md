@@ -22,7 +22,7 @@ API name of the authoring bundle you want to validate.
 
 # flags.api-name.prompt
 
-API name of the authoring bundle to validate.
+API name of the authoring bundle to validate
 
 # error.missingRequiredFlags
 
