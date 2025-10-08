@@ -26,7 +26,7 @@ API name of the new authoring bundle; if not specified, the API name is derived 
 
 # flags.api-name.prompt
 
-API name of the new authoring bundle.
+API name of the new authoring bundle
 
 # examples
 
