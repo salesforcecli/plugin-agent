@@ -43,7 +43,7 @@ Failed to publish agent with the following errors:
 
 # error.agentNotFound
 
-Couldn't find an .agent file with API name '%s' in the project.
+Could not find a .bundle-meta.xml file with API name '%s' in the project.
 
 # error.agentNotFoundAction
 

@@ -14,6 +14,10 @@ By default, this command outputs test results in human-readable tables for each 
 
 API name of the agent test to run; corresponds to the name of the AiEvaluationDefinition metadata component that implements the agent test.
 
+# flags.api-name.prompt
+
+API name of the agent test to run
+
 # flags.wait.summary
 
 Number of minutes to wait for the command to complete and display results to the terminal window.
