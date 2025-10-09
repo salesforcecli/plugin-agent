@@ -1,8 +1,17 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { resolve, join } from 'node:path';
@@ -49,7 +58,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = false;
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -57,12 +65,14 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     'client-app': Flags.string({
       char: 'c',
       summary: messages.getMessage('flags.client-app.summary'),
-      required: true,
       dependsOn: ['target-org'],
     }),
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
+    }),
+    'authoring-bundle': Flags.string({
+      summary: messages.getMessage('flags.authoring-bundle.summary'),
     }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
@@ -83,10 +93,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const authInfo = await AuthInfo.create({
       username: flags['target-org'].getUsername(),
     });
+    if (!(flags['client-app'] ?? env.getString('SF_DEMO_AGENT_CLIENT_APP'))) {
+      throw new SfError('SF_DEMO_AGENT_CLIENT_APP is unset!');
+    }
 
     const jwtConn = await Connection.create({
       authInfo,
-      clientApp: flags['client-app'],
+      clientApp: env.getString('SF_DEMO_AGENT_CLIENT_APP') ?? flags['client-app'],
     });
 
     const agentsQuery = await conn.query<AgentData>(
@@ -99,7 +112,18 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     let selectedAgent;
 
-    if (apiNameFlag) {
+    if (flags['authoring-bundle']) {
+      const envAgentName = env.getString('SF_DEMO_AGENT');
+      const agent = agentsQuery.records.find((a) => a.DeveloperName === envAgentName);
+      selectedAgent = {
+        Id:
+          agent?.Id ??
+          `Couldn't find an agent in ${agentsQuery.records.map((a) => a.DeveloperName).join(', ')} matching ${
+            envAgentName ?? '!SF_DEMO_AGENT is unset!'
+          }`,
+        DeveloperName: flags['authoring-bundle'],
+      };
+    } else if (apiNameFlag) {
       selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
       validateAgent(selectedAgent);
