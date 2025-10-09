@@ -112,7 +112,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -174,7 +174,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -214,7 +214,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -319,11 +319,11 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
-Generate an authoring bundle from an agent specification.
+Generate a local authoring bundle from an existing agent spec YAML file.
 
 ```
 USAGE
@@ -331,13 +331,13 @@ USAGE
     <value>] [-d <value>] [-n <value>]
 
 FLAGS
-  -d, --output-dir=<value>   Directory where the authoring bundle files will be generated.
-  -f, --spec=<value>         Path to the agent specification file.
+  -d, --output-dir=<value>   Directory where the authoring bundle files are generated.
+  -f, --spec=<value>         Path to the agent spec YAML file.
   -n, --name=<value>         Name (label) of the authoring bundle.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-name=<value>     API name of the new authoring bundle; if not specified, the API name is derived from the
-                             authoring bundle name (label); the API name must not exist in the org.
+                             authoring bundle name (label); the API name can't exist in the org.
       --api-version=<value>  Override the api version used for api requests made by this command
 
 GLOBAL FLAGS
@@ -345,22 +345,29 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Generate an authoring bundle from an agent specification.
+  Generate a local authoring bundle from an existing agent spec YAML file.
 
-  Generates an authoring bundle containing Agent and its meta.xml file from an agent specification file.
+  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
+  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
+  ".agent") that fully describes the next-gen agent. Use this command to generate an authoring bundle based on an agent
+  spec YAML file, which you create with the "agent create agent-spec" command.
+
+  By default, authoring bundles are generated in the force-app/main/default/aiAuthoringBundles/<api-name> directory. Use
+  the --output-dir to generate them elsewhere.
 
 EXAMPLES
-  Generate an authoring bundle from a specification file:
+  Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My
+  Authoring Bundle":
 
-    $ sf agent generate authoring-bundle --spec-file path/to/spec.yaml --name "My Authoring Bundle"
+    $ sf agent generate authoring-bundle --spec-file specs/agentSpec.yaml --name "My Authoring Bundle"
 
-  Generate an authoring bundle with a custom output directory:
+  Same as previous example, but generate the files in the other-package-dir/main/default/aiAuthoringBundles directory:
 
-    $ sf agent generate authoring-bundle --spec-file path/to/spec.yaml --name "My Authoring Bundle" --output-dir \
-      path/to/output
+    $ sf agent generate authoring-bundle --spec-file specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir \
+      other-package-dir/main/default/aiAuthoringBundles
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -408,7 +415,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -469,7 +476,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -481,16 +488,15 @@ USAGE
     [--authoring-bundle <value>] [-d <value>] [-x]
 
 FLAGS
-  -c, --client-app=<value>        Name of the linked client app to use for the agent connection. You must have
-                                  previously created this link with "org login web --client-app". Run "org display" to
-                                  see the available linked client apps.
+  -c, --client-app=<value>        Name of the linked client app to use for the agent connection.
   -d, --output-dir=<value>        Directory where conversation transcripts are saved.
   -n, --api-name=<value>          API name of the agent you want to interact with.
   -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
                                   configuration variable is already set.
   -x, --apex-debug                Enable Apex debug logging during the agent preview conversation.
       --api-version=<value>       Override the api version used for api requests made by this command
-      --authoring-bundle=<value>  Preview an ephemeral agent by specifying the API name of the Authoring Bundle metadata
+      --authoring-bundle=<value>  Preview a next-gen agent by specifying the API name of the authoring bundle metadata
+                                  component that implements it.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -517,8 +523,9 @@ DESCRIPTION
   currently deactivated, use the "agent activate" CLI command to activate it.
 
   IMPORTANT: Before you use this command, you must complete a number of configuration steps in your org and your DX
-  project. The examples in this help assume you've completed the steps. See "Preview an Agent" in the "Agentforce
-  Developer Guide" for complete documentation:
+  project. For example, you must first create the link to a client connected app using the "org login web --client-app"
+  CLI command to then get the value of the --client-app flag of this command. The examples in this help assume you've
+  completed the steps. See "Preview an Agent" in the "Agentforce Developer Guide" for complete documentation:
   https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
 
 EXAMPLES
@@ -534,18 +541,18 @@ EXAMPLES
       transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/preview.ts)_
 
 ## `sf agent publish authoring-bundle`
 
-Publish an Agent Authoring Bundle as a new agent
+Publish an authoring bundle to your org, which results in a new next-gen agent.
 
 ```
 USAGE
   $ sf agent publish authoring-bundle -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
 
 FLAGS
-  -n, --api-name=<value>     API name of the Agent Authoring Bundle to publish.
+  -n, --api-name=<value>     API name of the authoring bundle you want to publish.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
@@ -555,18 +562,29 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Publish an Agent Authoring Bundle as a new agent
+  Publish an authoring bundle to your org, which results in a new next-gen agent.
 
-  Publishes an Agent Authoring Bundle by compiling the .agent file and creating a new agent in your org.
+  When you publish an authoring bundle to your org, a number of things happen. First, this command validates that the
+  agent file (with extension ".agent") successfully compiles. Then the authoring bundle metadata component is deployed
+  to the org, and all associated metadata components, such as the Bot, BotVersion, and GenAiXXX components, are either
+  created or updated. The org then creates a new next-gen agent based on the deployed authoring bundle and associated
+  metadata. Finally, all the metadata associated with the new agent is retrieved back to your local DX project.
+
+  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
+  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
+  ".agent") that fully describes the next-gen agent.
+
+  This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the
+  command prompts you for it.
 
 EXAMPLES
-  Publish an Agent Authoring Bundle:
+  Publish an authoring bundle with API name MyAuthoringBundle to the org with alias "my-org", resulting in a new agent
+  named "My Fab Agent"::
 
-    $ sf agent publish authoring-bundle --api-name path/to/bundle --agent-name "My New Agent" --target-org \
-      myorg@example.com
+    $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --agent-name "My Fab Agent" --target-org my-org
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -621,7 +639,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -656,7 +674,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -722,7 +740,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -795,7 +813,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -869,18 +887,18 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/test/run.ts)_
 
 ## `sf agent validate authoring-bundle`
 
-Validate an Agent Authoring Bundle
+Validate a local authoring bundle to ensure it compiles successfully and can be used to create a next-gen agent.
 
 ```
 USAGE
   $ sf agent validate authoring-bundle -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
 
 FLAGS
-  -n, --api-name=<value>     API name of the Agent Authoring Bundle to validate.
+  -n, --api-name=<value>     API name of the authoring bundle you want to validate.
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
@@ -890,16 +908,25 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Validate an Agent Authoring Bundle
+  Validate a local authoring bundle to ensure it compiles successfully and can be used to create a next-gen agent.
 
-  Validates an Agent Authoring Bundle by compiling the .agent file and checking for errors.
+  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
+  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
+  ".agent") that fully describes the next-gen agent. Generate a local authoring bundle with the "agent generate
+  authoring-bundle" command.
+
+  This command validates that the agent file (with extension ".agent") that's part of the authoring bundle compiles
+  without errors and can later be used to successfully create a next-gen agent.
+
+  This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the
+  command prompts you for it.
 
 EXAMPLES
-  Validate an Agent Authoring Bundle:
+  Validate a local authoring bundle with API name MyAuthoringBundle:
 
-    $ sf agent validate authoring-bundle --api-name path/to/bundle
+    $ sf agent validate authoring-bundle --api-name MyAuthoringBundle
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.8/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-demo.9/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
