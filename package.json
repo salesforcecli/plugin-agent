@@ -10,7 +10,7 @@
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.22",
     "@salesforce/agents": "^0.17.9",
-    "@salesforce/core": "^8.18.5",
+    "@salesforce/core": "^8.23.2",
     "@salesforce/kit": "^3.2.3",
     "@salesforce/sf-plugins-core": "^12.2.4",
     "@salesforce/source-deploy-retrieve": "^12.24.0",
