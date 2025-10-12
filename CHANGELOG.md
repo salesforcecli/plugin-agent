@@ -1,3 +1,9 @@
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
 ## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14) (2025-10-12)
 
 ### Bug Fixes
