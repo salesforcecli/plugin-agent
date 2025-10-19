@@ -1,3 +1,9 @@
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
 ## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
 
 ### Bug Fixes
