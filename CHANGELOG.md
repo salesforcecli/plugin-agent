@@ -1,3 +1,9 @@
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
 ## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
 
 ### Bug Fixes
