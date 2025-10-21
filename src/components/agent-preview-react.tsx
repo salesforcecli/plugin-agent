@@ -21,7 +21,7 @@ import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { Connection, SfError } from '@salesforce/core';
-import { AgentPreview, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
+import { AgentPreviewBase, AgentPreviewSendResponse, writeDebugLog, type AgentInteractionBase } from '@salesforce/agents';
 import { sleep } from '@salesforce/kit';
 
 // Component to show a simple typing animation
@@ -76,7 +76,7 @@ const saveTranscriptsToFile = (
  */
 export function AgentPreviewReact(props: {
   readonly connection: Connection;
-  readonly agent: AgentPreview;
+  readonly agent: AgentPreviewBase | AgentInteractionBase;
   readonly name: string;
   readonly outputDir: string | undefined;
 }): React.ReactNode {

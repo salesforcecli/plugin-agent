@@ -15,7 +15,8 @@
  */
 
 import { resolve, join } from 'node:path';
-import { readdirSync, statSync } from 'node:fs';
+import * as path from 'node:path';
+import { globSync } from 'glob';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import React from 'react';
@@ -49,12 +50,13 @@ enum AgentSource {
   LOCAL = 'local',
 }
 
-type AgentValue = {
-  Id: string;
-  DeveloperName: string;
-  source: AgentSource.ORG;
-} |
-{ DeveloperName: string; source: AgentSource.LOCAL; path: string };
+type AgentValue =
+  | {
+      Id: string;
+      DeveloperName: string;
+      source: AgentSource.ORG;
+    }
+  | { DeveloperName: string; source: AgentSource.LOCAL; path: string };
 
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
@@ -166,10 +168,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
     // Both classes share the same interface for the methods we need
-    const agentPreview = selectedAgent.source === AgentSource.ORG ?
-      new Preview(jwtConn, selectedAgent.Id) :
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      new AgentSimulate(jwtConn, selectedAgent.path, true) as unknown as Preview;
+    const agentPreview: Preview | AgentSimulate =
+      selectedAgent.source === AgentSource.ORG
+        ? new Preview(jwtConn, selectedAgent.Id)
+        : new AgentSimulate(jwtConn, selectedAgent.path, true);
 
     agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
@@ -207,10 +209,7 @@ export const validateAgent = (agent: AgentData): boolean => {
   return true;
 };
 
-export const getAgentChoices = (
-  agents: AgentData[],
-  project: SfProject
-): Array<Choice<AgentValue>> => {
+export const getAgentChoices = (agents: AgentData[], project: SfProject): Array<Choice<AgentValue>> => {
   const choices: Array<Choice<AgentValue>> = [];
 
   // Add org agents
@@ -229,37 +228,25 @@ export const getAgentChoices = (
     });
   }
 
-  // Add local agents from authoring bundles
-  const localAgents = findAuthoringBundle(project.getPath(), '*');
-  if (localAgents) {
-    const bundlePath = localAgents.replace(/\/[^/]+$/, ''); // Get parent directory
-    const agentDirs = readdirSync(bundlePath).filter((dir) =>
-      statSync(join(bundlePath, dir)).isDirectory()
-    );
-
-    agentDirs.forEach((agentDir) => {
-      choices.push({
-        name: `${agentDir} (local)`,
-        value: {
-          DeveloperName: agentDir,
-          source: AgentSource.LOCAL,
-          path: join(bundlePath, agentDir),
-        },
-      });
+  // Add local agents from .agent files
+  const localAgentPaths = globSync('**/*.agent', { cwd: project.getPath() });
+  for (const agentPath of localAgentPaths) {
+    const agentName = path.basename(agentPath, '.agent');
+    choices.push({
+      name: `${agentName} (local)`,
+      value: {
+        DeveloperName: agentName,
+        source: AgentSource.LOCAL,
+        path: path.join(project.getPath(), agentPath),
+      },
     });
   }
 
   return choices;
 };
 
-
-export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] => {
-  const config = authInfo.getConnectionOptions();
-  const clientApps = Object.entries(config)
-    .filter(([key]) => key.startsWith('oauthClientApp_'))
-    .map(([, value]) => value as string);
-  return clientApps;
-};
+export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] =>
+  Object.keys(authInfo.getFields().clientApps ?? {});
 
 export const resolveOutputDir = async (
   outputDir: string | undefined,
