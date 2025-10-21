@@ -15,12 +15,13 @@
  */
 
 import { resolve, join } from 'node:path';
+import { readdirSync, statSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
+import { AuthInfo, Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import { env } from '@salesforce/kit';
-import { AgentPreview as Preview } from '@salesforce/agents';
+import { AgentPreview as Preview, AgentSimulate, findAuthoringBundle } from '@salesforce/agents';
 import { select, confirm, input } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
@@ -43,10 +44,17 @@ type Choice<Value> = {
   disabled?: boolean | string;
 };
 
+enum AgentSource {
+  ORG = 'org',
+  LOCAL = 'local',
+}
+
 type AgentValue = {
   Id: string;
   DeveloperName: string;
-};
+  source: AgentSource.ORG;
+} |
+{ DeveloperName: string; source: AgentSource.LOCAL; path: string };
 
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
@@ -93,13 +101,30 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const authInfo = await AuthInfo.create({
       username: flags['target-org'].getUsername(),
     });
-    if (!(flags['client-app'] ?? env.getString('SF_DEMO_AGENT_CLIENT_APP'))) {
-      throw new SfError('SF_DEMO_AGENT_CLIENT_APP is unset!');
+    // Get client app - check flag first, then auth file, then env var
+    let clientApp = flags['client-app'];
+
+    if (!clientApp) {
+      const clientApps = getClientAppsFromAuth(authInfo);
+
+      if (clientApps.length === 1) {
+        clientApp = clientApps[0];
+      } else if (clientApps.length > 1) {
+        clientApp = await select({
+          message: 'Select a client app',
+          choices: clientApps.map((app) => ({ value: app, name: app })),
+        });
+      }
+    }
+
+    if (!clientApp) {
+      // at this point we should throw an error
+      throw new SfError('No client app found.');
     }
 
     const jwtConn = await Connection.create({
       authInfo,
-      clientApp: env.getString('SF_DEMO_AGENT_CLIENT_APP') ?? flags['client-app'],
+      clientApp,
     });
 
     const agentsQuery = await conn.query<AgentData>(
@@ -110,32 +135,42 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const agentsInOrg = agentsQuery.records;
 
-    let selectedAgent;
+    let selectedAgent: AgentValue | undefined;
 
     if (flags['authoring-bundle']) {
-      const envAgentName = env.getString('SF_DEMO_AGENT');
-      const agent = agentsQuery.records.find((a) => a.DeveloperName === envAgentName);
+      const bundlePath = findAuthoringBundle(this.project!.getPath(), flags['authoring-bundle']);
+      if (!bundlePath) {
+        throw new SfError(`Could not find authoring bundle for ${flags['authoring-bundle']}`);
+      }
       selectedAgent = {
-        Id:
-          agent?.Id ??
-          `Couldn't find an agent in ${agentsQuery.records.map((a) => a.DeveloperName).join(', ')} matching ${
-            envAgentName ?? '!SF_DEMO_AGENT is unset!'
-          }`,
         DeveloperName: flags['authoring-bundle'],
+        source: AgentSource.LOCAL,
+        path: bundlePath,
       };
     } else if (apiNameFlag) {
-      selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
+      const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
+      if (!agent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
+      validateAgent(agent);
+      selectedAgent = {
+        Id: agent.Id,
+        DeveloperName: agent.DeveloperName,
+        source: AgentSource.ORG,
+      };
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
-      validateAgent(selectedAgent);
     } else {
       selectedAgent = await select({
         message: 'Select an agent',
-        choices: getAgentChoices(agentsInOrg),
+        choices: getAgentChoices(agentsInOrg, this.project!),
       });
     }
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
-    const agentPreview = new Preview(jwtConn, selectedAgent.Id);
+    // Both classes share the same interface for the methods we need
+    const agentPreview = selectedAgent.source === AgentSource.ORG ?
+      new Preview(jwtConn, selectedAgent.Id) :
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      new AgentSimulate(jwtConn, selectedAgent.path, true) as unknown as Preview;
+
     agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
     const instance = render(
@@ -172,22 +207,59 @@ export const validateAgent = (agent: AgentData): boolean => {
   return true;
 };
 
-export const getAgentChoices = (agents: AgentData[]): Array<Choice<AgentValue>> =>
-  agents.map((agent) => {
-    let disabled: string | boolean = false;
+export const getAgentChoices = (
+  agents: AgentData[],
+  project: SfProject
+): Array<Choice<AgentValue>> => {
+  const choices: Array<Choice<AgentValue>> = [];
 
-    if (agentIsInactive(agent)) disabled = '(Inactive)';
-    if (agentIsUnsupported(agent.DeveloperName)) disabled = '(Not Supported)';
+  // Add org agents
+  for (const agent of agents) {
+    if (agentIsInactive(agent) || agentIsUnsupported(agent.DeveloperName)) {
+      continue;
+    }
 
-    return {
-      name: agent.DeveloperName,
+    choices.push({
+      name: `${agent.DeveloperName} (org)`,
       value: {
         Id: agent.Id,
         DeveloperName: agent.DeveloperName,
+        source: AgentSource.ORG,
       },
-      disabled,
-    };
-  });
+    });
+  }
+
+  // Add local agents from authoring bundles
+  const localAgents = findAuthoringBundle(project.getPath(), '*');
+  if (localAgents) {
+    const bundlePath = localAgents.replace(/\/[^/]+$/, ''); // Get parent directory
+    const agentDirs = readdirSync(bundlePath).filter((dir) =>
+      statSync(join(bundlePath, dir)).isDirectory()
+    );
+
+    agentDirs.forEach((agentDir) => {
+      choices.push({
+        name: `${agentDir} (local)`,
+        value: {
+          DeveloperName: agentDir,
+          source: AgentSource.LOCAL,
+          path: join(bundlePath, agentDir),
+        },
+      });
+    });
+  }
+
+  return choices;
+};
+
+
+export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] => {
+  const config = authInfo.getConnectionOptions();
+  const clientApps = Object.entries(config)
+    .filter(([key]) => key.startsWith('oauthClientApp_'))
+    .map(([, value]) => value as string);
+  return clientApps;
+};
 
 export const resolveOutputDir = async (
   outputDir: string | undefined,
