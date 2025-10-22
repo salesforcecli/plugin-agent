@@ -134,7 +134,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       // Write Agent file
       const conn = targetOrg.getConnection(flags['api-version']);
       const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
-      const agent = await Agent.createAgent(conn, specContents);
+      const agent = await Agent.createAgentScript(conn, specContents);
       // Create output directory if it doesn't exist
       mkdirSync(targetOutputDir, { recursive: true });
       writeFileSync(agentPath, agent);
