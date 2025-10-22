@@ -103,7 +103,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const conn = targetOrg.getConnection(flags['api-version']);
 
       // First compile the .agent file to get the Agent JSON
-      const agentJson = await Agent.compileAgent(
+      const agentJson = await Agent.compileAgentScript(
         conn,
         readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
       );

@@ -105,7 +105,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAgent() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAgent(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
+      await Agent.compileAgentScript(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
       mso.updateData({ status: 'COMPLETED' });
       mso.stop('completed');
       return {
