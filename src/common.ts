@@ -24,6 +24,14 @@ import { CompilationError } from '@salesforce/agents';
  * @throws SfError - Always throws a Salesforce CLI error
  */
 export function throwAgentCompilationError(compilationErrors: CompilationError[]): never {
+  if (compilationErrors.length === 0) {
+    throw SfError.create({
+      name: 'CompileAgentScriptError',
+      message: 'Unknown compilation error occurred',
+      data: compilationErrors,
+    });
+  }
+
   const errors = compilationErrors;
 
   throw SfError.create({
