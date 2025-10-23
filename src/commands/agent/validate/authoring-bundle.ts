@@ -21,6 +21,7 @@ import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { Duration, sleep } from '@salesforce/kit';
 import { colorize } from '@oclif/core/ux';
+import { throwAgentCompilationError } from '../../../common.js';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -105,12 +106,19 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       const conn = targetOrg.getConnection(flags['api-version']);
       // Call Agent.compileAgent() API
       await sleep(Duration.seconds(2));
-      await Agent.compileAgent(conn, readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8'));
-      mso.updateData({ status: 'COMPLETED' });
-      mso.stop('completed');
-      return {
-        success: true,
-      };
+      const result = await Agent.compileAgentScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
+      );
+      if (result.status === 'success') {
+        mso.updateData({ status: 'COMPLETED' });
+        mso.stop('completed');
+        return {
+          success: true,
+        };
+      } else {
+        throwAgentCompilationError(result.errors);
+      }
     } catch (error) {
       // Handle validation errors
       const err = SfError.wrap(error);
@@ -121,7 +129,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
           count += 1;
           const type = line.split(':')[0];
           const rest = line.substring(line.indexOf(':')).trim();
-          return `- ${colorize('red', type)} ${rest}`;
+          return `- ${colorize('red', type)}${rest}`;
         })
         .join('\n');
 
