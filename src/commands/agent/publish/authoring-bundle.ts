@@ -23,6 +23,7 @@ import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
+import { throwAgentCompilationError } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.publish.authoring-bundle');
@@ -103,12 +104,15 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const conn = targetOrg.getConnection(flags['api-version']);
 
       // First compile the .agent file to get the Agent JSON
-      const agentJson = await Agent.compileAgentScript(
+      const compileResponse = await Agent.compileAgentScript(
         conn,
         readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
       );
-      mso.skipTo('Publish Agent');
-
+      if (compileResponse.status === 'success') {
+        mso.skipTo('Publish Agent');
+      } else {
+        throwAgentCompilationError(compileResponse.errors);
+      }
       // Then publish the Agent JSON to create the agent
       // Set up lifecycle listeners for retrieve events
       Lifecycle.getInstance().on('scopedPreRetrieve', () => {
@@ -129,7 +133,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         }
         return Promise.resolve();
       });
-      const result = await Agent.publishAgentJson(conn, this.project!, agentJson);
+      const result = await Agent.publishAgentJson(conn, this.project!, compileResponse.compiledArtifact);
       mso.stop();
 
       return {
