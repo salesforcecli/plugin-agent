@@ -19,7 +19,6 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
-import { Duration, sleep } from '@salesforce/kit';
 import { colorize } from '@oclif/core/ux';
 import { throwAgentCompilationError } from '../../../common.js';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
@@ -104,8 +103,6 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       mso.skipTo('Validating Authoring Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
-      // Call Agent.compileAgent() API
-      await sleep(Duration.seconds(2));
       const result = await Agent.compileAgentScript(
         conn,
         readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
@@ -123,12 +120,13 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       // Handle validation errors
       const err = SfError.wrap(error);
       let count = 0;
-      const formattedError = err.message
+      const rawError = err.message ? err.message : err.name;
+      const formattedError = rawError
         .split('\n')
         .map((line) => {
           count += 1;
           const type = line.split(':')[0];
-          const rest = line.substring(line.indexOf(':')).trim();
+          const rest = line.includes(':') ? line.substring(line.indexOf(':')).trim() : '';
           return `- ${colorize('red', type)}${rest}`;
         })
         .join('\n');

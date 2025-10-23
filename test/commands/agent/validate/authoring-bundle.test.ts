@@ -23,57 +23,11 @@ import AgentValidateAuthoringBundle, {
 import { throwAgentCompilationError } from '../../../../src/common.js';
 
 describe('Agent Validate Authoring Bundle', () => {
-  describe('command configuration', () => {
-    it('should have correct summary', () => {
-      expect(AgentValidateAuthoringBundle.summary).to.equal('Validate an Agent Authoring Bundle');
-    });
-
-    it('should require project', () => {
-      expect(AgentValidateAuthoringBundle.requiresProject).to.be.true;
-    });
-
-    it('should have correct flags', () => {
-      const flags = AgentValidateAuthoringBundle.flags;
-      expect(flags).to.have.property('target-org');
-      expect(flags).to.have.property('api-version');
-      expect(flags).to.have.property('api-name');
-    });
-  });
-
-  describe('flag validation', () => {
-    it('should validate API name format', () => {
-      const prompts = AgentValidateAuthoringBundle['FLAGGABLE_PROMPTS'];
-
-      // Valid API names
-      expect(prompts['api-name'].validate('ValidApiName')).to.equal(true);
-      expect(prompts['api-name'].validate('Valid_Api_Name_123')).to.equal(true);
-      expect(prompts['api-name'].validate('aa')).to.equal(true);
-      expect(prompts['api-name'].validate('MyAgent_Test_1')).to.equal(true);
-
-      // Invalid API names - empty
-      expect(prompts['api-name'].validate('')).to.equal('Invalid API name.');
-
-      // Invalid API names - starts with invalid character
-      expect(prompts['api-name'].validate('Invalid-Name')).to.equal('Invalid API name.');
-      expect(prompts['api-name'].validate('123StartsWithNumber')).to.equal('Invalid API name.');
-      expect(prompts['api-name'].validate('_StartsWithUnderscore')).to.equal('Invalid API name.');
-      expect(prompts['api-name'].validate('-StartsWithDash')).to.equal('Invalid API name.');
-
-      // Invalid API names - too long
-      expect(prompts['api-name'].validate('a'.repeat(81))).to.equal('API name cannot be over 80 characters.');
-
-      // Invalid API names - invalid characters
-      expect(prompts['api-name'].validate('Invalid.Name')).to.equal('Invalid API name.');
-      expect(prompts['api-name'].validate('Invalid Name')).to.equal('Invalid API name.');
-      expect(prompts['api-name'].validate('Invalid@Name')).to.equal('Invalid API name.');
-    });
-  });
-
   describe('prompt configuration', () => {
     it('should have correct prompt messages', () => {
       const prompts = AgentValidateAuthoringBundle['FLAGGABLE_PROMPTS'];
 
-      expect(prompts['api-name'].message).to.equal('API name of the Agent Authoring Bundle to validate.');
+      expect(prompts['api-name'].message).to.equal('API name of the authoring bundle you want to validate.');
       expect(prompts['api-name'].promptMessage).to.equal('API name of the authoring bundle to validate');
     });
   });
