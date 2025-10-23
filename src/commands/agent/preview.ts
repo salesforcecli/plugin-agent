@@ -168,7 +168,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
     // Both classes share the same interface for the methods we need
-    const agentPreview: Preview | AgentSimulate =
+    const agentPreview =
       selectedAgent.source === AgentSource.ORG
         ? new Preview(jwtConn, selectedAgent.Id)
         : new AgentSimulate(jwtConn, selectedAgent.path, true);

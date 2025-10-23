@@ -20,6 +20,7 @@ import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
+import { throwAgentCompilationError } from '../../../common.js';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -98,24 +99,35 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       ],
     });
 
-    mso.skipTo('Validating Authoring Bundle');
-    const targetOrg = flags['target-org'];
-    const conn = targetOrg.getConnection(flags['api-version']);
-    const result = await Agent.compileAgentScript(
-      conn,
-      readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
-    );
-    mso.updateData({ status: 'COMPLETED' });
-    mso.stop('completed');
-    if (result.status === 'failure') {
+    try {
+      mso.skipTo('Validating Authoring Bundle');
+      const targetOrg = flags['target-org'];
+      const conn = targetOrg.getConnection(flags['api-version']);
+      const result = await Agent.compileAgentScript(
+        conn,
+        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
+      );
+      if (result.status === 'success') {
+        mso.updateData({ status: 'COMPLETED' });
+        mso.stop('completed');
+        return {
+          success: true,
+        };
+      } else {
+        throwAgentCompilationError(result.errors);
+      }
+    } catch (error) {
       // Handle validation errors
+      const err = SfError.wrap(error);
       let count = 0;
-      const formattedError = result.errors
-        .map((e) => {
+      const rawError = err.message ? err.message : err.name;
+      const formattedError = rawError
+        .split('\n')
+        .map((line) => {
           count += 1;
-          return `- ${colorize('red', e.errorType)} ${e.description}: ${e.lineStart}:${e.colStart} / ${e.lineEnd}:${
-            e.colEnd
-          }`;
+          const type = line.split(':')[0];
+          const rest = line.includes(':') ? line.substring(line.indexOf(':')).trim() : '';
+          return `- ${colorize('red', type)}${rest}`;
         })
         .join('\n');
 
@@ -125,11 +137,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       this.log(messages.getMessage('error.compilationFailed', [formattedError]));
       return {
         success: false,
-        errors: [formattedError],
-      };
-    } else {
-      return {
-        success: true,
+        errors: err.message.split('\n'),
       };
     }
   }
