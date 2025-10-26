@@ -1,3 +1,9 @@
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+
 ## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
 
 ### Bug Fixes
