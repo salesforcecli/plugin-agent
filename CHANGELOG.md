@@ -1,3 +1,9 @@
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
 ## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
 
 ### Bug Fixes
