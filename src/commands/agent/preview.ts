@@ -50,13 +50,14 @@ enum AgentSource {
   LOCAL = 'local',
 }
 
-type AgentValue =
-  | {
-      Id: string;
-      DeveloperName: string;
-      source: AgentSource.ORG;
-    }
-  | { DeveloperName: string; source: AgentSource.LOCAL; path: string };
+type LocalAgent = { DeveloperName: string; source: AgentSource.LOCAL; path: string };
+type OrgAgent = {
+  Id: string;
+  DeveloperName: string;
+  source: AgentSource.ORG;
+};
+
+type AgentValue = LocalAgent | OrgAgent;
 
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
@@ -92,6 +93,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.apex-debug.summary'),
       char: 'x',
     }),
+    'mock-actions': Flags.boolean({
+      summary: messages.getMessage('flags.mock-actions.summary'),
+      dependsOn: ['authoring-bundle'],
+    }),
   };
 
   public async run(): Promise<AgentPreviewResult> {
@@ -99,36 +104,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const { 'api-name': apiNameFlag } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
-
-    const authInfo = await AuthInfo.create({
-      username: flags['target-org'].getUsername(),
-    });
-    // Get client app - check flag first, then auth file, then env var
-    let clientApp = flags['client-app'];
-
-    if (!clientApp) {
-      const clientApps = getClientAppsFromAuth(authInfo);
-
-      if (clientApps.length === 1) {
-        clientApp = clientApps[0];
-      } else if (clientApps.length > 1) {
-        clientApp = await select({
-          message: 'Select a client app',
-          choices: clientApps.map((app) => ({ value: app, name: app })),
-        });
-      }
-    }
-
-    if (!clientApp) {
-      // at this point we should throw an error
-      throw new SfError('No client app found.');
-    }
-
-    const jwtConn = await Connection.create({
-      authInfo,
-      clientApp,
-    });
-
     const agentsQuery = await conn.query<AgentData>(
       'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
     );
@@ -137,7 +112,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const agentsInOrg = agentsQuery.records;
 
-    let selectedAgent: AgentValue | undefined;
+    let selectedAgent: AgentValue;
 
     if (flags['authoring-bundle']) {
       const bundlePath = findAuthoringBundle(this.project!.getPath(), flags['authoring-bundle']);
@@ -147,7 +122,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       selectedAgent = {
         DeveloperName: flags['authoring-bundle'],
         source: AgentSource.LOCAL,
-        path: bundlePath,
+        path: join(bundlePath, `${flags['authoring-bundle']}.agent`),
       };
     } else if (apiNameFlag) {
       const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
@@ -165,13 +140,42 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         choices: getAgentChoices(agentsInOrg, this.project!),
       });
     }
+    const authInfo = await AuthInfo.create({
+      username: flags['target-org'].getUsername(),
+    });
+    // Get client app - check flag first, then auth file, then env var
+    let clientApp = flags['client-app'];
+
+    if (!clientApp && selectedAgent?.source === AgentSource.ORG) {
+      const clientApps = getClientAppsFromAuth(authInfo);
+
+      if (clientApps.length === 1) {
+        clientApp = clientApps[0];
+      } else if (clientApps.length > 1) {
+        clientApp = await select({
+          message: 'Select a client app',
+          choices: clientApps.map((app) => ({ value: app, name: app })),
+        });
+      } else {
+        // at this point we should throw an error
+        throw new SfError('No client app found.');
+      }
+    }
+
+    const jwtConn =
+      selectedAgent?.source === AgentSource.ORG
+        ? await Connection.create({
+            authInfo,
+            clientApp,
+          })
+        : await Connection.create({ authInfo });
 
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
     // Both classes share the same interface for the methods we need
     const agentPreview =
       selectedAgent.source === AgentSource.ORG
         ? new Preview(jwtConn, selectedAgent.Id)
-        : new AgentSimulate(jwtConn, selectedAgent.path, true);
+        : new AgentSimulate(jwtConn, selectedAgent.path, flags['mock-actions'] ?? false);
 
     agentPreview.toggleApexDebugMode(flags['apex-debug']);
 
