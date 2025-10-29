@@ -30,9 +30,9 @@ Name of the linked client app to use for the agent connection.
 
 Directory where conversation transcripts are saved.
 
-# flags.mock-actions.summary
+# flags.use-live-actions.summary
 
-quick summary here
+When true, will use real actions in the org, when false (default) will use AI to mock actions
 
 # flags.apex-debug.summary
 
