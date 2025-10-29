@@ -214,17 +214,17 @@ export function AgentPreviewReact(props: {
                 </Box>
               ) : (
                 <>
-                    <Box flexDirection="row" columnGap={1}>
-                      <Text>{role === 'user' ? 'You' : role}</Text>
-                      <Text color="grey">{ts.toLocaleString()}</Text>
-                    </Box>
-                    <Box
-                      borderStyle="round"
-                      paddingLeft={1}
-                      paddingRight={1}
-                    >
-                      <Text>{content}</Text>
-                    </Box>
+                  <Box flexDirection="row" columnGap={1}>
+                    <Text>{role === 'user' ? 'You' : role}</Text>
+                    <Text color="grey">{ts.toLocaleString()}</Text>
+                  </Box>
+                  <Box
+                    borderStyle="round"
+                    paddingLeft={1}
+                    paddingRight={1}
+                  >
+                    <Text>{content}</Text>
+                  </Box>
                 </>
               )}
             </Box>

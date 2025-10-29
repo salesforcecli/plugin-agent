@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { resolve, join } from 'node:path';
 import * as path from 'node:path';
+import { join, resolve } from 'node:path';
 import { globSync } from 'glob';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
@@ -25,12 +25,12 @@ import { env } from '@salesforce/kit';
 import {
   AgentPreview as Preview,
   AgentSimulate,
-  findAuthoringBundle,
   AgentSource,
-  ScriptAgent,
+  findAuthoringBundle,
   PublishedAgent,
+  ScriptAgent,
 } from '@salesforce/agents';
-import { select, confirm, input } from '@inquirer/prompts';
+import { confirm, input, select } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -183,7 +183,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         ? new Preview(jwtConn, selectedAgent.Id)
         : new AgentSimulate(jwtConn, selectedAgent.path, useLiveActions);
 
-    agentPreview.toggleApexDebugMode(flags['apex-debug']);
+    agentPreview.setApexDebugMode(flags['apex-debug']);
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
