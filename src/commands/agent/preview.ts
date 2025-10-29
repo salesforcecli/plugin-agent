@@ -22,7 +22,14 @@ import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/
 import React from 'react';
 import { render } from 'ink';
 import { env } from '@salesforce/kit';
-import { AgentPreview as Preview, AgentSimulate, findAuthoringBundle } from '@salesforce/agents';
+import {
+  AgentPreview as Preview,
+  AgentSimulate,
+  findAuthoringBundle,
+  AgentSource,
+  ScriptAgent,
+  PublishedAgent,
+} from '@salesforce/agents';
 import { select, confirm, input } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
@@ -44,20 +51,6 @@ type Choice<Value> = {
   name?: string;
   disabled?: boolean | string;
 };
-
-enum AgentSource {
-  PUBLISHED = 'published',
-  SCRIPT = 'script',
-}
-
-type ScriptAgent = { DeveloperName: string; source: AgentSource.SCRIPT; path: string };
-type PublishedAgent = {
-  Id: string;
-  DeveloperName: string;
-  source: AgentSource.PUBLISHED;
-};
-
-type AgentValue = ScriptAgent | PublishedAgent;
 
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
@@ -116,7 +109,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       )
     ).records;
 
-    let selectedAgent: AgentValue;
+    let selectedAgent: ScriptAgent | PublishedAgent;
 
     if (flags['authoring-bundle']) {
       // user specified --authoring-bundle, we'll find the script and use it
@@ -141,7 +134,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       };
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
     } else {
-      selectedAgent = await select({
+      selectedAgent = await select<ScriptAgent | PublishedAgent>({
         message: 'Select an agent',
         choices: this.getAgentChoices(agentsInOrg),
       });
@@ -205,8 +198,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     await instance.waitUntilExit();
   }
 
-  private getAgentChoices(agents: AgentData[]): Array<Choice<AgentValue>> {
-    const choices: Array<Choice<AgentValue>> = [];
+  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgent | PublishedAgent>> {
+    const choices: Array<Choice<ScriptAgent | PublishedAgent>> = [];
 
     // Add org agents
     for (const agent of agents) {
