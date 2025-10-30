@@ -32,7 +32,7 @@ Directory where conversation transcripts are saved.
 
 # flags.use-live-actions.summary
 
-When true, will use real actions in the org, when false (default) will use AI to mock actions
+Use real actions in the org; if not specified, preview uses AI to mock actions. 
 
 # flags.apex-debug.summary
 
