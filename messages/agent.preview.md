@@ -20,7 +20,7 @@ API name of the agent you want to interact with.
 
 # flags.authoring-bundle.summary
 
-Preview a next-gen agent by specifying the API name of the authoring bundle metadata component that implements it. 
+Preview a next-gen agent by specifying the API name of the authoring bundle metadata component that implements it.
 
 # flags.client-app.summary
 
@@ -29,6 +29,10 @@ Name of the linked client app to use for the agent connection.
 # flags.output-dir.summary
 
 Directory where conversation transcripts are saved.
+
+# flags.use-live-actions.summary
+
+Use real actions in the org; if not specified, preview uses AI to mock actions. 
 
 # flags.apex-debug.summary
 

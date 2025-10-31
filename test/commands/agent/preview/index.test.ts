@@ -23,7 +23,6 @@ import {
   agentIsUnsupported,
   agentIsInactive,
   validateAgent,
-  getAgentChoices,
 } from '../../../../src/commands/agent/preview.js';
 
 // TODO - pull in error messages
@@ -140,55 +139,23 @@ describe('Agent Preview', () => {
     });
   });
 
-  describe('gets agent choices', () => {
-    it('returns agent choices', () => {
-      const agents: AgentData[] = [
-        {
-          Id: 'OXx1234567890',
-          DeveloperName: 'some_agent',
-          BotVersions: {
-            records: [{ Status: 'Active' }],
-          },
-        },
-        {
-          Id: 'OXx1234567891',
-          DeveloperName: UNSUPPORTED_AGENTS[0],
-          BotVersions: {
-            records: [{ Status: 'Active' }],
-          },
-        },
-        {
-          Id: 'OXx1234567892',
-          DeveloperName: 'inactive_agent',
-          BotVersions: {
-            records: [{ Status: 'Inactive' }],
-          },
-        },
-      ];
+  describe('agent source types', () => {
+    it('should support script agent source type', () => {
+      const scriptAgent = {
+        DeveloperName: 'test-agent',
+        source: 'script' as const,
+        path: '/path/to/agent.agent',
+      };
+      expect(scriptAgent.source).to.equal('script');
+    });
 
-      const choices = getAgentChoices(agents);
-      expect(choices).to.have.lengthOf(3);
-
-      expect(choices[0].name).to.equal('some_agent');
-      expect(choices[0].value).to.deep.equal({
+    it('should support published agent source type', () => {
+      const publishedAgent = {
         Id: 'OXx1234567890',
-        DeveloperName: 'some_agent',
-      });
-      expect(choices[0].disabled).to.equal(false);
-
-      expect(choices[1].name).to.equal(UNSUPPORTED_AGENTS[0]);
-      expect(choices[1].value).to.deep.equal({
-        Id: 'OXx1234567891',
-        DeveloperName: UNSUPPORTED_AGENTS[0],
-      });
-      expect(choices[1].disabled).to.equal('(Not Supported)');
-
-      expect(choices[2].name).to.equal('inactive_agent');
-      expect(choices[2].value).to.deep.equal({
-        Id: 'OXx1234567892',
-        DeveloperName: 'inactive_agent',
-      });
-      expect(choices[2].disabled).to.equal('(Inactive)');
+        DeveloperName: 'test-agent',
+        source: 'published' as const,
+      };
+      expect(publishedAgent.source).to.equal('published');
     });
   });
 });

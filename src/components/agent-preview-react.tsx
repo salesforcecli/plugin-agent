@@ -20,8 +20,8 @@ import * as process from 'node:process';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { Connection, SfError } from '@salesforce/core';
-import { AgentPreview, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
+import { Connection, SfError, Lifecycle } from '@salesforce/core';
+import { AgentPreviewBase, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
 import { sleep } from '@salesforce/kit';
 
 // Component to show a simple typing animation
@@ -48,10 +48,6 @@ function Typing(): React.ReactNode {
   );
 }
 
-// Split the content on newlines, then find the longest array element
-const calculateWidth = (content: string): number =>
-  content.split('\n').reduce((acc, line) => Math.max(acc, line.length), 0) + 4;
-
 const saveTranscriptsToFile = (
   outputDir: string,
   messages: Array<{ timestamp: Date; role: string; content: string }>,
@@ -76,9 +72,10 @@ const saveTranscriptsToFile = (
  */
 export function AgentPreviewReact(props: {
   readonly connection: Connection;
-  readonly agent: AgentPreview;
+  readonly agent: AgentPreviewBase;
   readonly name: string;
   readonly outputDir: string | undefined;
+  readonly isLocalAgent: boolean;
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
@@ -93,7 +90,7 @@ export function AgentPreviewReact(props: {
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
   const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
 
-  const { connection, agent, name, outputDir } = props;
+  const { connection, agent, name, outputDir, isLocalAgent } = props;
 
   useInput((input, key) => {
     if (key.escape) {
@@ -121,6 +118,29 @@ export function AgentPreviewReact(props: {
   }, [sessionEnded]);
 
   React.useEffect(() => {
+    // Set up event listeners for agent compilation and simulation events
+    const lifecycle = Lifecycle.getInstance();
+
+    const handleCompilingEvent = (): Promise<void> => {
+      setHeader('Compiling agent...');
+      return Promise.resolve();
+    };
+
+    const handleSimulationStartingEvent = (): Promise<void> => {
+      setHeader('Starting session...');
+      return Promise.resolve();
+    };
+
+    const handleSessionStartedEvent = (): Promise<void> => {
+      setHeader(`New session started with "${props.name}"`);
+      return Promise.resolve();
+    };
+
+    // Listen for the events
+    lifecycle.on('agents:compiling', handleCompilingEvent);
+    lifecycle.on('agents:simulation-starting', handleSimulationStartingEvent);
+    lifecycle.on('agents:session-started', handleSessionStartedEvent);
+
     const startSession = async (): Promise<void> => {
       try {
         const session = await agent.start();
@@ -132,7 +152,17 @@ export function AgentPreviewReact(props: {
           const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
           setTempDir(path.join(outputDir, `${dateForDir}--${session.sessionId}`));
         }
-        setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
+        // Add disclaimer for local agents before the agent's first message
+        const initialMessages = [];
+        if (isLocalAgent) {
+          initialMessages.push({
+            role: 'system',
+            content: 'Agent preview does not provide strict adherence to connection endpoint configuration and escalation is not supported.\n\nTo test escalation, publish your agent then use the desired connection endpoint (e.g., Web Page, SMS, etc).',
+            timestamp: new Date(),
+          });
+        }
+        initialMessages.push({ role: name, content: session.messages[0].message, timestamp: new Date() });
+        setMessages(initialMessages);
       } catch (e) {
         const sfError = SfError.wrap(e);
         setIsTyping(false);
@@ -143,7 +173,7 @@ export function AgentPreviewReact(props: {
     };
 
     void startSession();
-  }, []);
+  }, [agent, name, outputDir, props.name, isLocalAgent]);
 
   React.useEffect(() => {
     saveTranscriptsToFile(tempDir, messages, responses);
@@ -171,19 +201,32 @@ export function AgentPreviewReact(props: {
               alignItems={role === 'user' ? 'flex-end' : 'flex-start'}
               flexDirection="column"
             >
-              <Box flexDirection="row" columnGap={1}>
-                <Text>{role === 'user' ? 'You' : role}</Text>
-                <Text color="grey">{ts.toLocaleString()}</Text>
-              </Box>
-              <Box
-                // Use 70% of the terminal width, or the width of a single line of content, whichever is smaller
-                width={Math.min(process.stdout.columns * 0.7, calculateWidth(content))}
-                borderStyle="round"
-                paddingLeft={1}
-                paddingRight={1}
-              >
-                <Text>{content}</Text>
-              </Box>
+              {role === 'system' ? (
+                <Box
+                  width={process.stdout.columns}
+                  borderStyle="round"
+                  borderColor="yellow"
+                  paddingLeft={1}
+                  paddingRight={1}
+                  marginBottom={1}
+                >
+                  <Text>{content}</Text>
+                </Box>
+              ) : (
+                <>
+                  <Box flexDirection="row" columnGap={1}>
+                    <Text>{role === 'user' ? 'You' : role}</Text>
+                    <Text color="grey">{ts.toLocaleString()}</Text>
+                  </Box>
+                  <Box
+                    borderStyle="round"
+                    paddingLeft={1}
+                    paddingRight={1}
+                  >
+                    <Text>{content}</Text>
+                  </Box>
+                </>
+              )}
             </Box>
           ))}
         </Box>

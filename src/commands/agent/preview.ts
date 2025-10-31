@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-import { resolve, join } from 'node:path';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { AuthInfo, Connection, Messages, SfError } from '@salesforce/core';
+import * as path from 'node:path';
+import { join, resolve } from 'node:path';
+import { globSync } from 'glob';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import { env } from '@salesforce/kit';
-import { AgentPreview as Preview } from '@salesforce/agents';
-import { select, confirm, input } from '@inquirer/prompts';
+import {
+  AgentPreview as Preview,
+  AgentSimulate,
+  AgentSource,
+  findAuthoringBundle,
+  PublishedAgent,
+  ScriptAgent,
+} from '@salesforce/agents';
+import { confirm, input, select } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -41,11 +50,6 @@ type Choice<Value> = {
   value: Value;
   name?: string;
   disabled?: boolean | string;
-};
-
-type AgentValue = {
-  Id: string;
-  DeveloperName: string;
 };
 
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
@@ -82,61 +86,104 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.apex-debug.summary'),
       char: 'x',
     }),
+    'use-live-actions': Flags.boolean({
+      summary: messages.getMessage('flags.use-live-actions.summary'),
+      default: false,
+    }),
   };
 
   public async run(): Promise<AgentPreviewResult> {
+    // STAGES OF PREVIEW
+    // get user's agent selection either from flags, or interaction
+    // if .agent selected, use the AgentSimulate class to preview
+    // if published agent, use AgentPreview for preview
+    // based on agent, differing auth mechanisms required
     const { flags } = await this.parse(AgentPreview);
 
-    const { 'api-name': apiNameFlag } = flags;
+    const { 'api-name': apiNameFlag, 'use-live-actions': useLiveActions } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    const authInfo = await AuthInfo.create({
-      username: flags['target-org'].getUsername(),
-    });
-    if (!(flags['client-app'] ?? env.getString('SF_DEMO_AGENT_CLIENT_APP'))) {
-      throw new SfError('SF_DEMO_AGENT_CLIENT_APP is unset!');
-    }
+    const agentsInOrg = (
+      await conn.query<AgentData>(
+        'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
+      )
+    ).records;
 
-    const jwtConn = await Connection.create({
-      authInfo,
-      clientApp: env.getString('SF_DEMO_AGENT_CLIENT_APP') ?? flags['client-app'],
-    });
-
-    const agentsQuery = await conn.query<AgentData>(
-      'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
-    );
-
-    if (agentsQuery.totalSize === 0) throw new SfError('No Agents found in the org');
-
-    const agentsInOrg = agentsQuery.records;
-
-    let selectedAgent;
+    let selectedAgent: ScriptAgent | PublishedAgent;
 
     if (flags['authoring-bundle']) {
-      const envAgentName = env.getString('SF_DEMO_AGENT');
-      const agent = agentsQuery.records.find((a) => a.DeveloperName === envAgentName);
+      // user specified --authoring-bundle, we'll find the script and use it
+      const bundlePath = findAuthoringBundle(this.project!.getPath(), flags['authoring-bundle']);
+      if (!bundlePath) {
+        throw new SfError(`Could not find authoring bundle for ${flags['authoring-bundle']}`);
+      }
       selectedAgent = {
-        Id:
-          agent?.Id ??
-          `Couldn't find an agent in ${agentsQuery.records.map((a) => a.DeveloperName).join(', ')} matching ${
-            envAgentName ?? '!SF_DEMO_AGENT is unset!'
-          }`,
         DeveloperName: flags['authoring-bundle'],
+        source: AgentSource.SCRIPT,
+        path: join(bundlePath, `${flags['authoring-bundle']}.agent`),
       };
     } else if (apiNameFlag) {
-      selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === apiNameFlag);
+      // user specified --api-name, it should be in the list of agents from the org
+      const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
+      if (!agent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
+      validateAgent(agent);
+      selectedAgent = {
+        Id: agent.Id,
+        DeveloperName: agent.DeveloperName,
+        source: AgentSource.PUBLISHED,
+      };
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
-      validateAgent(selectedAgent);
     } else {
-      selectedAgent = await select({
+      selectedAgent = await select<ScriptAgent | PublishedAgent>({
         message: 'Select an agent',
-        choices: getAgentChoices(agentsInOrg),
+        choices: this.getAgentChoices(agentsInOrg),
       });
     }
 
+    // we have the selected agent, create the appropriate connection
+    const authInfo = await AuthInfo.create({
+      username: flags['target-org'].getUsername(),
+    });
+    // Get client app - check flag first, then auth file, then env var
+    let clientApp = flags['client-app'];
+
+    if (!clientApp && selectedAgent?.source === AgentSource.PUBLISHED) {
+      const clientApps = getClientAppsFromAuth(authInfo);
+
+      if (clientApps.length === 1) {
+        clientApp = clientApps[0];
+      } else if (clientApps.length > 1) {
+        clientApp = await select({
+          message: 'Select a client app',
+          choices: clientApps.map((app) => ({ value: app, name: app })),
+        });
+      } else {
+        throw new SfError('No client app found.');
+      }
+    }
+
+    if (useLiveActions && selectedAgent.source === AgentSource.PUBLISHED) {
+      void Lifecycle.getInstance().emitWarning(
+        'Published agents will always use real actions in your org, specifying --use-live-actions and selecting a published agent has no effect'
+      );
+    }
+
+    const jwtConn =
+      selectedAgent?.source === AgentSource.PUBLISHED
+        ? await Connection.create({
+            authInfo,
+            clientApp,
+          })
+        : await Connection.create({ authInfo });
+
     const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
-    const agentPreview = new Preview(jwtConn, selectedAgent.Id);
-    agentPreview.toggleApexDebugMode(flags['apex-debug']);
+    // Both classes share the same interface for the methods we need
+    const agentPreview =
+      selectedAgent.source === AgentSource.PUBLISHED
+        ? new Preview(jwtConn, selectedAgent.Id)
+        : new AgentSimulate(jwtConn, selectedAgent.path, useLiveActions);
+
+    agentPreview.setApexDebugMode(flags['apex-debug']);
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
@@ -144,10 +191,47 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         agent: agentPreview,
         name: selectedAgent.DeveloperName,
         outputDir,
+        isLocalAgent: selectedAgent.source === AgentSource.SCRIPT,
       }),
       { exitOnCtrlC: false }
     );
     await instance.waitUntilExit();
+  }
+
+  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgent | PublishedAgent>> {
+    const choices: Array<Choice<ScriptAgent | PublishedAgent>> = [];
+
+    // Add org agents
+    for (const agent of agents) {
+      if (agentIsInactive(agent) || agentIsUnsupported(agent.DeveloperName)) {
+        continue;
+      }
+
+      choices.push({
+        name: `${agent.DeveloperName} (Published)`,
+        value: {
+          Id: agent.Id,
+          DeveloperName: agent.DeveloperName,
+          source: AgentSource.PUBLISHED,
+        },
+      });
+    }
+
+    // Add local agents from .agent files
+    const localAgentPaths = globSync('**/*.agent', { cwd: this.project!.getPath() });
+    for (const agentPath of localAgentPaths) {
+      const agentName = path.basename(agentPath, '.agent');
+      choices.push({
+        name: `${agentName} (Agent Script)`,
+        value: {
+          DeveloperName: agentName,
+          source: AgentSource.SCRIPT,
+          path: path.join(this.project!.getPath(), agentPath),
+        },
+      });
+    }
+
+    return choices;
   }
 }
 
@@ -172,22 +256,8 @@ export const validateAgent = (agent: AgentData): boolean => {
   return true;
 };
 
-export const getAgentChoices = (agents: AgentData[]): Array<Choice<AgentValue>> =>
-  agents.map((agent) => {
-    let disabled: string | boolean = false;
-
-    if (agentIsInactive(agent)) disabled = '(Inactive)';
-    if (agentIsUnsupported(agent.DeveloperName)) disabled = '(Not Supported)';
-
-    return {
-      name: agent.DeveloperName,
-      value: {
-        Id: agent.Id,
-        DeveloperName: agent.DeveloperName,
-      },
-      disabled,
-    };
-  });
+export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] =>
+  Object.keys(authInfo.getFields().clientApps ?? {});
 
 export const resolveOutputDir = async (
   outputDir: string | undefined,
