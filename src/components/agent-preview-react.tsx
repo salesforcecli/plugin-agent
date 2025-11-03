@@ -49,7 +49,7 @@ function Typing(): React.ReactNode {
   );
 }
 
-const saveTranscriptsToFile = (
+export const saveTranscriptsToFile = (
   outputDir: string,
   messages: Array<{ timestamp: Date; role: string; content: string }>,
   responses: AgentPreviewSendResponse[]
