@@ -8,7 +8,7 @@
     "@inquirer/core": "^10.3.0",
     "@inquirer/prompts": "^7.8.4",
     "@oclif/core": "^4",
-    "@oclif/multi-stage-output": "^0.8.26",
+    "@oclif/multi-stage-output": "^0.8.28",
     "@salesforce/agents": "^0.18.2",
     "@salesforce/core": "^8.23.2",
     "@salesforce/kit": "^3.2.3",
