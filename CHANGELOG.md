@@ -1,3 +1,9 @@
+## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
+
 ## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.25) (2025-11-09)
 
 ### Bug Fixes
