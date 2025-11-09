@@ -1,3 +1,9 @@
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.25) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
 ## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
 
 ### Bug Fixes
