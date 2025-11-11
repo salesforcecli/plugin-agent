@@ -21,7 +21,6 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
-import { env } from '@salesforce/kit';
 import {
   AgentPreview as Preview,
   AgentSimulate,
@@ -30,7 +29,7 @@ import {
   PublishedAgent,
   ScriptAgent,
 } from '@salesforce/agents';
-import { confirm, input, select } from '@inquirer/prompts';
+import { select } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -176,7 +175,9 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
           })
         : await Connection.create({ authInfo });
 
-    const outputDir = await resolveOutputDir(flags['output-dir'], flags['apex-debug']);
+    // Only resolve outputDir if explicitly provided via flag
+    // Otherwise, let user decide when exiting
+    const outputDir = flags['output-dir'] ? resolve(flags['output-dir']) : undefined;
     // Both classes share the same interface for the methods we need
     const agentPreview =
       selectedAgent.source === AgentSource.PUBLISHED
@@ -192,6 +193,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         name: selectedAgent.DeveloperName,
         outputDir,
         isLocalAgent: selectedAgent.source === AgentSource.SCRIPT,
+        apexDebug: flags['apex-debug'],
       }),
       { exitOnCtrlC: false }
     );
@@ -258,30 +260,3 @@ export const validateAgent = (agent: AgentData): boolean => {
 
 export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] =>
   Object.keys(authInfo.getFields().clientApps ?? {});
-
-export const resolveOutputDir = async (
-  outputDir: string | undefined,
-  apexDebug: boolean | undefined
-): Promise<string | undefined> => {
-  if (!outputDir) {
-    const response = apexDebug
-      ? true
-      : await confirm({
-          message: 'Save transcripts to an output directory?',
-          default: true,
-        });
-
-    const outputTypes = apexDebug ? 'debug logs and transcripts' : 'transcripts';
-    if (response) {
-      const getDir = await input({
-        message: `Enter the output directory for ${outputTypes}`,
-        default: env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', join('temp', 'agent-preview')),
-        required: true,
-      });
-
-      return resolve(getDir);
-    }
-  } else {
-    return resolve(outputDir);
-  }
-};
