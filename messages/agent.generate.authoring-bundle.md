@@ -1,12 +1,18 @@
 # summary
 
-Generate a local authoring bundle from an existing agent spec YAML file.
+Generate an authoring bundle from an existing agent spec YAML file.
 
 # description
 
-Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension ".agent") that fully describes the next-gen agent. Use this command to generate an authoring bundle based on an agent spec YAML file, which you create with the "agent create agent-spec" command.
+Authoring bundles are metadata components that contain an agent's Agent Script file. The Agent Script file is the agent's blueprint; it fully describes what the agent can do using the Agent Script language.
 
-By default, authoring bundles are generated in the force-app/main/default/aiAuthoringBundles/<api-name> directory. Use the --output-dir to generate them elsewhere.
+Use this command to generate a new authoring bundle based on an agent spec YAML file, which you create with the "agent generate agent-spec" command. The agent spec YAML file is a high-level description of the agent; it describes its essence rather than exactly what it can do.
+
+The metadata type for authoring bundles is aiAuthoringBundle, which consist of a standard "<bundle-name>.bundle-meta.xml" metadata file and the Agent Script file (with extension ".agent"). When you run this command, the new authoring bundle is generated in the force-app/main/default/aiAuthoringBundles/<bundle-name> directory. Use the --output-dir flag to generate them elsewhere.
+
+After you generate the initial authoring bundle, vibe code (modify using natural language) the Agent Script file so your agent behaves exactly as you want. The generated Agent Script file is just a first draft of your agent! Then publish the agent to your org with the "agent publish authoring-bundle" command.
+
+This command requires an org because it uses it to access an LLM for generating the Agent Script file.
 
 # flags.spec.summary
 
@@ -30,13 +36,13 @@ API name of the new authoring bundle
 
 # examples
 
-- Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My Authoring Bundle":
+- Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My Authoring Bundle"; use your default org:
 
-  <%= config.bin %> <%= command.id %> --spec-file specs/agentSpec.yaml --name "My Authoring Bundle"
+  <%= config.bin %> <%= command.id %> --spec specs/agentSpec.yaml --name "My Authoring Bundle"
 
-- Same as previous example, but generate the files in the other-package-dir/main/default/aiAuthoringBundles directory:
+- Same as previous example, but generate the files in the "other-package-dir/main/default" package directory; use the org with alias "my-dev-org":
 
-  <%= config.bin %> <%= command.id %> --spec-file specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir other-package-dir/main/default/aiAuthoringBundles
+  <%= config.bin %> <%= command.id %> --spec specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir other-package-dir/main/default --target-org my-dev-org
 
 # error.no-spec-file
 
@@ -48,4 +54,4 @@ The specified file is not a valid agent spec YAML file.
 
 # error.failed-to-create-agent
 
-Failed to create a next-gen agent from the agent spec YAML file.
+Failed to create an authoring bundle from the agent spec YAML file.

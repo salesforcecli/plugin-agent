@@ -4,6 +4,8 @@ Create an agent in your org using a local agent spec file.
 
 # description
 
+NOTE: This command creates an agent that doesn't use Agent Script as its blueprint. We generally don't recommend you use this workflow to create an agent. Rather, use the "agent generate|validate|publish authoring-bundle" commands to author agents that use the Agent Script language. See "Author an Agent" (https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-nga-author-agent.html) for details.
+
 To run this command, you must have an agent spec file, which is a YAML file that define the agent properties and contains a list of AI-generated topics. Topics define the range of jobs the agent can handle. Use the "agent generate agent-spec" CLI command to generate an agent spec file. Then specify the file to this command using the --spec flag, along with the name (label) of the new agent with the --name flag. If you don't specify any of the required flags, the command prompts you.
 
 When this command completes, your org contains the new agent, which you can then edit and customize in the Agent Builder UI. The new agent's topics are the same as the ones listed in the agent spec file. The agent might also have some AI-generated actions, or you can add them. This command also retrieves all the metadata files associated with the new agent to your local Salesforce DX project.
