@@ -1,20 +1,20 @@
 # summary
 
-Publish an authoring bundle to your org, which results in a new next-gen agent.
+Publish an authoring bundle to your org, which results in a new or updated agent.
 
 # description
 
-When you publish an authoring bundle to your org, a number of things happen. First, this command validates that the agent file (with extension ".agent") successfully compiles. Then the authoring bundle metadata component is deployed to the org, and all associated metadata components, such as the Bot, BotVersion, and GenAiXXX components, are either created or updated. The org then creates a new next-gen agent based on the deployed authoring bundle and associated metadata. Finally, all the metadata associated with the new agent is retrieved back to your local DX project.
+An authoring bundle is a metadata type (named aiAuthoringBundle) that provides the blueprint for an agent. The metadata type contains two files: the standard metatada XML file and an Agent Script file (extension ".agent") that fully describes the agent using the Agent Script language.
 
-Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension ".agent") that fully describes the next-gen agent.
+When you publish an authoring bundle to your org, a number of things happen. First, this command validates that the Agent Script file successfully compiles. If there are compilation errors, the command exits and you must fix the Agent Script file to continue. Once the Agent Script file compiles, then the authoring bundle metadata component is deployed to the org, and all associated agent metadata components, such as the Bot, BotVersion, and GenAiXXX components, are either created or updated. The org then either creates a new agent based on the deployed authoring bundle, or creates a new version of the agent if it already existed. Finally, all the new or changed metadata components associated with the new agent are retrieved back to your local DX project.
 
-This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the command prompts you for it.
+This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
 # examples
 
-- Publish an authoring bundle with API name MyAuthoringBundle to the org with alias "my-org", resulting in a new agent named "My Fab Agent"::
+- Publish an authoring bundle with API name MyAuthoringBundle to the org with alias "my-org":
 
-  <%= config.bin %> <%= command.id %> --api-name MyAuthoringbundle --agent-name "My Fab Agent" --target-org my-org
+  <%= config.bin %> <%= command.id %> --api-name MyAuthoringbundle --target-org my-org
 
 # flags.api-name.summary
 
@@ -23,10 +23,6 @@ API name of the authoring bundle you want to publish.
 # flags.api-name.prompt
 
 API name of the authoring bundle to publish
-
-# flags.agent-name.summary
-
-Name for the new agent that is created from the published authoring bundle.
 
 # error.missingRequiredFlags
 
@@ -43,8 +39,8 @@ Failed to publish agent with the following errors:
 
 # error.agentNotFound
 
-Could not find a .bundle-meta.xml file with API name '%s' in the project.
+Couldn't find a ".bundle-meta.xml" file with API name '%s' in the DX project.
 
 # error.agentNotFoundAction
 
-Check that the API name is correct and that the .agent file exists in your project directory.
+Check that the API name is correct and that the ".agent" file exists in your DX project directory.

@@ -4,7 +4,7 @@ Generate an agent spec, which is a YAML file that captures what an agent can do.
 
 # description
 
-The first step in creating an agent in your org with Salesforce CLI is to generate an agent spec using this command. An agent spec is a YAML-formatted file that contains information about the agent, such as its role and company description, and then an AI-generated list of topics based on this information. Topics define the range of jobs your agent can handle.
+An agent spec is a YAML-formatted file that contains basic information about the agent, such as its role, company description, and an AI-generated list of topics based on this information. Topics define the range of jobs your agent can handle.
 
 Use flags, such as --role and --company-description, to provide details about your company and the role that the agent plays in your company. If you prefer, you can also be prompted for the basic information; use --full-interview to be prompted for all required and optional properties. Upon command execution, the large language model (LLM) associated with your org uses the provided information to generate a list of topics for the agent. Because the LLM uses the company and role information to generate the topics, we recommend that you provide accurate, complete, and specific details so the LLM generates the best and most relevant topics. Once generated, you can edit the spec file; for example, you can remove topics that don't apply or change a topic's description.
 
@@ -12,7 +12,7 @@ You can also iterate the spec generation process by using the --spec flag to pas
 
 You can also specify other agent properties, such as a custom prompt template, how to ground the prompt template to add context to the agent's prompts, the tone of the prompts, and the username of a user in the org to assign to the agent.
 
-When your agent spec is ready, you then create the agent in your org by running the "agent create" CLI command and specifying the spec with the --spec flag.
+When your agent spec is ready, generate an authoring bundle from it by passing the spec file to the --spec flag of the "agent generate authoring-bundle" CLI command. An authoring bundle is a metadata type that contains an Agent Script file, which is the blueprint for an agent. (While not recommended, you can also use the agent spec file to immediately create an agent with the "agent create" command. We don't recommend this workflow because these types of agents don't use Agent Script, and are thus less flexible and more difficult to maintain.)
 
 # flags.type.summary
 

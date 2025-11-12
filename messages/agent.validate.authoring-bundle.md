@@ -1,18 +1,18 @@
 # summary
 
-Validate a local authoring bundle to ensure it compiles successfully and can be used to create a next-gen agent.
+Validate an authoring bundle to ensure its Agent Script file compiles successfully and can be used to publish an agent.
 
 # description
 
-Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension ".agent") that fully describes the next-gen agent. Generate a local authoring bundle with the "agent generate authoring-bundle" command.
+An authoring bundle is a metadata type (named aiAuthoringBundle) that provides the blueprint for an agent. The metadata type contains two files: the standard metatada XML file and an Agent Script file (extension ".agent") that fully describes the agent using the Agent Script language.
 
-This command validates that the agent file (with extension ".agent") that's part of the authoring bundle compiles without errors and can later be used to successfully create a next-gen agent.
+This command validates that the Agent Script file in the authoring bundle compiles without errors so that you can later publish the bundle to your org. Use this command while you vibe code (modify with natural language) the Agent Script file to ensure that it's always valid. If the validation fails, the command outputs the list of syntax errors, a brief description of the error, and the location in the Agent Script file where the error occurred.
 
-This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the command prompts you for it.
+This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
 # examples
 
-- Validate a local authoring bundle with API name MyAuthoringBundle:
+- Validate an authoring bundle with API name MyAuthoringBundle:
 
   <%= config.bin %> <%= command.id %> --api-name MyAuthoringBundle
 
@@ -34,13 +34,13 @@ Invalid authoring bundle path. Provide a valid directory path to the authoring b
 
 # error.compilationFailed
 
-Compilation of the agent file failed with the following errors:
+Compilation of the Agent Script file failed with the following errors:
 %s
 
 # error.agentNotFound
 
-Could not find a .bundle-meta.xml file with API name '%s' in the project.
+Couldn't find a ".bundle-meta.xml" file with API name '%s' in the DX project.
 
 # error.agentNotFoundAction
 
-Check that the API name is correct and that the ".agent" file exists in your project directory.
+Check that the API name is correct and that the ".agent" file exists in your DX project directory.
