@@ -104,9 +104,6 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
 
-      // Preserve the original accessToken by storing its value
-      const originalAccessToken = conn.accessToken;
-
       // First compile the .agent file to get the Agent JSON
       const compileResponse = await Agent.compileAgentScript(
         conn,
@@ -138,8 +135,6 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
-      // Restore the original accessToken after compilation
-      conn.accessToken = originalAccessToken;
       const result = await Agent.publishAgentJson(conn, this.project!, compileResponse.compiledArtifact);
       mso.stop();
 
