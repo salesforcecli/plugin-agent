@@ -112,7 +112,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -139,6 +139,11 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Create an agent in your org using a local agent spec file.
+
+  NOTE: This command creates an agent that doesn't use Agent Script as its blueprint. We generally don't recommend you
+  use this workflow to create an agent. Rather, use the "agent generate|validate|publish authoring-bundle" commands to
+  author agents that use the Agent Script language. See "Author an Agent"
+  (https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-nga-author-agent.html) for details.
 
   To run this command, you must have an agent spec file, which is a YAML file that define the agent properties and
   contains a list of AI-generated topics. Topics define the range of jobs the agent can handle. Use the "agent generate
@@ -174,7 +179,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -214,7 +219,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -265,10 +270,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Generate an agent spec, which is a YAML file that captures what an agent can do.
 
-  The first step in creating an agent in your org with Salesforce CLI is to generate an agent spec using this command.
-  An agent spec is a YAML-formatted file that contains information about the agent, such as its role and company
-  description, and then an AI-generated list of topics based on this information. Topics define the range of jobs your
-  agent can handle.
+  An agent spec is a YAML-formatted file that contains basic information about the agent, such as its role, company
+  description, and an AI-generated list of topics based on this information. Topics define the range of jobs your agent
+  can handle.
 
   Use flags, such as --role and --company-description, to provide details about your company and the role that the agent
   plays in your company. If you prefer, you can also be prompted for the basic information; use --full-interview to be
@@ -286,8 +290,11 @@ DESCRIPTION
   add context to the agent's prompts, the tone of the prompts, and the username of a user in the org to assign to the
   agent.
 
-  When your agent spec is ready, you then create the agent in your org by running the "agent create" CLI command and
-  specifying the spec with the --spec flag.
+  When your agent spec is ready, generate an authoring bundle from it by passing the spec file to the --spec flag of the
+  "agent generate authoring-bundle" CLI command. An authoring bundle is a metadata type that contains an Agent Script
+  file, which is the blueprint for an agent. (While not recommended, you can also use the agent spec file to immediately
+  create an agent with the "agent create" command. We don't recommend this workflow because these types of agents don't
+  use Agent Script, and are thus less flexible and more difficult to maintain.)
 
 EXAMPLES
   Generate an agent spec in the default location and use flags to specify the agent properties, such as its role and
@@ -319,11 +326,11 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
-Generate a local authoring bundle from an existing agent spec YAML file.
+Generate an authoring bundle from an existing agent spec YAML file.
 
 ```
 USAGE
@@ -345,29 +352,40 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Generate a local authoring bundle from an existing agent spec YAML file.
+  Generate an authoring bundle from an existing agent spec YAML file.
 
-  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
-  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
-  ".agent") that fully describes the next-gen agent. Use this command to generate an authoring bundle based on an agent
-  spec YAML file, which you create with the "agent create agent-spec" command.
+  Authoring bundles are metadata components that contain an agent's Agent Script file. The Agent Script file is the
+  agent's blueprint; it fully describes what the agent can do using the Agent Script language.
 
-  By default, authoring bundles are generated in the force-app/main/default/aiAuthoringBundles/<api-name> directory. Use
-  the --output-dir to generate them elsewhere.
+  Use this command to generate a new authoring bundle based on an agent spec YAML file, which you create with the "agent
+  generate agent-spec" command. The agent spec YAML file is a high-level description of the agent; it describes its
+  essence rather than exactly what it can do.
+
+  The metadata type for authoring bundles is aiAuthoringBundle, which consist of a standard
+  "<bundle-name>.bundle-meta.xml" metadata file and the Agent Script file (with extension ".agent"). When you run this
+  command, the new authoring bundle is generated in the force-app/main/default/aiAuthoringBundles/<bundle-name>
+  directory. Use the --output-dir flag to generate them elsewhere.
+
+  After you generate the initial authoring bundle, vibe code (modify using natural language) the Agent Script file so
+  your agent behaves exactly as you want. The generated Agent Script file is just a first draft of your agent! Then
+  publish the agent to your org with the "agent publish authoring-bundle" command.
+
+  This command requires an org because it uses it to access an LLM for generating the Agent Script file.
 
 EXAMPLES
   Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My
-  Authoring Bundle":
+  Authoring Bundle"; use your default org:
 
-    $ sf agent generate authoring-bundle --spec-file specs/agentSpec.yaml --name "My Authoring Bundle"
+    $ sf agent generate authoring-bundle --spec specs/agentSpec.yaml --name "My Authoring Bundle"
 
-  Same as previous example, but generate the files in the other-package-dir/main/default/aiAuthoringBundles directory:
+  Same as previous example, but generate the files in the "other-package-dir/main/default" package directory; use the
+  org with alias "my-dev-org":
 
-    $ sf agent generate authoring-bundle --spec-file specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir \
-      other-package-dir/main/default/aiAuthoringBundles
+    $ sf agent generate authoring-bundle --spec specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir \
+      other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -415,7 +433,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -476,7 +494,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -542,11 +560,11 @@ EXAMPLES
       transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/preview.ts)_
 
 ## `sf agent publish authoring-bundle`
 
-Publish an authoring bundle to your org, which results in a new next-gen agent.
+Publish an authoring bundle to your org, which results in a new or updated agent.
 
 ```
 USAGE
@@ -563,29 +581,30 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Publish an authoring bundle to your org, which results in a new next-gen agent.
+  Publish an authoring bundle to your org, which results in a new or updated agent.
+
+  An authoring bundle is a metadata type (named aiAuthoringBundle) that provides the blueprint for an agent. The
+  metadata type contains two files: the standard metatada XML file and an Agent Script file (extension ".agent") that
+  fully describes the agent using the Agent Script language.
 
   When you publish an authoring bundle to your org, a number of things happen. First, this command validates that the
-  agent file (with extension ".agent") successfully compiles. Then the authoring bundle metadata component is deployed
-  to the org, and all associated metadata components, such as the Bot, BotVersion, and GenAiXXX components, are either
-  created or updated. The org then creates a new next-gen agent based on the deployed authoring bundle and associated
-  metadata. Finally, all the metadata associated with the new agent is retrieved back to your local DX project.
+  Agent Script file successfully compiles. If there are compilation errors, the command exits and you must fix the Agent
+  Script file to continue. Once the Agent Script file compiles, then the authoring bundle metadata component is deployed
+  to the org, and all associated agent metadata components, such as the Bot, BotVersion, and GenAiXXX components, are
+  either created or updated. The org then either creates a new agent based on the deployed authoring bundle, or creates
+  a new version of the agent if it already existed. Finally, all the new or changed metadata components associated with
+  the new agent are retrieved back to your local DX project.
 
-  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
-  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
-  ".agent") that fully describes the next-gen agent.
-
-  This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the
-  command prompts you for it.
+  This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the
+  command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
 EXAMPLES
-  Publish an authoring bundle with API name MyAuthoringBundle to the org with alias "my-org", resulting in a new agent
-  named "My Fab Agent"::
+  Publish an authoring bundle with API name MyAuthoringBundle to the org with alias "my-org":
 
-    $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --agent-name "My Fab Agent" --target-org my-org
+    $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --target-org my-org
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -640,7 +659,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -675,7 +694,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -741,7 +760,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -814,7 +833,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -888,11 +907,11 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/test/run.ts)_
 
 ## `sf agent validate authoring-bundle`
 
-Validate a local authoring bundle to ensure it compiles successfully and can be used to create a next-gen agent.
+Validate an authoring bundle to ensure its Agent Script file compiles successfully and can be used to publish an agent.
 
 ```
 USAGE
@@ -909,25 +928,27 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Validate a local authoring bundle to ensure it compiles successfully and can be used to create a next-gen agent.
+  Validate an authoring bundle to ensure its Agent Script file compiles successfully and can be used to publish an
+  agent.
 
-  Authoring bundles are metadata types that represent the next-gen Salesforce agents. Their exact metadata name is
-  AiAuthoringBundle and they consist of a standard "\*-meta.xml" metadata file and an agent file (with extension
-  ".agent") that fully describes the next-gen agent. Generate a local authoring bundle with the "agent generate
-  authoring-bundle" command.
+  An authoring bundle is a metadata type (named aiAuthoringBundle) that provides the blueprint for an agent. The
+  metadata type contains two files: the standard metatada XML file and an Agent Script file (extension ".agent") that
+  fully describes the agent using the Agent Script language.
 
-  This command validates that the agent file (with extension ".agent") that's part of the authoring bundle compiles
-  without errors and can later be used to successfully create a next-gen agent.
+  This command validates that the Agent Script file in the authoring bundle compiles without errors so that you can
+  later publish the bundle to your org. Use this command while you vibe code (modify with natural language) the Agent
+  Script file to ensure that it's always valid. If the validation fails, the command outputs the list of syntax errors,
+  a brief description of the error, and the location in the Agent Script file where the error occurred.
 
-  This command requires the API name of the authoring bundle; if you don't provide it with the --api-name flag, the
-  command prompts you for it.
+  This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the
+  command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
 EXAMPLES
-  Validate a local authoring bundle with API name MyAuthoringBundle:
+  Validate an authoring bundle with API name MyAuthoringBundle:
 
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.1/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.24.14-nga.2/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
