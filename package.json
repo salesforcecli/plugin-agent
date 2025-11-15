@@ -5,7 +5,7 @@
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
-    "@inquirer/core": "^10.3.0",
+    "@inquirer/core": "^10.3.2",
     "@inquirer/prompts": "^7.10.0",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.28",
