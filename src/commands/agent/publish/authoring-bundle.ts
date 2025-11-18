@@ -145,7 +145,8 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     } catch (error) {
       // Handle validation errors
       const err = SfError.wrap(error);
-      const errorMessage = messages.getMessage('error.publishFailed', [err.message]);
+      const message = err.message ? err.message : err.name;
+      const errorMessage = messages.getMessage('error.publishFailed', [message]);
 
       // Stop the multi-stage output on error
       mso.error();
