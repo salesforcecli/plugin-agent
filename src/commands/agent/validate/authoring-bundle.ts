@@ -135,7 +135,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       mso.updateData({ errors: count.toString(), status: 'ERROR' });
       mso.error();
 
-      this.log(messages.getMessage('error.compilationFailed', [formattedError]));
+      this.error(messages.getMessage('error.compilationFailed', [formattedError]));
       return {
         success: false,
         errors: err.message.split('\n'),
