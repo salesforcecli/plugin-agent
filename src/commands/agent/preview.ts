@@ -182,7 +182,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const agentPreview =
       selectedAgent.source === AgentSource.PUBLISHED
         ? new Preview(jwtConn, selectedAgent.Id)
-        : new AgentSimulate(jwtConn, selectedAgent.path, useLiveActions);
+        : new AgentSimulate(jwtConn, selectedAgent.path, !useLiveActions);
 
     agentPreview.setApexDebugMode(flags['apex-debug']);
 
