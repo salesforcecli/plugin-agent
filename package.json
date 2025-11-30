@@ -6,7 +6,7 @@
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
     "@inquirer/core": "^10.3.2",
-    "@inquirer/prompts": "^7.10.0",
+    "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.29",
     "@salesforce/agents": "^0.18.2",
