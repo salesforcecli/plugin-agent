@@ -1,3 +1,9 @@
+## [1.24.32](https://github.com/salesforcecli/plugin-agent/compare/1.24.31...1.24.32) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.5 to 12.2.6 ([e6c292e](https://github.com/salesforcecli/plugin-agent/commit/e6c292ebcb53ba6dc789ab6ad5e57a55b64aac4c))
+
 ## [1.24.31](https://github.com/salesforcecli/plugin-agent/compare/1.24.30...1.24.31) (2025-11-23)
 
 ### Bug Fixes
