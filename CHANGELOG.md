@@ -1,3 +1,9 @@
+## [1.24.35](https://github.com/salesforcecli/plugin-agent/compare/1.24.34...1.24.35) (2025-12-02)
+
+### Bug Fixes
+
+- **deps:** bump mdast-util-to-hast from 13.2.0 to 13.2.1 ([4b2180b](https://github.com/salesforcecli/plugin-agent/commit/4b2180bd82b9f04c5a29a271406dca82e767ad9d))
+
 ## [1.24.34](https://github.com/salesforcecli/plugin-agent/compare/1.24.33...1.24.34) (2025-11-30)
 
 ### Bug Fixes
