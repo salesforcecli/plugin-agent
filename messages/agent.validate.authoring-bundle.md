@@ -6,19 +6,23 @@ Validate an authoring bundle to ensure its Agent Script file compiles successful
 
 An authoring bundle is a metadata type (named aiAuthoringBundle) that provides the blueprint for an agent. The metadata type contains two files: the standard metatada XML file and an Agent Script file (extension ".agent") that fully describes the agent using the Agent Script language.
 
-This command validates that the Agent Script file in the authoring bundle compiles without errors so that you can later publish the bundle to your org. Use this command while you vibe code (modify with natural language) the Agent Script file to ensure that it's always valid. If the validation fails, the command outputs the list of syntax errors, a brief description of the error, and the location in the Agent Script file where the error occurred.
+This command validates that the Agent Script file in the authoring bundle compiles without errors so that you can later publish the bundle to your org. Use this command while you code the Agent Script file to ensure that it's valid. If the validation fails, the command outputs the list of syntax errors, a brief description of the error, and the location in the Agent Script file where the error occurred.
 
 This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
 # examples
 
-- Validate an authoring bundle with API name MyAuthoringBundle:
+- Validate an authoring bundle by being prompted for its API name; use your default org:
 
-  <%= config.bin %> <%= command.id %> --api-name MyAuthoringBundle
+  <%= config.bin %> <%= command.id %>
+
+- Validate an authoring bundle with API name MyAuthoringBundle; use the org with alias "my-dev-org":
+
+  <%= config.bin %> <%= command.id %> --api-name MyAuthoringBundle --target-org my-dev-org
 
 # flags.api-name.summary
 
-API name of the authoring bundle you want to validate.
+API name of the authoring bundle you want to validate; if not specified, the command provides a list that you can choose from.
 
 # flags.api-name.prompt
 
