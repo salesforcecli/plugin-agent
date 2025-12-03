@@ -27,7 +27,9 @@ describe('Agent Validate Authoring Bundle', () => {
     it('should have correct prompt messages', () => {
       const prompts = AgentValidateAuthoringBundle['FLAGGABLE_PROMPTS'];
 
-      expect(prompts['api-name'].message).to.equal('API name of the authoring bundle you want to validate.');
+      expect(prompts['api-name'].message).to.equal(
+        'API name of the authoring bundle you want to validate; if not specified, the command provides a list that you can choose from.'
+      );
       expect(prompts['api-name'].promptMessage).to.equal('API name of the authoring bundle to validate');
     });
   });

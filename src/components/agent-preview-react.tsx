@@ -186,18 +186,6 @@ export function AgentPreviewReact(props: {
         setHeader(`New session started with "${props.name}" (${session.sessionId})`);
         await sleep(500); // Add a short delay to make it feel more natural
         setIsTyping(false);
-        // Add disclaimer for local agents before the agent's first message
-        const initialMessages = [];
-        if (isLocalAgent) {
-          initialMessages.push({
-            role: 'system',
-            content:
-              'Agent preview does not provide strict adherence to connection endpoint configuration and escalation is not supported.\n\nTo test escalation, publish your agent then use the desired connection endpoint (e.g., Web Page, SMS, etc).',
-            timestamp: new Date(),
-          });
-        }
-        initialMessages.push({ role: name, content: session.messages[0].message, timestamp: new Date() });
-        setMessages(initialMessages);
       } catch (e) {
         const sfError = SfError.wrap(e);
         setIsTyping(false);
