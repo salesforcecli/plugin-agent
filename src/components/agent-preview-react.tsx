@@ -1,18 +1,29 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import path from 'node:path';
 import fs from 'node:fs';
+import * as process from 'node:process';
+import { resolve } from 'node:path';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { Connection } from '@salesforce/core';
-import { AgentPreview, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
-import { sleep } from '@salesforce/kit';
+import { Connection, SfError, Lifecycle } from '@salesforce/core';
+import { AgentPreviewBase, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
+import { sleep, env } from '@salesforce/kit';
 
 // Component to show a simple typing animation
 function Typing(): React.ReactNode {
@@ -38,11 +49,7 @@ function Typing(): React.ReactNode {
   );
 }
 
-// Split the content on newlines, then find the longest array element
-const calculateWidth = (content: string): number =>
-  content.split('\n').reduce((acc, line) => Math.max(acc, line.length), 0) + 4;
-
-const saveTranscriptsToFile = (
+export const saveTranscriptsToFile = (
   outputDir: string,
   messages: Array<{ timestamp: Date; role: string; content: string }>,
   responses: AgentPreviewSendResponse[]
@@ -66,9 +73,11 @@ const saveTranscriptsToFile = (
  */
 export function AgentPreviewReact(props: {
   readonly connection: Connection;
-  readonly agent: AgentPreview;
+  readonly agent: AgentPreviewBase;
   readonly name: string;
   readonly outputDir: string | undefined;
+  readonly isLocalAgent: boolean;
+  readonly apexDebug: boolean | undefined;
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
@@ -76,6 +85,11 @@ export function AgentPreviewReact(props: {
   const [query, setQuery] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(true);
   const [sessionEnded, setSessionEnded] = React.useState(false);
+  const [exitRequested, setExitRequested] = React.useState(false);
+  const [showSavePrompt, setShowSavePrompt] = React.useState(false);
+  const [showDirInput, setShowDirInput] = React.useState(false);
+  const [saveDir, setSaveDir] = React.useState('');
+  const [saveConfirmed, setSaveConfirmed] = React.useState(false);
   // @ts-expect-error: Complains if this is not defined but it's not used
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timestamp, setTimestamp] = React.useState(new Date().getTime());
@@ -83,48 +97,151 @@ export function AgentPreviewReact(props: {
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
   const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
 
-  const { connection, agent, name, outputDir } = props;
+  const { connection, agent, name, outputDir, isLocalAgent, apexDebug } = props;
 
   useInput((input, key) => {
-    if (key.escape) {
+    // If user is in directory input and presses ESC, cancel and exit without saving
+    if (showDirInput && (key.escape || (key.ctrl && input === 'c'))) {
       setSessionEnded(true);
+      return;
     }
-    if (key.ctrl && input === 'c') {
-      setSessionEnded(true);
+
+    // Only handle exit if we're not already in save prompt flow
+    if (!exitRequested && !showSavePrompt && !showDirInput) {
+      if (key.escape || (key.ctrl && input === 'c')) {
+        setExitRequested(true);
+        setShowSavePrompt(true);
+      }
+      return;
+    }
+
+    // Handle save prompt navigation
+    if (showSavePrompt && !showDirInput) {
+      if (input.toLowerCase() === 'y' || input.toLowerCase() === 'n') {
+        if (input.toLowerCase() === 'y') {
+          // If outputDir was provided via flag, use it directly
+          if (outputDir) {
+            setSaveDir(outputDir);
+            setSaveConfirmed(true);
+            setShowSavePrompt(false);
+          } else {
+            // Otherwise, prompt for directory
+            setShowSavePrompt(false);
+            setShowDirInput(true);
+            const defaultDir = env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', path.join('temp', 'agent-preview'));
+            setSaveDir(defaultDir);
+          }
+        } else {
+          // User said no, exit without saving
+          setSessionEnded(true);
+        }
+      }
     }
   });
 
   React.useEffect(() => {
     const endSession = async (): Promise<void> => {
       if (sessionEnded) {
-        // TODO: Support other end types (such as Escalate)
-        await agent.end(sessionId, 'UserRequest');
-        process.exit(0);
+        try {
+          // TODO: Support other end types (such as Escalate)
+          await agent.end(sessionId, 'UserRequest');
+          process.exit(0);
+        } catch (e) {
+          // in case the agent session never started, calling agent.end will throw an error, but we've already shown the error to the user
+          process.exit(0);
+        }
       }
     };
     void endSession();
-  }, [sessionEnded]);
+  }, [sessionEnded, sessionId, agent]);
 
   React.useEffect(() => {
+    // Set up event listeners for agent compilation and simulation events
+    const lifecycle = Lifecycle.getInstance();
+
+    const handleCompilingEvent = (): Promise<void> => {
+      setHeader('Compiling agent...');
+      return Promise.resolve();
+    };
+
+    const handleSimulationStartingEvent = (): Promise<void> => {
+      setHeader('Starting session...');
+      return Promise.resolve();
+    };
+
+    const handleSessionStartedEvent = (): Promise<void> => {
+      setHeader(`New session started with "${props.name}"`);
+      return Promise.resolve();
+    };
+
+    // Listen for the events
+    lifecycle.on('agents:compiling', handleCompilingEvent);
+    lifecycle.on('agents:simulation-starting', handleSimulationStartingEvent);
+    lifecycle.on('agents:session-started', handleSessionStartedEvent);
+
     const startSession = async (): Promise<void> => {
-      const session = await agent.start();
-      setSessionId(session.sessionId);
-      setHeader(`New session started with "${props.name}" (${session.sessionId})`);
-      await sleep(500); // Add a short delay to make it feel more natural
-      setIsTyping(false);
-      if (outputDir) {
-        const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        setTempDir(path.join(outputDir, `${dateForDir}--${session.sessionId}`));
+      try {
+        const session = await agent.start();
+        setSessionId(session.sessionId);
+        setHeader(`New session started with "${props.name}" (${session.sessionId})`);
+        await sleep(500); // Add a short delay to make it feel more natural
+        setIsTyping(false);
+      } catch (e) {
+        const sfError = SfError.wrap(e);
+        setIsTyping(false);
+        setHeader('Error starting session');
+        setMessages([{ role: name, content: `${sfError.name} - ${sfError.message}`, timestamp: new Date() }]);
+        setSessionEnded(true);
       }
-      setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
     };
 
     void startSession();
-  }, []);
+  }, [agent, name, outputDir, props.name, isLocalAgent]);
 
   React.useEffect(() => {
-    saveTranscriptsToFile(tempDir, messages, responses);
+    // Save to tempDir if it was set (during session)
+    if (tempDir) {
+      saveTranscriptsToFile(tempDir, messages, responses);
+    }
   }, [tempDir, messages, responses]);
+
+  // Handle saving when user confirms save on exit
+  React.useEffect(() => {
+    const saveAndExit = async (): Promise<void> => {
+      if (saveConfirmed && saveDir) {
+        const finalDir = resolve(saveDir);
+        fs.mkdirSync(finalDir, { recursive: true });
+
+        // Create a timestamped subdirectory for this session
+        const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+        const sessionDir = path.join(finalDir, `${dateForDir}--${sessionId || 'session'}`);
+        fs.mkdirSync(sessionDir, { recursive: true });
+
+        saveTranscriptsToFile(sessionDir, messages, responses);
+
+        // Write apex debug logs if any
+        if (apexDebug) {
+          for (const response of responses) {
+            if (response.apexDebugLog) {
+              // eslint-disable-next-line no-await-in-loop
+              await writeDebugLog(connection, response.apexDebugLog, sessionDir);
+              const logId = response.apexDebugLog.Id;
+              if (logId) {
+                setApexDebugLogs((prev) => [...prev, path.join(sessionDir, `${logId}.log`)]);
+              }
+            }
+          }
+        }
+
+        // Update tempDir so the save message shows the correct path
+        setTempDir(sessionDir);
+
+        // Mark session as ended to trigger exit
+        setSessionEnded(true);
+      }
+    };
+    void saveAndExit();
+  }, [saveConfirmed, saveDir, messages, responses, sessionId, apexDebug, connection]);
 
   return (
     <Box flexDirection="column">
@@ -148,19 +265,28 @@ export function AgentPreviewReact(props: {
               alignItems={role === 'user' ? 'flex-end' : 'flex-start'}
               flexDirection="column"
             >
-              <Box flexDirection="row" columnGap={1}>
-                <Text>{role === 'user' ? 'You' : role}</Text>
-                <Text color="grey">{ts.toLocaleString()}</Text>
-              </Box>
-              <Box
-                // Use 70% of the terminal width, or the width of a single line of content, whichever is smaller
-                width={Math.min(process.stdout.columns * 0.7, calculateWidth(content))}
-                borderStyle="round"
-                paddingLeft={1}
-                paddingRight={1}
-              >
-                <Text>{content}</Text>
-              </Box>
+              {role === 'system' ? (
+                <Box
+                  width={process.stdout.columns}
+                  borderStyle="round"
+                  borderColor="yellow"
+                  paddingLeft={1}
+                  paddingRight={1}
+                  marginBottom={1}
+                >
+                  <Text>{content}</Text>
+                </Box>
+              ) : (
+                <>
+                  <Box flexDirection="row" columnGap={1}>
+                    <Text>{role === 'user' ? 'You' : role}</Text>
+                    <Text color="grey">{ts.toLocaleString()}</Text>
+                  </Box>
+                  <Box borderStyle="round" paddingLeft={1} paddingRight={1}>
+                    <Text>{content}</Text>
+                  </Box>
+                </>
+              )}
             </Box>
           ))}
         </Box>
@@ -185,47 +311,100 @@ export function AgentPreviewReact(props: {
         <Text dimColor>{'─'.repeat(process.stdout.columns - 2)}</Text>
       </Box>
 
-      <Box marginBottom={1}>
-        <Text>&gt; </Text>
-        <TextInput
-          showCursor
-          value={query}
-          placeholder="Start typing (press ESC to exit)"
-          onChange={setQuery}
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onSubmit={async (content) => {
-            if (!content) return;
-            setQuery('');
+      {showSavePrompt && !showDirInput ? (
+        <Box
+          flexDirection="column"
+          width={process.stdout.columns}
+          borderStyle="round"
+          borderColor="yellow"
+          marginTop={1}
+          marginBottom={1}
+          paddingLeft={1}
+          paddingRight={1}
+        >
+          <Text bold>Save chat history before exiting? (y/n)</Text>
+          {outputDir ? (
+            <Text dimColor>Will save to: {outputDir}</Text>
+          ) : (
+            <Text dimColor>Press &#39;y&#39; to save, &#39;n&#39; to exit without saving</Text>
+          )}
+        </Box>
+      ) : null}
 
-            // Add the most recent user message to the chat window
-            setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
-            setIsTyping(true);
-            const response = await agent.send(sessionId, content);
-            setResponses((prev) => [...prev, response]);
-            const message = response.messages[0].message;
+      {showDirInput ? (
+        <Box
+          flexDirection="column"
+          width={process.stdout.columns}
+          borderStyle="round"
+          borderColor="yellow"
+          marginTop={1}
+          marginBottom={1}
+          paddingLeft={1}
+          paddingRight={1}
+        >
+          <Text bold>Enter output directory for {apexDebug ? 'debug logs and transcripts' : 'transcripts'}:</Text>
+          <Box marginTop={1}>
+            <Text>&gt; </Text>
+            <TextInput
+              showCursor
+              value={saveDir}
+              placeholder="Press Enter to confirm"
+              onChange={setSaveDir}
+              onSubmit={(dir) => {
+                if (dir) {
+                  setSaveDir(dir);
+                  setSaveConfirmed(true);
+                  setShowDirInput(false);
+                }
+              }}
+            />
+          </Box>
+        </Box>
+      ) : null}
 
-            if (!message) {
-              throw new Error('Failed to send message');
-            }
-            setIsTyping(false);
+      {!sessionEnded && !exitRequested && !showSavePrompt && !showDirInput ? (
+        <Box marginBottom={1}>
+          <Text>&gt; </Text>
+          <TextInput
+            showCursor
+            value={query}
+            placeholder="Start typing (press ESC or Ctrl+C to exit)"
+            onChange={setQuery}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onSubmit={async (content) => {
+              if (!content) return;
+              setQuery('');
 
-            // Add the agent's response to the chat
-            setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+              try {
+                // Add the most recent user message to the chat window
+                setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
+                setIsTyping(true);
+                const response = await agent.send(sessionId, content);
+                setResponses((prev) => [...prev, response]);
+                const message = response.messages[0].message;
 
-            // If there is an apex debug log entry, get the log and write it to the output dir
-            if (response.apexDebugLog && tempDir) {
-              // Write the apex debug to the output dir
-              await writeDebugLog(connection, response.apexDebugLog, tempDir);
-              const logId = response.apexDebugLog.Id;
-              if (logId) {
-                setApexDebugLogs((prev) => [...prev, path.join(tempDir, `${logId}.log`)]);
+                if (!message) {
+                  throw new Error('Failed to send message');
+                }
+                setIsTyping(false);
+
+                // Add the agent's response to the chat
+                setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+
+                // Apex debug logs will be saved when user exits and chooses to save
+              } catch (e) {
+                const sfError = SfError.wrap(e);
+                setIsTyping(false);
+                setHeader(`Error: ${sfError.name}`);
+                setMessages([{ role: name, content: `${sfError.name} - ${sfError.message}`, timestamp: new Date() }]);
+                setSessionEnded(true);
               }
-            }
-          }}
-        />
-      </Box>
+            }}
+          />
+        </Box>
+      ) : null}
 
-      {sessionEnded ? (
+      {sessionEnded && !showSavePrompt && !showDirInput ? (
         <Box
           flexDirection="column"
           width={process.stdout.columns}
@@ -236,9 +415,9 @@ export function AgentPreviewReact(props: {
           paddingRight={1}
         >
           <Text bold>Session Ended</Text>
-          {outputDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
-          {outputDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
-          {apexDebugLogs.length > 0 && <Text>Apex Debug Logs: {'\n' + apexDebugLogs.join('\n')}</Text>}
+          {tempDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
+          {tempDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
+          {apexDebugLogs.length > 0 && tempDir && <Text>Apex Debug Logs saved to: {tempDir}</Text>}
         </Box>
       ) : null}
     </Box>

@@ -9,14 +9,15 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.29",
-    "@salesforce/agents": "^0.18.2",
-    "@salesforce/core": "^8.23.2",
+    "@salesforce/agents": "^0.19.4",
+    "@salesforce/core": "^8.23.7",
     "@salesforce/kit": "^3.2.3",
     "@salesforce/sf-plugins-core": "^12.2.6",
     "@salesforce/source-deploy-retrieve": "^12.30.0",
     "@salesforce/types": "^1.5.0",
     "ansis": "^3.3.2",
     "fast-xml-parser": "^4.5.1",
+    "glob": "^11.0.3",
     "ink": "5.0.1",
     "ink-text-input": "^6.0.0",
     "inquirer-autocomplete-standalone": "^0.8.1",
@@ -27,7 +28,7 @@
     "@oclif/plugin-command-snapshot": "^5.3.8",
     "@oclif/test": "^4.1.15",
     "@salesforce/cli-plugins-testkit": "^5.3.41",
-    "@salesforce/dev-scripts": "^10.2.12",
+    "@salesforce/dev-scripts": "^11.0.4",
     "@salesforce/plugin-command-reference": "^3.1.78",
     "@types/inquirer": "^9.0.9",
     "@types/react": "^18.3.3",
@@ -47,8 +48,6 @@
   "files": [
     "/lib",
     "/messages",
-    "/npm-shrinkwrap.json",
-    "/oclif.lock",
     "/oclif.manifest.json",
     "/schemas"
   ],
@@ -62,7 +61,7 @@
     "sfdx",
     "sfdx-plugin"
   ],
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "oclif": {
     "commands": "./lib/commands",
     "bin": "sf",
@@ -78,12 +77,19 @@
         "external": true,
         "subtopics": {
           "test": {
+            "description": "Commands to test agents.",
+            "external": true
+          },
+          "publish": {
+            "description": "Command to publish agents to an org.",
             "external": true
           },
           "generate": {
+            "description": "Commands to generate agent artifacts, such as the agent spec YAML file, authoring bundle, and test spec file.",
             "external": true
           },
-          "create": {
+          "validate": {
+            "description": "Command to validate an Agent Script file.",
             "external": true
           }
         }
@@ -98,6 +104,7 @@
     "clean-all": "sf-clean all",
     "compile": "wireit",
     "docs": "sf-docs",
+    "fix-license": "eslint src test --fix --rule \"header/header: [2]\"",
     "format": "wireit",
     "link-check": "wireit",
     "lint": "wireit",

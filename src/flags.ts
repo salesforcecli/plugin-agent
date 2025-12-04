@@ -1,15 +1,25 @@
 /*
- * Copyright (c) 2024, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2025, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { readdir } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { readdirSync } from 'node:fs';
+import { basename, join, relative } from 'node:path';
 import { Interfaces } from '@oclif/core';
 import { Flags } from '@salesforce/sf-plugins-core';
-import { Connection, Messages, SfError } from '@salesforce/core';
+import { Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
@@ -82,18 +92,36 @@ export function makeFlags<T extends Record<string, FlaggablePrompt>>(flaggablePr
   ) as FlagsOfPrompts<T>;
 }
 
-export async function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): Promise<string[]> {
-  const files = await readdir(dir, { withFileTypes: true });
+export async function getHiddenDirs(projectRoot?: string): Promise<string[]> {
+  const rootDir = projectRoot ?? process.cwd();
+
+  try {
+    const files = await readdir(rootDir, { withFileTypes: true });
+    return files.filter((file) => file.isDirectory() && file.name.startsWith('.')).map((file) => file.name);
+  } catch (error) {
+    return [];
+  }
+}
+
+export function traverseForFiles(dir: string, suffixes: string[], excludeDirs?: string[]): string[];
+// eslint-disable-next-line @typescript-eslint/unified-signatures
+export function traverseForFiles(dirs: string[], suffixes: string[], excludeDirs?: string[]): string[];
+
+export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[], excludeDirs?: string[]): string[] {
+  const dirs = Array.isArray(dirOrDirs) ? dirOrDirs : [dirOrDirs];
   const results: string[] = [];
 
-  for (const file of files) {
-    const fullPath = join(dir, file.name);
+  for (const dir of dirs) {
+    const files = readdirSync(dir, { withFileTypes: true });
 
-    if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
-      // eslint-disable-next-line no-await-in-loop
-      results.push(...(await traverseForFiles(fullPath, suffixes, excludeDirs)));
-    } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
-      results.push(fullPath);
+    for (const file of files) {
+      const fullPath = join(dir, file.name);
+
+      if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
+        results.push(...traverseForFiles(fullPath, suffixes, excludeDirs));
+      } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
+        results.push(fullPath);
+      }
     }
   }
 
@@ -115,7 +143,7 @@ export const promptForAiEvaluationDefinitionApiName = async (
 
   return Promise.race([
     autocomplete({
-      message: flagDef.message,
+      message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
         const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
@@ -131,19 +159,33 @@ export const promptForAiEvaluationDefinitionApiName = async (
   });
 };
 
-export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> => {
-  const yamlFiles = await traverseForFiles(process.cwd(), ['.yml', '.yaml'], ['node_modules']);
+export const promptForFileByExtensions = async (
+  flagDef: FlaggablePrompt,
+  extensions: string[],
+  fileNameOnly = false,
+  dirs?: string[]
+): Promise<string> => {
+  const hiddenDirs = await getHiddenDirs();
+  const dirsToTraverse = dirs ?? [process.cwd()];
+  const files = traverseForFiles(dirsToTraverse, extensions, ['node_modules', ...hiddenDirs]);
   return autocomplete({
-    message: flagDef.message,
+    message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
     // eslint-disable-next-line @typescript-eslint/require-await
     source: async (input) => {
-      const arr = yamlFiles.map((o) => ({ name: relative(process.cwd(), o), value: o }));
-
+      let arr;
+      if (fileNameOnly) {
+        arr = files.map((o) => ({ name: basename(o).split('.')[0], value: basename(o).split('.')[0] }));
+      } else {
+        arr = files.map((o) => ({ name: relative(process.cwd(), o), value: o }));
+      }
       if (!input) return arr;
       return arr.filter((o) => o.name.includes(input));
     },
   });
 };
+
+export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> =>
+  promptForFileByExtensions(flagDef, ['.yml', '.yaml']);
 
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
@@ -160,6 +202,11 @@ export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> =
     validate: flagDef.validate,
     theme,
   });
+};
+
+export const promptForAgentFiles = (project: SfProject, flagDef: FlaggablePrompt): Promise<string> => {
+  const dirs = project.getPackageDirectories().map((dir) => dir.fullPath);
+  return promptForFileByExtensions(flagDef, ['.bundle-meta.xml'], true, dirs);
 };
 
 export const validateAgentType = (agentType?: string, required = false): string | undefined => {

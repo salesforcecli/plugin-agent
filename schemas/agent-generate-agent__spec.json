@@ -69,7 +69,7 @@
     },
     "AgentType": {
       "type": "string",
-      "enum": ["customer", "internal"]
+      "enum": ["customer", "internal", "AGENT"]
     }
   }
 }
