@@ -78,12 +78,19 @@
         "external": true,
         "subtopics": {
           "test": {
+            "description": "Commands to test agents.",
+            "external": true
+          },
+          "publish": {
+            "description": "Command to publish agents to an org.",
             "external": true
           },
           "generate": {
+            "description": "Commands to generate agent artifacts, such as the agent spec YAML file, authoring bundle, and test spec file.",
             "external": true
           },
-          "create": {
+          "validate": {
+            "description": "Command to validate an Agent Script file.",
             "external": true
           }
         }
