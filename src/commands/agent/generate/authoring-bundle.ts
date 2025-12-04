@@ -64,6 +64,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   private static readonly FLAGGABLE_PROMPTS = {
     name: {
       message: messages.getMessage('flags.name.summary'),
+      promptMessage: messages.getMessage('flags.name.prompt'),
       validate: (d: string): boolean | string =>
         d.trim().length > 0 || 'Name cannot be empty or contain only whitespace',
       required: true,
@@ -87,6 +88,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     },
     spec: {
       message: messages.getMessage('flags.spec.summary'),
+      promptMessage: messages.getMessage('flags.spec.prompt'),
       validate: (d: string): boolean | string => {
         const specPath = resolve(d);
         if (!existsSync(specPath)) {
