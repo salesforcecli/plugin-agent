@@ -15,7 +15,7 @@
  */
 
 import { join, resolve } from 'node:path';
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { generateApiName, Messages, SfError } from '@salesforce/core';
 import { Agent, AgentJobSpec } from '@salesforce/agents';
@@ -64,6 +64,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
   private static readonly FLAGGABLE_PROMPTS = {
     name: {
       message: messages.getMessage('flags.name.summary'),
+      promptMessage: messages.getMessage('flags.name.prompt'),
       validate: (d: string): boolean | string =>
         d.trim().length > 0 || 'Name cannot be empty or contain only whitespace',
       required: true,
@@ -87,6 +88,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     },
     spec: {
       message: messages.getMessage('flags.spec.summary'),
+      promptMessage: messages.getMessage('flags.spec.prompt'),
       validate: (d: string): boolean | string => {
         const specPath = resolve(d);
         if (!existsSync(specPath)) {
@@ -135,22 +137,12 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       // Write Agent file
       const conn = targetOrg.getConnection(flags['api-version']);
       const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
-      const agent = await Agent.createAgentScript(conn, { ...specContents, ...{ name, developerName: bundleApiName } });
-      // Create output directory if it doesn't exist
-      mkdirSync(targetOutputDir, { recursive: true });
-      writeFileSync(agentPath, agent);
-
-      // Write meta.xml file
-      const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
-<aiAuthoringBundle>
-  <Label>${specContents.role}</Label>
-  <BundleType>${specContents.agentType}</BundleType>
-  <VersionTag>Spring2026</VersionTag>
-  <VersionDescription>Initial release for ${bundleApiName}</VersionDescription>
-  <SourceBundleVersion></SourceBundleVersion>
-  <Target></Target>
-</aiAuthoringBundle>`;
-      writeFileSync(metaXmlPath, metaXml);
+      await Agent.createAuthoringBundle({
+        connection: conn,
+        agentSpec: { ...specContents, ...{ name, developerName: bundleApiName } },
+        project: this.project!,
+        bundleApiName,
+      });
 
       this.logSuccess(`Successfully generated ${bundleApiName} Authoring Bundle`);
 
