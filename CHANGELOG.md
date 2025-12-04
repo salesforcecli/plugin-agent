@@ -1,3 +1,135 @@
+## [1.24.35](https://github.com/salesforcecli/plugin-agent/compare/1.24.34...1.24.35) (2025-12-02)
+
+### Bug Fixes
+
+- **deps:** bump mdast-util-to-hast from 13.2.0 to 13.2.1 ([4b2180b](https://github.com/salesforcecli/plugin-agent/commit/4b2180bd82b9f04c5a29a271406dca82e767ad9d))
+
+## [1.24.34](https://github.com/salesforcecli/plugin-agent/compare/1.24.33...1.24.34) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([3203ff3](https://github.com/salesforcecli/plugin-agent/commit/3203ff39cb8072cb4379853c2a132ca86bc1b108))
+
+## [1.24.33](https://github.com/salesforcecli/plugin-agent/compare/1.24.32...1.24.33) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.10.0 to 7.10.1 ([af4c628](https://github.com/salesforcecli/plugin-agent/commit/af4c62826e34e046e07a047b59a9f81ba7c7efba))
+
+## [1.24.32](https://github.com/salesforcecli/plugin-agent/compare/1.24.31...1.24.32) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.5 to 12.2.6 ([e6c292e](https://github.com/salesforcecli/plugin-agent/commit/e6c292ebcb53ba6dc789ab6ad5e57a55b64aac4c))
+
+## [1.24.31](https://github.com/salesforcecli/plugin-agent/compare/1.24.30...1.24.31) (2025-11-23)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([0491065](https://github.com/salesforcecli/plugin-agent/commit/0491065ac20aee412a73dc82d50296de76712a86))
+
+## [1.24.30](https://github.com/salesforcecli/plugin-agent/compare/1.24.29...1.24.30) (2025-11-23)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.28 to 0.8.29 ([2d5206e](https://github.com/salesforcecli/plugin-agent/commit/2d5206e3b49b295a2c26c225497f7d0dc8a95396))
+
+## [1.24.29](https://github.com/salesforcecli/plugin-agent/compare/1.24.28...1.24.29) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.3.0 to 10.3.2 ([5c829b9](https://github.com/salesforcecli/plugin-agent/commit/5c829b97e776cc7c69992d93892ad192141f271a))
+
+## [1.24.28](https://github.com/salesforcecli/plugin-agent/compare/1.24.27...1.24.28) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([c4d74ea](https://github.com/salesforcecli/plugin-agent/commit/c4d74ea04228810f7d6f140d0a23f76ba20e21c9))
+
+## [1.24.27](https://github.com/salesforcecli/plugin-agent/compare/1.24.26...1.24.27) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.4 to 7.9.0 ([bf62ed9](https://github.com/salesforcecli/plugin-agent/commit/bf62ed9111d5294c71cab8e01e76ff559c27fc39))
+
+## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
+
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.25) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
+## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.4 to 12.2.5 ([f4950f9](https://github.com/salesforcecli/plugin-agent/commit/f4950f9b3f71009daeb6ad017e9fd4735071c5b2))
+
+## [1.24.23](https://github.com/salesforcecli/plugin-agent/compare/1.24.22...1.24.23) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.22 to 0.8.26 ([68b72b4](https://github.com/salesforcecli/plugin-agent/commit/68b72b4f21daa1f3ce9ccfa509cccc462fd38344))
+
+## [1.24.22](https://github.com/salesforcecli/plugin-agent/compare/1.24.21...1.24.22) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.7.2 to 4.8.0 ([beb9b67](https://github.com/salesforcecli/plugin-agent/commit/beb9b6774df80b355496602f88d896bdac684c9d))
+
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+
+## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([37c802d](https://github.com/salesforcecli/plugin-agent/commit/37c802d4f568eb5e4784b23378b88fda8d077173))
+
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
+## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.5 to 4.5.6 ([a2ac458](https://github.com/salesforcecli/plugin-agent/commit/a2ac4581681e2e836a2c46059536d7071b279f72))
+
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
 ## [1.24.13](https://github.com/salesforcecli/plugin-agent/compare/1.24.12...1.24.13) (2025-09-22)
 
 ### Bug Fixes
