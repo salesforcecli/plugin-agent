@@ -16,7 +16,11 @@ This command requires an org because it uses it to access an LLM for generating 
 
 # flags.spec.summary
 
-Path to the agent spec YAML file.
+Path to the agent spec YAML file; if not specified, the command provides a list that you can choose from.
+
+# flags.spec.prompt
+
+Path to the agent spec YAML file
 
 # flags.output-dir.summary
 
@@ -24,7 +28,11 @@ Directory where the authoring bundle files are generated.
 
 # flags.name.summary
 
-Name (label) of the authoring bundle.
+Name (label) of the authoring bundle; if not specified, you're prompted for the name.
+
+# flags.name.prompt
+
+Name (label) of the authoring bundle
 
 # flags.api-name.summary
 
