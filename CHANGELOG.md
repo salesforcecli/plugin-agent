@@ -1,3 +1,211 @@
+# [1.25.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.9...1.25.0) (2025-12-04)
+
+### Bug Fixes
+
+- add mso step for deployment event on publish agent command ([a4993ef](https://github.com/salesforcecli/plugin-agent/commit/a4993ef520090d1262cc18d838e2f33b57b2d060))
+- create and use prompt messages for prompts ([42c460c](https://github.com/salesforcecli/plugin-agent/commit/42c460c25ac3fcfbac3ff9cf8a7499ebcb971f1a))
+- edit messages for NGA commands ([e890203](https://github.com/salesforcecli/plugin-agent/commit/e89020356e94a1201865a36cb5ab549ef08cc2e0))
+- update after feedback from SteveH ([cd9438b](https://github.com/salesforcecli/plugin-agent/commit/cd9438bf7109c2c12297b879ab38fce0cdb602e5))
+- update agent generate command for new method ([a270ad0](https://github.com/salesforcecli/plugin-agent/commit/a270ad03268b97918aa9ba677d4bab60ac5f2c3a))
+- update package.json with topic descriptions ([a36d07f](https://github.com/salesforcecli/plugin-agent/commit/a36d07f407416be1be3c8591df4c1c18be0abe12))
+
+## [1.24.35](https://github.com/salesforcecli/plugin-agent/compare/1.24.34...1.24.35) (2025-12-02)
+
+### Bug Fixes
+
+- **deps:** bump mdast-util-to-hast from 13.2.0 to 13.2.1 ([4b2180b](https://github.com/salesforcecli/plugin-agent/commit/4b2180bd82b9f04c5a29a271406dca82e767ad9d))
+
+## [1.24.34](https://github.com/salesforcecli/plugin-agent/compare/1.24.33...1.24.34) (2025-11-30)
+
+## [1.24.33](https://github.com/salesforcecli/plugin-agent/compare/1.24.32...1.24.33) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.10.0 to 7.10.1 ([af4c628](https://github.com/salesforcecli/plugin-agent/commit/af4c62826e34e046e07a047b59a9f81ba7c7efba))
+- **deps:** bump @salesforce/source-deploy-retrieve ([3203ff3](https://github.com/salesforcecli/plugin-agent/commit/3203ff39cb8072cb4379853c2a132ca86bc1b108))
+
+## [1.24.32](https://github.com/salesforcecli/plugin-agent/compare/1.24.31...1.24.32) (2025-11-30)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.5 to 12.2.6 ([e6c292e](https://github.com/salesforcecli/plugin-agent/commit/e6c292ebcb53ba6dc789ab6ad5e57a55b64aac4c))
+
+## [1.24.31](https://github.com/salesforcecli/plugin-agent/compare/1.24.30...1.24.31) (2025-11-23)
+
+## [1.24.30](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.3...1.24.30) (2025-11-23)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.28 to 0.8.29 ([2d5206e](https://github.com/salesforcecli/plugin-agent/commit/2d5206e3b49b295a2c26c225497f7d0dc8a95396))
+- **deps:** bump @salesforce/source-deploy-retrieve ([0491065](https://github.com/salesforcecli/plugin-agent/commit/0491065ac20aee412a73dc82d50296de76712a86))
+
+## [1.24.29](https://github.com/salesforcecli/plugin-agent/compare/1.24.28...1.24.29) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.3.0 to 10.3.2 ([5c829b9](https://github.com/salesforcecli/plugin-agent/commit/5c829b97e776cc7c69992d93892ad192141f271a))
+
+## [1.24.28](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.2...1.24.28) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([c4d74ea](https://github.com/salesforcecli/plugin-agent/commit/c4d74ea04228810f7d6f140d0a23f76ba20e21c9))
+
+## [1.24.27](https://github.com/salesforcecli/plugin-agent/compare/1.24.26...1.24.27) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.4 to 7.9.0 ([bf62ed9](https://github.com/salesforcecli/plugin-agent/commit/bf62ed9111d5294c71cab8e01e76ff559c27fc39))
+
+## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
+
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.0...1.24.25) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
+- **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
+## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
+
+## [1.24.23](https://github.com/salesforcecli/plugin-agent/compare/1.24.22...1.24.23) (2025-11-02)
+
+## [1.24.22](https://github.com/salesforcecli/plugin-agent/compare/1.24.21...1.24.22) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.7.2 to 4.8.0 ([beb9b67](https://github.com/salesforcecli/plugin-agent/commit/beb9b6774df80b355496602f88d896bdac684c9d))
+- **deps:** bump @oclif/multi-stage-output from 0.8.22 to 0.8.26 ([68b72b4](https://github.com/salesforcecli/plugin-agent/commit/68b72b4f21daa1f3ce9ccfa509cccc462fd38344))
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.4 to 12.2.5 ([f4950f9](https://github.com/salesforcecli/plugin-agent/commit/f4950f9b3f71009daeb6ad017e9fd4735071c5b2))
+
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([37c802d](https://github.com/salesforcecli/plugin-agent/commit/37c802d4f568eb5e4784b23378b88fda8d077173))
+
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
+## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.5 to 4.5.6 ([a2ac458](https://github.com/salesforcecli/plugin-agent/commit/a2ac4581681e2e836a2c46059536d7071b279f72))
+
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.9...1.24.14) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
+## [1.24.14-nga.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.35...1.24.14-nga.9) (2025-12-03)
+
+### Bug Fixes
+
+- update to latest agents lib and bump version ([c6938e2](https://github.com/salesforcecli/plugin-agent/commit/c6938e2785b2b715cefd216cadf989b64ee5f8de))
+- update yarn.lock ([1c988d5](https://github.com/salesforcecli/plugin-agent/commit/1c988d5ae5f8a902646d9332a4ac6fca06de8a18))
+
+## [1.24.14-nga.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.29...1.24.14-nga.3) (2025-11-21)
+
+### Bug Fixes
+
+- handle empty error messages ([61b0ed2](https://github.com/salesforcecli/plugin-agent/commit/61b0ed25b4653b56d5457cc11f33abed5fff0e1a))
+
+## [1.24.14-nga.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.1...1.24.14-nga.2) (2025-11-14)
+
+### Bug Fixes
+
+- remove call to preserve accessToken ([b2d2dc9](https://github.com/salesforcecli/plugin-agent/commit/b2d2dc978af03c772833654e790557a6663a9158))
+- update AB commands to be Beta ([d846c3e](https://github.com/salesforcecli/plugin-agent/commit/d846c3e864889d2819e0f89f550837e07de9d37e))
+- update for Beta ([dbbe3da](https://github.com/salesforcecli/plugin-agent/commit/dbbe3da20179d63916ee01a62d4cd11a8092c825))
+
+## [1.24.14-nga.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.27...1.24.14-nga.1) (2025-11-10)
+
+### Bug Fixes
+
+- preserve accessToken before calling ai-agent APIs ([65ee0d0](https://github.com/salesforcecli/plugin-agent/commit/65ee0d09775a2f6c5703035034af87a91d4c4b92))
+
+## [1.24.14-nga.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.14-nga.0) (2025-11-06)
+
+### Bug Fixes
+
+- add flag for mock actions in simulations ([59c5514](https://github.com/salesforcecli/plugin-agent/commit/59c55149ab75f084c2c9cfc939c33686af07f8b7))
+- update agent preview to start to work with simulated agents ([afdb37b](https://github.com/salesforcecli/plugin-agent/commit/afdb37b2f18ac88cfd9f2db13169c3e8a18ba5ec))
+- update for library changes ([e291290](https://github.com/salesforcecli/plugin-agent/commit/e291290c70607e8c420591e4704a52d5a9b82a39))
+- update for new methods ([269b8b9](https://github.com/salesforcecli/plugin-agent/commit/269b8b9cf141b96c731f59a0670a34cac4e5c9d0))
+- update preview/simulation to save conversation at the end ([8578b30](https://github.com/salesforcecli/plugin-agent/commit/8578b30a188378c17d3f6de94dfd0652bcbfd9cf))
+
+### Features
+
+- handle agent compilation errors ([d04ad2b](https://github.com/salesforcecli/plugin-agent/commit/d04ad2bfc43bc245e68f49bfa091a0ceee642a45))
+
+## [1.24.14-demo.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.8...1.24.14-demo.9) (2025-10-09)
+
+## [1.24.14-demo.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.7...1.24.14-demo.8) (2025-10-07)
+
+## [1.24.14-demo.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.6...1.24.14-demo.7) (2025-10-07)
+
+### Bug Fixes
+
+- quick edit of messages for new NGA commands ([ecafd83](https://github.com/salesforcecli/plugin-agent/commit/ecafd83fe85238e54557e0ec62af2b7ebd952489))
+- search for agent files only in package directories ([f5ab5ad](https://github.com/salesforcecli/plugin-agent/commit/f5ab5ad238f41b41afd8e640bf9ba2a33bddc38b))
+
+## [1.24.14-demo.6](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.4...1.24.14-demo.6) (2025-10-06)
+
+## [1.24.14-demo.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.3...1.24.14-demo.4) (2025-10-06)
+
+### Bug Fixes
+
+- if api-name flag is not used, prompt user to select an .agent file from the project ([0c0cafa](https://github.com/salesforcecli/plugin-agent/commit/0c0cafa8cf6d47aaec19b50eed12766747fac44b))
+- use apiName as file and directory name ([8d0f4be](https://github.com/salesforcecli/plugin-agent/commit/8d0f4be2af122cb8020ab7ed7d1d51796a901e16))
+
+## [1.24.14-demo.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.2...1.24.14-demo.3) (2025-10-03)
+
+### Bug Fixes
+
+- add --api-name flag to generate authoring-bundle command ([6ee56bf](https://github.com/salesforcecli/plugin-agent/commit/6ee56bf7acaf6af3e083f68b5f4ed9a4d395b2cc))
+- add MSO to validate ([a685ae3](https://github.com/salesforcecli/plugin-agent/commit/a685ae3f2b3a5a411fd84bf66940e2d09bea5236))
+- make api-name flag prompt-able and rename AfScript to Agent ([17ff205](https://github.com/salesforcecli/plugin-agent/commit/17ff20572f7dcd4877a3b30cdd24218509842456))
+
+## [1.24.14-demo.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.1...1.24.14-demo.2) (2025-10-01)
+
+## [1.24.14-demo.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.0...1.24.14-demo.1) (2025-09-25)
+
+## [1.24.14-demo.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14-demo.0) (2025-09-24)
+
+### Bug Fixes
+
+- add abent publish command/messages/NUTs ([c771796](https://github.com/salesforcecli/plugin-agent/commit/c7717966002e63732d2cc4ba91d23705c1514940))
+- add agent generate authoring-bundle command ([83086c8](https://github.com/salesforcecli/plugin-agent/commit/83086c88071a5422218d47277afb53a590ab58b9))
+- add agent validate authoring-bundle ([038925c](https://github.com/salesforcecli/plugin-agent/commit/038925cf836c4aacd6b233557ec5426155d081d2))
+- bump to latest agent lib version ([8a03792](https://github.com/salesforcecli/plugin-agent/commit/8a03792a974e271801938a07f491929e0d598f32))
+- roundtrip publish ([347e293](https://github.com/salesforcecli/plugin-agent/commit/347e2932d7ae3fbb53c87cb527a4dd81899cb76c))
+
 ## [1.24.35](https://github.com/salesforcecli/plugin-agent/compare/1.24.34...1.24.35) (2025-12-02)
 
 ### Bug Fixes
@@ -28,7 +236,7 @@
 
 - **deps:** bump @salesforce/source-deploy-retrieve ([0491065](https://github.com/salesforcecli/plugin-agent/commit/0491065ac20aee412a73dc82d50296de76712a86))
 
-## [1.24.30](https://github.com/salesforcecli/plugin-agent/compare/1.24.29...1.24.30) (2025-11-23)
+## [1.24.30](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.3...1.24.30) (2025-11-23)
 
 ### Bug Fixes
 
@@ -40,7 +248,7 @@
 
 - **deps:** bump @inquirer/core from 10.3.0 to 10.3.2 ([5c829b9](https://github.com/salesforcecli/plugin-agent/commit/5c829b97e776cc7c69992d93892ad192141f271a))
 
-## [1.24.28](https://github.com/salesforcecli/plugin-agent/compare/1.24.27...1.24.28) (2025-11-16)
+## [1.24.28](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.2...1.24.28) (2025-11-16)
 
 ### Bug Fixes
 
@@ -54,15 +262,429 @@
 
 ## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
 
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.0...1.24.25) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
+- **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
+## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
+
+## [1.24.23](https://github.com/salesforcecli/plugin-agent/compare/1.24.22...1.24.23) (2025-11-02)
+
+## [1.24.22](https://github.com/salesforcecli/plugin-agent/compare/1.24.21...1.24.22) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.7.2 to 4.8.0 ([beb9b67](https://github.com/salesforcecli/plugin-agent/commit/beb9b6774df80b355496602f88d896bdac684c9d))
+- **deps:** bump @oclif/multi-stage-output from 0.8.22 to 0.8.26 ([68b72b4](https://github.com/salesforcecli/plugin-agent/commit/68b72b4f21daa1f3ce9ccfa509cccc462fd38344))
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.4 to 12.2.5 ([f4950f9](https://github.com/salesforcecli/plugin-agent/commit/f4950f9b3f71009daeb6ad017e9fd4735071c5b2))
+
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([37c802d](https://github.com/salesforcecli/plugin-agent/commit/37c802d4f568eb5e4784b23378b88fda8d077173))
+
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
+## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.5 to 4.5.6 ([a2ac458](https://github.com/salesforcecli/plugin-agent/commit/a2ac4581681e2e836a2c46059536d7071b279f72))
+
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.9...1.24.14) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
+## [1.24.14-nga.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.29...1.24.14-nga.3) (2025-11-21)
+
+### Bug Fixes
+
+- handle empty error messages ([61b0ed2](https://github.com/salesforcecli/plugin-agent/commit/61b0ed25b4653b56d5457cc11f33abed5fff0e1a))
+
+## [1.24.14-nga.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.1...1.24.14-nga.2) (2025-11-14)
+
+### Bug Fixes
+
+- remove call to preserve accessToken ([b2d2dc9](https://github.com/salesforcecli/plugin-agent/commit/b2d2dc978af03c772833654e790557a6663a9158))
+- update AB commands to be Beta ([d846c3e](https://github.com/salesforcecli/plugin-agent/commit/d846c3e864889d2819e0f89f550837e07de9d37e))
+- update for Beta ([dbbe3da](https://github.com/salesforcecli/plugin-agent/commit/dbbe3da20179d63916ee01a62d4cd11a8092c825))
+
+## [1.24.14-nga.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.27...1.24.14-nga.1) (2025-11-10)
+
+### Bug Fixes
+
+- preserve accessToken before calling ai-agent APIs ([65ee0d0](https://github.com/salesforcecli/plugin-agent/commit/65ee0d09775a2f6c5703035034af87a91d4c4b92))
+
+## [1.24.14-nga.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.14-nga.0) (2025-11-06)
+
+### Bug Fixes
+
+- add flag for mock actions in simulations ([59c5514](https://github.com/salesforcecli/plugin-agent/commit/59c55149ab75f084c2c9cfc939c33686af07f8b7))
+- update agent preview to start to work with simulated agents ([afdb37b](https://github.com/salesforcecli/plugin-agent/commit/afdb37b2f18ac88cfd9f2db13169c3e8a18ba5ec))
+- update for library changes ([e291290](https://github.com/salesforcecli/plugin-agent/commit/e291290c70607e8c420591e4704a52d5a9b82a39))
+- update for new methods ([269b8b9](https://github.com/salesforcecli/plugin-agent/commit/269b8b9cf141b96c731f59a0670a34cac4e5c9d0))
+- update preview/simulation to save conversation at the end ([8578b30](https://github.com/salesforcecli/plugin-agent/commit/8578b30a188378c17d3f6de94dfd0652bcbfd9cf))
+
+### Features
+
+- handle agent compilation errors ([d04ad2b](https://github.com/salesforcecli/plugin-agent/commit/d04ad2bfc43bc245e68f49bfa091a0ceee642a45))
+
+## [1.24.14-demo.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.8...1.24.14-demo.9) (2025-10-09)
+
+## [1.24.14-demo.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.7...1.24.14-demo.8) (2025-10-07)
+
+## [1.24.14-demo.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.6...1.24.14-demo.7) (2025-10-07)
+
+### Bug Fixes
+
+- quick edit of messages for new NGA commands ([ecafd83](https://github.com/salesforcecli/plugin-agent/commit/ecafd83fe85238e54557e0ec62af2b7ebd952489))
+- search for agent files only in package directories ([f5ab5ad](https://github.com/salesforcecli/plugin-agent/commit/f5ab5ad238f41b41afd8e640bf9ba2a33bddc38b))
+
+## [1.24.14-demo.6](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.4...1.24.14-demo.6) (2025-10-06)
+
+## [1.24.14-demo.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.3...1.24.14-demo.4) (2025-10-06)
+
+### Bug Fixes
+
+- if api-name flag is not used, prompt user to select an .agent file from the project ([0c0cafa](https://github.com/salesforcecli/plugin-agent/commit/0c0cafa8cf6d47aaec19b50eed12766747fac44b))
+- use apiName as file and directory name ([8d0f4be](https://github.com/salesforcecli/plugin-agent/commit/8d0f4be2af122cb8020ab7ed7d1d51796a901e16))
+
+## [1.24.14-demo.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.2...1.24.14-demo.3) (2025-10-03)
+
+### Bug Fixes
+
+- add --api-name flag to generate authoring-bundle command ([6ee56bf](https://github.com/salesforcecli/plugin-agent/commit/6ee56bf7acaf6af3e083f68b5f4ed9a4d395b2cc))
+- add MSO to validate ([a685ae3](https://github.com/salesforcecli/plugin-agent/commit/a685ae3f2b3a5a411fd84bf66940e2d09bea5236))
+- make api-name flag prompt-able and rename AfScript to Agent ([17ff205](https://github.com/salesforcecli/plugin-agent/commit/17ff20572f7dcd4877a3b30cdd24218509842456))
+
+## [1.24.14-demo.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.1...1.24.14-demo.2) (2025-10-01)
+
+## [1.24.14-demo.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.0...1.24.14-demo.1) (2025-09-25)
+
+## [1.24.14-demo.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14-demo.0) (2025-09-24)
+
+### Bug Fixes
+
+- add abent publish command/messages/NUTs ([c771796](https://github.com/salesforcecli/plugin-agent/commit/c7717966002e63732d2cc4ba91d23705c1514940))
+- add agent generate authoring-bundle command ([83086c8](https://github.com/salesforcecli/plugin-agent/commit/83086c88071a5422218d47277afb53a590ab58b9))
+- add agent validate authoring-bundle ([038925c](https://github.com/salesforcecli/plugin-agent/commit/038925cf836c4aacd6b233557ec5426155d081d2))
+- bump to latest agent lib version ([8a03792](https://github.com/salesforcecli/plugin-agent/commit/8a03792a974e271801938a07f491929e0d598f32))
+- roundtrip publish ([347e293](https://github.com/salesforcecli/plugin-agent/commit/347e2932d7ae3fbb53c87cb527a4dd81899cb76c))
+
+## [1.24.29](https://github.com/salesforcecli/plugin-agent/compare/1.24.28...1.24.29) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.3.0 to 10.3.2 ([5c829b9](https://github.com/salesforcecli/plugin-agent/commit/5c829b97e776cc7c69992d93892ad192141f271a))
+
+## [1.24.28](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.2...1.24.28) (2025-11-16)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([c4d74ea](https://github.com/salesforcecli/plugin-agent/commit/c4d74ea04228810f7d6f140d0a23f76ba20e21c9))
+
+## [1.24.27](https://github.com/salesforcecli/plugin-agent/compare/1.24.26...1.24.27) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.4 to 7.9.0 ([bf62ed9](https://github.com/salesforcecli/plugin-agent/commit/bf62ed9111d5294c71cab8e01e76ff559c27fc39))
+
+## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
+
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.0...1.24.25) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
+- **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
+## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
+
+## [1.24.23](https://github.com/salesforcecli/plugin-agent/compare/1.24.22...1.24.23) (2025-11-02)
+
+## [1.24.22](https://github.com/salesforcecli/plugin-agent/compare/1.24.21...1.24.22) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.7.2 to 4.8.0 ([beb9b67](https://github.com/salesforcecli/plugin-agent/commit/beb9b6774df80b355496602f88d896bdac684c9d))
+- **deps:** bump @oclif/multi-stage-output from 0.8.22 to 0.8.26 ([68b72b4](https://github.com/salesforcecli/plugin-agent/commit/68b72b4f21daa1f3ce9ccfa509cccc462fd38344))
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.4 to 12.2.5 ([f4950f9](https://github.com/salesforcecli/plugin-agent/commit/f4950f9b3f71009daeb6ad017e9fd4735071c5b2))
+
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([37c802d](https://github.com/salesforcecli/plugin-agent/commit/37c802d4f568eb5e4784b23378b88fda8d077173))
+
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
+## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.5 to 4.5.6 ([a2ac458](https://github.com/salesforcecli/plugin-agent/commit/a2ac4581681e2e836a2c46059536d7071b279f72))
+
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.9...1.24.14) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
+## [1.24.14-nga.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.1...1.24.14-nga.2) (2025-11-14)
+
+### Bug Fixes
+
+- remove call to preserve accessToken ([b2d2dc9](https://github.com/salesforcecli/plugin-agent/commit/b2d2dc978af03c772833654e790557a6663a9158))
+- update AB commands to be Beta ([d846c3e](https://github.com/salesforcecli/plugin-agent/commit/d846c3e864889d2819e0f89f550837e07de9d37e))
+- update for Beta ([dbbe3da](https://github.com/salesforcecli/plugin-agent/commit/dbbe3da20179d63916ee01a62d4cd11a8092c825))
+- update preview/simulation to save conversation at the end ([8578b30](https://github.com/salesforcecli/plugin-agent/commit/8578b30a188378c17d3f6de94dfd0652bcbfd9cf))
+
+## [1.24.14-nga.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.27...1.24.14-nga.1) (2025-11-10)
+
+### Bug Fixes
+
+- preserve accessToken before calling ai-agent APIs ([65ee0d0](https://github.com/salesforcecli/plugin-agent/commit/65ee0d09775a2f6c5703035034af87a91d4c4b92))
+
+## [1.24.14-nga.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.14-nga.0) (2025-11-06)
+
+### Bug Fixes
+
+- add flag for mock actions in simulations ([59c5514](https://github.com/salesforcecli/plugin-agent/commit/59c55149ab75f084c2c9cfc939c33686af07f8b7))
+- update agent preview to start to work with simulated agents ([afdb37b](https://github.com/salesforcecli/plugin-agent/commit/afdb37b2f18ac88cfd9f2db13169c3e8a18ba5ec))
+- update for library changes ([e291290](https://github.com/salesforcecli/plugin-agent/commit/e291290c70607e8c420591e4704a52d5a9b82a39))
+- update for new methods ([269b8b9](https://github.com/salesforcecli/plugin-agent/commit/269b8b9cf141b96c731f59a0670a34cac4e5c9d0))
+
+### Features
+
+- handle agent compilation errors ([d04ad2b](https://github.com/salesforcecli/plugin-agent/commit/d04ad2bfc43bc245e68f49bfa091a0ceee642a45))
+
+## [1.24.14-demo.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.8...1.24.14-demo.9) (2025-10-09)
+
+## [1.24.14-demo.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.7...1.24.14-demo.8) (2025-10-07)
+
+## [1.24.14-demo.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.6...1.24.14-demo.7) (2025-10-07)
+
+### Bug Fixes
+
+- quick edit of messages for new NGA commands ([ecafd83](https://github.com/salesforcecli/plugin-agent/commit/ecafd83fe85238e54557e0ec62af2b7ebd952489))
+- search for agent files only in package directories ([f5ab5ad](https://github.com/salesforcecli/plugin-agent/commit/f5ab5ad238f41b41afd8e640bf9ba2a33bddc38b))
+
+## [1.24.14-demo.6](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.4...1.24.14-demo.6) (2025-10-06)
+
+## [1.24.14-demo.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.3...1.24.14-demo.4) (2025-10-06)
+
+### Bug Fixes
+
+- if api-name flag is not used, prompt user to select an .agent file from the project ([0c0cafa](https://github.com/salesforcecli/plugin-agent/commit/0c0cafa8cf6d47aaec19b50eed12766747fac44b))
+- use apiName as file and directory name ([8d0f4be](https://github.com/salesforcecli/plugin-agent/commit/8d0f4be2af122cb8020ab7ed7d1d51796a901e16))
+
+## [1.24.14-demo.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.2...1.24.14-demo.3) (2025-10-03)
+
+### Bug Fixes
+
+- add --api-name flag to generate authoring-bundle command ([6ee56bf](https://github.com/salesforcecli/plugin-agent/commit/6ee56bf7acaf6af3e083f68b5f4ed9a4d395b2cc))
+- add MSO to validate ([a685ae3](https://github.com/salesforcecli/plugin-agent/commit/a685ae3f2b3a5a411fd84bf66940e2d09bea5236))
+- make api-name flag prompt-able and rename AfScript to Agent ([17ff205](https://github.com/salesforcecli/plugin-agent/commit/17ff20572f7dcd4877a3b30cdd24218509842456))
+
+## [1.24.14-demo.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.1...1.24.14-demo.2) (2025-10-01)
+
+## [1.24.14-demo.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.0...1.24.14-demo.1) (2025-09-25)
+
+## [1.24.14-demo.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14-demo.0) (2025-09-24)
+
+### Bug Fixes
+
+- add abent publish command/messages/NUTs ([c771796](https://github.com/salesforcecli/plugin-agent/commit/c7717966002e63732d2cc4ba91d23705c1514940))
+- add agent generate authoring-bundle command ([83086c8](https://github.com/salesforcecli/plugin-agent/commit/83086c88071a5422218d47277afb53a590ab58b9))
+- add agent validate authoring-bundle ([038925c](https://github.com/salesforcecli/plugin-agent/commit/038925cf836c4aacd6b233557ec5426155d081d2))
+- bump to latest agent lib version ([8a03792](https://github.com/salesforcecli/plugin-agent/commit/8a03792a974e271801938a07f491929e0d598f32))
+- roundtrip publish ([347e293](https://github.com/salesforcecli/plugin-agent/commit/347e2932d7ae3fbb53c87cb527a4dd81899cb76c))
+
+## [1.24.27](https://github.com/salesforcecli/plugin-agent/compare/1.24.26...1.24.27) (2025-11-09)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/prompts from 7.8.4 to 7.9.0 ([bf62ed9](https://github.com/salesforcecli/plugin-agent/commit/bf62ed9111d5294c71cab8e01e76ff559c27fc39))
+
+## [1.24.26](https://github.com/salesforcecli/plugin-agent/compare/1.24.25...1.24.26) (2025-11-09)
+
 ### Bug Fixes
 
 - **deps:** bump @oclif/multi-stage-output from 0.8.26 to 0.8.28 ([b661aa0](https://github.com/salesforcecli/plugin-agent/commit/b661aa087cc7198518cfabe13faf3d34734f705f))
 
-## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.25) (2025-11-09)
+## [1.24.25](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-nga.0...1.24.25) (2025-11-09)
 
 ### Bug Fixes
 
 - **deps:** bump @salesforce/source-deploy-retrieve ([d756717](https://github.com/salesforcecli/plugin-agent/commit/d75671774badc4afc5a62cd640a5bd537b0d8718))
+
+## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
+
+## [1.24.23](https://github.com/salesforcecli/plugin-agent/compare/1.24.22...1.24.23) (2025-11-02)
+
+## [1.24.22](https://github.com/salesforcecli/plugin-agent/compare/1.24.21...1.24.22) (2025-11-02)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.7.2 to 4.8.0 ([beb9b67](https://github.com/salesforcecli/plugin-agent/commit/beb9b6774df80b355496602f88d896bdac684c9d))
+- **deps:** bump @oclif/multi-stage-output from 0.8.22 to 0.8.26 ([68b72b4](https://github.com/salesforcecli/plugin-agent/commit/68b72b4f21daa1f3ce9ccfa509cccc462fd38344))
+- **deps:** bump @salesforce/sf-plugins-core from 12.2.4 to 12.2.5 ([f4950f9](https://github.com/salesforcecli/plugin-agent/commit/f4950f9b3f71009daeb6ad017e9fd4735071c5b2))
+
+## [1.24.21](https://github.com/salesforcecli/plugin-agent/compare/1.24.20...1.24.21) (2025-10-26)
+
+## [1.24.20](https://github.com/salesforcecli/plugin-agent/compare/1.24.19...1.24.20) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([37c802d](https://github.com/salesforcecli/plugin-agent/commit/37c802d4f568eb5e4784b23378b88fda8d077173))
+
+## [1.24.19](https://github.com/salesforcecli/plugin-agent/compare/1.24.18...1.24.19) (2025-10-26)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.6 to 4.7.2 ([acaba9d](https://github.com/salesforcecli/plugin-agent/commit/acaba9dbcbb3e26324205752334071e847203225))
+- **deps:** bump @salesforce/types from 1.4.0 to 1.5.0 ([4ad588b](https://github.com/salesforcecli/plugin-agent/commit/4ad588b721d331d4ff453a8f99482ca56551a666))
+
+## [1.24.18](https://github.com/salesforcecli/plugin-agent/compare/1.24.17...1.24.18) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.5.5 to 4.5.6 ([a2ac458](https://github.com/salesforcecli/plugin-agent/commit/a2ac4581681e2e836a2c46059536d7071b279f72))
+
+## [1.24.17](https://github.com/salesforcecli/plugin-agent/compare/1.24.16...1.24.17) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @inquirer/core from 10.2.2 to 10.3.0 ([6cbfdd1](https://github.com/salesforcecli/plugin-agent/commit/6cbfdd1a04587937dcc377e628723f52ecaf287a))
+
+## [1.24.16](https://github.com/salesforcecli/plugin-agent/compare/1.24.15...1.24.16) (2025-10-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 0.17.9 to 0.18.2 ([49d9b0a](https://github.com/salesforcecli/plugin-agent/commit/49d9b0a847f524bd3cb87106d43e26e89fd9851e))
+
+## [1.24.15](https://github.com/salesforcecli/plugin-agent/compare/1.24.14...1.24.15) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
+
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.9...1.24.14) (2025-10-12)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
+## [1.24.14-nga.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.24...1.24.14-nga.0) (2025-11-06)
+
+### Bug Fixes
+
+- add flag for mock actions in simulations ([59c5514](https://github.com/salesforcecli/plugin-agent/commit/59c55149ab75f084c2c9cfc939c33686af07f8b7))
+- update agent preview to start to work with simulated agents ([afdb37b](https://github.com/salesforcecli/plugin-agent/commit/afdb37b2f18ac88cfd9f2db13169c3e8a18ba5ec))
+- update for library changes ([e291290](https://github.com/salesforcecli/plugin-agent/commit/e291290c70607e8c420591e4704a52d5a9b82a39))
+- update for new methods ([269b8b9](https://github.com/salesforcecli/plugin-agent/commit/269b8b9cf141b96c731f59a0670a34cac4e5c9d0))
+
+### Features
+
+- handle agent compilation errors ([d04ad2b](https://github.com/salesforcecli/plugin-agent/commit/d04ad2bfc43bc245e68f49bfa091a0ceee642a45))
+
+## [1.24.14-demo.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.8...1.24.14-demo.9) (2025-10-09)
+
+## [1.24.14-demo.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.7...1.24.14-demo.8) (2025-10-07)
+
+## [1.24.14-demo.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.6...1.24.14-demo.7) (2025-10-07)
+
+### Bug Fixes
+
+- quick edit of messages for new NGA commands ([ecafd83](https://github.com/salesforcecli/plugin-agent/commit/ecafd83fe85238e54557e0ec62af2b7ebd952489))
+- search for agent files only in package directories ([f5ab5ad](https://github.com/salesforcecli/plugin-agent/commit/f5ab5ad238f41b41afd8e640bf9ba2a33bddc38b))
+
+## [1.24.14-demo.6](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.4...1.24.14-demo.6) (2025-10-06)
+
+## [1.24.14-demo.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.3...1.24.14-demo.4) (2025-10-06)
+
+### Bug Fixes
+
+- if api-name flag is not used, prompt user to select an .agent file from the project ([0c0cafa](https://github.com/salesforcecli/plugin-agent/commit/0c0cafa8cf6d47aaec19b50eed12766747fac44b))
+- use apiName as file and directory name ([8d0f4be](https://github.com/salesforcecli/plugin-agent/commit/8d0f4be2af122cb8020ab7ed7d1d51796a901e16))
+
+## [1.24.14-demo.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.2...1.24.14-demo.3) (2025-10-03)
+
+### Bug Fixes
+
+- add --api-name flag to generate authoring-bundle command ([6ee56bf](https://github.com/salesforcecli/plugin-agent/commit/6ee56bf7acaf6af3e083f68b5f4ed9a4d395b2cc))
+- add MSO to validate ([a685ae3](https://github.com/salesforcecli/plugin-agent/commit/a685ae3f2b3a5a411fd84bf66940e2d09bea5236))
+- make api-name flag prompt-able and rename AfScript to Agent ([17ff205](https://github.com/salesforcecli/plugin-agent/commit/17ff20572f7dcd4877a3b30cdd24218509842456))
+
+## [1.24.14-demo.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.1...1.24.14-demo.2) (2025-10-01)
+
+## [1.24.14-demo.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.0...1.24.14-demo.1) (2025-09-25)
+
+## [1.24.14-demo.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14-demo.0) (2025-09-24)
+
+### Bug Fixes
+
+- add abent publish command/messages/NUTs ([c771796](https://github.com/salesforcecli/plugin-agent/commit/c7717966002e63732d2cc4ba91d23705c1514940))
+- add agent generate authoring-bundle command ([83086c8](https://github.com/salesforcecli/plugin-agent/commit/83086c88071a5422218d47277afb53a590ab58b9))
+- add agent validate authoring-bundle ([038925c](https://github.com/salesforcecli/plugin-agent/commit/038925cf836c4aacd6b233557ec5426155d081d2))
+- bump to latest agent lib version ([8a03792](https://github.com/salesforcecli/plugin-agent/commit/8a03792a974e271801938a07f491929e0d598f32))
+- roundtrip publish ([347e293](https://github.com/salesforcecli/plugin-agent/commit/347e2932d7ae3fbb53c87cb527a4dd81899cb76c))
 
 ## [1.24.24](https://github.com/salesforcecli/plugin-agent/compare/1.24.23...1.24.24) (2025-11-02)
 
@@ -124,11 +746,59 @@
 
 - **deps:** bump @salesforce/core from 8.23.1 to 8.23.2 ([f0ccd7b](https://github.com/salesforcecli/plugin-agent/commit/f0ccd7bc0b3244886b2d5d468f0a527bf5a9bc0a))
 
-## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14) (2025-10-12)
+## [1.24.14](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.9...1.24.14) (2025-10-12)
 
 ### Bug Fixes
 
 - **deps:** bump @salesforce/source-deploy-retrieve ([9f4c398](https://github.com/salesforcecli/plugin-agent/commit/9f4c3981d6ed744403b490000e8e0cd7b53dbbc5))
+
+## [1.24.14-demo.9](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.8...1.24.14-demo.9) (2025-10-09)
+
+### Bug Fixes
+
+- quick edit of messages for new NGA commands ([ecafd83](https://github.com/salesforcecli/plugin-agent/commit/ecafd83fe85238e54557e0ec62af2b7ebd952489))
+
+## [1.24.14-demo.8](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.7...1.24.14-demo.8) (2025-10-07)
+
+## [1.24.14-demo.7](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.6...1.24.14-demo.7) (2025-10-07)
+
+### Bug Fixes
+
+- search for agent files only in package directories ([f5ab5ad](https://github.com/salesforcecli/plugin-agent/commit/f5ab5ad238f41b41afd8e640bf9ba2a33bddc38b))
+
+## [1.24.14-demo.6](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.4...1.24.14-demo.6) (2025-10-06)
+
+## [1.24.14-demo.4](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.3...1.24.14-demo.4) (2025-10-06)
+
+### Bug Fixes
+
+- if api-name flag is not used, prompt user to select an .agent file from the project ([0c0cafa](https://github.com/salesforcecli/plugin-agent/commit/0c0cafa8cf6d47aaec19b50eed12766747fac44b))
+- use apiName as file and directory name ([8d0f4be](https://github.com/salesforcecli/plugin-agent/commit/8d0f4be2af122cb8020ab7ed7d1d51796a901e16))
+
+## [1.24.14-demo.3](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.2...1.24.14-demo.3) (2025-10-03)
+
+### Bug Fixes
+
+- add --api-name flag to generate authoring-bundle command ([6ee56bf](https://github.com/salesforcecli/plugin-agent/commit/6ee56bf7acaf6af3e083f68b5f4ed9a4d395b2cc))
+- add MSO to validate ([a685ae3](https://github.com/salesforcecli/plugin-agent/commit/a685ae3f2b3a5a411fd84bf66940e2d09bea5236))
+- make api-name flag prompt-able and rename AfScript to Agent ([17ff205](https://github.com/salesforcecli/plugin-agent/commit/17ff20572f7dcd4877a3b30cdd24218509842456))
+
+## [1.24.14-demo.2](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.1...1.24.14-demo.2) (2025-10-01)
+
+## [1.24.14-demo.1](https://github.com/salesforcecli/plugin-agent/compare/1.24.14-demo.0...1.24.14-demo.1) (2025-09-25)
+
+### Bug Fixes
+
+- add agent generate authoring-bundle command ([83086c8](https://github.com/salesforcecli/plugin-agent/commit/83086c88071a5422218d47277afb53a590ab58b9))
+
+## [1.24.14-demo.0](https://github.com/salesforcecli/plugin-agent/compare/1.24.13...1.24.14-demo.0) (2025-09-24)
+
+### Bug Fixes
+
+- add abent publish command/messages/NUTs ([c771796](https://github.com/salesforcecli/plugin-agent/commit/c7717966002e63732d2cc4ba91d23705c1514940))
+- add agent validate authoring-bundle ([038925c](https://github.com/salesforcecli/plugin-agent/commit/038925cf836c4aacd6b233557ec5426155d081d2))
+- bump to latest agent lib version ([8a03792](https://github.com/salesforcecli/plugin-agent/commit/8a03792a974e271801938a07f491929e0d598f32))
+- roundtrip publish ([347e293](https://github.com/salesforcecli/plugin-agent/commit/347e2932d7ae3fbb53c87cb527a4dd81899cb76c))
 
 ## [1.24.13](https://github.com/salesforcecli/plugin-agent/compare/1.24.12...1.24.13) (2025-09-22)
 
