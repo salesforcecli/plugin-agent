@@ -20,7 +20,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent, findAuthoringBundle } from '@salesforce/agents';
-import { RequestStatus, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
+import { RequestStatus, ScopedPostDeploy, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
 import { throwAgentCompilationError } from '../../../common.js';
@@ -85,7 +85,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     }
     // Create multi-stage output
     const mso = new MultiStageOutput<{ agentName: string }>({
-      stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata'],
+      stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata', 'Deploy Metadata'],
       title: 'Publishing Agent',
       data: { agentName: apiName },
       jsonEnabled: this.jsonEnabled(),
@@ -120,14 +120,31 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         mso.skipTo('Retrieve Metadata');
         return Promise.resolve();
       });
+      // Set up lifecycle listeners for deploy events
+      Lifecycle.getInstance().on('scopedPreDeploy', () => {
+        mso.skipTo('Deploy Metadata');
+        return Promise.resolve();
+      });
 
       Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
-        if (result.retrieveResult.response.status === RequestStatus.Succeeded) {
-          mso.stop();
-        } else {
+        if (result.retrieveResult.response.status !== RequestStatus.Succeeded) {
           const errorMessage = `Metadata retrieval failed: ${ensureArray(
             // @ts-expect-error I saw errorMessages populated with useful information during testing
             result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
+          ).join(EOL)}`;
+          mso.error();
+          throw new SfError(errorMessage);
+        }
+        return Promise.resolve();
+      });
+
+      Lifecycle.getInstance().on('scopedPostDeploy', (result: ScopedPostDeploy) => {
+        if (result.deployResult.response.status === RequestStatus.Succeeded) {
+          mso.stop();
+        } else {
+          const errorMessage = `Metadata deployment failed: ${ensureArray(
+            // @ts-expect-error I saw errorMessages populated with useful information during testing
+            result?.deployResult.response?.messages ?? result?.deployResult?.response?.errorMessage
           ).join(EOL)}`;
           mso.error();
           throw new SfError(errorMessage);
