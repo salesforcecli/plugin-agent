@@ -184,6 +184,12 @@ export function AgentPreviewReact(props: {
         const session = await agent.start();
         setSessionId(session.sessionId);
         setHeader(`New session started with "${props.name}" (${session.sessionId})`);
+
+        // Add the initial agent message if present
+        if (session.messages.at(0)?.message) {
+          setMessages([{ role: name, content: session.messages[0].message, timestamp: new Date() }]);
+        }
+
         await sleep(500); // Add a short delay to make it feel more natural
         setIsTyping(false);
       } catch (e) {
