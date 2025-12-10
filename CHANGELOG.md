@@ -1,3 +1,9 @@
+## [1.25.3](https://github.com/salesforcecli/plugin-agent/compare/1.25.2...1.25.3) (2025-12-10)
+
+### Bug Fixes
+
+- display welcome message ([8ee975d](https://github.com/salesforcecli/plugin-agent/commit/8ee975d735130fca942b5f4058deb3f8c4d29b1e))
+
 ## [1.25.2](https://github.com/salesforcecli/plugin-agent/compare/1.25.1...1.25.2) (2025-12-08)
 
 ### Bug Fixes
