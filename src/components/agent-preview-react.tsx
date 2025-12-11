@@ -71,20 +71,22 @@ export const saveTranscriptsToFile = (
   }
 };
 
-const getTraces = async (
+export const getTraces = async (
   agent: AgentPreviewBase,
   sessionId: string,
   messageIds: string[],
   logger: Logger
 ): Promise<PlannerResponse[]> => {
-  try {
-    const traces = await agent.traces(sessionId, messageIds);
-    return traces;
-  } catch (e) {
-    const sfError = SfError.wrap(e);
-    logger.info(`Error obtaining traces: ${sfError.name} - ${sfError.message}`, { sessionId, messageIds });
-    return [];
+  if (messageIds.length > 0) {
+    try {
+      const traces = await agent.traces(sessionId, messageIds);
+      return traces;
+    } catch (e) {
+      const sfError = SfError.wrap(e);
+      logger.info(`Error obtaining traces: ${sfError.name} - ${sfError.message}`, { sessionId, messageIds });
+    }
   }
+  return [];
 };
 
 /**
