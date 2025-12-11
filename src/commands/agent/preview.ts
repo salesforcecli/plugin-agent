@@ -18,7 +18,7 @@ import * as path from 'node:path';
 import { join, resolve } from 'node:path';
 import { globSync } from 'glob';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { AuthInfo, Connection, Lifecycle, Logger, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import {
@@ -34,6 +34,14 @@ import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview');
+
+let logger: Logger;
+const getLogger = (): Logger => {
+  if (!logger) {
+    logger = Logger.childFromRoot('plugin-agent-preview');
+  }
+  return logger;
+};
 
 type BotVersionStatus = { Status: 'Active' | 'Inactive' };
 
@@ -195,6 +203,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         outputDir,
         isLocalAgent: selectedAgent.source === AgentSource.SCRIPT,
         apexDebug: flags['apex-debug'],
+        logger: getLogger(),
       }),
       { exitOnCtrlC: false }
     );
