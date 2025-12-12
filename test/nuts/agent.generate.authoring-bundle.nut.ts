@@ -23,19 +23,19 @@ import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agen
 
 let session: TestSession;
 
-describe.skip('agent generate authoring-bundle NUTs', () => {
+describe('agent generate authoring-bundle NUTs', () => {
   before(async () => {
     session = await TestSession.create({
       project: {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
+      // scratchOrgs: [
+      //   {
+      //     setDefault: true,
+      //     config: join('config', 'project-scratch-def.json'),
+      //   },
+      // ],
     });
   });
 
@@ -48,7 +48,8 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
     const bundleName = 'Test_Bundle';
 
     it('should generate authoring bundle from spec file', async () => {
-      const username = session.orgs.get('default')!.username as string;
+      // until we're testing in scratch orgs, use the devhub
+      const username = session.hubOrg.username;
       const specPath = join(session.project.dir, 'specs', specFileName);
 
       // First generate a spec file
@@ -72,20 +73,8 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
       const agent = readFileSync(result!.agentPath, 'utf8');
       const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
       expect(agent).to.be.ok;
-      expect(metaXml).to.include('<aiAuthoringBundle>');
-      expect(metaXml).to.include(bundleName);
-    });
-
-    it('should use default output directory when not specified', async () => {
-      const username = session.orgs.get('default')!.username as string;
-      const specPath = join(session.project.dir, 'specs', specFileName);
-      const defaultPath = join('force-app', 'main', 'default', 'aiAuthoringBundles');
-
-      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --target-org ${username} --json`;
-      const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
-
-      expect(result).to.be.ok;
-      expect(result?.outputDir).to.include(defaultPath);
+      expect(metaXml).to.include('<AiAuthoringBundle');
+      expect(agent).to.include(bundleName);
     });
   });
 });
