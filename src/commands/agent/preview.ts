@@ -26,7 +26,7 @@ import {
   AgentSource,
   findAuthoringBundle,
   ProductionAgent,
-  PublishedAgentType,
+  ProductionAgentType,
   ScriptAgent,
   ScriptAgentType,
 } from '@salesforce/agents';
@@ -127,16 +127,16 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: agent.Id });
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
     } else {
-      const choice = await select<ScriptAgentType | PublishedAgentType>({
+      const choice = await select<ScriptAgentType | ProductionAgentType>({
         message: 'Select an agent',
         choices: this.getAgentChoices(agentsInOrg),
       });
       const p =
         choice.source === AgentSource.SCRIPT
-          ? { aabDirectory: basename(choice.path) }
-          : { nameOrId: choice.DeveloperName };
+          ? { aabDirectory: basename(choice.path), project: this.project!, connection: conn }
+          : { nameOrId: choice.DeveloperName, project: this.project!, connection: conn };
 
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, ...p });
+      selectedAgent = await Agent.init(p);
     }
 
     if (useLiveActions && selectedAgent instanceof ProductionAgent) {
@@ -155,7 +155,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       React.createElement(AgentPreviewReact, {
         connection: conn,
         agent: agentPreview,
-        name: selectedAgent.DeveloperName,
+        name: selectedAgent,
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
         apexDebug: flags['apex-debug'],
@@ -165,8 +165,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     await instance.waitUntilExit();
   }
 
-  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgentType | PublishedAgentType>> {
-    const choices: Array<Choice<ScriptAgentType | PublishedAgentType>> = [];
+  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgentType | ProductionAgentType>> {
+    const choices: Array<Choice<ScriptAgentType | ProductionAgentType>> = [];
 
     // Add org agents
     for (const agent of agents) {

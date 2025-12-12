@@ -73,7 +73,7 @@ export const saveTranscriptsToFile = (
  */
 export function AgentPreviewReact(props: {
   readonly connection: Connection;
-  readonly agent: AgentPreviewBase;
+  readonly agent;
   readonly name: string;
   readonly outputDir: string | undefined;
   readonly isLocalAgent: boolean;
