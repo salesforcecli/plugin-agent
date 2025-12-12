@@ -19,8 +19,13 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
+import sinon, { SinonStubbedInstance } from 'sinon';
 import type { AgentPreviewSendResponse } from '@salesforce/agents';
-import { saveTranscriptsToFile } from '../../src/components/agent-preview-react.js';
+import { PlannerResponse } from '@salesforce/agents/lib/types.js';
+import type { Logger } from '@salesforce/core';
+import type { AgentPreviewBase } from '@salesforce/agents';
+import { saveTranscriptsToFile, getTraces } from '../../src/components/agent-preview-react.js';
+import { trace1, trace2 } from '../testData.js';
 
 describe('AgentPreviewReact saveTranscriptsToFile', () => {
   let testDir: string;
@@ -138,5 +143,77 @@ describe('AgentPreviewReact saveTranscriptsToFile', () => {
     expect(content).to.include('\n');
     // Should parse as valid JSON
     expect(() => JSON.parse(content) as unknown).to.not.throw();
+  });
+
+  it('should write traces.json when traces are provided', () => {
+    const outputDir = path.join(testDir, 'output');
+    const messages: Array<{ timestamp: Date; role: string; content: string }> = [];
+    const responses: AgentPreviewSendResponse[] = [];
+    const traces: PlannerResponse[] = [trace1, trace2];
+
+    saveTranscriptsToFile(outputDir, messages, responses, traces);
+
+    const tracesPath = path.join(outputDir, 'traces.json');
+    expect(fs.existsSync(tracesPath)).to.be.true;
+
+    const content = JSON.parse(fs.readFileSync(tracesPath, 'utf8')) as PlannerResponse[];
+    expect(content).to.have.lengthOf(2);
+  });
+});
+
+describe('AgentPreviewReact getTraces', () => {
+  let mockAgent: SinonStubbedInstance<AgentPreviewBase>;
+  let mockLogger: SinonStubbedInstance<Logger>;
+  const sessionId = 'session-123';
+  const messageIds = ['msg-1', 'msg-2'];
+
+  beforeEach(() => {
+    mockAgent = {
+      traces: sinon.stub(),
+    } as SinonStubbedInstance<AgentPreviewBase>;
+
+    mockLogger = {
+      info: sinon.stub(),
+    } as SinonStubbedInstance<Logger>;
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it('should return traces when agent.traces succeeds', async () => {
+    const expectedTraces: PlannerResponse[] = [trace1];
+
+    mockAgent.traces.resolves(expectedTraces);
+
+    const result = await getTraces(mockAgent, sessionId, messageIds, mockLogger);
+
+    expect(result).to.deep.equal(expectedTraces);
+    expect(mockAgent.traces.calledWith(sessionId, messageIds)).to.be.true;
+    expect(mockLogger.info.called).to.be.false;
+  });
+
+  it('should return empty array when agent.traces throws an error', async () => {
+    const error = new Error('Failed to get traces');
+    mockAgent.traces.rejects(error);
+
+    const result = await getTraces(mockAgent, sessionId, messageIds, mockLogger);
+
+    expect(result).to.deep.equal([]);
+    expect(mockAgent.traces.calledWith(sessionId, messageIds)).to.be.true;
+    expect(
+      mockLogger.info.calledWith('Error obtaining traces: Error - Failed to get traces', { sessionId, messageIds })
+    ).to.be.true;
+  });
+
+  it('should handle empty messageIds array', async () => {
+    const expectedTraces: PlannerResponse[] = [];
+    mockAgent.traces.resolves(expectedTraces);
+
+    const result = await getTraces(mockAgent, sessionId, [], mockLogger);
+
+    expect(result).to.deep.equal(expectedTraces);
+    expect(mockAgent.traces.notCalled).to.be.true;
+    expect(mockLogger.info.called).to.be.false;
   });
 });

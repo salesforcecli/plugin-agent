@@ -21,9 +21,10 @@ import { resolve } from 'node:path';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { Connection, SfError, Lifecycle } from '@salesforce/core';
+import { Connection, SfError, Lifecycle, Logger } from '@salesforce/core';
 import { AgentPreviewBase, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
 import { sleep, env } from '@salesforce/kit';
+import { PlannerResponse } from '@salesforce/agents/lib/types.js';
 
 // Component to show a simple typing animation
 function Typing(): React.ReactNode {
@@ -52,7 +53,8 @@ function Typing(): React.ReactNode {
 export const saveTranscriptsToFile = (
   outputDir: string,
   messages: Array<{ timestamp: Date; role: string; content: string }>,
-  responses: AgentPreviewSendResponse[]
+  responses: AgentPreviewSendResponse[],
+  traces?: PlannerResponse[]
 ): void => {
   if (!outputDir) return;
   fs.mkdirSync(outputDir, { recursive: true });
@@ -62,6 +64,29 @@ export const saveTranscriptsToFile = (
 
   const responsesPath = path.join(outputDir, 'responses.json');
   fs.writeFileSync(responsesPath, JSON.stringify(responses, null, 2));
+
+  if (traces) {
+    const tracesPath = path.join(outputDir, 'traces.json');
+    fs.writeFileSync(tracesPath, JSON.stringify(traces, null, 2));
+  }
+};
+
+export const getTraces = async (
+  agent: AgentPreviewBase,
+  sessionId: string,
+  messageIds: string[],
+  logger: Logger
+): Promise<PlannerResponse[]> => {
+  if (messageIds.length > 0) {
+    try {
+      const traces = await agent.traces(sessionId, messageIds);
+      return traces;
+    } catch (e) {
+      const sfError = SfError.wrap(e);
+      logger.info(`Error obtaining traces: ${sfError.name} - ${sfError.message}`, { sessionId, messageIds });
+    }
+  }
+  return [];
 };
 
 /**
@@ -78,6 +103,7 @@ export function AgentPreviewReact(props: {
   readonly outputDir: string | undefined;
   readonly isLocalAgent: boolean;
   readonly apexDebug: boolean | undefined;
+  readonly logger: Logger;
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
@@ -96,8 +122,9 @@ export function AgentPreviewReact(props: {
   const [tempDir, setTempDir] = React.useState('');
   const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
   const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
+  const [messageIds, setMessageIds] = React.useState<string[]>([]);
 
-  const { connection, agent, name, outputDir, isLocalAgent, apexDebug } = props;
+  const { connection, agent, name, outputDir, isLocalAgent, apexDebug, logger } = props;
 
   useInput((input, key) => {
     // If user is in directory input and presses ESC, cancel and exit without saving
@@ -222,7 +249,9 @@ export function AgentPreviewReact(props: {
         const sessionDir = path.join(finalDir, `${dateForDir}--${sessionId || 'session'}`);
         fs.mkdirSync(sessionDir, { recursive: true });
 
-        saveTranscriptsToFile(sessionDir, messages, responses);
+        const traces = await getTraces(agent, sessionId, messageIds, logger);
+
+        saveTranscriptsToFile(sessionDir, messages, responses, traces);
 
         // Write apex debug logs if any
         if (apexDebug) {
@@ -246,7 +275,7 @@ export function AgentPreviewReact(props: {
       }
     };
     void saveAndExit();
-  }, [saveConfirmed, saveDir, messages, responses, sessionId, apexDebug, connection]);
+  }, [saveConfirmed, saveDir, messages, responses, sessionId, apexDebug, connection, agent, messageIds, logger]);
 
   return (
     <Box flexDirection="column">
@@ -395,6 +424,7 @@ export function AgentPreviewReact(props: {
 
                 // Add the agent's response to the chat
                 setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
+                setMessageIds((prev) => [...prev, response.messages[0].planId]);
 
                 // Apex debug logs will be saved when user exits and chooses to save
               } catch (e) {
@@ -422,6 +452,7 @@ export function AgentPreviewReact(props: {
           <Text bold>Session Ended</Text>
           {tempDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
           {tempDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
+          {tempDir ? <Text>Traces: {tempDir}/traces.json</Text> : null}
           {apexDebugLogs.length > 0 && tempDir && <Text>Apex Debug Logs saved to: {tempDir}</Text>}
         </Box>
       ) : null}
