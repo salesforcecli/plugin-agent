@@ -1,3 +1,9 @@
+# [1.26.0](https://github.com/salesforcecli/plugin-agent/compare/1.25.3...1.26.0) (2025-12-12)
+
+### Features
+
+- save traces to file ([b098ae5](https://github.com/salesforcecli/plugin-agent/commit/b098ae5a8121adcbef7d35cb7c5b7144400983c2))
+
 ## [1.25.3](https://github.com/salesforcecli/plugin-agent/compare/1.25.2...1.25.3) (2025-12-10)
 
 ### Bug Fixes
