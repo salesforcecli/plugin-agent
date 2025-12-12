@@ -19,7 +19,7 @@ import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
 
-describe.skip('agent validate authoring-bundle NUTs', () => {
+describe('agent validate authoring-bundle NUTs', () => {
   let session: TestSession;
 
   before(async () => {
@@ -28,12 +28,12 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
+      // scratchOrgs: [
+      //   {
+      //     setDefault: true,
+      //     config: join('config', 'project-scratch-def.json'),
+      //   },
+      // ],
     });
   });
 
@@ -42,11 +42,11 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
   });
 
   it('should validate a valid authoring bundle', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
+    // until we're testing in scratch orgs, use the devhub
+    const username = session.hubOrg.username;
 
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name valid --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -56,12 +56,15 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
   });
 
   it('should fail validation for invalid bundle path', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'invalid', 'path');
+    // until we're testing in scratch orgs, use the devhub
+    const username = session.hubOrg.username;
+    const result = execCmd<AgentValidateAuthoringBundleResult>(
+      `agent validate authoring-bundle --api-name invalid --target-org ${username} --json`,
+      { ensureExitCode: 2 }
+    ).jsonOutput!;
 
-    execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
-      { ensureExitCode: 1 }
-    );
+    expect(result?.stack).to.include('Error: Compilation of the Agent Script file failed with the following');
+    expect(result?.stack).to.include('Auto transitions require a description.');
+    expect(result?.stack).to.include("to the target topic 'share_local_events'");
   });
 });
