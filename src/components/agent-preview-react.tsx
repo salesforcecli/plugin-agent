@@ -22,7 +22,7 @@ import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { Connection, SfError, Lifecycle } from '@salesforce/core';
-import { AgentPreviewBase, AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
+import { AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
 import { sleep, env } from '@salesforce/kit';
 
 // Component to show a simple typing animation

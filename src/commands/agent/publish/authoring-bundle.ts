@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 import { EOL } from 'node:os';
-import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
@@ -103,12 +101,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       mso.goto('Validate Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
+      const agent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: authoringBundleDir });
 
       // First compile the .agent file to get the Agent JSON
-      const compileResponse = await Agent.compileAgentScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
-      );
+      const compileResponse = await agent.compile();
       if (compileResponse.status === 'success') {
         mso.skipTo('Publish Agent');
       } else {
@@ -152,7 +148,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
-      const result = await Agent.publishAgentJson(conn, this.project!, compileResponse.compiledArtifact);
+      const result = await agent.publish();
       mso.stop();
 
       return {

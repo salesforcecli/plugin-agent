@@ -15,19 +15,20 @@
  */
 
 import * as path from 'node:path';
-import { join, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { globSync } from 'glob';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { AuthInfo, Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { AuthInfo, Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import {
-  AgentPreview as Preview,
-  AgentSimulate,
+  Agent,
   AgentSource,
   findAuthoringBundle,
-  PublishedAgent,
+  ProductionAgent,
+  PublishedAgentType,
   ScriptAgent,
+  ScriptAgentType,
 } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
@@ -109,7 +110,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       )
     ).records;
 
-    let selectedAgent: ScriptAgent | PublishedAgent;
+    let selectedAgent: ScriptAgent | ProductionAgent;
 
     if (flags['authoring-bundle']) {
       // user specified --authoring-bundle, we'll find the script and use it
@@ -117,75 +118,38 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       if (!bundlePath) {
         throw new SfError(`Could not find authoring bundle for ${flags['authoring-bundle']}`);
       }
-      selectedAgent = {
-        DeveloperName: flags['authoring-bundle'],
-        source: AgentSource.SCRIPT,
-        path: join(bundlePath, `${flags['authoring-bundle']}.agent`),
-      };
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: bundlePath });
     } else if (apiNameFlag) {
       // user specified --api-name, it should be in the list of agents from the org
       const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
       if (!agent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
       validateAgent(agent);
-      selectedAgent = {
-        Id: agent.Id,
-        DeveloperName: agent.DeveloperName,
-        source: AgentSource.PUBLISHED,
-      };
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: agent.Id });
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
     } else {
-      selectedAgent = await select<ScriptAgent | PublishedAgent>({
+      const choice = await select<ScriptAgentType | PublishedAgentType>({
         message: 'Select an agent',
         choices: this.getAgentChoices(agentsInOrg),
       });
+      const p =
+        choice.source === AgentSource.SCRIPT
+          ? { aabDirectory: basename(choice.path) }
+          : { nameOrId: choice.DeveloperName };
+
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, ...p });
     }
 
-    // we have the selected agent, create the appropriate connection
-    const authInfo = await AuthInfo.create({
-      username: flags['target-org'].getUsername(),
-    });
-    // Get client app - check flag first, then auth file, then env var
-    let clientApp = flags['client-app'];
-
-    if (!clientApp && selectedAgent?.source === AgentSource.PUBLISHED) {
-      const clientApps = getClientAppsFromAuth(authInfo);
-
-      if (clientApps.length === 1) {
-        clientApp = clientApps[0];
-      } else if (clientApps.length > 1) {
-        clientApp = await select({
-          message: 'Select a client app',
-          choices: clientApps.map((app) => ({ value: app, name: app })),
-        });
-      } else {
-        throw new SfError('No client app found.');
-      }
-    }
-
-    if (useLiveActions && selectedAgent.source === AgentSource.PUBLISHED) {
+    if (useLiveActions && selectedAgent instanceof ProductionAgent) {
       void Lifecycle.getInstance().emitWarning(
         'Published agents will always use real actions in your org, specifying --use-live-actions and selecting a published agent has no effect'
       );
     }
 
-    const jwtConn =
-      selectedAgent?.source === AgentSource.PUBLISHED
-        ? await Connection.create({
-            authInfo,
-            clientApp,
-          })
-        : await Connection.create({ authInfo });
-
     // Only resolve outputDir if explicitly provided via flag
     // Otherwise, let user decide when exiting
     const outputDir = flags['output-dir'] ? resolve(flags['output-dir']) : undefined;
     // Both classes share the same interface for the methods we need
-    const agentPreview =
-      selectedAgent.source === AgentSource.PUBLISHED
-        ? new Preview(jwtConn, selectedAgent.Id)
-        : new AgentSimulate(jwtConn, selectedAgent.path, !useLiveActions);
-
-    agentPreview.setApexDebugMode(flags['apex-debug']);
+    const agentPreview = selectedAgent.preview;
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
@@ -193,7 +157,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         agent: agentPreview,
         name: selectedAgent.DeveloperName,
         outputDir,
-        isLocalAgent: selectedAgent.source === AgentSource.SCRIPT,
+        isLocalAgent: selectedAgent instanceof ScriptAgent,
         apexDebug: flags['apex-debug'],
       }),
       { exitOnCtrlC: false }
@@ -201,8 +165,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     await instance.waitUntilExit();
   }
 
-  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgent | PublishedAgent>> {
-    const choices: Array<Choice<ScriptAgent | PublishedAgent>> = [];
+  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgentType | PublishedAgentType>> {
+    const choices: Array<Choice<ScriptAgentType | PublishedAgentType>> = [];
 
     // Add org agents
     for (const agent of agents) {
@@ -231,7 +195,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
           source: AgentSource.SCRIPT,
           path: path.join(this.project!.getPath(), agentPath),
         },
-      });
+      } as Choice<ScriptAgentType>);
     }
 
     return choices;

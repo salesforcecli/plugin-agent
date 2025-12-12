@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Connection, Messages, Org, SfError } from '@salesforce/core';
-import { Agent, type BotMetadata } from '@salesforce/agents';
+import { Messages, Org, SfError, SfProject } from '@salesforce/core';
+import { Agent, type BotMetadata, ProductionAgent } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 
 type Choice<Value> = {
@@ -67,16 +67,15 @@ export const getAgentChoices = (agents: BotMetadata[], status: 'Active' | 'Inact
   });
 
 export const getAgentForActivation = async (config: {
-  conn: Connection;
   targetOrg: Org;
   status: 'Active' | 'Inactive';
   apiNameFlag?: string;
-}): Promise<Agent> => {
-  const { conn, targetOrg, status, apiNameFlag } = config;
+}): Promise<ProductionAgent> => {
+  const { targetOrg, status, apiNameFlag } = config;
 
   let agentsInOrg: BotMetadata[] = [];
   try {
-    agentsInOrg = await Agent.listRemote(conn);
+    agentsInOrg = await Agent.listRemote(targetOrg.getConnection());
   } catch (error) {
     throw SfError.create({
       message: 'Error listing agents in org',
@@ -105,5 +104,9 @@ export const getAgentForActivation = async (config: {
     selectedAgent = agentsInOrg.find((agent) => agent.DeveloperName === agentChoice.DeveloperName);
   }
 
-  return new Agent({ connection: conn, nameOrId: selectedAgent!.Id });
+  return Agent.init({
+    connection: targetOrg.getConnection(),
+    nameOrId: selectedAgent!.Id,
+    project: SfProject.getInstance(),
+  });
 };

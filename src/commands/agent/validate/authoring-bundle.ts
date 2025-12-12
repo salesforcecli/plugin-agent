@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
@@ -104,10 +102,8 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       mso.skipTo('Validating Authoring Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
-      const result = await Agent.compileAgentScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
-      );
+      const agent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: authoringBundleDir });
+      const result = await agent.compile();
       if (result.status === 'success') {
         mso.updateData({ status: 'COMPLETED' });
         mso.stop('completed');
