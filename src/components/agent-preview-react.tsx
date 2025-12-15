@@ -22,8 +22,12 @@ import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { Connection, SfError, Lifecycle } from '@salesforce/core';
-import { AgentPreviewSendResponse, writeDebugLog } from '@salesforce/agents';
+import { AgentPreviewSendResponse, writeDebugLog, ScriptAgent, ProductionAgent } from '@salesforce/agents';
 import { sleep, env } from '@salesforce/kit';
+
+type ScriptAgentPreview = ScriptAgent['preview'];
+type ProductionAgentPreview = ProductionAgent['preview'];
+type AgentPreview = ScriptAgentPreview | ProductionAgentPreview;
 
 // Component to show a simple typing animation
 function Typing(): React.ReactNode {
@@ -73,7 +77,7 @@ export const saveTranscriptsToFile = (
  */
 export function AgentPreviewReact(props: {
   readonly connection: Connection;
-  readonly agent;
+  readonly agent: AgentPreview;
   readonly name: string;
   readonly outputDir: string | undefined;
   readonly isLocalAgent: boolean;
@@ -144,7 +148,12 @@ export function AgentPreviewReact(props: {
       if (sessionEnded) {
         try {
           // TODO: Support other end types (such as Escalate)
-          await agent.end(sessionId, 'UserRequest');
+          // ScriptAgent.end() takes no args, ProductionAgent.end(reason) takes EndReason
+          if (isLocalAgent) {
+            await (agent as ScriptAgentPreview).end();
+          } else {
+            await (agent as ProductionAgentPreview).end('UserRequest');
+          }
           process.exit(0);
         } catch (e) {
           // in case the agent session never started, calling agent.end will throw an error, but we've already shown the error to the user
@@ -153,7 +162,7 @@ export function AgentPreviewReact(props: {
       }
     };
     void endSession();
-  }, [sessionEnded, sessionId, agent]);
+  }, [sessionEnded, sessionId, agent, isLocalAgent]);
 
   React.useEffect(() => {
     // Set up event listeners for agent compilation and simulation events
@@ -201,7 +210,7 @@ export function AgentPreviewReact(props: {
     };
 
     void startSession();
-  }, [agent, name, outputDir, props.name, isLocalAgent]);
+  }, [agent, name, outputDir, props.name, isLocalAgent, apexDebug]);
 
   React.useEffect(() => {
     // Save to tempDir if it was set (during session)
@@ -384,7 +393,8 @@ export function AgentPreviewReact(props: {
                 // Add the most recent user message to the chat window
                 setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
                 setIsTyping(true);
-                const response = await agent.send(sessionId, content);
+                // send() only takes the message, not sessionId
+                const response = await agent.send(content);
                 setResponses((prev) => [...prev, response]);
                 const message = response.messages[0].message;
 

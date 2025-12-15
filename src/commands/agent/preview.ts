@@ -15,7 +15,7 @@
  */
 
 import * as path from 'node:path';
-import { basename, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { globSync } from 'glob';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { AuthInfo, Lifecycle, Messages, SfError } from '@salesforce/core';
@@ -111,6 +111,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     ).records;
 
     let selectedAgent: ScriptAgent | ProductionAgent;
+    let agentName: string;
 
     if (flags['authoring-bundle']) {
       // user specified --authoring-bundle, we'll find the script and use it
@@ -119,6 +120,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         throw new SfError(`Could not find authoring bundle for ${flags['authoring-bundle']}`);
       }
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: bundlePath });
+      agentName = flags['authoring-bundle'];
     } else if (apiNameFlag) {
       // user specified --api-name, it should be in the list of agents from the org
       const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
@@ -126,17 +128,40 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       validateAgent(agent);
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: agent.Id });
       if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
+      // ProductionAgent needs getBotMetadata() to get the name, ScriptAgent won't be returned here
+      if (selectedAgent instanceof ProductionAgent) {
+        const agentMetadata = await selectedAgent.getBotMetadata();
+        agentName = agentMetadata.DeveloperName;
+      } else {
+        agentName = apiNameFlag;
+      }
     } else {
       const choice = await select<ScriptAgentType | ProductionAgentType>({
         message: 'Select an agent',
         choices: this.getAgentChoices(agentsInOrg),
       });
-      const p =
-        choice.source === AgentSource.SCRIPT
-          ? { aabDirectory: basename(choice.path), project: this.project!, connection: conn }
-          : { nameOrId: choice.DeveloperName, project: this.project!, connection: conn };
 
-      selectedAgent = await Agent.init(p);
+      if (choice.source === AgentSource.SCRIPT) {
+        // aabDirectory should be the directory path, not the filename
+        const aabDirectory = dirname(choice.path);
+        selectedAgent = await Agent.init({
+          connection: conn,
+          project: this.project!,
+          aabDirectory,
+        });
+        // Extract name from path: basename without .agent extension
+        agentName = basename(choice.path, '.agent');
+        selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+      } else {
+        selectedAgent = await Agent.init({
+          connection: conn,
+          project: this.project!,
+          nameOrId: choice.DeveloperName,
+        });
+        // ProductionAgent needs getBotMetadata() to get the name
+        const agentMetadata = await selectedAgent.getBotMetadata();
+        agentName = agentMetadata.DeveloperName;
+      }
     }
 
     if (useLiveActions && selectedAgent instanceof ProductionAgent) {
@@ -148,14 +173,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     // Only resolve outputDir if explicitly provided via flag
     // Otherwise, let user decide when exiting
     const outputDir = flags['output-dir'] ? resolve(flags['output-dir']) : undefined;
-    // Both classes share the same interface for the methods we need
-    const agentPreview = selectedAgent.preview;
 
+    selectedAgent.preview.setApexDebugging(flags['apex-debug']);
     const instance = render(
       React.createElement(AgentPreviewReact, {
         connection: conn,
-        agent: agentPreview,
-        name: selectedAgent,
+        agent: selectedAgent.preview,
+        name: agentName,
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
         apexDebug: flags['apex-debug'],
