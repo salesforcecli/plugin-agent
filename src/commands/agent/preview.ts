@@ -142,12 +142,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
-        connection: conn,
         agent: selectedAgent.preview,
         name: selectedAgent.name ?? 'No Name Found',
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
-        apexDebug: flags['apex-debug'],
       }),
       { exitOnCtrlC: false }
     );

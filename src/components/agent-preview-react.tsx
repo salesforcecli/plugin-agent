@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import path from 'node:path';
-import fs from 'node:fs';
 import * as process from 'node:process';
 import { resolve } from 'node:path';
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
-import { Connection, SfError, Lifecycle } from '@salesforce/core';
-import { AgentPreviewSendResponse, writeDebugLog, ScriptAgent, ProductionAgent } from '@salesforce/agents';
+import { SfError, Lifecycle } from '@salesforce/core';
+import { ScriptAgent, ProductionAgent } from '@salesforce/agents';
 import { sleep, env } from '@salesforce/kit';
 
 type ScriptAgentPreview = ScriptAgent['preview'];
@@ -53,21 +51,6 @@ function Typing(): React.ReactNode {
   );
 }
 
-export const saveTranscriptsToFile = (
-  outputDir: string,
-  messages: Array<{ timestamp: Date; role: string; content: string }>,
-  responses: AgentPreviewSendResponse[]
-): void => {
-  if (!outputDir) return;
-  fs.mkdirSync(outputDir, { recursive: true });
-
-  const transcriptPath = path.join(outputDir, 'transcript.json');
-  fs.writeFileSync(transcriptPath, JSON.stringify(messages, null, 2));
-
-  const responsesPath = path.join(outputDir, 'responses.json');
-  fs.writeFileSync(responsesPath, JSON.stringify(responses, null, 2));
-};
-
 /**
  * Ideas:
  * - Limit height based on terminal height
@@ -76,12 +59,10 @@ export const saveTranscriptsToFile = (
  * - Add keystroke to scroll down
  */
 export function AgentPreviewReact(props: {
-  readonly connection: Connection;
   readonly agent: AgentPreview;
   readonly name: string;
   readonly outputDir: string | undefined;
   readonly isLocalAgent: boolean;
-  readonly apexDebug: boolean | undefined;
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
@@ -93,15 +74,9 @@ export function AgentPreviewReact(props: {
   const [showSavePrompt, setShowSavePrompt] = React.useState(false);
   const [showDirInput, setShowDirInput] = React.useState(false);
   const [saveDir, setSaveDir] = React.useState('');
-  const [saveConfirmed, setSaveConfirmed] = React.useState(false);
-  // @ts-expect-error: Complains if this is not defined but it's not used
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [timestamp, setTimestamp] = React.useState(new Date().getTime());
-  const [tempDir, setTempDir] = React.useState('');
-  const [responses, setResponses] = React.useState<AgentPreviewSendResponse[]>([]);
-  const [apexDebugLogs, setApexDebugLogs] = React.useState<string[]>([]);
+  const [savedPath, setSavedPath] = React.useState<string | undefined>();
 
-  const { connection, agent, name, outputDir, isLocalAgent, apexDebug } = props;
+  const { agent, name, outputDir, isLocalAgent } = props;
 
   useInput((input, key) => {
     // If user is in directory input and presses ESC, cancel and exit without saving
@@ -126,13 +101,11 @@ export function AgentPreviewReact(props: {
           // If outputDir was provided via flag, use it directly
           if (outputDir) {
             setSaveDir(outputDir);
-            setSaveConfirmed(true);
-            setShowSavePrompt(false);
           } else {
             // Otherwise, prompt for directory
             setShowSavePrompt(false);
             setShowDirInput(true);
-            const defaultDir = env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', path.join('temp', 'agent-preview'));
+            const defaultDir = env.getString('SF_AGENT_PREVIEW_OUTPUT_DIR', 'temp/agent-preview');
             setSaveDir(defaultDir);
           }
         } else {
@@ -210,52 +183,33 @@ export function AgentPreviewReact(props: {
     };
 
     void startSession();
-  }, [agent, name, outputDir, props.name, isLocalAgent, apexDebug]);
-
-  React.useEffect(() => {
-    // Save to tempDir if it was set (during session)
-    if (tempDir) {
-      saveTranscriptsToFile(tempDir, messages, responses);
-    }
-  }, [tempDir, messages, responses]);
+  }, [agent, name, props.name, isLocalAgent]);
 
   // Handle saving when user confirms save on exit
   React.useEffect(() => {
     const saveAndExit = async (): Promise<void> => {
-      if (saveConfirmed && saveDir) {
-        const finalDir = resolve(saveDir);
-        fs.mkdirSync(finalDir, { recursive: true });
-
-        // Create a timestamped subdirectory for this session
-        const dateForDir = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        const sessionDir = path.join(finalDir, `${dateForDir}--${sessionId || 'session'}`);
-        fs.mkdirSync(sessionDir, { recursive: true });
-
-        saveTranscriptsToFile(sessionDir, messages, responses);
-
-        // Write apex debug logs if any
-        if (apexDebug) {
-          for (const response of responses) {
-            if (response.apexDebugLog) {
-              // eslint-disable-next-line no-await-in-loop
-              await writeDebugLog(connection, response.apexDebugLog, sessionDir);
-              const logId = response.apexDebugLog.Id;
-              if (logId) {
-                setApexDebugLogs((prev) => [...prev, path.join(sessionDir, `${logId}.log`)]);
-              }
-            }
-          }
+      if (saveDir && !savedPath && !showDirInput) {
+        try {
+          const finalDir = outputDir ?? saveDir;
+          const savedSessionPath = await (
+            agent as { saveSession: (outputDir?: string) => Promise<string> }
+          ).saveSession(finalDir);
+          setSavedPath(savedSessionPath);
+          // Mark session as ended to trigger exit
+          setSessionEnded(true);
+        } catch (e) {
+          const sfError = SfError.wrap(e);
+          setHeader(`Error saving session: ${sfError.message}`);
+          // Still exit even if save failed
+          setSessionEnded(true);
         }
-
-        // Update tempDir so the save message shows the correct path
-        setTempDir(sessionDir);
-
-        // Mark session as ended to trigger exit
+      } else if (saveDir && savedPath) {
+        // Already saved, just exit
         setSessionEnded(true);
       }
     };
     void saveAndExit();
-  }, [saveConfirmed, saveDir, messages, responses, sessionId, apexDebug, connection]);
+  }, [saveDir, outputDir, agent, savedPath, showDirInput]);
 
   return (
     <Box flexDirection="column">
@@ -356,7 +310,7 @@ export function AgentPreviewReact(props: {
           paddingLeft={1}
           paddingRight={1}
         >
-          <Text bold>Enter output directory for {apexDebug ? 'debug logs and transcripts' : 'transcripts'}:</Text>
+          <Text bold>Enter output directory for session data:</Text>
           <Box marginTop={1}>
             <Text>&gt; </Text>
             <TextInput
@@ -366,8 +320,7 @@ export function AgentPreviewReact(props: {
               onChange={setSaveDir}
               onSubmit={(dir) => {
                 if (dir) {
-                  setSaveDir(dir);
-                  setSaveConfirmed(true);
+                  setSaveDir(resolve(dir));
                   setShowDirInput(false);
                 }
               }}
@@ -395,7 +348,6 @@ export function AgentPreviewReact(props: {
                 setIsTyping(true);
                 // send() only takes the message, not sessionId
                 const response = await agent.send(content);
-                setResponses((prev) => [...prev, response]);
                 const message = response.messages[0].message;
 
                 if (!message) {
@@ -405,8 +357,6 @@ export function AgentPreviewReact(props: {
 
                 // Add the agent's response to the chat
                 setMessages((prev) => [...prev, { role: name, content: message, timestamp: new Date() }]);
-
-                // Apex debug logs will be saved when user exits and chooses to save
               } catch (e) {
                 const sfError = SfError.wrap(e);
                 setIsTyping(false);
@@ -430,9 +380,7 @@ export function AgentPreviewReact(props: {
           paddingRight={1}
         >
           <Text bold>Session Ended</Text>
-          {tempDir ? <Text>Conversation log: {tempDir}/transcript.json</Text> : null}
-          {tempDir ? <Text>API transactions: {tempDir}/responses.json</Text> : null}
-          {apexDebugLogs.length > 0 && tempDir && <Text>Apex Debug Logs saved to: {tempDir}</Text>}
+          {savedPath ? <Text>Session saved to: {savedPath}</Text> : null}
         </Box>
       ) : null}
     </Box>
