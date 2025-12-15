@@ -101,9 +101,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     } else if (apiNameFlag) {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: apiNameFlag });
     } else {
-      const choices: PreviewableAgent[] = (await Agent.listPreviewable(conn, this.project!)).map((r) => ({
-        ...r,
-        ...{ name: r.source === 'org' ? `${r.name} (Published)` : `${r.name} (Agent Script)` },
+      const previewableAgents = await Agent.listPreviewable(conn, this.project!);
+      const choices = previewableAgents.map((agent) => ({
+        name: agent.source === 'org' ? `${agent.name} (Published)` : `${agent.name} (Agent Script)`,
+        value: agent,
       }));
       const choice = await select<PreviewableAgent>({
         message: 'Select an agent',
@@ -117,6 +118,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
           project: this.project!,
           aabDirectory: choice.aabDirectory,
         });
+        selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
       } else {
         selectedAgent = await Agent.init({
           connection: conn,
@@ -137,9 +139,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const outputDir = flags['output-dir'] ? resolve(flags['output-dir']) : undefined;
 
     selectedAgent.preview.setApexDebugging(flags['apex-debug']);
-    if (selectedAgent instanceof ScriptAgent) {
-      selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
-    }
 
     const instance = render(
       React.createElement(AgentPreviewReact, {
