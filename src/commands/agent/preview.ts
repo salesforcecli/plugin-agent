@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import * as path from 'node:path';
-import { basename, dirname, resolve } from 'node:path';
-import { globSync } from 'glob';
+import { resolve } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { AuthInfo, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import {
   Agent,
   AgentSource,
   findAuthoringBundle,
+  PreviewableAgent,
   ProductionAgent,
-  ProductionAgentType,
   ScriptAgent,
-  ScriptAgentType,
 } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
@@ -46,12 +43,6 @@ export type AgentData = {
   };
 };
 
-type Choice<Value> = {
-  value: Value;
-  name?: string;
-  disabled?: boolean | string;
-};
-
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
 
@@ -67,11 +58,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'client-app': Flags.string({
-      char: 'c',
-      summary: messages.getMessage('flags.client-app.summary'),
-      dependsOn: ['target-org'],
-    }),
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
@@ -98,20 +84,12 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     // get user's agent selection either from flags, or interaction
     // if .agent selected, use the AgentSimulate class to preview
     // if published agent, use AgentPreview for preview
-    // based on agent, differing auth mechanisms required
     const { flags } = await this.parse(AgentPreview);
 
     const { 'api-name': apiNameFlag, 'use-live-actions': useLiveActions } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    const agentsInOrg = (
-      await conn.query<AgentData>(
-        'SELECT Id, DeveloperName, (SELECT Status FROM BotVersions) FROM BotDefinition WHERE IsDeleted = false'
-      )
-    ).records;
-
     let selectedAgent: ScriptAgent | ProductionAgent;
-    let agentName: string;
 
     if (flags['authoring-bundle']) {
       // user specified --authoring-bundle, we'll find the script and use it
@@ -120,47 +98,31 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         throw new SfError(`Could not find authoring bundle for ${flags['authoring-bundle']}`);
       }
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: bundlePath });
-      agentName = flags['authoring-bundle'];
     } else if (apiNameFlag) {
-      // user specified --api-name, it should be in the list of agents from the org
-      const agent = agentsInOrg.find((a) => a.DeveloperName === apiNameFlag);
-      if (!agent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
-      validateAgent(agent);
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: agent.Id });
-      if (!selectedAgent) throw new Error(`No valid Agents were found with the Api Name ${apiNameFlag}.`);
-      // ProductionAgent needs getBotMetadata() to get the name, ScriptAgent won't be returned here
-      if (selectedAgent instanceof ProductionAgent) {
-        const agentMetadata = await selectedAgent.getBotMetadata();
-        agentName = agentMetadata.DeveloperName;
-      } else {
-        agentName = apiNameFlag;
-      }
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: apiNameFlag });
     } else {
-      const choice = await select<ScriptAgentType | ProductionAgentType>({
+      const choices: PreviewableAgent[] = (await Agent.listPreviewable(conn, this.project!)).map((r) => ({
+        ...r,
+        ...{ name: r.source === 'org' ? `${r.name} (Published)` : `${r.name} (Agent Script)` },
+      }));
+      const choice = await select<PreviewableAgent>({
         message: 'Select an agent',
-        choices: this.getAgentChoices(agentsInOrg),
+        choices,
       });
 
-      if (choice.source === AgentSource.SCRIPT) {
+      if (choice.source === AgentSource.SCRIPT && choice.aabDirectory) {
         // aabDirectory should be the directory path, not the filename
-        const aabDirectory = dirname(choice.path);
         selectedAgent = await Agent.init({
           connection: conn,
           project: this.project!,
-          aabDirectory,
+          aabDirectory: choice.aabDirectory,
         });
-        // Extract name from path: basename without .agent extension
-        agentName = basename(choice.path, '.agent');
-        selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
       } else {
         selectedAgent = await Agent.init({
           connection: conn,
           project: this.project!,
-          nameOrId: choice.DeveloperName,
+          nameOrId: choice.name,
         });
-        // ProductionAgent needs getBotMetadata() to get the name
-        const agentMetadata = await selectedAgent.getBotMetadata();
-        agentName = agentMetadata.DeveloperName;
       }
     }
 
@@ -175,11 +137,15 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const outputDir = flags['output-dir'] ? resolve(flags['output-dir']) : undefined;
 
     selectedAgent.preview.setApexDebugging(flags['apex-debug']);
+    if (selectedAgent instanceof ScriptAgent) {
+      selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+    }
+
     const instance = render(
       React.createElement(AgentPreviewReact, {
         connection: conn,
         agent: selectedAgent.preview,
-        name: agentName,
+        name: selectedAgent.name ?? 'No Name Found',
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
         apexDebug: flags['apex-debug'],
@@ -187,42 +153,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       { exitOnCtrlC: false }
     );
     await instance.waitUntilExit();
-  }
-
-  private getAgentChoices(agents: AgentData[]): Array<Choice<ScriptAgentType | ProductionAgentType>> {
-    const choices: Array<Choice<ScriptAgentType | ProductionAgentType>> = [];
-
-    // Add org agents
-    for (const agent of agents) {
-      if (agentIsInactive(agent) || agentIsUnsupported(agent.DeveloperName)) {
-        continue;
-      }
-
-      choices.push({
-        name: `${agent.DeveloperName} (Published)`,
-        value: {
-          Id: agent.Id,
-          DeveloperName: agent.DeveloperName,
-          source: AgentSource.PUBLISHED,
-        },
-      });
-    }
-
-    // Add local agents from .agent files
-    const localAgentPaths = globSync('**/*.agent', { cwd: this.project!.getPath() });
-    for (const agentPath of localAgentPaths) {
-      const agentName = path.basename(agentPath, '.agent');
-      choices.push({
-        name: `${agentName} (Agent Script)`,
-        value: {
-          DeveloperName: agentName,
-          source: AgentSource.SCRIPT,
-          path: path.join(this.project!.getPath(), agentPath),
-        },
-      } as Choice<ScriptAgentType>);
-    }
-
-    return choices;
   }
 }
 
@@ -246,6 +176,3 @@ export const validateAgent = (agent: AgentData): boolean => {
 
   return true;
 };
-
-export const getClientAppsFromAuth = (authInfo: AuthInfo): string[] =>
-  Object.keys(authInfo.getFields().clientApps ?? {});
