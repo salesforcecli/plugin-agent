@@ -99,7 +99,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       }
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabDirectory: bundlePath });
     } else if (apiNameFlag) {
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, nameOrId: apiNameFlag });
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId: apiNameFlag });
     } else {
       const previewableAgents = await Agent.listPreviewable(conn, this.project!);
       const choices = previewableAgents.map((agent) => ({
@@ -123,7 +123,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
         selectedAgent = await Agent.init({
           connection: conn,
           project: this.project!,
-          nameOrId: choice.name,
+          // developerName will be set at this point since the user selected a production agent, even ID will be defined
+          apiNameOrId: choice.developerName ?? choice.id ?? '',
         });
       }
     }
@@ -143,7 +144,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const instance = render(
       React.createElement(AgentPreviewReact, {
         agent: selectedAgent.preview,
-        name: selectedAgent.name ?? 'No Name Found',
+        name: selectedAgent.name ?? '',
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
       }),

@@ -106,7 +106,7 @@ export const getAgentForActivation = async (config: {
 
   return Agent.init({
     connection: targetOrg.getConnection(),
-    nameOrId: selectedAgent!.Id,
+    apiNameOrId: selectedAgent!.Id,
     project: SfProject.getInstance(),
   });
 };
