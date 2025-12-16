@@ -15,34 +15,14 @@
  */
 import { join } from 'node:path';
 import { expect } from 'chai';
-import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
+import { getSharedContext } from './shared-setup.js';
 
 describe.skip('agent publish authoring-bundle NUTs', () => {
-  let session: TestSession;
-
-  before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
-  });
-
   it('should publish a valid authoring bundle', () => {
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
+    const context = getSharedContext();
+    const bundlePath = join(context.session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundlePath} --json`,
@@ -56,8 +36,9 @@ describe.skip('agent publish authoring-bundle NUTs', () => {
   });
 
   it('should fail for invalid bundle path', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'invalid', 'path');
+    const context = getSharedContext();
+    const username = context.username;
+    const bundlePath = join(context.session.project.dir, 'invalid', 'path');
     const agentName = 'Test Agent';
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(

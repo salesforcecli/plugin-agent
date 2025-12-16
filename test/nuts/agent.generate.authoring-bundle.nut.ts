@@ -17,40 +17,20 @@
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { expect } from 'chai';
-import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
+import { genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
-
-let session: TestSession;
+import { getSharedContext } from './shared-setup.js';
 
 describe('agent generate authoring-bundle NUTs', () => {
-  before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-      // scratchOrgs: [
-      //   {
-      //     setDefault: true,
-      //     config: join('config', 'project-scratch-def.json'),
-      //   },
-      // ],
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
-  });
-
   describe('agent generate authoring-bundle', () => {
     const specFileName = genUniqueString('agentSpec_%s.yaml');
     const bundleName = 'Test_Bundle';
 
     it('should generate authoring bundle from spec file', async () => {
-      // until we're testing in scratch orgs, use the devhub
-      const username = session.hubOrg.username;
-      const specPath = join(session.project.dir, 'specs', specFileName);
+      const context = getSharedContext();
+      const username = context.username;
+      const specPath = join(context.session.project.dir, 'specs', specFileName);
 
       // First generate a spec file
       const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
