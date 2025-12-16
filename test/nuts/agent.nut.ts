@@ -260,8 +260,8 @@ describe('plugin-agent NUTs', () => {
       expect(fileStat.size).to.be.greaterThan(0);
     });
 
-    // skip until 12/16 - should be fixed in server-side release then
-    itAfter(new Date('2025-12-16'))('should create new agent in org', async () => {
+    // skip until 12/17 - should be fixed in server-side release on 12/16
+    itAfter(new Date('2025-12-17'))('should create new agent in org', async () => {
       const expectedFilePath = join(session.project.dir, 'specs', specFileName);
       const name = 'Plugin Agent Test';
       const apiName = 'Plugin_Agent_Test';
