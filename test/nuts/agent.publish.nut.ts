@@ -19,7 +19,7 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import { getSharedContext } from './shared-setup.js';
 
-describe.skip('agent publish authoring-bundle NUTs', () => {
+describe('agent publish authoring-bundle NUTs', () => {
   it('should publish a valid authoring bundle', () => {
     const context = getSharedContext();
     const bundlePath = join(context.session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');

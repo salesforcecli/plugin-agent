@@ -50,6 +50,12 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
   const existingOrgUsername = process.env.TESTKIT_ORG_USERNAME;
   const useExistingOrg = Boolean(existingOrgUsername);
 
+  if (useExistingOrg) {
+    console.log(`Using existing org for testing: ${existingOrgUsername}`);
+  } else {
+    console.log('Creating scratch org for testing...');
+  }
+
   const session = await TestSession.create({
     project: {
       sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
@@ -87,6 +93,7 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
           `Original error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
+    console.log(`Testing with username: ${username}`);
   } else {
     const defaultOrgInfo = session.orgs.get('default');
     if (!defaultOrgInfo?.username) {
@@ -95,6 +102,7 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
     username = defaultOrgInfo.username;
     defaultOrg = await Org.create({ aliasOrUsername: username });
     connection = defaultOrg.getConnection();
+    console.log(`Scratch org created. Testing with username: ${username}`);
   }
 
   // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
