@@ -37,11 +37,11 @@ describe('agent validate authoring-bundle NUTs', () => {
     const username = context.username;
     const result = execCmd<AgentValidateAuthoringBundleResult>(
       `agent validate authoring-bundle --api-name invalid --target-org ${username} --json`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 2 }
     ).jsonOutput!;
 
     expect(result.stack).to.include('Error: Compilation of the Agent Script file failed with the following');
-    expect(result?.stack).to.include('Auto transitions require a description');
+    expect(result.stack).to.include('Auto transitions require a description');
   });
 
   it('should fail validation for invalid bundle name specified ', () => {
