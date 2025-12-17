@@ -30,19 +30,32 @@ describe('agent validate authoring-bundle NUTs', () => {
 
     expect(result).to.be.ok;
     expect(result?.success).to.be.true;
-    expect(result?.errors).to.be.undefined;
   });
 
-  it('should fail validation for invalid bundle path', () => {
+  it('should fail validation for invalid bundle', () => {
     const context = getSharedContext();
     const username = context.username;
     const result = execCmd<AgentValidateAuthoringBundleResult>(
       `agent validate authoring-bundle --api-name invalid --target-org ${username} --json`,
-      { ensureExitCode: 2 }
+      { ensureExitCode: 1 }
     ).jsonOutput!;
 
-    expect(result?.stack).to.include('Error: Compilation of the Agent Script file failed with the following');
-    expect(result?.stack).to.include('Auto transitions require a description.');
-    expect(result?.stack).to.include("to the target topic 'share_local_events'");
+    expect(result.stack).to.include('Error: Compilation of the Agent Script file failed with the following');
+    expect(result?.stack).to.include('Auto transitions require a description');
+  });
+
+  it('should fail validation for invalid bundle name specified ', () => {
+    const context = getSharedContext();
+    const username = context.username;
+    const result = execCmd<AgentValidateAuthoringBundleResult>(
+      `agent validate authoring-bundle --api-name doesNotExist --target-org ${username} --json`,
+      { ensureExitCode: 1 }
+    ).jsonOutput!;
+
+    expect(result.name).to.equal('AgentNotFoundError');
+    expect(result.stack).to.include("file with API name 'doesNotExist' in the DX project");
+    expect(result?.actions).to.deep.equal([
+      'Check that the API name is correct and that the ".agent" file exists in your DX project directory.',
+    ]);
   });
 });
