@@ -21,6 +21,7 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 describe('agent publish authoring-bundle NUTs', () => {
   let session: TestSession;
@@ -40,8 +41,7 @@ describe('agent publish authoring-bundle NUTs', () => {
   });
 
   it.skip('should publish a new agent (first version)', async () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+    const username = getDevhubUsername(session);
 
     // Generate a unique bundle name to ensure it's a new agent
     const bundleName = genUniqueString('Test_Agent_%s');
@@ -144,8 +144,7 @@ describe('agent publish authoring-bundle NUTs', () => {
   });
 
   it.skip('should publish a new version of an existing agent', async () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+    const username = getDevhubUsername(session);
 
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
@@ -159,9 +158,8 @@ describe('agent publish authoring-bundle NUTs', () => {
     expect(result?.errors).to.be.undefined;
   });
 
-  it('should fail for invalid bundle api-name', () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+  it('should fail for invalid bundle api-name', async () => {
+    const username = getDevhubUsername(session);
     const invalidApiName = 'Invalid_Bundle_Name_That_Does_Not_Exist';
 
     execCmd<AgentPublishAuthoringBundleResult>(

@@ -22,6 +22,23 @@ import type { TestSession } from '@salesforce/cli-plugins-testkit';
 
 /* eslint-disable no-console */
 
+/**
+ * Gets the devhub username from the test session.
+ */
+export function getDevhubUsername(session: TestSession): string {
+  // First try environment variable
+  if (process.env.TESTKIT_HUB_USERNAME) {
+    return process.env.TESTKIT_HUB_USERNAME;
+  }
+
+  // Use session.hubOrg which TestKit keeps authenticated
+  if (session.hubOrg?.username) {
+    return session.hubOrg.username;
+  }
+
+  throw new Error('Devhub username not found. Ensure TESTKIT_HUB_USERNAME is set or devhub is properly authenticated.');
+}
+
 export async function deployMetadata(connection: Connection, session: TestSession): Promise<void> {
   // deploy Local_Info_Agent to scratch org
   const compSet1 = await ComponentSetBuilder.build({

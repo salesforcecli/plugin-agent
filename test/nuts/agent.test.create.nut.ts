@@ -20,6 +20,7 @@ import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 describe('agent test create NUTs', () => {
   let session: TestSession;
@@ -38,8 +39,7 @@ describe('agent test create NUTs', () => {
   });
 
   it('should create test from test spec file', async () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+    const username = getDevhubUsername(session);
     const testApiName = genUniqueString('Test_Agent_%s');
     const specFileName = genUniqueString('testSpec_%s.yaml');
     const specPath = join(session.project.dir, 'specs', specFileName);
@@ -78,9 +78,8 @@ testCases:
     expect(existsSync(fullPath)).to.be.true;
   });
 
-  it('should fail when spec file does not exist', () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+  it('should fail when spec file does not exist', async () => {
+    const username = getDevhubUsername(session);
     const testApiName = genUniqueString('Test_Agent_%s');
     const invalidSpecPath = join(session.project.dir, 'invalid', 'testSpec.yaml');
 
@@ -90,9 +89,8 @@ testCases:
     );
   });
 
-  it('should fail when required flags are missing in JSON mode', () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+  it('should fail when required flags are missing in JSON mode', async () => {
+    const username = getDevhubUsername(session);
 
     // Missing --api-name
     execCmd<AgentTestCreateResult>(`agent test create --target-org ${username} --json`, { ensureExitCode: 1 });

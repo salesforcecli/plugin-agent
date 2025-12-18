@@ -21,6 +21,7 @@ import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentCreateSpecResult } from '../../src/commands/agent/generate/agent-spec.js';
 import type { AgentCreateResult } from '../../src/commands/agent/create.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
@@ -36,9 +37,7 @@ describe('agent create NUTs', () => {
       },
       devhubAuthStrategy: 'AUTO',
     });
-    const devhubUsername = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!devhubUsername) throw new Error('Devhub username not found');
-    username = devhubUsername;
+    username = getDevhubUsername(session);
   });
 
   after(async () => {

@@ -20,6 +20,7 @@ import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { Connection, Org } from '@salesforce/core';
 import { sleep } from '@salesforce/kit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+import { getDevhubUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
@@ -53,9 +54,7 @@ describe('agent activate/deactivate NUTs', () => {
       },
       devhubAuthStrategy: 'AUTO',
     });
-    const devhubUsername = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!devhubUsername) throw new Error('Devhub username not found');
-    username = devhubUsername;
+    username = getDevhubUsername(session);
     defaultOrg = await Org.create({ aliasOrUsername: username });
     connection = defaultOrg.getConnection();
   });

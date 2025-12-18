@@ -22,6 +22,7 @@ import { AgentTestCache } from '../../src/agentTestCache.js';
 import type { AgentTestListResult } from '../../src/commands/agent/test/list.js';
 import type { AgentTestResultsResult } from '../../src/commands/agent/test/results.js';
 import type { AgentTestRunResult } from '../../src/flags.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
@@ -37,7 +38,7 @@ describe('agent test NUTs', () => {
       },
       devhubAuthStrategy: 'AUTO',
     });
-    devhubUsername = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')!.username!;
+    devhubUsername = getDevhubUsername(session);
   });
 
   after(async () => {

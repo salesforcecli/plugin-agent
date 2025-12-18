@@ -20,6 +20,7 @@ import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 let session: TestSession;
 
@@ -38,8 +39,7 @@ describe('agent generate authoring-bundle NUTs', () => {
   });
 
   it('should generate authoring bundle from spec file', async () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+    const username = getDevhubUsername(session);
     const specFileName = 'agentSpec.yaml';
     const bundleName = genUniqueString('Test_Bundle_%s');
     const specPath = join(session.project.dir, 'specs', specFileName);

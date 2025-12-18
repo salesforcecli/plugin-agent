@@ -18,6 +18,7 @@ import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 describe('agent validate authoring-bundle NUTs', () => {
   let session: TestSession;
@@ -36,8 +37,7 @@ describe('agent validate authoring-bundle NUTs', () => {
   });
 
   it('should validate a valid authoring bundle', async () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+    const username = getDevhubUsername(session);
 
     // Use the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentValidateAuthoringBundleResult>(
@@ -50,9 +50,8 @@ describe('agent validate authoring-bundle NUTs', () => {
     expect(result?.errors).to.be.undefined;
   });
 
-  it('should fail validation for invalid authoring bundle', () => {
-    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-    if (!username) throw new Error('Devhub username not found');
+  it('should fail validation for invalid authoring bundle', async () => {
+    const username = getDevhubUsername(session);
 
     // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
