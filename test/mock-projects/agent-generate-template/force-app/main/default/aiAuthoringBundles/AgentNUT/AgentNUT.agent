@@ -6,7 +6,7 @@ system:
 
 config:
     developer_name: "Local_Info_Agent_NGA"
-    default_agent_user: "UPDATE_WITH_AN_AGENT_USER_IN_YOUR_ORG"
+    default_agent_user: "ge.agent@afdx-usa1000-02.testorg"
     agent_label: "Local Info Agent (NGA)"
     description: "A next-gen agent for Coral Cloud Resort that provides local weather updates and shares information about local events."
 variables:

@@ -19,7 +19,6 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { Connection, Org, User, UserFields } from '@salesforce/core';
 import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
-import { sleep } from '@salesforce/kit';
 import { genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
@@ -35,9 +34,9 @@ export type SharedTestContext = {
 let sharedContext: SharedTestContext | null = null;
 
 /**
- * Initialize the shared test context with a scratch org setup.
+ * Initialize the shared test context with a devhub setup.
  * This should be called once in main.nut.ts before any other tests run.
- * Supports both creating a new scratch org and using an existing org via TESTKIT_ORG_USERNAME.
+ * Uses the authenticated devhub as the target-org, or an existing org via TESTKIT_ORG_USERNAME.
  */
 export async function initializeSharedContext(): Promise<SharedTestContext> {
   if (sharedContext) {
@@ -53,7 +52,7 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
   if (useExistingOrg) {
     console.log(`Using existing org for testing: ${existingOrgUsername}`);
   } else {
-    console.log('Creating scratch org for testing...');
+    console.log('Using authenticated devhub for testing...');
   }
 
   const session = await TestSession.create({
@@ -61,20 +60,10 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
       sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
     },
     devhubAuthStrategy: 'AUTO',
-    // Only create scratch org if not using an existing org
-    ...(useExistingOrg
-      ? {}
-      : {
-          scratchOrgs: [
-            {
-              setDefault: true,
-              config: join('config', 'project-scratch-def.json'),
-            },
-          ],
-        }),
+    // Don't create scratch orgs - use devhub directly
   });
 
-  // Get username from existing org env var or from session
+  // Get username from existing org env var or from devhub
   let username: string;
   let defaultOrg: Org;
   let connection: Connection;
@@ -95,14 +84,15 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
     }
     console.log(`Testing with username: ${username}`);
   } else {
-    const defaultOrgInfo = session.orgs.get('default');
-    if (!defaultOrgInfo?.username) {
-      throw new Error('Failed to get username from TestSession. No default org found.');
+    // Get devhub org from session
+    const hubOrgInfo = session.orgs.get('hub');
+    if (!hubOrgInfo?.username) {
+      throw new Error('Failed to get devhub username from TestSession. Please ensure a devhub is authenticated.');
     }
-    username = defaultOrgInfo.username;
+    username = hubOrgInfo.username;
     defaultOrg = await Org.create({ aliasOrUsername: username });
     connection = defaultOrg.getConnection();
-    console.log(`Scratch org created. Testing with username: ${username}`);
+    console.log(`Using devhub for testing. Username: ${username}`);
   }
 
   // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
@@ -119,9 +109,7 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
   await deployMetadata(connection, session);
 
   // wait for the agent to be provisioned (only for new scratch orgs)
-  if (!useExistingOrg) {
-    await sleep(240_000);
-  }
+  // Skip wait when using devhub or existing org
 
   sharedContext = {
     session,
@@ -147,13 +135,13 @@ export function getSharedContext(): SharedTestContext {
 
 /**
  * Clean up the shared test context.
- * Only cleans up if we created a scratch org (not when using TESTKIT_ORG_USERNAME).
+ * Only cleans up if we created a scratch org (not when using TESTKIT_ORG_USERNAME or devhub).
  */
 export async function cleanupSharedContext(): Promise<void> {
   if (sharedContext) {
     const useExistingOrg = Boolean(process.env.TESTKIT_ORG_USERNAME);
     if (!useExistingOrg) {
-      // Only clean up if we created the scratch org
+      // Only clean up if we created a scratch org (not when using devhub)
       await sharedContext.session?.clean();
     }
     sharedContext = null;

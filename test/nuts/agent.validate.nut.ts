@@ -24,7 +24,7 @@ describe('agent validate authoring-bundle NUTs', () => {
     const username = context.username;
 
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name valid --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name AgentNUT --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 

@@ -20,13 +20,13 @@ import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent
 import { getSharedContext } from './shared-setup.js';
 
 describe('agent publish authoring-bundle NUTs', () => {
-  // TODO: create agent user with correct permissions to be used in agent script
-  it.skip('should publish a valid authoring bundle', () => {
+  it('should publish a valid authoring bundle', () => {
     const context = getSharedContext();
+    const username = context.username;
     const bundlePath = join(context.session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${bundlePath} --json`,
+      `agent publish authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 

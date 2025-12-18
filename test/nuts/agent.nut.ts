@@ -30,12 +30,6 @@ import { getSharedContext } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-/**
- * Returns it.skip if the current date is before the specified date, otherwise returns it.
- * Used to conditionally enable tests after a specific date.
- */
-const itAfter = (date: Date) => (new Date() >= date ? it : it.skip);
-
 describe('plugin-agent NUTs', () => {
   describe('agent test', () => {
     const agentTestName = 'Local_Info_Agent_Test';
@@ -227,8 +221,7 @@ describe('plugin-agent NUTs', () => {
       expect(fileStat.size).to.be.greaterThan(0);
     });
 
-    // skip until 12/17 - should be fixed in server-side release on 12/16
-    itAfter(new Date('2025-12-17'))('should create new agent in org', async () => {
+    it('should create new agent in org', async () => {
       const context = getSharedContext();
       const expectedFilePath = join(context.session.project.dir, 'specs', specFileName);
       const name = 'Plugin Agent Test';
