@@ -37,56 +37,32 @@ describe('agent generate authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  describe.skip('agent generate authoring-bundle', () => {
-    it('should generate authoring bundle from spec file', async () => {
-      const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-      if (!username) throw new Error('Devhub username not found');
-      const specFileName = genUniqueString('agentSpec_%s.yaml');
-      const bundleName = genUniqueString('Test_Bundle_%s');
-      const specPath = join(session.project.dir, 'specs', specFileName);
+  it('should generate authoring bundle from spec file', async () => {
+    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
+    if (!username) throw new Error('Devhub username not found');
+    const specFileName = 'agentSpec.yaml';
+    const bundleName = genUniqueString('Test_Bundle_%s');
+    const specPath = join(session.project.dir, 'specs', specFileName);
 
-      // First generate a spec file
-      const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
-      execCmd(specCommand, { ensureExitCode: 0 });
+    // Now generate the authoring bundle
+    const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
+    const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
-      // Now generate the authoring bundle
-      const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
-      const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
+    expect(result).to.be.ok;
+    expect(result?.agentPath).to.be.ok;
+    expect(result?.metaXmlPath).to.be.ok;
+    expect(result?.outputDir).to.be.ok;
 
-      expect(result).to.be.ok;
-      expect(result?.agentPath).to.be.ok;
-      expect(result?.metaXmlPath).to.be.ok;
-      expect(result?.outputDir).to.be.ok;
+    // Verify files exist
+    expect(existsSync(result!.agentPath)).to.be.true;
+    expect(existsSync(result!.metaXmlPath)).to.be.true;
 
-      // Verify files exist
-      expect(existsSync(result!.agentPath)).to.be.true;
-      expect(existsSync(result!.metaXmlPath)).to.be.true;
-
-      // Verify file contents
-      const agent = readFileSync(result!.agentPath, 'utf8');
-      const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
-      expect(agent).to.be.ok;
-      expect(metaXml).to.include('<aiAuthoringBundle>');
-      expect(metaXml).to.include(bundleName);
-    });
-
-    it('should use default output directory when not specified', async () => {
-      const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
-      if (!username) throw new Error('Devhub username not found');
-      const specFileName = genUniqueString('agentSpec_%s.yaml');
-      const bundleName = genUniqueString('Test_Bundle_%s');
-      const specPath = join(session.project.dir, 'specs', specFileName);
-      const defaultPath = join('force-app', 'main', 'default', 'aiAuthoringBundles');
-
-      // First generate a spec file
-      const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
-      execCmd(specCommand, { ensureExitCode: 0 });
-
-      const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --target-org ${username} --json`;
-      const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
-
-      expect(result).to.be.ok;
-      expect(result?.outputDir).to.include(defaultPath);
-    });
+    // Verify file contents
+    const agent = readFileSync(result!.agentPath, 'utf8');
+    const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
+    expect(agent).to.be.ok;
+    expect(metaXml).to.include('<AiAuthoringBundle');
+    expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
+    expect(agent).to.include(`developer_name: "${bundleName}"`);
   });
 });
