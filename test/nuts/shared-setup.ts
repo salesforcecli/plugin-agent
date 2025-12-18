@@ -17,7 +17,7 @@
 import { join } from 'node:path';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
-import { Connection, Org, User, UserFields } from '@salesforce/core';
+import { Connection, Org, User, UserFields, StateAggregator } from '@salesforce/core';
 import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
@@ -84,15 +84,30 @@ export async function initializeSharedContext(): Promise<SharedTestContext> {
     }
     console.log(`Testing with username: ${username}`);
   } else {
-    // Get devhub org from session
-    const hubOrgInfo = session.orgs.get('hub');
-    if (!hubOrgInfo?.username) {
-      throw new Error('Failed to get devhub username from TestSession. Please ensure a devhub is authenticated.');
+    // Get devhub org from StateAggregator (config)
+    try {
+      const stateAggregator = await StateAggregator.getInstance();
+      const orgs = stateAggregator.orgs.getAll();
+
+      // Find the devhub org (has isDevHub: true)
+      const devHubOrg = orgs.find((org) => org.isDevHub === true);
+
+      if (!devHubOrg?.username) {
+        throw new Error('No devhub org found in config.');
+      }
+
+      username = devHubOrg.username;
+      defaultOrg = await Org.create({ aliasOrUsername: username });
+      connection = defaultOrg.getConnection();
+      console.log(`Using devhub for testing. Username: ${username}`);
+    } catch (error) {
+      throw new Error(
+        'Failed to get authenticated devhub org. ' +
+          'Please ensure a devhub is authenticated by running: sf org login web --alias <alias> --instance-url <url> --set-default-dev-hub ' +
+          'or set TESTKIT_ORG_USERNAME environment variable to use a specific org.\n' +
+          `Original error: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
-    username = hubOrgInfo.username;
-    defaultOrg = await Org.create({ aliasOrUsername: username });
-    connection = defaultOrg.getConnection();
-    console.log(`Using devhub for testing. Username: ${username}`);
   }
 
   // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
