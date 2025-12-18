@@ -59,7 +59,7 @@ testCases:
     writeFileSync(specPath, testSpecContent);
 
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec ${specPath} --target-org ${username} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${specPath}" --target-org ${username} --json`,
       { ensureExitCode: 0 }
     );
 
@@ -84,7 +84,7 @@ testCases:
     const invalidSpecPath = join(session.project.dir, 'invalid', 'testSpec.yaml');
 
     execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec ${invalidSpecPath} --target-org ${username} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${invalidSpecPath}" --target-org ${username} --json`,
       { ensureExitCode: 1 }
     );
   });
@@ -97,7 +97,7 @@ testCases:
 
     // Missing --spec
     const testApiName = genUniqueString('Test_Agent_%s');
-    execCmd<AgentTestCreateResult>(`agent test create --api-name ${testApiName} --target-org ${username} --json`, {
+    execCmd<AgentTestCreateResult>(`agent test create --api-name "${testApiName}" --target-org ${username} --json`, {
       ensureExitCode: 1,
     });
   });

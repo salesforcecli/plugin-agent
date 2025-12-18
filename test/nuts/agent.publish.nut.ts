@@ -40,7 +40,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  it.skip('should publish a new agent (first version)', async () => {
+  it('should publish a new agent (first version)', async () => {
     const username = getDevhubUsername(session);
 
     // Generate a unique bundle name to ensure it's a new agent
@@ -143,7 +143,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     }
   });
 
-  it.skip('should publish a new version of an existing agent', async () => {
+  it('should publish a new version of an existing agent', async () => {
     const username = getDevhubUsername(session);
 
     // Publish the existing Willie_Resort_Manager authoring bundle
