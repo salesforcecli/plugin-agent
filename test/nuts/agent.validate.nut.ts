@@ -15,11 +15,12 @@
  */
 import { join } from 'node:path';
 import { expect } from 'chai';
-import { TestSession } from '@salesforce/cli-plugins-testkit';
+import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
+import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 
-describe.skip('agent validate authoring-bundle NUTs', () => {
+describe('agent validate authoring-bundle NUTs', () => {
   let session: TestSession;
 
   before(async () => {
@@ -28,12 +29,6 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
     });
   });
 
@@ -41,12 +36,27 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  it('should validate a valid authoring bundle', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
+  it('should validate a valid authoring bundle', async () => {
+    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
+    if (!username) throw new Error('Devhub username not found');
+    const specFileName = genUniqueString('agentSpec_%s.yaml');
+    const bundleName = genUniqueString('Test_Bundle_%s');
+    const specPath = join(session.project.dir, 'specs', specFileName);
 
+    // First generate a spec file
+    const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
+    execCmd(specCommand, { ensureExitCode: 0 });
+
+    // Generate the authoring bundle
+    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
+    const generateResult = execCmd<AgentGenerateAuthoringBundleResult>(generateCommand, {
+      ensureExitCode: 0,
+    }).jsonOutput?.result;
+    expect(generateResult).to.be.ok;
+
+    // Now validate the authoring bundle
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name ${bundleName} --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -55,12 +65,13 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     expect(result?.errors).to.be.undefined;
   });
 
-  it('should fail validation for invalid bundle path', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'invalid', 'path');
+  it('should fail validation for invalid bundle api-name', () => {
+    const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
+    if (!username) throw new Error('Devhub username not found');
+    const invalidApiName = 'Invalid_Bundle_Name_That_Does_Not_Exist';
 
     execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name ${invalidApiName} --target-org ${username} --json`,
       { ensureExitCode: 1 }
     );
   });

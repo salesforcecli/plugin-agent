@@ -23,19 +23,13 @@ import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agen
 
 let session: TestSession;
 
-describe.skip('agent generate authoring-bundle NUTs', () => {
+describe('agent generate authoring-bundle NUTs', () => {
   before(async () => {
     session = await TestSession.create({
       project: {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
     });
   });
 
@@ -43,12 +37,12 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  describe('agent generate authoring-bundle', () => {
-    const specFileName = genUniqueString('agentSpec_%s.yaml');
-    const bundleName = 'Test_Bundle';
-
+  describe.skip('agent generate authoring-bundle', () => {
     it('should generate authoring bundle from spec file', async () => {
-      const username = session.orgs.get('default')!.username as string;
+      const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
+      if (!username) throw new Error('Devhub username not found');
+      const specFileName = genUniqueString('agentSpec_%s.yaml');
+      const bundleName = genUniqueString('Test_Bundle_%s');
       const specPath = join(session.project.dir, 'specs', specFileName);
 
       // First generate a spec file
@@ -56,7 +50,7 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
       execCmd(specCommand, { ensureExitCode: 0 });
 
       // Now generate the authoring bundle
-      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --api-name ${bundleName} --target-org ${username} --json`;
+      const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
       const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
       expect(result).to.be.ok;
@@ -77,11 +71,18 @@ describe.skip('agent generate authoring-bundle NUTs', () => {
     });
 
     it('should use default output directory when not specified', async () => {
-      const username = session.orgs.get('default')!.username as string;
+      const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
+      if (!username) throw new Error('Devhub username not found');
+      const specFileName = genUniqueString('agentSpec_%s.yaml');
+      const bundleName = genUniqueString('Test_Bundle_%s');
       const specPath = join(session.project.dir, 'specs', specFileName);
       const defaultPath = join('force-app', 'main', 'default', 'aiAuthoringBundles');
 
-      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --target-org ${username} --json`;
+      // First generate a spec file
+      const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
+      execCmd(specCommand, { ensureExitCode: 0 });
+
+      const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --target-org ${username} --json`;
       const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
       expect(result).to.be.ok;
