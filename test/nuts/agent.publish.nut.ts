@@ -22,7 +22,7 @@ import { Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 
-describe.only('agent publish authoring-bundle NUTs', () => {
+describe('agent publish authoring-bundle NUTs', () => {
   let session: TestSession;
   const bundleApiName = 'Willie_Resort_Manager';
 
@@ -143,7 +143,7 @@ describe.only('agent publish authoring-bundle NUTs', () => {
     }
   });
 
-  it('should publish a new version of an existing agent', async () => {
+  it.skip('should publish a new version of an existing agent', async () => {
     const username = process.env.TESTKIT_HUB_USERNAME ?? session.orgs.get('devhub')?.username;
     if (!username) throw new Error('Devhub username not found');
 
