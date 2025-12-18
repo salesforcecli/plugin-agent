@@ -45,10 +45,11 @@ describe('agent test create NUTs', () => {
     const specPath = join(session.project.dir, 'specs', specFileName);
 
     // Create a minimal test spec file
+    // Note: Using an agent that should exist in the devhub (Willie_Resort_Manager)
     const testSpecContent = `name: Test Agent Test
 description: Test description
 subjectType: AGENT
-subjectName: Local_Info_Agent
+subjectName: Willie_Resort_Manager
 testCases:
   - utterance: "What is the weather?"
     expectedTopic: Weather_and_Temperature_Information
@@ -63,13 +64,18 @@ testCases:
     );
 
     const result = commandResult.jsonOutput?.result;
+    if (!result || typeof result !== 'object' || !result.path || !result.contents) {
+      throw new Error(
+        `Command failed or returned invalid result. Result type: ${typeof result}, value: ${JSON.stringify(result)}`
+      );
+    }
 
-    expect(result).to.be.ok;
-    expect(result?.path).to.be.ok;
-    expect(result?.contents).to.be.ok;
+    expect(result.path).to.be.a('string').and.not.be.empty;
+    expect(result.contents).to.be.a('string').and.not.be.empty;
 
-    // Verify file exists
-    expect(existsSync(result!.path)).to.be.true;
+    // Verify file exists (path is relative to project root)
+    const fullPath = join(session.project.dir, result.path);
+    expect(existsSync(fullPath)).to.be.true;
   });
 
   it('should fail when spec file does not exist', () => {
