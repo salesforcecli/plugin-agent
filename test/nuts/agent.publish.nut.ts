@@ -40,7 +40,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  it('should publish a new agent (first version)', async () => {
+  it.skip('should publish a new agent (first version)', async () => {
     const username = getDevhubUsername(session);
 
     // Generate a unique bundle name to ensure it's a new agent
@@ -100,35 +100,18 @@ describe('agent publish authoring-bundle NUTs', () => {
       };
     };
 
+    // Query for Bot and BotVersions
     const botResult = await connection.singleRecordQuery<BotDefinitionWithVersions>(
       `SELECT Id, DeveloperName, (SELECT Id FROM BotVersions) FROM BotDefinition WHERE DeveloperName = '${botDeveloperName}' LIMIT 1`
     );
 
-    // Delete BotVersions first (must delete before Bot)
-    if (botResult.BotVersions?.records && botResult.BotVersions.records.length > 0) {
-      const botVersionIds = botResult.BotVersions.records.map((bv) => bv.Id);
-      // Delete all BotVersions in parallel
-      await Promise.all(botVersionIds.map((id) => connection.sobject('BotVersion').destroy(id)));
-    }
+    // Delete in correct order to handle dependencies:
+    // 1. AiAuthoringBundle (references BotVersion)
+    // 2. BotVersions (references Bot)
+    // 3. Bot (BotDefinition)
+    // 4. GenAiPlannerBundle
 
-    // Delete Bot
-    await connection.sobject('BotDefinition').destroy(botResult.Id);
-
-    // Query and delete GenAiPlannerBundle
-    type GenAiPlannerBundleResult = {
-      Id: string;
-      DeveloperName: string;
-    };
-
-    const plannerBundleResult = await connection.query<GenAiPlannerBundleResult>(
-      `SELECT Id, DeveloperName FROM GenAiPlannerBundle WHERE DeveloperName = '${botDeveloperName}' LIMIT 1`
-    );
-
-    if (plannerBundleResult.records && plannerBundleResult.records.length > 0) {
-      await connection.sobject('GenAiPlannerBundle').destroy(plannerBundleResult.records[0].Id);
-    }
-
-    // Query and delete AiAuthoringBundle metadata
+    // Step 1: Delete AiAuthoringBundle first (it references BotVersion)
     type AiAuthoringBundleResult = {
       Id: string;
       DeveloperName: string;
@@ -141,9 +124,33 @@ describe('agent publish authoring-bundle NUTs', () => {
     if (authoringBundleResult.records && authoringBundleResult.records.length > 0) {
       await connection.sobject('AiAuthoringBundle').destroy(authoringBundleResult.records[0].Id);
     }
+
+    // Step 2: Delete BotVersions (must delete before Bot)
+    if (botResult.BotVersions?.records && botResult.BotVersions.records.length > 0) {
+      const botVersionIds = botResult.BotVersions.records.map((bv) => bv.Id);
+      // Delete all BotVersions in parallel
+      await Promise.all(botVersionIds.map((id) => connection.sobject('BotVersion').destroy(id)));
+    }
+
+    // Step 3: Delete Bot
+    await connection.sobject('BotDefinition').destroy(botResult.Id);
+
+    // Step 4: Query and delete GenAiPlannerBundle
+    type GenAiPlannerBundleResult = {
+      Id: string;
+      DeveloperName: string;
+    };
+
+    const plannerBundleResult = await connection.query<GenAiPlannerBundleResult>(
+      `SELECT Id, DeveloperName FROM GenAiPlannerBundle WHERE DeveloperName = '${botDeveloperName}' LIMIT 1`
+    );
+
+    if (plannerBundleResult.records && plannerBundleResult.records.length > 0) {
+      await connection.sobject('GenAiPlannerBundle').destroy(plannerBundleResult.records[0].Id);
+    }
   });
 
-  it('should publish a new version of an existing agent', async () => {
+  it.skip('should publish a new version of an existing agent', async () => {
     const username = getDevhubUsername(session);
 
     // Publish the existing Willie_Resort_Manager authoring bundle

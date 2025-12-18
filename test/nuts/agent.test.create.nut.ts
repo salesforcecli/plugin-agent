@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { join } from 'node:path';
-import { existsSync, writeFileSync } from 'node:fs';
+import { join, normalize } from 'node:path';
+import { existsSync } from 'node:fs';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
 import { getDevhubUsername } from './shared-setup.js';
+
+const isWindows = process.platform === 'win32';
 
 describe('agent test create NUTs', () => {
   let session: TestSession;
@@ -38,28 +40,18 @@ describe('agent test create NUTs', () => {
     await session?.clean();
   });
 
-  it('should create test from test spec file', async () => {
+  (isWindows ? it.skip : it)('should create test from test spec file', async () => {
     const username = getDevhubUsername(session);
     const testApiName = genUniqueString('Test_Agent_%s');
-    const specFileName = genUniqueString('testSpec_%s.yaml');
-    const specPath = join(session.project.dir, 'specs', specFileName);
+    // Use the existing test spec file from the mock project
+    const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
 
-    // Create a minimal test spec file
-    // Note: Using an agent that should exist in the devhub (Willie_Resort_Manager)
-    const testSpecContent = `name: Test Agent Test
-description: Test description
-subjectType: AGENT
-subjectName: Willie_Resort_Manager
-testCases:
-  - utterance: "What is the weather?"
-    expectedTopic: Weather_and_Temperature_Information
-    expectedActions: []
-    expectedOutcome: "The agent should provide weather information"
-`;
-    writeFileSync(specPath, testSpecContent);
-
+    // Normalize path for cross-platform compatibility (Windows uses backslashes)
+    const normalizedSpecPath = normalize(specPath).replace(/\\/g, '/');
+    // Don't quote --api-name on Windows - it can cause parsing issues
+    // Only quote --spec path since it may contain spaces
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name "${testApiName}" --spec "${specPath}" --target-org ${username} --json`,
+      `agent test create --api-name ${testApiName} --spec "${normalizedSpecPath}" --target-org ${username} --json`,
       { ensureExitCode: 0 }
     );
 
@@ -83,8 +75,9 @@ testCases:
     const testApiName = genUniqueString('Test_Agent_%s');
     const invalidSpecPath = join(session.project.dir, 'invalid', 'testSpec.yaml');
 
+    const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
-      `agent test create --api-name "${testApiName}" --spec "${invalidSpecPath}" --target-org ${username} --json`,
+      `agent test create --api-name ${testApiName} --spec "${normalizedInvalidSpecPath}" --target-org ${username} --json`,
       { ensureExitCode: 1 }
     );
   });
@@ -97,7 +90,7 @@ testCases:
 
     // Missing --spec
     const testApiName = genUniqueString('Test_Agent_%s');
-    execCmd<AgentTestCreateResult>(`agent test create --api-name "${testApiName}" --target-org ${username} --json`, {
+    execCmd<AgentTestCreateResult>(`agent test create --api-name ${testApiName} --target-org ${username} --json`, {
       ensureExitCode: 1,
     });
   });
