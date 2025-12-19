@@ -18,8 +18,9 @@ import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
+import { getDevhubUsername } from './shared-setup.js';
 
-describe.skip('agent validate authoring-bundle NUTs', () => {
+describe('agent validate authoring-bundle NUTs', () => {
   let session: TestSession;
 
   before(async () => {
@@ -28,12 +29,6 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      scratchOrgs: [
-        {
-          setDefault: true,
-          config: join('config', 'project-scratch-def.json'),
-        },
-      ],
     });
   });
 
@@ -41,12 +36,12 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  it('should validate a valid authoring bundle', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'force-app', 'main', 'default', 'aiAuthoringBundles');
+  it('should validate a valid authoring bundle', async () => {
+    const username = getDevhubUsername(session);
 
+    // Use the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name Willie_Resort_Manager --target-org ${username} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -55,13 +50,13 @@ describe.skip('agent validate authoring-bundle NUTs', () => {
     expect(result?.errors).to.be.undefined;
   });
 
-  it('should fail validation for invalid bundle path', () => {
-    const username = session.orgs.get('default')!.username as string;
-    const bundlePath = join(session.project.dir, 'invalid', 'path');
+  it('should fail validation for invalid authoring bundle', async () => {
+    const username = getDevhubUsername(session);
 
+    // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name ${bundlePath} --target-org ${username} --json`,
-      { ensureExitCode: 1 }
+      `agent validate authoring-bundle --api-name invalid --target-org ${username} --json`,
+      { ensureExitCode: 2 }
     );
   });
 });

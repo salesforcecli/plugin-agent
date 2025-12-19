@@ -128,12 +128,14 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
       Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
         if (result.retrieveResult.response.status !== RequestStatus.Succeeded) {
-          const errorMessage = `Metadata retrieval failed: ${ensureArray(
+          const errorMessages = ensureArray(
             // @ts-expect-error I saw errorMessages populated with useful information during testing
             result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
-          ).join(EOL)}`;
+          );
+
+          const errorMessage = `Metadata retrieval failed: ${errorMessages.join(EOL)}`;
           mso.error();
-          throw new SfError(errorMessage);
+          throw SfError.create({ name: 'Retrieve Failed', message: errorMessage });
         }
         return Promise.resolve();
       });
@@ -142,12 +144,14 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         if (result.deployResult.response.status === RequestStatus.Succeeded) {
           mso.stop();
         } else {
-          const errorMessage = `Metadata deployment failed: ${ensureArray(
-            // @ts-expect-error I saw errorMessages populated with useful information during testing
-            result?.deployResult.response?.messages ?? result?.deployResult?.response?.errorMessage
-          ).join(EOL)}`;
-          mso.error();
-          throw new SfError(errorMessage);
+          const deployResponse = result.deployResult.response;
+
+          // Check for component failures (most common source of detailed errors)
+          const failures = ensureArray(deployResponse.details.componentFailures);
+          throw SfError.create({
+            name: 'Deployment Failed',
+            message: failures.map((f) => `${f.problemType!}: ${f.problem!}`).join('\n'),
+          });
         }
         return Promise.resolve();
       });

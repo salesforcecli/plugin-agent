@@ -112,7 +112,7 @@
     "prepack": "sf-prepack",
     "prepare": "sf-install",
     "test": "wireit",
-    "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000",
+    "test:nuts": "nyc mocha \"test/nuts/**/*.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
     "test:only": "wireit",
     "version": "oclif readme"
   },
