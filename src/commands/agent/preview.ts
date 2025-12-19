@@ -16,7 +16,6 @@
 
 import { resolve } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import React from 'react';
 import { render } from 'ink';
 import {
@@ -28,6 +27,7 @@ import {
   ScriptAgent,
 } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
+import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

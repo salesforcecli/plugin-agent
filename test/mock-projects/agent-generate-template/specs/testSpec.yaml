@@ -1,0 +1,9 @@
+name: Test_Agent_Test
+description: Test description
+subjectType: AGENT
+subjectName: Willie_Resort_Manager
+testCases:
+  - utterance: 'What is the weather?'
+    expectedTopic: Weather_and_Temperature_Information
+    expectedActions: []
+    expectedOutcome: 'The agent should provide weather information'

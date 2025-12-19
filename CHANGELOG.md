@@ -1,3 +1,15 @@
+## [1.26.1](https://github.com/salesforcecli/plugin-agent/compare/1.26.0...1.26.1) (2025-12-19)
+
+### Bug Fixes
+
+- separated nuts, activate passing ([1d140d5](https://github.com/salesforcecli/plugin-agent/commit/1d140d585400dcd02ff3807ed03144c0e9745e98))
+
+# [1.26.0](https://github.com/salesforcecli/plugin-agent/compare/1.25.3...1.26.0) (2025-12-12)
+
+### Features
+
+- save traces to file ([b098ae5](https://github.com/salesforcecli/plugin-agent/commit/b098ae5a8121adcbef7d35cb7c5b7144400983c2))
+
 ## [1.25.3](https://github.com/salesforcecli/plugin-agent/compare/1.25.2...1.25.3) (2025-12-10)
 
 ### Bug Fixes

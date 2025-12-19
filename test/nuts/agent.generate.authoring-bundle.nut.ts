@@ -20,6 +20,7 @@ import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
+import { getDevhubUsername } from './shared-setup.js';
 
 let session: TestSession;
 
@@ -30,12 +31,6 @@ describe('agent generate authoring-bundle NUTs', () => {
         sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
       },
       devhubAuthStrategy: 'AUTO',
-      // scratchOrgs: [
-      //   {
-      //     setDefault: true,
-      //     config: join('config', 'project-scratch-def.json'),
-      //   },
-      // ],
     });
   });
 
@@ -43,38 +38,31 @@ describe('agent generate authoring-bundle NUTs', () => {
     await session?.clean();
   });
 
-  describe('agent generate authoring-bundle', () => {
-    const specFileName = genUniqueString('agentSpec_%s.yaml');
-    const bundleName = 'Test_Bundle';
+  it('should generate authoring bundle from spec file', async () => {
+    const username = getDevhubUsername(session);
+    const specFileName = 'agentSpec.yaml';
+    const bundleName = genUniqueString('Test_Bundle_%s');
+    const specPath = join(session.project.dir, 'specs', specFileName);
 
-    it('should generate authoring bundle from spec file', async () => {
-      // until we're testing in scratch orgs, use the devhub
-      const username = session.hubOrg.username;
-      const specPath = join(session.project.dir, 'specs', specFileName);
+    // Now generate the authoring bundle
+    const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
+    const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
-      // First generate a spec file
-      const specCommand = `agent generate agent-spec --target-org ${username} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
-      execCmd(specCommand, { ensureExitCode: 0 });
+    expect(result).to.be.ok;
+    expect(result?.agentPath).to.be.ok;
+    expect(result?.metaXmlPath).to.be.ok;
+    expect(result?.outputDir).to.be.ok;
 
-      // Now generate the authoring bundle
-      const command = `agent generate authoring-bundle --spec ${specPath} --name ${bundleName} --api-name ${bundleName} --target-org ${username} --json`;
-      const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
+    // Verify files exist
+    expect(existsSync(result!.agentPath)).to.be.true;
+    expect(existsSync(result!.metaXmlPath)).to.be.true;
 
-      expect(result).to.be.ok;
-      expect(result?.agentPath).to.be.ok;
-      expect(result?.metaXmlPath).to.be.ok;
-      expect(result?.outputDir).to.be.ok;
-
-      // Verify files exist
-      expect(existsSync(result!.agentPath)).to.be.true;
-      expect(existsSync(result!.metaXmlPath)).to.be.true;
-
-      // Verify file contents
-      const agent = readFileSync(result!.agentPath, 'utf8');
-      const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
-      expect(agent).to.be.ok;
-      expect(metaXml).to.include('<AiAuthoringBundle');
-      expect(agent).to.include(bundleName);
-    });
+    // Verify file contents
+    const agent = readFileSync(result!.agentPath, 'utf8');
+    const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
+    expect(agent).to.be.ok;
+    expect(metaXml).to.include('<AiAuthoringBundle');
+    expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
+    expect(agent).to.include(`developer_name: "${bundleName}"`);
   });
 });
