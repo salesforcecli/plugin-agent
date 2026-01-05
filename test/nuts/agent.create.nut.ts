@@ -21,25 +21,23 @@ import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentCreateSpecResult } from '../../src/commands/agent/generate/agent-spec.js';
 import type { AgentCreateResult } from '../../src/commands/agent/create.js';
+import { getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
 describe('agent create NUTs', () => {
   let session: TestSession;
+  let username: string;
   const specFileName = genUniqueString('agentSpec_%s.yaml');
 
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
+    session = await getTestSession();
+    username = getUsername();
   });
 
   it('should generate spec file with minimal flags', async () => {
     const expectedFilePath = join(session.project.dir, 'specs', specFileName);
-    const targetOrg = `--target-org ${session.orgs.get('default')?.username}`;
+    const targetOrg = `--target-org ${username}`;
     const type = 'customer';
     const role = 'test agent role';
     const companyName = 'Test Company Name';
@@ -66,9 +64,7 @@ describe('agent create NUTs', () => {
     const expectedFilePath = join(session.project.dir, 'specs', specFileName);
     const name = 'Plugin Agent Test';
     const apiName = 'Plugin_Agent_Test';
-    const command = `agent create --spec ${expectedFilePath} --target-org ${
-      session.orgs.get('default')?.username
-    } --name "${name}" --api-name ${apiName} --json`;
+    const command = `agent create --spec ${expectedFilePath} --target-org ${username} --name "${name}" --api-name ${apiName} --json`;
     const result = execCmd<AgentCreateResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
     expect(result).to.be.ok;
     if (!result?.isSuccess) {
