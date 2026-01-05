@@ -20,28 +20,16 @@ import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
-import { getDevhubUsername } from './shared-setup.js';
+import { getTestSession } from './shared-setup.js';
 
 const isWindows = process.platform === 'win32';
 
 describe('agent test create NUTs', () => {
   let session: TestSession;
-
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
+    session = await getTestSession();
   });
-
-  after(async () => {
-    await session?.clean();
-  });
-
   (isWindows ? it.skip : it)('should create test from test spec file', async () => {
-    const username = getDevhubUsername(session);
     const testApiName = genUniqueString('Test_Agent_%s');
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
@@ -51,7 +39,9 @@ describe('agent test create NUTs', () => {
     // Don't quote --api-name on Windows - it can cause parsing issues
     // Only quote --spec path since it may contain spaces
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${normalizedSpecPath}" --target-org ${username} --json`,
+      `agent test create --api-name ${testApiName} --spec "${normalizedSpecPath}" --target-org ${
+        session.orgs.get('default')?.username
+      } --json`,
       { ensureExitCode: 0 }
     );
 
@@ -71,27 +61,31 @@ describe('agent test create NUTs', () => {
   });
 
   it('should fail when spec file does not exist', async () => {
-    const username = getDevhubUsername(session);
     const testApiName = genUniqueString('Test_Agent_%s');
     const invalidSpecPath = join(session.project.dir, 'invalid', 'testSpec.yaml');
 
     const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${normalizedInvalidSpecPath}" --target-org ${username} --json`,
+      `agent test create --api-name ${testApiName} --spec "${normalizedInvalidSpecPath}" --target-org ${
+        session.orgs.get('default')?.username
+      } --json`,
       { ensureExitCode: 1 }
     );
   });
 
   it('should fail when required flags are missing in JSON mode', async () => {
-    const username = getDevhubUsername(session);
-
     // Missing --api-name
-    execCmd<AgentTestCreateResult>(`agent test create --target-org ${username} --json`, { ensureExitCode: 1 });
+    execCmd<AgentTestCreateResult>(`agent test create --target-org ${session.orgs.get('default')?.username} --json`, {
+      ensureExitCode: 1,
+    });
 
     // Missing --spec
     const testApiName = genUniqueString('Test_Agent_%s');
-    execCmd<AgentTestCreateResult>(`agent test create --api-name ${testApiName} --target-org ${username} --json`, {
-      ensureExitCode: 1,
-    });
+    execCmd<AgentTestCreateResult>(
+      `agent test create --api-name ${testApiName} --target-org ${session.orgs.get('default')?.username} --json`,
+      {
+        ensureExitCode: 1,
+      }
+    );
   });
 });

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { join } from 'node:path';
 import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
@@ -22,34 +21,26 @@ import { AgentTestCache } from '../../src/agentTestCache.js';
 import type { AgentTestListResult } from '../../src/commands/agent/test/list.js';
 import type { AgentTestResultsResult } from '../../src/commands/agent/test/results.js';
 import type { AgentTestRunResult } from '../../src/flags.js';
-import { getDevhubUsername } from './shared-setup.js';
+import { getTestSession } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
 describe('agent test NUTs', () => {
   let session: TestSession;
-  let devhubUsername: string;
   const agentTestName = 'Local_Info_Agent_Test';
 
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
-    devhubUsername = getDevhubUsername(session);
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
   });
 
   describe('agent test list', () => {
     it('should list agent tests in org', async () => {
-      const result = execCmd<AgentTestListResult>(`agent test list --target-org ${devhubUsername} --json`, {
-        ensureExitCode: 0,
-      }).jsonOutput?.result;
+      const result = execCmd<AgentTestListResult>(
+        `agent test list --target-org ${session.orgs.get('default')?.username} --json`,
+        {
+          ensureExitCode: 0,
+        }
+      ).jsonOutput?.result;
       expect(result).to.be.ok;
       expect(result?.length).to.be.greaterThanOrEqual(1);
       expect(result?.at(0)?.type).to.include('AiEvaluationDefinition');
@@ -58,7 +49,9 @@ describe('agent test NUTs', () => {
 
   describe('agent test run', () => {
     it('should start async test run', async () => {
-      const command = `agent test run --api-name ${agentTestName} --target-org ${devhubUsername} --json`;
+      const command = `agent test run --api-name ${agentTestName} --target-org ${
+        session.orgs.get('default')?.username
+      } --json`;
       const output = execCmd<AgentTestRunResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -73,7 +66,9 @@ describe('agent test NUTs', () => {
     });
 
     it('should poll for test run completion when --wait is used', async () => {
-      const command = `agent test run --api-name ${agentTestName} --target-org ${devhubUsername} --wait 5 --json`;
+      const command = `agent test run --api-name ${agentTestName} --target-org ${
+        session.orgs.get('default')?.username
+      } --wait 5 --json`;
       const output = execCmd<AgentTestRunResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -90,7 +85,9 @@ describe('agent test NUTs', () => {
       cache.clear();
 
       const runResult = execCmd<AgentTestRunResult>(
-        `agent test run --api-name ${agentTestName} --target-org ${devhubUsername} --wait 5 --json`,
+        `agent test run --api-name ${agentTestName} --target-org ${
+          session.orgs.get('default')?.username
+        } --wait 5 --json`,
         {
           ensureExitCode: 0,
         }
@@ -100,7 +97,9 @@ describe('agent test NUTs', () => {
       expect(runResult?.result.status.toLowerCase()).to.equal('completed');
 
       const output = execCmd<AgentTestResultsResult>(
-        `agent test results --job-id ${runResult?.result.runId} --target-org ${devhubUsername} --json`,
+        `agent test results --job-id ${runResult?.result.runId} --target-org ${
+          session.orgs.get('default')?.username
+        } --json`,
         {
           ensureExitCode: 0,
         }
@@ -121,7 +120,7 @@ describe('agent test NUTs', () => {
       cache.clear();
 
       const runResult = execCmd<AgentTestRunResult>(
-        `agent test run --api-name ${agentTestName} --target-org ${devhubUsername} --json`,
+        `agent test run --api-name ${agentTestName} --target-org ${session.orgs.get('default')?.username} --json`,
         {
           ensureExitCode: 0,
         }
@@ -130,7 +129,9 @@ describe('agent test NUTs', () => {
       expect(runResult?.result.runId).to.be.ok;
 
       const output = execCmd<AgentTestRunResult>(
-        `agent test resume --job-id ${runResult?.result.runId} --target-org ${devhubUsername} --json`,
+        `agent test resume --job-id ${runResult?.result.runId} --target-org ${
+          session.orgs.get('default')?.username
+        } --json`,
         {
           ensureExitCode: 0,
         }

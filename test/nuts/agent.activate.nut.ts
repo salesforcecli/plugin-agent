@@ -20,7 +20,6 @@ import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { Connection, Org } from '@salesforce/core';
 import { sleep } from '@salesforce/kit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
-import { getDevhubUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
@@ -28,7 +27,6 @@ describe('agent activate/deactivate NUTs', () => {
   let session: TestSession;
   let connection: Connection;
   let defaultOrg: Org;
-  let username: string;
   const botApiName = 'Local_Info_Agent';
 
   type BotDefinitionWithVersions = {
@@ -54,13 +52,8 @@ describe('agent activate/deactivate NUTs', () => {
       },
       devhubAuthStrategy: 'AUTO',
     });
-    username = getDevhubUsername(session);
-    defaultOrg = await Org.create({ aliasOrUsername: username });
+    defaultOrg = await Org.create({ aliasOrUsername: session.orgs.get('default')?.username });
     connection = defaultOrg.getConnection();
-  });
-
-  after(async () => {
-    await session?.clean();
   });
 
   it('should activate the agent', async () => {
@@ -68,7 +61,10 @@ describe('agent activate/deactivate NUTs', () => {
     const initialStatus = await getBotStatus();
     if (initialStatus === 'Active') {
       console.log('Agent is already active, deactivating to ensure clean slate...');
-      execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+      execCmd(
+        `agent deactivate --api-name ${botApiName} --target-org ${session.orgs.get('default')?.username} --json`,
+        { ensureExitCode: 0 }
+      );
       // Wait a moment for deactivation to complete
       await sleep(5000);
       // Verify it's now inactive
@@ -79,14 +75,18 @@ describe('agent activate/deactivate NUTs', () => {
     }
 
     try {
-      execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+      execCmd(`agent activate --api-name ${botApiName} --target-org ${session.orgs.get('default')?.username}--json`, {
+        ensureExitCode: 0,
+      });
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'unknown';
       const waitMin = 3;
       console.log(`Error activating agent due to ${errMsg}. \nWaiting ${waitMin} minutes and trying again...`);
       await sleep(waitMin * 60 * 1000);
       console.log(`${waitMin} minutes is up, retrying now.`);
-      execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+      execCmd(`agent activate --api-name ${botApiName} --target-org ${session.orgs.get('default')?.username} --json`, {
+        ensureExitCode: 0,
+      });
     }
 
     // Verify the BotVersion status is now 'Active'
@@ -99,7 +99,9 @@ describe('agent activate/deactivate NUTs', () => {
     const initialStatus = await getBotStatus();
     expect(initialStatus).to.equal('Active');
 
-    execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, { ensureExitCode: 0 });
+    execCmd(`agent deactivate --api-name ${botApiName} --target-org ${session.orgs.get('default')?.username} --json`, {
+      ensureExitCode: 0,
+    });
 
     // Verify the BotVersion status is now 'Inactive'
     const finalStatus = await getBotStatus();

@@ -13,35 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { join } from 'node:path';
 import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
-import { getDevhubUsername } from './shared-setup.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent validate authoring-bundle NUTs', () => {
   let session: TestSession;
 
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
   });
 
   it('should validate a valid authoring bundle', async () => {
-    const username = getDevhubUsername(session);
-
     // Use the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name Willie_Resort_Manager --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name Willie_Resort_Manager --target-org ${
+        session.orgs.get('default')?.username
+      } --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -51,11 +41,9 @@ describe('agent validate authoring-bundle NUTs', () => {
   });
 
   it('should fail validation for invalid authoring bundle', async () => {
-    const username = getDevhubUsername(session);
-
     // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name invalid --target-org ${username} --json`,
+      `agent validate authoring-bundle --api-name invalid --target-org ${session.orgs.get('default')?.username} --json`,
       { ensureExitCode: 2 }
     );
   });
