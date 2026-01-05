@@ -15,8 +15,9 @@
  */
 
 import { join } from 'node:path';
-import { TestSession } from '@salesforce/cli-plugins-testkit';
-import { assignAgentforcePermset } from '../utils/assignAgentforcePermset.js';
+import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
+import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
+import { Org, User } from '@salesforce/core';
 
 /* eslint-disable no-console */
 
@@ -63,15 +64,52 @@ export async function getTestSession(): Promise<TestSession> {
 
     // Get the scratch org username and assign permission set
     const orgs = session.orgs;
+    const defaultOrg = orgs.get('default');
+
     if (orgs && orgs.size > 0) {
-      const defaultOrg = orgs.get('default');
       if (defaultOrg?.username) {
         console.log(`Using scratch org: ${defaultOrg.username}`);
         try {
-          await assignAgentforcePermset(defaultOrg.username);
+          const org = await Org.create({ aliasOrUsername: defaultOrg.username });
+          const connection = org.getConnection();
+
+          // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
+          const queryResult = await connection.singleRecordQuery<{ Id: string }>(
+            `SELECT Id FROM User WHERE Username='${defaultOrg.username}'`
+          );
+          const user = await User.create({ org });
+          await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
+          // Error (AgentJobSpecCreateError): Failed to generate agent topic drafts with LLMG, To view prompt templates, you need the permission ExecutePromptTemplates.
+
           console.log('Permission set assigned to scratch org user');
         } catch (error) {
           console.warn('Warning: Failed to assign permission set:', error);
+        }
+
+        try {
+          console.log('deploying metadata (no AiEvaluationDefinition)');
+
+          const cs1 = await ComponentSetBuilder.build({
+            manifest: {
+              manifestPath: join(testSession.project.dir, 'noTest.xml'),
+              directoryPaths: [testSession.homeDir],
+            },
+          });
+          const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
+          await deploy1.pollStatus({ frequency: Duration.seconds(10) });
+
+          console.log('deploying metadata (AiEvaluationDefinition)');
+
+          const cs2 = await ComponentSetBuilder.build({
+            manifest: {
+              manifestPath: join(testSession.project.dir, 'test.xml'),
+              directoryPaths: [testSession.homeDir],
+            },
+          });
+          const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
+          await deploy2.pollStatus({ frequency: Duration.seconds(10) });
+        } catch (e) {
+          console.warn(e);
         }
       }
     }
@@ -102,26 +140,4 @@ export function getUsername(): string {
   }
 
   return defaultOrg.username;
-}
-
-/**
- * Cleanup function for test hooks. Cleans up the shared test session.
- * This function is idempotent and can be called multiple times safely.
- */
-export async function cleanupScratchOrg(): Promise<void> {
-  // Wait for any in-progress creation to complete
-  if (testSessionPromise && !testSession) {
-    try {
-      await testSessionPromise;
-    } catch (error) {
-      console.warn('Warning: Test session creation failed:', error);
-    }
-  }
-
-  // Clean up the shared test session (this will delete the scratch org)
-  if (testSession) {
-    await testSession.clean();
-    testSession = undefined;
-    testSessionPromise = undefined;
-  }
 }

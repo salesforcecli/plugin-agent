@@ -25,7 +25,7 @@ import { getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-describe('agent create NUTs', () => {
+describe('agent create', () => {
   let session: TestSession;
   let username: string;
   const specFileName = genUniqueString('agentSpec_%s.yaml');
@@ -60,7 +60,7 @@ describe('agent create NUTs', () => {
     expect(fileStat.size).to.be.greaterThan(0);
   });
 
-  it.skip('should create new agent in org', async () => {
+  it('should create new agent in org', async () => {
     const expectedFilePath = join(session.project.dir, 'specs', specFileName);
     const name = 'Plugin Agent Test';
     const apiName = 'Plugin_Agent_Test';
@@ -76,8 +76,8 @@ describe('agent create NUTs', () => {
 
     // verify agent metadata files are retrieved to the project
     const sourceDir = join(session.project.dir, 'force-app', 'main', 'default');
-    expect(readdirSync(join(sourceDir, 'bots'))).to.have.length.greaterThan(3);
-    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles'))).to.have.length.greaterThan(3);
-    expect(readdirSync(join(sourceDir, 'genAiPlugins'))).to.have.length.greaterThan(3);
+    expect(readdirSync(join(sourceDir, 'bots'))).length.to.equal(2);
+    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles'))).length.to.equal(2);
+    expect(readdirSync(join(sourceDir, 'genAiPlugins'))).length.to.equal(2);
   });
 });

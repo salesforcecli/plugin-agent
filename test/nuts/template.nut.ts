@@ -22,7 +22,7 @@ import {
   AgentGenerateTemplateResult,
   BotTemplateExt,
   GenAiPlannerBundleExt,
-} from '../../../../src/commands/agent/generate/template.js';
+} from '../../src/commands/agent/generate/template.js';
 
 describe('agent generate template NUTs', () => {
   let session: TestSession;
@@ -51,14 +51,7 @@ describe('agent generate template NUTs', () => {
 
   it('Converts an Agent into an BotTemplate and GenAiPlannerBundle', async () => {
     const agentVersion = 1;
-    const agentFile = join(
-      'force-app',
-      'main',
-      'default',
-      'bots',
-      'Guest_Experience_Agent',
-      'Guest_Experience_Agent.bot-meta.xml'
-    );
+    const agentFile = join('force-app', 'main', 'default', 'bots', 'Local_Info_Agent', 'Local_Info_Agent.bot-meta.xml');
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, {
       ensureExitCode: 0,
@@ -69,15 +62,15 @@ describe('agent generate template NUTs', () => {
       'main',
       'default',
       'botTemplates',
-      'Guest_Experience_Agent_v1_Template.botTemplate-meta.xml'
+      'Local_Info_Agent_v1_Template.botTemplate-meta.xml'
     );
     const genAiPlannerBundleFilePath = join(
       'force-app',
       'main',
       'default',
       'genAiPlannerBundles',
-      'Guest_Experience_Agent_v1_Template',
-      'Guest_Experience_Agent_v1_Template.genAiPlannerBundle'
+      'Local_Info_Agent_v1_Template',
+      'Local_Info_Agent_v1_Template.genAiPlannerBundle'
     );
 
     const generatedBotTemplateFilePath = resolve(session.project.dir, botTemplateFilePath);

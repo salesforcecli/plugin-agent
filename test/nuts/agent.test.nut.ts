@@ -25,7 +25,7 @@ import { getTestSession } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-describe('agent test NUTs', () => {
+describe('agent test', () => {
   let session: TestSession;
   const agentTestName = 'Local_Info_Agent_Test';
 

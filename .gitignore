@@ -47,3 +47,5 @@ node_modules
 # os specific files
 .DS_Store
 .idea
+/test/mock-projects/agent-generate-template/.sf/
+/test/mock-projects/agent-generate-template/.sfdx/

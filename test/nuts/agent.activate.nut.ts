@@ -71,11 +71,6 @@ describe('agent activate/deactivate NUTs', () => {
         ensureExitCode: 0,
       });
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : 'unknown';
-      const waitMin = 3;
-      console.log(`Error activating agent due to ${errMsg}. \nWaiting ${waitMin} minutes and trying again...`);
-      await sleep(waitMin * 60 * 1000);
-      console.log(`${waitMin} minutes is up, retrying now.`);
       execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, {
         ensureExitCode: 0,
       });

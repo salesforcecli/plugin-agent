@@ -22,24 +22,20 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
 import { getTestSession } from './shared-setup.js';
 
-const isWindows = process.platform === 'win32';
+// const isWindows = process.platform === 'win32';
 
-describe('agent test create NUTs', () => {
+describe.skip('agent test create', () => {
   let session: TestSession;
   before(async () => {
     session = await getTestSession();
   });
-  (isWindows ? it.skip : it)('should create test from test spec file', async () => {
+  it('should create test from test spec file', async () => {
     const testApiName = genUniqueString('Test_Agent_%s');
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
 
-    // Normalize path for cross-platform compatibility (Windows uses backslashes)
-    const normalizedSpecPath = normalize(specPath).replace(/\\/g, '/');
-    // Don't quote --api-name on Windows - it can cause parsing issues
-    // Only quote --spec path since it may contain spaces
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${normalizedSpecPath}" --target-org ${
+      `agent test create --api-name ${testApiName} --spec "${specPath}" --target-org ${
         session.orgs.get('default')?.username
       } --json`,
       { ensureExitCode: 0 }

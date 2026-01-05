@@ -30,7 +30,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     session = await getTestSession();
   });
 
-  it.skip('should publish a new agent (first version)', async () => {
+  it('should publish a new agent (first version)', async () => {
     // Generate a unique bundle name to ensure it's a new agent
     const bundleName = genUniqueString('Test_Agent_%s');
     const newBundleApiName = genUniqueString('Test_Agent_%s');
@@ -144,7 +144,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     }
   });
 
-  it.skip('should publish a new version of an existing agent', async () => {
+  it('should publish a new version of an existing agent', async () => {
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${
