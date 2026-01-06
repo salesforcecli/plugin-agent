@@ -27,13 +27,15 @@ describe('agent test create', () => {
   before(async () => {
     session = await getTestSession();
   });
-  it.skip('should create test from test spec file', async () => {
-    const testApiName = genUniqueString('Test_Agent_%s');
+  it('should create test from test spec file', async function () {
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
 
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${specPath}" --target-org ${getUsername()} --json`,
+      `agent test create --api-name NutTest --spec "${specPath}" --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     );
 
