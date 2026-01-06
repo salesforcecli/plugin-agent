@@ -79,36 +79,74 @@ export async function getTestSession(): Promise<TestSession> {
           const user = await User.create({ org });
           await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
           console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
+
+          // Create a new agent user with required permission sets
+          console.log('Creating agent user...');
+          const profileResult = await connection.singleRecordQuery<{ Id: string }>(
+            "SELECT Id FROM Profile WHERE Name='Standard User' LIMIT 1"
+          );
+
+          const agentUserUsername = `agent.user@${defaultOrg.username.split('@')[1]}`;
+          const agentUserRecord = await connection.sobject('User').create({
+            FirstName: 'Agent',
+            LastName: 'User',
+            Alias: 'agentusr',
+            Email: agentUserUsername,
+            Username: agentUserUsername,
+            ProfileId: profileResult.Id,
+            TimeZoneSidKey: 'America/Los_Angeles',
+            LocaleSidKey: 'en_US',
+            EmailEncodingKey: 'UTF-8',
+            LanguageLocaleKey: 'en_US',
+          });
+
+          if (!agentUserRecord.success || !agentUserRecord.id) {
+            throw new Error(`Failed to create agent user: ${agentUserRecord.errors?.join(', ')}`);
+          }
+
+          const agentUserId = agentUserRecord.id;
+          console.log(`Agent user created: ${agentUserUsername} (${agentUserId})`);
+
+          // Assign permission sets to the agent user
+          await user.assignPermissionSets(agentUserId, [
+            'AgentforceServiceAgentBase',
+            'AgentforceServiceAgentUser',
+            'EinsteinGPTPromptTemplateUser',
+          ]);
+          console.log('Permission sets assigned to agent user');
+
+          // Set environment variable for string replacement
+          process.env.AGENT_USER_USERNAME = agentUserUsername;
+
+          try {
+            console.log('deploying metadata (no AiEvaluationDefinition)');
+
+            const cs1 = await ComponentSetBuilder.build({
+              manifest: {
+                manifestPath: join(testSession.project.dir, 'noTest.xml'),
+                directoryPaths: [testSession.homeDir],
+              },
+            });
+            const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
+            await deploy1.pollStatus({ frequency: Duration.seconds(10) });
+
+            console.log('deploying metadata (AiEvaluationDefinition)');
+
+            const cs2 = await ComponentSetBuilder.build({
+              manifest: {
+                manifestPath: join(testSession.project.dir, 'test.xml'),
+                directoryPaths: [testSession.homeDir],
+              },
+            });
+            const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
+            await deploy2.pollStatus({ frequency: Duration.seconds(10) });
+          } catch (e) {
+            console.warn(e);
+            throw e;
+          }
         } catch (error) {
-          console.warn('Warning: Failed to assign permission set:', error);
+          console.warn('Warning: Failed to assign permission set or create agent user:', error);
           throw error;
-        }
-
-        try {
-          console.log('deploying metadata (no AiEvaluationDefinition)');
-
-          const cs1 = await ComponentSetBuilder.build({
-            manifest: {
-              manifestPath: join(testSession.project.dir, 'noTest.xml'),
-              directoryPaths: [testSession.homeDir],
-            },
-          });
-          const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
-          await deploy1.pollStatus({ frequency: Duration.seconds(10) });
-
-          console.log('deploying metadata (AiEvaluationDefinition)');
-
-          const cs2 = await ComponentSetBuilder.build({
-            manifest: {
-              manifestPath: join(testSession.project.dir, 'test.xml'),
-              directoryPaths: [testSession.homeDir],
-            },
-          });
-          const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
-          await deploy2.pollStatus({ frequency: Duration.seconds(10) });
-        } catch (e) {
-          console.warn(e);
-          throw e;
         }
       }
     }

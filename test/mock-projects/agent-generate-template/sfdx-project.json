@@ -8,5 +8,12 @@
   "name": "agent-generate-template",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "65.0"
+  "sourceApiVersion": "65.0",
+  "replacements": [
+    {
+      "filename": "**",
+      "stringToReplace": "%AGENT_USERNAME%",
+      "replaceWithEnv": "AGENT_USER_USERNAME"
+    }
+  ]
 }
