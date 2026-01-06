@@ -71,6 +71,24 @@ export async function getTestSession(): Promise<TestSession> {
         try {
           const org = await Org.create({ aliasOrUsername: defaultOrg.username });
           const connection = org.getConnection();
+          //
+          // // Generate SFDX URL for easy authentication and write to file
+          // const authInfo = await AuthInfo.create({ username: defaultOrg.username });
+          // const refreshToken = authInfo.getFields().refreshToken;
+          // const clientId = authInfo.getFields().clientId || 'PlatformCLI';
+          // const clientSecret = authInfo.getFields().clientSecret || '';
+          // const instanceUrl = connection.instanceUrl.replace(/^https?:\/\//, ''); // Remove protocol
+          //
+          // if (!refreshToken) {
+          //   console.warn('\nWarning: Could not retrieve refresh token for SFDX URL generation\n');
+          // } else {
+          //   const sfdxUrl = `force://${clientId}:${clientSecret}:${refreshToken}@${instanceUrl}`;
+          //   const sfdxUrlPath = join(testSession.project.dir, 'sfdx-url.txt');
+          //   writeFileSync(sfdxUrlPath, sfdxUrl, 'utf8');
+          //   console.log(`\nSFDX URL saved to: ${sfdxUrlPath}`);
+          //   console.log('To authenticate to this scratch org, run:');
+          //   console.log(`  sf org login sfdx-url --sfdx-url-file ${sfdxUrlPath} --alias test-org\n`);
+          // }
 
           // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
           const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(

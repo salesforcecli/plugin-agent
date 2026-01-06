@@ -38,14 +38,7 @@ describe('agent generate template NUTs', () => {
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
     const agentVersion = 1;
-    const agentFile = join(
-      'force-app',
-      'main',
-      'default',
-      'bots',
-      'Invalid_For_Template',
-      'Invalid_For_Template.bot-meta.xml'
-    );
+    const agentFile = join('force-app', 'main', 'default', 'bots', 'Bot_Agent', 'Bot_Agent.bot-meta.xml');
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, { ensureExitCode: 1 }).jsonOutput;
 
@@ -56,7 +49,14 @@ describe('agent generate template NUTs', () => {
 
   it('Converts an Agent into an BotTemplate and GenAiPlannerBundle', async () => {
     const agentVersion = 1;
-    const agentFile = join('force-app', 'main', 'default', 'bots', 'Local_Info_Agent', 'Local_Info_Agent.bot-meta.xml');
+    const agentFile = join(
+      'force-app',
+      'main',
+      'default',
+      'bots',
+      'Guest_Experience_Agent',
+      'Guest_Experience_Agent.bot-meta.xml'
+    );
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, {
       ensureExitCode: 0,
@@ -67,15 +67,15 @@ describe('agent generate template NUTs', () => {
       'main',
       'default',
       'botTemplates',
-      'Local_Info_Agent_v1_Template.botTemplate-meta.xml'
+      'Guest_Experience_Agent_v1_Template.botTemplate-meta.xml'
     );
     const genAiPlannerBundleFilePath = join(
       'force-app',
       'main',
       'default',
       'genAiPlannerBundles',
-      'Local_Info_Agent_v1_Template',
-      'Local_Info_Agent_v1_Template.genAiPlannerBundle'
+      'Guest_Experience_Agent_v1_Template',
+      'Guest_Experience_Agent_v1_Template.genAiPlannerBundle'
     );
 
     const generatedBotTemplateFilePath = resolve(session.project.dir, botTemplateFilePath);

@@ -11,8 +11,8 @@
   "sourceApiVersion": "65.0",
   "replacements": [
     {
-      "filename": "**",
-      "stringToReplace": "%AGENT_USERNAME%",
+      "filename": "force-app/main/default/bots/Local_Info_Agent/Local_Info_Agent.bot-meta.xml",
+      "stringToReplace": "AGENT_USERNAME",
       "replaceWithEnv": "AGENT_USER_USERNAME"
     }
   ]
