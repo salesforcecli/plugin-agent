@@ -80,23 +80,6 @@ export async function getTestSession(): Promise<TestSession> {
         const user = await User.create({ org });
         await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
         console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
-
-        // Set password for admin user using the REST API
-        await connection.request({
-          method: 'POST',
-          url: `/services/data/v${connection.version}/sobjects/User/${queryResult.Id}/password`,
-          body: JSON.stringify({ NewPassword: 'orgfarm1234' }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-        console.log('Password set for admin user: orgfarm1234');
-
-        // Print authentication command
-        const instanceUrl = connection.instanceUrl;
-        console.log('To authenticate to this scratch org, run:');
-        console.log(`  sf org login web --instance-url ${instanceUrl}`);
-        console.log('Password: orgfarm1234');
-        console.log(`Username: ${defaultOrg.username}`);
-
         // Create a new agent user with required permission sets
         console.log('Creating agent user...');
 
