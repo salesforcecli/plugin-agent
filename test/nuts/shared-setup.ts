@@ -18,12 +18,14 @@ import { join } from 'node:path';
 import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { Org, User } from '@salesforce/core';
+import { sleep } from '@salesforce/kit';
 
 /* eslint-disable no-console */
 
 // Module-level variables to ensure only one TestSession is created
 let testSession: TestSession | undefined;
 let testSessionPromise: Promise<TestSession> | undefined;
+let agentUsername: string | undefined;
 
 /**
  * Gets the shared TestSession with a scratch org. This ensures only one TestSession
@@ -71,24 +73,6 @@ export async function getTestSession(): Promise<TestSession> {
         try {
           const org = await Org.create({ aliasOrUsername: defaultOrg.username });
           const connection = org.getConnection();
-          //
-          // // Generate SFDX URL for easy authentication and write to file
-          // const authInfo = await AuthInfo.create({ username: defaultOrg.username });
-          // const refreshToken = authInfo.getFields().refreshToken;
-          // const clientId = authInfo.getFields().clientId || 'PlatformCLI';
-          // const clientSecret = authInfo.getFields().clientSecret || '';
-          // const instanceUrl = connection.instanceUrl.replace(/^https?:\/\//, ''); // Remove protocol
-          //
-          // if (!refreshToken) {
-          //   console.warn('\nWarning: Could not retrieve refresh token for SFDX URL generation\n');
-          // } else {
-          //   const sfdxUrl = `force://${clientId}:${clientSecret}:${refreshToken}@${instanceUrl}`;
-          //   const sfdxUrlPath = join(testSession.project.dir, 'sfdx-url.txt');
-          //   writeFileSync(sfdxUrlPath, sfdxUrl, 'utf8');
-          //   console.log(`\nSFDX URL saved to: ${sfdxUrlPath}`);
-          //   console.log('To authenticate to this scratch org, run:');
-          //   console.log(`  sf org login sfdx-url --sfdx-url-file ${sfdxUrlPath} --alias test-org\n`);
-          // }
 
           // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
           const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
@@ -97,6 +81,21 @@ export async function getTestSession(): Promise<TestSession> {
           const user = await User.create({ org });
           await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
           console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
+
+          // Set password for admin user using the REST API
+          await connection.request({
+            method: 'POST',
+            url: `/services/data/v${connection.version}/sobjects/User/${queryResult.Id}/password`,
+            body: JSON.stringify({ NewPassword: 'orgfarm1234' }),
+            headers: { 'Content-Type': 'application/json' },
+          });
+          console.log('Password set for admin user: orgfarm1234');
+
+          // Print authentication command
+          const instanceUrl = connection.instanceUrl;
+          console.log('\nTo authenticate to this scratch org, run:');
+          console.log(`  sf org login web --username ${defaultOrg.username} --instance-url ${instanceUrl}\n`);
+          console.log('Password: orgfarm1234\n');
 
           // Create a new agent user with required permission sets
           console.log('Creating agent user...');
@@ -109,13 +108,13 @@ export async function getTestSession(): Promise<TestSession> {
           // Generate a unique username using timestamp to avoid duplicates
           const timestamp = Date.now();
           const domain = defaultOrg.username.split('@')[1];
-          const agentUserUsername = `agent.user.${timestamp}@${domain}`;
+          agentUsername = `agent.user.${timestamp}@${domain}`;
           const agentUserRecord = await connection.sobject('User').create({
             FirstName: 'Agent',
             LastName: 'User',
             Alias: 'agentusr',
-            Email: agentUserUsername,
-            Username: agentUserUsername,
+            Email: agentUsername,
+            Username: agentUsername,
             ProfileId: profileResult.Id,
             TimeZoneSidKey: 'America/Los_Angeles',
             LocaleSidKey: 'en_US',
@@ -128,7 +127,7 @@ export async function getTestSession(): Promise<TestSession> {
           }
 
           const agentUserId = agentUserRecord.id;
-          console.log(`Agent user created: ${agentUserUsername} (${agentUserId})`);
+          console.log(`Agent user created: ${agentUsername} (${agentUserId})`);
 
           // Assign permission sets to the agent user individually to identify any failures
           const permissionSets = [
@@ -151,7 +150,7 @@ export async function getTestSession(): Promise<TestSession> {
           console.log('Permission set assignment completed');
 
           // Set environment variable for string replacement
-          process.env.AGENT_USER_USERNAME = agentUserUsername;
+          process.env.AGENT_USER_USERNAME = agentUsername;
 
           try {
             console.log('deploying metadata (no AiEvaluationDefinition)');
@@ -186,6 +185,8 @@ export async function getTestSession(): Promise<TestSession> {
       }
     }
 
+    // sleep a minute for org
+    await sleep(60_000);
     return session;
   })();
 
@@ -207,4 +208,15 @@ export function getUsername(): string {
   }
 
   return testSession.orgs.get('default')!.username!;
+}
+
+/**
+ * Gets the agent user, username, from the shared test session.
+ * Throws an error if the session hasn't been created yet.
+ */
+export function getAgentUsername(): string | undefined {
+  if (!testSession) {
+    throw new Error('Test session not available. Call getTestSession() first.');
+  }
+  return agentUsername;
 }

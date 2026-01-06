@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 import { expect } from 'chai';
-import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
-import { getTestSession } from './shared-setup.js';
+import { getTestSession, getUsername } from './shared-setup.js';
 
 describe('agent validate authoring-bundle NUTs', () => {
-  let session: TestSession;
-
   before(async () => {
-    session = await getTestSession();
+    await getTestSession();
   });
 
   it('should validate a valid authoring bundle', async () => {
     // Use the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name Willie_Resort_Manager --target-org ${
-        session.orgs.get('default')?.username
-      } --json`,
+      `agent validate authoring-bundle --api-name Willie_Resort_Manager --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -43,7 +38,7 @@ describe('agent validate authoring-bundle NUTs', () => {
   it('should fail validation for invalid authoring bundle', async () => {
     // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
-      `agent validate authoring-bundle --api-name invalid --target-org ${session.orgs.get('default')?.username} --json`,
+      `agent validate authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
       { ensureExitCode: 2 }
     );
   });

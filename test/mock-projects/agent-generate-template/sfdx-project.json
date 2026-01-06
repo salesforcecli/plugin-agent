@@ -14,6 +14,11 @@
       "filename": "force-app/main/default/bots/Local_Info_Agent/Local_Info_Agent.bot-meta.xml",
       "stringToReplace": "AGENT_USERNAME",
       "replaceWithEnv": "AGENT_USER_USERNAME"
+    },
+    {
+      "filename": "force-app/main/default/aiAuthoringBundles/Willie_Resort_Manager/Willie_Resort_Manager.agent",
+      "stringToReplace": "AGENT_USERNAME",
+      "replaceWithEnv": "AGENT_USER_USERNAME"
     }
   ]
 }

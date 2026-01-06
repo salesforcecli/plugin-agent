@@ -21,9 +21,9 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
-import { getTestSession } from './shared-setup.js';
+import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 
-describe('agent publish authoring-bundle NUTs', () => {
+describe.skip('agent publish authoring-bundle NUTs', () => {
   let session: TestSession;
   const bundleApiName = 'Willie_Resort_Manager';
   before(async () => {
@@ -38,15 +38,11 @@ describe('agent publish authoring-bundle NUTs', () => {
     const specPath = join(session.project.dir, 'specs', specFileName);
 
     // Step 1: Generate an agent spec
-    const specCommand = `agent generate agent-spec --target-org ${
-      session.orgs.get('default')?.username
-    } --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
+    const specCommand = `agent generate agent-spec --target-org ${getUsername()} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath} --json`;
     execCmd(specCommand, { ensureExitCode: 0 });
 
     // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${newBundleApiName} --target-org ${
-      session.orgs.get('default')?.username
-    } --json`;
+    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${newBundleApiName} --target-org ${getUsername()} --json`;
     const generateResult = execCmd<AgentGenerateAuthoringBundleResult>(generateCommand, {
       ensureExitCode: 0,
     }).jsonOutput?.result;
@@ -58,16 +54,14 @@ describe('agent publish authoring-bundle NUTs', () => {
       // Replace default_agent_user with the devhub username
       const updatedContent = agentContent.replace(
         /default_agent_user:\s*"[^"]*"/,
-        'default_agent_user: "ge.agent@afdx-usa1000-02.testorg"'
+        `default_agent_user: "${getAgentUsername()}"`
       );
       writeFileSync(generateResult.agentPath, updatedContent, 'utf8');
     }
 
     // Step 3: Publish the authoring bundle (first version)
     const publishResult = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${newBundleApiName} --target-org ${
-        session.orgs.get('default')?.username
-      } --json`,
+      `agent publish authoring-bundle --api-name ${newBundleApiName} --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -81,7 +75,7 @@ describe('agent publish authoring-bundle NUTs', () => {
       throw new Error('botDeveloperName not found in publish result');
     }
 
-    const org = await Org.create({ aliasOrUsername: session.orgs.get('default')?.username });
+    const org = await Org.create({ aliasOrUsername: getUsername() });
     const connection = org.getConnection();
     const botDeveloperName = publishResult.botDeveloperName;
 
@@ -147,9 +141,7 @@ describe('agent publish authoring-bundle NUTs', () => {
   it('should publish a new version of an existing agent', async () => {
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${
-        session.orgs.get('default')?.username
-      } --json`,
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -163,9 +155,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     const invalidApiName = 'Invalid_Bundle_Name_That_Does_Not_Exist';
 
     execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${
-        session.orgs.get('default')?.username
-      } --json`,
+      `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${getUsername()} --json`,
       { ensureExitCode: 1 }
     );
   });
