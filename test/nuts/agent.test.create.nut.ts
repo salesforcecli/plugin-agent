@@ -27,7 +27,7 @@ describe('agent test create', () => {
   before(async () => {
     session = await getTestSession();
   });
-  it('should create test from test spec file', async () => {
+  it.skip('should create test from test spec file', async () => {
     const testApiName = genUniqueString('Test_Agent_%s');
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');

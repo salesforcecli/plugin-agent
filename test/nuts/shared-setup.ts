@@ -70,118 +70,104 @@ export async function getTestSession(): Promise<TestSession> {
     if (orgs && orgs.size > 0) {
       if (defaultOrg?.username) {
         console.log(`Using scratch org: ${defaultOrg.username}`);
-        try {
-          const org = await Org.create({ aliasOrUsername: defaultOrg.username });
-          const connection = org.getConnection();
+        const org = await Org.create({ aliasOrUsername: defaultOrg.username });
+        const connection = org.getConnection();
 
-          // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
-          const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
-            `SELECT Id, Name FROM User WHERE Username='${defaultOrg.username}'`
-          );
-          const user = await User.create({ org });
-          await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
-          console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
+        // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
+        const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
+          `SELECT Id, Name FROM User WHERE Username='${defaultOrg.username}'`
+        );
+        const user = await User.create({ org });
+        await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
+        console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
 
-          // Set password for admin user using the REST API
-          await connection.request({
-            method: 'POST',
-            url: `/services/data/v${connection.version}/sobjects/User/${queryResult.Id}/password`,
-            body: JSON.stringify({ NewPassword: 'orgfarm1234' }),
-            headers: { 'Content-Type': 'application/json' },
-          });
-          console.log('Password set for admin user: orgfarm1234');
+        // Set password for admin user using the REST API
+        await connection.request({
+          method: 'POST',
+          url: `/services/data/v${connection.version}/sobjects/User/${queryResult.Id}/password`,
+          body: JSON.stringify({ NewPassword: 'orgfarm1234' }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+        console.log('Password set for admin user: orgfarm1234');
 
-          // Print authentication command
-          const instanceUrl = connection.instanceUrl;
-          console.log('\nTo authenticate to this scratch org, run:');
-          console.log(`  sf org login web --username ${defaultOrg.username} --instance-url ${instanceUrl}\n`);
-          console.log('Password: orgfarm1234\n');
+        // Print authentication command
+        const instanceUrl = connection.instanceUrl;
+        console.log('To authenticate to this scratch org, run:');
+        console.log(`  sf org login web --instance-url ${instanceUrl}`);
+        console.log('Password: orgfarm1234');
+        console.log(`Username: ${defaultOrg.username}`);
 
-          // Create a new agent user with required permission sets
-          console.log('Creating agent user...');
+        // Create a new agent user with required permission sets
+        console.log('Creating agent user...');
 
-          // Get the 'Einstein Agent User' profile
-          const profileResult = await connection.singleRecordQuery<{ Id: string }>(
-            "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
-          );
+        // Get the 'Einstein Agent User' profile
+        const profileResult = await connection.singleRecordQuery<{ Id: string }>(
+          "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
+        );
 
-          // Generate a unique username using timestamp to avoid duplicates
-          const timestamp = Date.now();
-          const domain = defaultOrg.username.split('@')[1];
-          agentUsername = `agent.user.${timestamp}@${domain}`;
-          const agentUserRecord = await connection.sobject('User').create({
-            FirstName: 'Agent',
-            LastName: 'User',
-            Alias: 'agentusr',
-            Email: agentUsername,
-            Username: agentUsername,
-            ProfileId: profileResult.Id,
-            TimeZoneSidKey: 'America/Los_Angeles',
-            LocaleSidKey: 'en_US',
-            EmailEncodingKey: 'UTF-8',
-            LanguageLocaleKey: 'en_US',
-          });
+        // Generate a unique username using timestamp to avoid duplicates
+        const timestamp = Date.now();
+        const domain = defaultOrg.username.split('@')[1];
+        agentUsername = `agent.user.${timestamp}@${domain}`;
+        const agentUserRecord = await connection.sobject('User').create({
+          FirstName: 'Agent',
+          LastName: 'User',
+          Alias: 'agentusr',
+          Email: agentUsername,
+          Username: agentUsername,
+          ProfileId: profileResult.Id,
+          TimeZoneSidKey: 'America/Los_Angeles',
+          LocaleSidKey: 'en_US',
+          EmailEncodingKey: 'UTF-8',
+          LanguageLocaleKey: 'en_US',
+        });
 
-          if (!agentUserRecord.success || !agentUserRecord.id) {
-            throw new Error(`Failed to create agent user: ${agentUserRecord.errors?.join(', ')}`);
-          }
-
-          const agentUserId = agentUserRecord.id;
-          console.log(`Agent user created: ${agentUsername} (${agentUserId})`);
-
-          // Assign permission sets to the agent user individually to identify any failures
-          const permissionSets = [
-            'AgentforceServiceAgentBase',
-            'AgentforceServiceAgentUser',
-            'EinsteinGPTPromptTemplateUser',
-          ];
-
-          // I had issues assigning all permission sets in one pass, assign individually for now
-          for (const permissionSet of permissionSets) {
-            try {
-              // eslint-disable-next-line no-await-in-loop
-              await user.assignPermissionSets(agentUserId, [permissionSet]);
-              console.log(`Permission set assigned: ${permissionSet}`);
-            } catch (error) {
-              console.warn(`Warning: Failed to assign permission set ${permissionSet}:`, error);
-              // Continue with other permission sets even if one fails
-            }
-          }
-          console.log('Permission set assignment completed');
-
-          // Set environment variable for string replacement
-          process.env.AGENT_USER_USERNAME = agentUsername;
-
-          try {
-            console.log('deploying metadata (no AiEvaluationDefinition)');
-
-            const cs1 = await ComponentSetBuilder.build({
-              manifest: {
-                manifestPath: join(testSession.project.dir, 'noTest.xml'),
-                directoryPaths: [testSession.homeDir],
-              },
-            });
-            const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
-            await deploy1.pollStatus({ frequency: Duration.seconds(10) });
-
-            console.log('deploying metadata (AiEvaluationDefinition)');
-
-            const cs2 = await ComponentSetBuilder.build({
-              manifest: {
-                manifestPath: join(testSession.project.dir, 'test.xml'),
-                directoryPaths: [testSession.homeDir],
-              },
-            });
-            const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
-            await deploy2.pollStatus({ frequency: Duration.seconds(10) });
-          } catch (e) {
-            console.warn(e);
-            throw e;
-          }
-        } catch (error) {
-          console.warn('Warning: Failed to assign permission set or create agent user:', error);
-          throw error;
+        if (!agentUserRecord.success || !agentUserRecord.id) {
+          throw new Error(`Failed to create agent user: ${agentUserRecord.errors?.join(', ')}`);
         }
+
+        const agentUserId = agentUserRecord.id;
+        console.log(`Agent user created: ${agentUsername} (${agentUserId})`);
+
+        // Assign permission sets to the agent user individually to identify any failures
+        const permissionSets = [
+          'AgentforceServiceAgentBase',
+          'AgentforceServiceAgentUser',
+          'EinsteinGPTPromptTemplateUser',
+        ];
+
+        // I had issues assigning all permission sets in one pass, assign individually for now
+        for (const permissionSet of permissionSets) {
+          // eslint-disable-next-line no-await-in-loop
+          await user.assignPermissionSets(agentUserId, [permissionSet]);
+          console.log(`Permission set assigned: ${permissionSet}`);
+        }
+        console.log('Permission set assignment completed');
+
+        // Set environment variable for string replacement
+        process.env.AGENT_USER_USERNAME = agentUsername;
+
+        console.log('deploying metadata (no AiEvaluationDefinition)');
+
+        const cs1 = await ComponentSetBuilder.build({
+          manifest: {
+            manifestPath: join(testSession.project.dir, 'noTest.xml'),
+            directoryPaths: [testSession.homeDir],
+          },
+        });
+        const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
+        await deploy1.pollStatus({ frequency: Duration.seconds(10) });
+
+        console.log('deploying metadata (AiEvaluationDefinition)');
+
+        const cs2 = await ComponentSetBuilder.build({
+          manifest: {
+            manifestPath: join(testSession.project.dir, 'test.xml'),
+            directoryPaths: [testSession.homeDir],
+          },
+        });
+        const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
+        await deploy2.pollStatus({ frequency: Duration.seconds(10) });
       }
     }
 
