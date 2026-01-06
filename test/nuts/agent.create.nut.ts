@@ -76,8 +76,8 @@ describe('agent create', () => {
 
     // verify agent metadata files are retrieved to the project
     const sourceDir = join(session.project.dir, 'force-app', 'main', 'default');
-    expect(readdirSync(join(sourceDir, 'bots'))).length.to.equal(2);
-    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles'))).length.to.equal(2);
-    expect(readdirSync(join(sourceDir, 'genAiPlugins'))).length.to.equal(2);
+    expect(readdirSync(join(sourceDir, 'bots')).length).to.greaterThanOrEqual(2);
+    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles')).length).to.greaterThanOrEqual(2);
+    expect(readdirSync(join(sourceDir, 'genAiPlugins')).length).to.greaterThanOrEqual(2);
   });
 });

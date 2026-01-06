@@ -23,24 +23,29 @@ import {
   BotTemplateExt,
   GenAiPlannerBundleExt,
 } from '../../src/commands/agent/generate/template.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', () => {
   let session: TestSession;
 
   before(async () => {
-    session = await TestSession.create({
-      devhubAuthStrategy: 'NONE',
-      project: { sourceDir: join('test', 'mock-projects', 'agent-generate-template') },
-    });
+    session = await getTestSession();
   });
 
   after(async () => {
-    await session?.clean();
+    // await session?.clean();
   });
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
     const agentVersion = 1;
-    const agentFile = join('force-app', 'main', 'default', 'bots', 'Bot_Agent', 'Bot_Agent.bot-meta.xml');
+    const agentFile = join(
+      'force-app',
+      'main',
+      'default',
+      'bots',
+      'Invalid_For_Template',
+      'Invalid_For_Template.bot-meta.xml'
+    );
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, { ensureExitCode: 1 }).jsonOutput;
 

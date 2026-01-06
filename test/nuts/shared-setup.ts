@@ -53,7 +53,6 @@ export async function getTestSession(): Promise<TestSession> {
         {
           alias: 'default',
           setDefault: true,
-          // Config path is relative to the project directory (test/mock-projects/agent-generate-template)
           config: 'config/project-scratch-def.json',
         },
       ],
@@ -74,16 +73,15 @@ export async function getTestSession(): Promise<TestSession> {
           const connection = org.getConnection();
 
           // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
-          const queryResult = await connection.singleRecordQuery<{ Id: string }>(
-            `SELECT Id FROM User WHERE Username='${defaultOrg.username}'`
+          const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
+            `SELECT Id, Name FROM User WHERE Username='${defaultOrg.username}'`
           );
           const user = await User.create({ org });
           await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
-          // Error (AgentJobSpecCreateError): Failed to generate agent topic drafts with LLMG, To view prompt templates, you need the permission ExecutePromptTemplates.
-
-          console.log('Permission set assigned to scratch org user');
+          console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
         } catch (error) {
           console.warn('Warning: Failed to assign permission set:', error);
+          throw error;
         }
 
         try {
@@ -110,6 +108,7 @@ export async function getTestSession(): Promise<TestSession> {
           await deploy2.pollStatus({ frequency: Duration.seconds(10) });
         } catch (e) {
           console.warn(e);
+          throw e;
         }
       }
     }
@@ -134,10 +133,5 @@ export function getUsername(): string {
     throw new Error('No orgs found in test session.');
   }
 
-  const defaultOrg = orgs.get('default');
-  if (!defaultOrg?.username) {
-    throw new Error('Default org username not found in test session.');
-  }
-
-  return defaultOrg.username;
+  return testSession.orgs.get('default')!.username!;
 }
