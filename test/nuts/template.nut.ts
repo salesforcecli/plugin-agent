@@ -33,7 +33,7 @@ describe('agent generate template NUTs', () => {
   });
 
   after(async () => {
-    await session?.clean();
+    // await session?.clean();
   });
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {

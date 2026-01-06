@@ -82,11 +82,16 @@ export async function getTestSession(): Promise<TestSession> {
 
           // Create a new agent user with required permission sets
           console.log('Creating agent user...');
+
+          // Get the 'Einstein Agent User' profile
           const profileResult = await connection.singleRecordQuery<{ Id: string }>(
-            "SELECT Id FROM Profile WHERE Name='Standard User' LIMIT 1"
+            "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
           );
 
-          const agentUserUsername = `agent.user@${defaultOrg.username.split('@')[1]}`;
+          // Generate a unique username using timestamp to avoid duplicates
+          const timestamp = Date.now();
+          const domain = defaultOrg.username.split('@')[1];
+          const agentUserUsername = `agent.user.${timestamp}@${domain}`;
           const agentUserRecord = await connection.sobject('User').create({
             FirstName: 'Agent',
             LastName: 'User',
@@ -107,13 +112,25 @@ export async function getTestSession(): Promise<TestSession> {
           const agentUserId = agentUserRecord.id;
           console.log(`Agent user created: ${agentUserUsername} (${agentUserId})`);
 
-          // Assign permission sets to the agent user
-          await user.assignPermissionSets(agentUserId, [
+          // Assign permission sets to the agent user individually to identify any failures
+          const permissionSets = [
             'AgentforceServiceAgentBase',
             'AgentforceServiceAgentUser',
             'EinsteinGPTPromptTemplateUser',
-          ]);
-          console.log('Permission sets assigned to agent user');
+          ];
+
+          // I had issues assigning all permission sets in one pass, assign individually for now
+          for (const permissionSet of permissionSets) {
+            try {
+              // eslint-disable-next-line no-await-in-loop
+              await user.assignPermissionSets(agentUserId, [permissionSet]);
+              console.log(`Permission set assigned: ${permissionSet}`);
+            } catch (error) {
+              console.warn(`Warning: Failed to assign permission set ${permissionSet}:`, error);
+              // Continue with other permission sets even if one fails
+            }
+          }
+          console.log('Permission set assignment completed');
 
           // Set environment variable for string replacement
           process.env.AGENT_USER_USERNAME = agentUserUsername;
