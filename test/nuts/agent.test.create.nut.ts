@@ -22,14 +22,12 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-const isWindows = process.platform === 'win32';
-
 describe('agent test create', () => {
   let session: TestSession;
   before(async () => {
     session = await getTestSession();
   });
-  (isWindows ? it.skip : it)('should create test from test spec file', async () => {
+  it('should create test from test spec file', async () => {
     const testApiName = genUniqueString('Test_Agent_%s');
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');

@@ -23,14 +23,14 @@ import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 
-describe.skip('agent publish authoring-bundle NUTs', () => {
+describe('agent publish authoring-bundle NUTs', () => {
   let session: TestSession;
   const bundleApiName = 'Willie_Resort_Manager';
   before(async () => {
     session = await getTestSession();
   });
 
-  it('should publish a new agent (first version)', async () => {
+  it.skip('should publish a new agent (first version)', async () => {
     // Generate a unique bundle name to ensure it's a new agent
     const bundleName = genUniqueString('Test_Agent_%s');
     const newBundleApiName = genUniqueString('Test_Agent_%s');
@@ -138,7 +138,7 @@ describe.skip('agent publish authoring-bundle NUTs', () => {
     }
   });
 
-  it('should publish a new version of an existing agent', async () => {
+  it.skip('should publish a new version of an existing agent', async () => {
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,
