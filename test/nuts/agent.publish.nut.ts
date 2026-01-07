@@ -29,7 +29,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     session = await getTestSession();
   });
 
-  it.skip('should publish a new agent (first version)', async () => {
+  it('should publish a new agent (first version)', async () => {
     const specFileName = genUniqueString('agentSpec_%s.yaml');
     const specPath = join(session.project.dir, 'specs', specFileName);
 
@@ -67,7 +67,7 @@ describe('agent publish authoring-bundle NUTs', () => {
     expect(publishResult?.errors).to.be.undefined;
   });
 
-  it.skip('should publish a new version of an existing agent', async () => {
+  it('should publish a new version of an existing agent', async () => {
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,

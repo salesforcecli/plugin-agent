@@ -154,8 +154,11 @@ export async function getTestSession(): Promise<TestSession> {
       }
     }
 
-    // sleep a 3 minutes for org
-    await sleep(3 * 1000 * 60);
+    // Wait for org to be ready - longer wait on Windows CI where things can be slower
+    const isWindows = process.platform === 'win32';
+    const waitTime = isWindows ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes on Windows, 5 minutes otherwise
+    console.log(`waiting ${waitTime / 1000 / 60} minutes for org to be ready (platform: ${process.platform})`);
+    await sleep(waitTime);
     return session;
   })();
 
