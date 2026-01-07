@@ -154,8 +154,8 @@ export async function getTestSession(): Promise<TestSession> {
       }
     }
 
-    // sleep a minute for org
-    await sleep(60_000);
+    // sleep a 3 minutes for org
+    await sleep(3 * 1000 * 60);
     return session;
   })();
 
