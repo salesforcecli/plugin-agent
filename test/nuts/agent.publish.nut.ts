@@ -18,22 +18,18 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
-import { Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 
 describe('agent publish authoring-bundle NUTs', () => {
   let session: TestSession;
-  const bundleApiName = 'Willie_Resort_Manager';
+  const bundleApiName = genUniqueString('Test_Agent_%s');
   before(async () => {
     session = await getTestSession();
   });
 
   it.skip('should publish a new agent (first version)', async () => {
-    // Generate a unique bundle name to ensure it's a new agent
-    const bundleName = genUniqueString('Test_Agent_%s');
-    const newBundleApiName = genUniqueString('Test_Agent_%s');
     const specFileName = genUniqueString('agentSpec_%s.yaml');
     const specPath = join(session.project.dir, 'specs', specFileName);
 
@@ -42,13 +38,13 @@ describe('agent publish authoring-bundle NUTs', () => {
     execCmd(specCommand, { ensureExitCode: 0 });
 
     // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${newBundleApiName} --target-org ${getUsername()} --json`;
+    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()} --json`;
     const generateResult = execCmd<AgentGenerateAuthoringBundleResult>(generateCommand, {
       ensureExitCode: 0,
     }).jsonOutput?.result;
     expect(generateResult).to.be.ok;
 
-    // Step 2.5: Update default_agent_user in the generated .agent file
+    // Step 2.5: Update default_agent_user in the generated .agent file to the 'agent user' we created in shared setup
     if (generateResult?.agentPath) {
       const agentContent = readFileSync(generateResult.agentPath, 'utf8');
       // Replace default_agent_user with the devhub username
@@ -61,7 +57,7 @@ describe('agent publish authoring-bundle NUTs', () => {
 
     // Step 3: Publish the authoring bundle (first version)
     const publishResult = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${newBundleApiName} --target-org ${getUsername()} --json`,
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -69,73 +65,6 @@ describe('agent publish authoring-bundle NUTs', () => {
     expect(publishResult?.success).to.be.true;
     expect(publishResult?.botDeveloperName).to.be.a('string');
     expect(publishResult?.errors).to.be.undefined;
-
-    // Cleanup: Delete the created metadata
-    if (!publishResult?.botDeveloperName) {
-      throw new Error('botDeveloperName not found in publish result');
-    }
-
-    const org = await Org.create({ aliasOrUsername: getUsername() });
-    const connection = org.getConnection();
-    const botDeveloperName = publishResult.botDeveloperName;
-
-    // Query for Bot and BotVersions
-    type BotDefinitionWithVersions = {
-      Id: string;
-      DeveloperName: string;
-      BotVersions: {
-        records: Array<{ Id: string }>;
-      };
-    };
-
-    // Query for Bot and BotVersions
-    const botResult = await connection.singleRecordQuery<BotDefinitionWithVersions>(
-      `SELECT Id, DeveloperName, (SELECT Id FROM BotVersions) FROM BotDefinition WHERE DeveloperName = '${botDeveloperName}' LIMIT 1`
-    );
-
-    // Delete in correct order to handle dependencies:
-    // 1. AiAuthoringBundle (references BotVersion)
-    // 2. BotVersions (references Bot)
-    // 3. Bot (BotDefinition)
-    // 4. GenAiPlannerBundle
-
-    // Step 1: Delete AiAuthoringBundle first (it references BotVersion)
-    type AiAuthoringBundleResult = {
-      Id: string;
-      DeveloperName: string;
-    };
-
-    const authoringBundleResult = await connection.query<AiAuthoringBundleResult>(
-      `SELECT Id, DeveloperName FROM AiAuthoringBundle WHERE DeveloperName = '${newBundleApiName}' LIMIT 1`
-    );
-
-    if (authoringBundleResult.records && authoringBundleResult.records.length > 0) {
-      await connection.sobject('AiAuthoringBundle').destroy(authoringBundleResult.records[0].Id);
-    }
-
-    // Step 2: Delete BotVersions (must delete before Bot)
-    if (botResult.BotVersions?.records && botResult.BotVersions.records.length > 0) {
-      const botVersionIds = botResult.BotVersions.records.map((bv) => bv.Id);
-      // Delete all BotVersions in parallel
-      await Promise.all(botVersionIds.map((id) => connection.sobject('BotVersion').destroy(id)));
-    }
-
-    // Step 3: Delete Bot
-    await connection.sobject('BotDefinition').destroy(botResult.Id);
-
-    // Step 4: Query and delete GenAiPlannerBundle
-    type GenAiPlannerBundleResult = {
-      Id: string;
-      DeveloperName: string;
-    };
-
-    const plannerBundleResult = await connection.query<GenAiPlannerBundleResult>(
-      `SELECT Id, DeveloperName FROM GenAiPlannerBundle WHERE DeveloperName = '${botDeveloperName}' LIMIT 1`
-    );
-
-    if (plannerBundleResult.records && plannerBundleResult.records.length > 0) {
-      await connection.sobject('GenAiPlannerBundle').destroy(plannerBundleResult.records[0].Id);
-    }
   });
 
   it.skip('should publish a new version of an existing agent', async () => {

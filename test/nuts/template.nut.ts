@@ -32,12 +32,6 @@ describe('agent generate template NUTs', () => {
     session = await getTestSession();
   });
 
-  after(async () => {
-    // mocha tests run in series, alphabetically, meaning this is the last NUT (for now)
-    // cleanup should be done in the last test
-    await session?.clean();
-  });
-
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
     const agentVersion = 1;
     const agentFile = join('force-app', 'main', 'default', 'bots', 'Bot_Agent', 'Bot_Agent.bot-meta.xml');
