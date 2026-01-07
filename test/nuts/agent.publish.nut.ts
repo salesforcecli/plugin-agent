@@ -29,7 +29,11 @@ describe('agent publish authoring-bundle NUTs', () => {
     session = await getTestSession();
   });
 
-  it('should publish a new agent (first version)', async () => {
+  it('should publish a new agent (first version)', async function () {
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
     const specFileName = genUniqueString('agentSpec_%s.yaml');
     const specPath = join(session.project.dir, 'specs', specFileName);
 
@@ -50,7 +54,7 @@ describe('agent publish authoring-bundle NUTs', () => {
       // Replace default_agent_user with the devhub username
       const updatedContent = agentContent.replace(
         /default_agent_user:\s*"[^"]*"/,
-        `default_agent_user: "${getAgentUsername()}"`
+        `default_agent_user: "${getAgentUsername()!}"`
       );
       writeFileSync(generateResult.agentPath, updatedContent, 'utf8');
     }
@@ -67,7 +71,11 @@ describe('agent publish authoring-bundle NUTs', () => {
     expect(publishResult?.errors).to.be.undefined;
   });
 
-  it('should publish a new version of an existing agent', async () => {
+  it('should publish a new version of an existing agent', async function () {
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,

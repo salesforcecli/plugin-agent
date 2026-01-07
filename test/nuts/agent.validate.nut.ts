@@ -24,7 +24,7 @@ describe('agent validate authoring-bundle NUTs', () => {
     await getTestSession();
   });
 
-  it.skip('should validate a valid authoring bundle', async function () {
+  it('should validate a valid authoring bundle', async function () {
     // Retry up to 3 times total (1 initial + 2 retries) to handle transient failures
     // Windows CI can be slower, so retries help handle timing issues
     this.retries(2);
@@ -45,7 +45,7 @@ describe('agent validate authoring-bundle NUTs', () => {
     expect(result?.errors).to.be.undefined;
   });
 
-  it.skip('should fail validation for invalid authoring bundle', async function () {
+  it('should fail validation for invalid authoring bundle', async function () {
     // Retry up to 3 times total (1 initial + 2 retries) to handle transient failures
     this.retries(2);
 
