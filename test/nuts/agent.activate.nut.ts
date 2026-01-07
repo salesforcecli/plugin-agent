@@ -22,7 +22,10 @@ import { getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-describe('agent activate/deactivate NUTs', () => {
+describe('agent activate/deactivate NUTs', function () {
+  // Increase timeout for setup and tests since shared setup includes a long wait on Windows
+  this.timeout(15 * 60 * 1000); // 15 minutes
+
   let connection: Connection;
   let defaultOrg: Org;
   let username: string;

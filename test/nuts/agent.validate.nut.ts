@@ -19,7 +19,10 @@ import { sleep } from '@salesforce/kit';
 import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agent/validate/authoring-bundle.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-describe('agent validate authoring-bundle NUTs', () => {
+describe('agent validate authoring-bundle NUTs', function () {
+  // Increase timeout for setup since shared setup includes a long wait on Windows
+  this.timeout(15 * 60 * 1000); // 15 minutes
+
   before(async () => {
     await getTestSession();
   });
