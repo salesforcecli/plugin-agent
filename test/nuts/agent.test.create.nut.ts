@@ -16,6 +16,7 @@
 
 import { join, normalize } from 'node:path';
 import { existsSync } from 'node:fs';
+import * as os from 'node:os';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
@@ -30,12 +31,12 @@ describe('agent test create', () => {
   it('should create test from test spec file', async function () {
     // Increase timeout to 30 minutes since deployment can take a long time
     this.timeout(30 * 60 * 1000);
-    const testApiName = genUniqueString('Test_Agent_%s');
+    const testApiName = genUniqueString('Test_Agent_%s') + os.platform();
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
 
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${specPath}" --target-org ${getUsername()} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${specPath}" --target-org ${getUsername()} --json`,
       { ensureExitCode: 0 }
     );
 
@@ -60,7 +61,7 @@ describe('agent test create', () => {
 
     const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
-      `agent test create --api-name ${testApiName} --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --json`,
       { ensureExitCode: 1 }
     );
   });
@@ -73,8 +74,11 @@ describe('agent test create', () => {
 
     // Missing --spec
     const testApiName = genUniqueString('Test_Agent_%s');
-    execCmd<AgentTestCreateResult>(`agent test create --api-name ${testApiName} --target-org ${getUsername()} --json`, {
-      ensureExitCode: 1,
-    });
+    execCmd<AgentTestCreateResult>(
+      `agent test create --api-name "${testApiName}" --target-org ${getUsername()} --json`,
+      {
+        ensureExitCode: 1,
+      }
+    );
   });
 });
