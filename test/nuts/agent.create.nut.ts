@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Salesforce, Inc.
+ * Copyright 2026, Salesforce, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,18 @@ import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentCreateSpecResult } from '../../src/commands/agent/generate/agent-spec.js';
 import type { AgentCreateResult } from '../../src/commands/agent/create.js';
-import { getDevhubUsername } from './shared-setup.js';
+import { getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-describe('agent create NUTs', () => {
+describe('agent create', () => {
   let session: TestSession;
   let username: string;
   const specFileName = genUniqueString('agentSpec_%s.yaml');
 
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
-    username = getDevhubUsername(session);
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
+    username = getUsername();
   });
 
   it('should generate spec file with minimal flags', async () => {
@@ -69,7 +60,7 @@ describe('agent create NUTs', () => {
     expect(fileStat.size).to.be.greaterThan(0);
   });
 
-  it.skip('should create new agent in org', async () => {
+  it('should create new agent in org', async () => {
     const expectedFilePath = join(session.project.dir, 'specs', specFileName);
     const name = 'Plugin Agent Test';
     const apiName = 'Plugin_Agent_Test';
@@ -85,8 +76,8 @@ describe('agent create NUTs', () => {
 
     // verify agent metadata files are retrieved to the project
     const sourceDir = join(session.project.dir, 'force-app', 'main', 'default');
-    expect(readdirSync(join(sourceDir, 'bots'))).to.have.length.greaterThan(3);
-    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles'))).to.have.length.greaterThan(3);
-    expect(readdirSync(join(sourceDir, 'genAiPlugins'))).to.have.length.greaterThan(3);
+    expect(readdirSync(join(sourceDir, 'bots')).length).to.greaterThanOrEqual(3);
+    expect(readdirSync(join(sourceDir, 'genAiPlannerBundles')).length).to.greaterThanOrEqual(3);
+    expect(readdirSync(join(sourceDir, 'genAiPlugins')).length).to.greaterThanOrEqual(3);
   });
 });

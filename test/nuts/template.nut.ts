@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Salesforce, Inc.
+ * Copyright 2026, Salesforce, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,14 @@ import {
   AgentGenerateTemplateResult,
   BotTemplateExt,
   GenAiPlannerBundleExt,
-} from '../../../../src/commands/agent/generate/template.js';
+} from '../../src/commands/agent/generate/template.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', () => {
   let session: TestSession;
 
   before(async () => {
-    session = await TestSession.create({
-      devhubAuthStrategy: 'NONE',
-      project: { sourceDir: join('test', 'mock-projects', 'agent-generate-template') },
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
   });
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
