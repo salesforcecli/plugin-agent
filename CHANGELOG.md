@@ -1,3 +1,9 @@
+## [1.26.2](https://github.com/salesforcecli/plugin-agent/compare/1.26.1...1.26.2) (2026-01-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([cf65f01](https://github.com/salesforcecli/plugin-agent/commit/cf65f01aa116df1b311212198acb89588658cb1f))
+
 ## [1.26.1](https://github.com/salesforcecli/plugin-agent/compare/1.26.0...1.26.1) (2025-12-19)
 
 ### Bug Fixes
