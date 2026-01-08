@@ -18,7 +18,6 @@ import { join } from 'node:path';
 import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
 import { Org, User } from '@salesforce/core';
-import { sleep } from '@salesforce/kit';
 
 /* eslint-disable no-console */
 
@@ -153,12 +152,6 @@ export async function getTestSession(): Promise<TestSession> {
         await deploy2.pollStatus({ frequency: Duration.seconds(10) });
       }
     }
-
-    // Wait for org to be ready - longer wait on Windows CI where things can be slower
-    const isWindows = process.platform === 'win32';
-    const waitTime = isWindows ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes on Windows, 5 minutes otherwise
-    console.log(`waiting ${waitTime / 1000 / 60} minutes for org to be ready (platform: ${process.platform})`);
-    await sleep(waitTime);
     return session;
   })();
 
