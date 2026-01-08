@@ -35,8 +35,8 @@ describe('agent publish authoring-bundle NUTs', function () {
   it('should publish a new agent (first version)', async function () {
     // Increase timeout to 30 minutes since deployment can take a long time
     this.timeout(30 * 60 * 1000); // 30 minutes
-    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
-    this.retries(1);
+    // Retry up to 3 times total (1 initial + 2 retries) to handle transient failures
+    this.retries(2);
     const specFileName = genUniqueString('agentSpec_%s.yaml');
     const specPath = join(session.project.dir, 'specs', specFileName);
 
