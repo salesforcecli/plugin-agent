@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Salesforce, Inc.
+ * Copyright 2026, Salesforce, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,12 @@ import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateTemplateResult } from '../../src/commands/agent/generate/template.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', () => {
   let session: TestSession;
-
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
   });
 
   it('should generate template from agent file', () => {

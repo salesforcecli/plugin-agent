@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Salesforce, Inc.
+ * Copyright 2026, Salesforce, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,22 @@ import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
-import { getDevhubUsername } from './shared-setup.js';
+import { getTestSession, getUsername } from './shared-setup.js';
 
 let session: TestSession;
 
 describe('agent generate authoring-bundle NUTs', () => {
   before(async () => {
-    session = await TestSession.create({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
-  });
-
-  after(async () => {
-    await session?.clean();
+    session = await getTestSession();
   });
 
   it('should generate authoring bundle from spec file', async () => {
-    const username = getDevhubUsername(session);
     const specFileName = 'agentSpec.yaml';
     const bundleName = genUniqueString('Test_Bundle_%s');
     const specPath = join(session.project.dir, 'specs', specFileName);
 
     // Now generate the authoring bundle
-    const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${username} --json`;
+    const command = `agent generate authoring-bundle --spec ${specPath} --name "${bundleName}" --api-name ${bundleName} --target-org ${getUsername()} --json`;
     const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
     expect(result).to.be.ok;

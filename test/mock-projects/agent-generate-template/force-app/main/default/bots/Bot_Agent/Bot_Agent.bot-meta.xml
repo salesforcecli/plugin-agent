@@ -5,7 +5,7 @@
         <label>Bot Agent</label>
         <name>Bot_Agent</name>
     </botMlDomain>
-    <botUser>ge.agent@afdx-usa1000-02.testorg</botUser>
+    <botUser>AGENT_USERNAME</botUser>
     <contextVariables>
         <contextVariableMappings>
             <SObjectType>MessagingEndUser</SObjectType>
