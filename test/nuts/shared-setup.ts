@@ -129,6 +129,12 @@ export async function getTestSession(): Promise<TestSession> {
           }
           console.log('Permission set assignment completed');
 
+          // Wait for org to be ready - longer wait on Windows CI where things can be slower
+          const isWindows = process.platform === 'win32';
+          const waitTime = isWindows ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes on Windows, 5 minutes otherwise
+          console.log(`waiting ${waitTime / 1000 / 60} minutes for org to be ready (platform: ${process.platform})`);
+          await sleep(waitTime);
+
           // Set environment variable for string replacement
           process.env.AGENT_USER_USERNAME = agentUsername;
 
@@ -156,11 +162,6 @@ export async function getTestSession(): Promise<TestSession> {
         }
       }
 
-      // Wait for org to be ready - longer wait on Windows CI where things can be slower
-      const isWindows = process.platform === 'win32';
-      const waitTime = isWindows ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes on Windows, 5 minutes otherwise
-      console.log(`waiting ${waitTime / 1000 / 60} minutes for org to be ready (platform: ${process.platform})`);
-      await sleep(waitTime);
       return session;
     } catch (e) {
       console.log('XXXXXX ERROR XXXXXXX');
