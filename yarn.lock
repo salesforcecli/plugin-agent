@@ -78,7 +78,7 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-cloudfront@^3.962.0":
+"@aws-sdk/client-cloudfront@^3.966.0":
   version "3.966.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-cloudfront/-/client-cloudfront-3.966.0.tgz#adb0c3ef72b5dedd7fd4006b064bdb64ea96078b"
   integrity sha512-SFaV3NJmedINeJYjJ8Kxwjbq5nyjSeZeL4na/RKMQjyaFZzzVNdGEsgvRf9NF+meVc5Ba8ov9oIS/rAJzfWDtQ==
@@ -125,7 +125,7 @@
     "@smithy/util-waiter" "^4.2.7"
     tslib "^2.6.2"
 
-"@aws-sdk/client-s3@^3.962.0":
+"@aws-sdk/client-s3@^3.966.0":
   version "3.966.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-s3/-/client-s3-3.966.0.tgz#5930d213fcb9976e184b5fc41c1214efc7d2a53d"
   integrity sha512-IckVv+A6irQyXTiJrNpfi63ZtPuk6/Iu70TnMq2DTRFK/4bD2bOvqL1IHZ2WGmZMoeWd5LI8Fn6pIwdK6g4QJQ==
@@ -1633,7 +1633,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.18.7", "@salesforce/core@^8.23.1", "@salesforce/core@^8.23.3", "@salesforce/core@^8.23.5", "@salesforce/core@^8.23.7", "@salesforce/core@^8.24.0", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
+"@salesforce/core@^8.18.7", "@salesforce/core@^8.23.1", "@salesforce/core@^8.23.3", "@salesforce/core@^8.23.4", "@salesforce/core@^8.23.5", "@salesforce/core@^8.23.7", "@salesforce/core@^8.24.0", "@salesforce/core@^8.5.1", "@salesforce/core@^8.8.0":
   version "8.24.0"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.24.0.tgz#13426f9f3b5ed0ec126b8009e5eda68e03db0401"
   integrity sha512-8Ra5RT95bRkmHmaaFgABwkXbnHNSNS7l9gbJzJgO6VQpaEeytGPPyymnAE7TcTM2xp/QwlXn+PgX4biX7Lb7JA==
@@ -1755,7 +1755,27 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^12.30.0", "@salesforce/source-deploy-retrieve@^12.31.4":
+"@salesforce/source-deploy-retrieve@12.30.0", "@salesforce/source-deploy-retrieve@^12.30.0":
+  version "12.30.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.30.0.tgz#cae4e00b5f9f301f28d9224997f63bfa5a7ede1b"
+  integrity sha512-elfNE4NRw2JNRsYoS/e9Gi2KdaFg7c2JVdRY6ZT20vpxV3z81SvvbYhauiKOYkVvsP3Y+FBEzWiG6AwdF0fSWA==
+  dependencies:
+    "@salesforce/core" "^8.23.4"
+    "@salesforce/kit" "^3.2.4"
+    "@salesforce/ts-types" "^2.0.12"
+    "@salesforce/types" "^1.5.0"
+    fast-levenshtein "^3.0.0"
+    fast-xml-parser "^4.5.3"
+    got "^11.8.6"
+    graceful-fs "^4.2.11"
+    ignore "^5.3.2"
+    jszip "^3.10.1"
+    mime "2.6.0"
+    minimatch "^9.0.5"
+    proxy-agent "^6.4.0"
+    yaml "^2.8.1"
+
+"@salesforce/source-deploy-retrieve@^12.31.4":
   version "12.31.4"
   resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.31.4.tgz#ee8a110216306f19c1759f9b8a88e5acc444a6c7"
   integrity sha512-6E/kFEBsuw0JJPOjWEdmTXOaOuwp1LeHIEdjl9TJWom8+uOwD0dPAd08pMT0nmmDqpcuOIYsERM7OmLEuAemyg==
@@ -2541,9 +2561,9 @@
     "@types/node" "*"
 
 "@types/node@*":
-  version "25.0.3"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.0.3.tgz#79b9ac8318f373fbfaaf6e2784893efa9701f269"
-  integrity sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA==
+  version "25.0.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.0.6.tgz#5ca3c46f2b256b59128f433426e42d464765dab1"
+  integrity sha512-NNu0sjyNxpoiW3YuVFfNz7mxSQ+S4X2G28uqg2s+CzoqoQjLPsWSbsFFyztIAqt2vb8kfEAsJNepMGPTxFDx3Q==
   dependencies:
     undici-types "~7.16.0"
 
@@ -2560,16 +2580,16 @@
     undici-types "~5.26.4"
 
 "@types/node@^20.4.8":
-  version "20.19.27"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.27.tgz#d51333f77953a5e4e71d3b5aefa83ec5297fbb80"
-  integrity sha512-N2clP5pJhB2YnZJ3PIHFk5RkygRX5WO/5f0WC08tp0wd+sv0rsJk3MqWn3CbNmT2J505a5336jaQj4ph1AdMug==
+  version "20.19.28"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.28.tgz#d968c492e405e4a572f5c27e4f5efc24f0eb9937"
+  integrity sha512-VyKBr25BuFDzBFCK5sUM6ZXiWfqgCTwTAOK8qzGV/m9FCirXYDlmczJ+d5dXBAQALGCdRRdbteKYfJ84NGEusw==
   dependencies:
     undici-types "~6.21.0"
 
 "@types/node@^22.5.5":
-  version "22.19.3"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.19.3.tgz#8dfde7630d7a8528dc9b34db23d34f764467c02c"
-  integrity sha512-1N9SBnWYOJTrNZCdh/yJE+t910Y128BoyY+zBLWhL3r0TYzlTmFdXrPwHL9DyFZmlEXNQQolTZh3KHV31QDhyA==
+  version "22.19.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.19.5.tgz#82e8c3da99667246efc63a634114ab34fb34e08e"
+  integrity sha512-HfF8+mYcHPcPypui3w3mvzuIErlNOh2OAG+BCeBZCEwyiD5ls2SiCwEyT47OELtf7M3nHxBdu0FsmzdKxkN52Q==
   dependencies:
     undici-types "~6.21.0"
 
@@ -3323,9 +3343,9 @@ camelcase@^6.0.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001759:
-  version "1.0.30001763"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001763.tgz#9397446dd110b1aeadb0df249c41b2ece7f90f09"
-  integrity sha512-mh/dGtq56uN98LlNX9qdbKnzINhX0QzhiWBFEkFfsFO4QyCvL8YegrJAazCwXIeqkIob8BlZPGM3xdnY+sgmvQ==
+  version "1.0.30001764"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001764.tgz#03206c56469f236103b90f9ae10bcb8b9e1f6005"
+  integrity sha512-9JGuzl2M+vPL+pz70gtMF9sHdMFbY9FJaQBi186cHKH3pSzDvzoUJUPV6fqiKIMyXbud9ZLg4F3Yza1vJ1+93g==
 
 capital-case@^1.0.4:
   version "1.0.4"
@@ -6890,12 +6910,12 @@ object.values@^1.1.6, object.values@^1.2.1:
     es-object-atoms "^1.0.0"
 
 oclif@^4.22.51:
-  version "4.22.63"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.22.63.tgz#842e68bfe57368ee921098887b8147b442e50018"
-  integrity sha512-xhlXnMLlvnV376ofTKVW9KZk0lsvMSnLqUk6rJ3V18lzMj8grt3s4opWuEib9xgyig0rELCK46iYeZUgw04ibg==
+  version "4.22.65"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.22.65.tgz#ae0a2ef2b721deef80ba64347476846c812a5003"
+  integrity sha512-pJW0P+gUzIAS6gSQH11jmbu9xQgjfxgBV+FjWvvwu68NUtljtpZm1w3uftXUVk51Ra40r9XB1Jh/Mcbb+I6yJw==
   dependencies:
-    "@aws-sdk/client-cloudfront" "^3.962.0"
-    "@aws-sdk/client-s3" "^3.962.0"
+    "@aws-sdk/client-cloudfront" "^3.966.0"
+    "@aws-sdk/client-s3" "^3.966.0"
     "@inquirer/confirm" "^3.1.22"
     "@inquirer/input" "^2.2.4"
     "@inquirer/select" "^2.5.0"
