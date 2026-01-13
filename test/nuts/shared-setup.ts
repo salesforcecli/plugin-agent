@@ -137,6 +137,7 @@ export async function getTestSession(): Promise<TestSession> {
 
           // Set environment variable for string replacement
           process.env.AGENT_USER_USERNAME = agentUsername;
+          process.env.SF_AAB_COMPILATION = 'false';
 
           console.log('deploying metadata (no AiEvaluationDefinition)');
 
