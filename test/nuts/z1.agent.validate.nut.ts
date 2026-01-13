@@ -20,10 +20,11 @@ import type { AgentValidateAuthoringBundleResult } from '../../src/commands/agen
 import { getTestSession, getUsername } from './shared-setup.js';
 
 describe('agent validate authoring-bundle NUTs', function () {
-  // Increase timeout for setup since shared setup includes a long wait on Windows
-  this.timeout(15 * 60 * 1000); // 15 minutes
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
 
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     await getTestSession();
   });
 
