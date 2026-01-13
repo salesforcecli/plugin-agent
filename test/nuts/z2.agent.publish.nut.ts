@@ -23,12 +23,13 @@ import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agen
 import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 
 describe('agent publish authoring-bundle NUTs', function () {
-  // Increase timeout for setup since shared setup includes a long wait on Windows
-  this.timeout(15 * 60 * 1000); // 15 minutes
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
 
   let session: TestSession;
   const bundleApiName = genUniqueString('Test_Agent_%s');
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
 

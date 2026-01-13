@@ -23,9 +23,13 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentTestCreateResult } from '../../src/commands/agent/test/create.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-describe('agent test create', () => {
+describe('agent test create', function () {
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
+
   let session: TestSession;
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
   // this NUT is failing on windows due to an invalid api name, but it seems valid to me, passes on unix

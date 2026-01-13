@@ -47,7 +47,8 @@ describe('agent activate/deactivate NUTs', function () {
     return lastBotVersion.Status;
   };
 
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     await getTestSession();
     username = getUsername();
     defaultOrg = await Org.create({ aliasOrUsername: username });

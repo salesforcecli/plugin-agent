@@ -16,9 +16,9 @@
 
 import { join } from 'node:path';
 import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
-import { ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
-import { Org, SfError, User } from '@salesforce/core';
-import { sleep } from '@salesforce/kit';
+import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
+import { Org, SfError, User, Lifecycle } from '@salesforce/core';
+import { sleep, ensureArray } from '@salesforce/kit';
 
 /* eslint-disable no-console */
 
@@ -139,6 +139,73 @@ export async function getTestSession(): Promise<TestSession> {
           process.env.AGENT_USER_USERNAME = agentUsername;
           process.env.SF_AAB_COMPILATION = 'false';
 
+          // Set up deploy event listeners to log progress
+          const lifecycle = Lifecycle.getInstance();
+          let lastDeployed = 0;
+          let lastTotal = 0;
+
+          lifecycle.on('scopedPreDeploy', () => {
+            console.log('[DEPLOY] Starting deployment...');
+            // Reset progress tracking for new deployment
+            lastDeployed = 0;
+            lastTotal = 0;
+            return Promise.resolve();
+          });
+
+          lifecycle.on('scopedPostDeploy', (result: ScopedPostDeploy) => {
+            const deployResult = result.deployResult.response;
+            const status = deployResult.status;
+            const numberComponentErrors = deployResult.numberComponentErrors ?? 0;
+            const numberComponentsDeployed = deployResult.numberComponentsDeployed ?? 0;
+            const numberComponentsTotal = deployResult.numberComponentsTotal ?? 0;
+            const numberTestErrors = deployResult.numberTestErrors ?? 0;
+            const numberTestsCompleted = deployResult.numberTestsCompleted ?? 0;
+            const numberTestsTotal = deployResult.numberTestsTotal ?? 0;
+
+            // Log progress during polling (only if changed)
+            if (
+              (numberComponentsDeployed !== lastDeployed || numberComponentsTotal !== lastTotal) &&
+              numberComponentsTotal > 0
+            ) {
+              console.log(
+                `[DEPLOY] Progress: ${numberComponentsDeployed}/${numberComponentsTotal} components deployed${
+                  numberComponentErrors > 0 ? `, ${numberComponentErrors} errors` : ''
+                }`
+              );
+              lastDeployed = numberComponentsDeployed;
+              lastTotal = numberComponentsTotal;
+            }
+
+            // Log final status when deployment is complete
+            const isComplete =
+              status === RequestStatus.Succeeded ||
+              status === RequestStatus.Failed ||
+              status === RequestStatus.Canceled;
+            if (isComplete) {
+              console.log(`[DEPLOY] Deployment completed - Status: ${status}`);
+              console.log(
+                `[DEPLOY] Components: ${numberComponentsDeployed}/${numberComponentsTotal} deployed, ${numberComponentErrors} errors`
+              );
+              if (numberTestsTotal > 0) {
+                console.log(
+                  `[DEPLOY] Tests: ${numberTestsCompleted}/${numberTestsTotal} completed, ${numberTestErrors} errors`
+                );
+              }
+              const componentFailures = ensureArray(deployResult.details?.componentFailures);
+              if (componentFailures.length > 0) {
+                console.log(`[DEPLOY] Component failures: ${componentFailures.length}`);
+                componentFailures.slice(0, 5).forEach((failure, idx) => {
+                  console.log(
+                    `[DEPLOY]   Failure ${idx + 1}: ${failure.fullName ?? 'unknown'} - ${
+                      failure.problemType ?? 'unknown'
+                    }: ${failure.problem ?? 'unknown'}`
+                  );
+                });
+              }
+            }
+            return Promise.resolve();
+          });
+
           console.log('deploying metadata (no AiEvaluationDefinition)');
 
           const cs1 = await ComponentSetBuilder.build({
@@ -148,7 +215,13 @@ export async function getTestSession(): Promise<TestSession> {
             },
           });
           const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
-          await deploy1.pollStatus({ frequency: Duration.seconds(10) });
+          // pollStatus waits until deployment completes - will throw if deployment fails
+          await deploy1.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
+          console.log('[DEPLOY] First deployment completed successfully');
+
+          // Reset for second deployment
+          lastDeployed = 0;
+          lastTotal = 0;
 
           console.log('deploying metadata (AiEvaluationDefinition)');
 
@@ -159,7 +232,10 @@ export async function getTestSession(): Promise<TestSession> {
             },
           });
           const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
-          await deploy2.pollStatus({ frequency: Duration.seconds(10) });
+          // pollStatus waits until deployment completes - will throw if deployment fails
+          await deploy2.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
+          console.log('[DEPLOY] Second deployment completed successfully');
+          console.log('[DEPLOY] All deployments complete, tests can now run');
         }
       }
 

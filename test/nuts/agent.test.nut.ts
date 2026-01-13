@@ -24,10 +24,14 @@ import { getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
-describe('agent test', () => {
+describe('agent test', function () {
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
+
   const agentTestName = 'Local_Info_Agent_Test';
 
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     await getTestSession();
   });
 
