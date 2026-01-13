@@ -21,9 +21,13 @@ import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import { getTestSession } from './shared-setup.js';
 
-describe('agent generate test-spec NUTs', () => {
+describe('agent generate test-spec NUTs', function () {
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
+
   let session: TestSession;
-  before(async () => {
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
 

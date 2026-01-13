@@ -24,8 +24,12 @@ import { getTestSession, getUsername } from './shared-setup.js';
 
 let session: TestSession;
 
-describe('agent generate authoring-bundle NUTs', () => {
-  before(async () => {
+describe('agent generate authoring-bundle NUTs', function () {
+  // Increase timeout for setup since shared setup includes long waits and deployments
+  this.timeout(30 * 60 * 1000); // 30 minutes
+
+  before(async function () {
+    this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
 
