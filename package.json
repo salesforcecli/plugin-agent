@@ -4,9 +4,6 @@
   "version": "1.26.2",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
-  "resolutions": {
-    "@salesforce/source-deploy-retrieve": "12.30.0"
-  },
   "dependencies": {
     "@inquirer/core": "^10.3.2",
     "@inquirer/prompts": "^7.10.1",
