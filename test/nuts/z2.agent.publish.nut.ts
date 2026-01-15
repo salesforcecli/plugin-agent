@@ -97,7 +97,7 @@ describe('agent publish authoring-bundle NUTs', function () {
 
     execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${getUsername()} --json`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 2 }
     );
   });
 });

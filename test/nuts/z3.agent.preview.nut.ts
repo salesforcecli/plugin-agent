@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { join } from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
-import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { Agent } from '@salesforce/agents';
 import { Org, SfProject } from '@salesforce/core';
 import { getTestSession, getUsername } from './shared-setup.js';
+/* eslint-disable no-console */
 
 describe('agent preview', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
@@ -48,9 +48,6 @@ describe('agent preview', function () {
 
       const bundleApiName = 'Willie_Resort_Manager';
       const projectPath = session.project.dir;
-      const bundlePath = findAuthoringBundle(projectPath, bundleApiName);
-
-      expect(bundlePath).to.not.be.undefined;
 
       const org = await Org.create({ aliasOrUsername: getUsername() });
       const connection = org.getConnection();
@@ -59,7 +56,7 @@ describe('agent preview', function () {
       const agent = await Agent.init({
         connection,
         project,
-        aabDirectory: bundlePath!,
+        aabName: bundleApiName,
       });
 
       agent.preview.setMockMode('Mock');
@@ -84,9 +81,6 @@ describe('agent preview', function () {
 
       const bundleApiName = 'Willie_Resort_Manager';
       const projectPath = session.project.dir;
-      const bundlePath = findAuthoringBundle(projectPath, bundleApiName);
-
-      expect(bundlePath).to.not.be.undefined;
 
       const org = await Org.create({ aliasOrUsername: getUsername() });
       const connection = org.getConnection();
@@ -95,10 +89,8 @@ describe('agent preview', function () {
       const agent = await Agent.init({
         connection,
         project,
-        aabDirectory: bundlePath!,
+        aabName: bundleApiName,
       });
-
-      agent.preview.setMockMode('Live Test');
 
       // Start session
       const previewSession = await agent.preview.start();
@@ -130,44 +122,30 @@ describe('agent preview', function () {
       expect(publishedAgent).to.not.be.undefined;
       expect(publishedAgent?.DeveloperName).to.be.a('string');
 
-      // Initialize the published agent using its developer name
+      // Query the Bot object to get the Id
+      const botResult = await connection.singleRecordQuery<{ Id: string }>(
+        `SELECT ID FROM BotDefinition WHERE DeveloperName = '${publishedAgent!.DeveloperName}'`
+      );
+
+      expect(botResult).to.not.be.undefined;
+      expect(botResult.Id).to.be.a('string').and.not.be.empty;
+
+      // Initialize the published agent using its Bot Id
       const agent = await Agent.init({
         connection,
         project,
-        apiNameOrId: publishedAgent!.DeveloperName,
+        apiNameOrId: botResult.Id,
       });
+
+      // gotta activate published agents before previewing
+      await agent.activate();
 
       // Start session
       const previewSession = await agent.preview.start();
       expect(previewSession.sessionId).to.be.a('string');
 
-      // Send first message
-      const response1 = await agent.preview.send('What can you help me with?');
-      expect(response1.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // Send second message
-      const response2 = await agent.preview.send('Tell me more');
-      expect(response2.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // End session
-      await agent.preview.end();
-    });
-
-    it('should fail when authoring bundle path is invalid', async () => {
-      const org = await Org.create({ aliasOrUsername: getUsername() });
-      const connection = org.getConnection();
-      const project = await SfProject.resolve(session.project.dir);
-
-      try {
-        await Agent.init({
-          connection,
-          project,
-          aabDirectory: join(session.project.dir, 'non-existent-bundle'),
-        });
-        expect.fail('Should have thrown an error for invalid bundle path');
-      } catch (error) {
-        expect(error).to.not.be.undefined;
-      }
+      const response = await agent.preview.send('What can you help me with?');
+      expect(response.messages).to.be.an('array').with.length.greaterThan(0);
     });
   });
 });

@@ -9,7 +9,7 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.29",
-    "@salesforce/agents": "0.20.0-beta.3",
+    "@salesforce/agents": "0.20.0-beta.4",
     "@salesforce/core": "^8.24.0",
     "@salesforce/kit": "^3.2.3",
     "@salesforce/sf-plugins-core": "^12.2.6",
