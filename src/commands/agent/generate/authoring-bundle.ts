@@ -22,7 +22,7 @@ import { AgentJobSpec, ScriptAgent } from '@salesforce/agents';
 import YAML from 'yaml';
 import { input as inquirerInput } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
-import { FlaggablePrompt, promptForFlag, promptForYamlFile } from '../../../flags.js';
+import { FlaggablePrompt, promptForFlag, promptForSpecYaml } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.authoring-bundle');
@@ -105,7 +105,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const { 'output-dir': outputDir } = flags;
 
     // If we don't have a spec yet, prompt for it
-    const spec = flags.spec ?? (await promptForYamlFile(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
+    const spec = flags.spec ?? (await promptForSpecYaml(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
 
     // If we don't have a name yet, prompt for it
     const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));
@@ -135,9 +135,10 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml`);
 
       // Write Agent file
-      const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
       await ScriptAgent.createAuthoringBundle({
-        agentSpec: { ...specContents, ...{ name, developerName: bundleApiName } },
+        agentSpec: spec
+          ? { ...(YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec), ...{ name, developerName: bundleApiName } }
+          : undefined,
         project: this.project!,
         bundleApiName,
       });
