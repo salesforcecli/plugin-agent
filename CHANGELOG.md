@@ -1,3 +1,17 @@
+## [1.26.5](https://github.com/salesforcecli/plugin-agent/compare/1.26.4...1.26.5) (2026-01-18)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([85094d4](https://github.com/salesforcecli/plugin-agent/commit/85094d42b9a05da3c6f01b1aebbc50f5d6967a96))
+
+## [1.26.4](https://github.com/salesforcecli/plugin-agent/compare/1.26.3...1.26.4) (2026-01-18)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.24.1 to 8.24.3 ([0a3d102](https://github.com/salesforcecli/plugin-agent/commit/0a3d102990e2ccf42240b74a261618a8e03ec47a))
+
+## [1.26.3](https://github.com/salesforcecli/plugin-agent/compare/1.26.2...1.26.3) (2026-01-15)
+
 ## [1.26.2](https://github.com/salesforcecli/plugin-agent/compare/1.26.1...1.26.2) (2026-01-08)
 
 ### Bug Fixes
