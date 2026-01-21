@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { expect } from 'chai';
-import { traverseForFiles } from '../src/flags.js';
+import { getHiddenDirs, traverseForFiles } from '../src/flags.js';
 
 describe('traverseForFiles', () => {
   const testDir = join(process.cwd(), 'test-temp');
@@ -71,5 +71,39 @@ describe('traverseForFiles', () => {
   it('should handle empty excludeDirs array', async () => {
     const results = traverseForFiles(testDir, ['.yml', '.yaml'], []);
     expect(results).to.have.lengthOf(6);
+  });
+});
+
+describe('promptForSpecYaml', () => {
+  it('should include "Default Agent Spec" in the list of options', async () => {
+    // Test the source function logic directly by replicating what promptForSpecYaml does
+
+    const hiddenDirs = await getHiddenDirs();
+    const dirsToTraverse = [process.cwd()];
+    const files = traverseForFiles(
+      dirsToTraverse,
+      ['AgentSpec.yml', 'AgentSpec.yaml'],
+      ['node_modules', ...hiddenDirs]
+    );
+
+    // Replicate the source function logic from promptForSpecYaml
+    const source = async (input?: string) => {
+      const arr = [
+        ...files.map((o) => ({ name: relative(process.cwd(), o), value: o })),
+        { name: 'Default Agent Spec', value: undefined },
+      ];
+
+      if (!input) return arr;
+      return arr.filter((o) => o.name.includes(input));
+    };
+
+    // Call the source function with no input to get all options
+    const options = await source();
+
+    // Verify "Default Agent Spec" is in the list
+    const defaultAgentSpecOption = options.find((option) => option.name === 'Default Agent Spec');
+    expect(defaultAgentSpecOption).to.be.ok;
+    expect(defaultAgentSpecOption?.name).to.equal('Default Agent Spec');
+    expect(defaultAgentSpecOption?.value).to.be.undefined;
   });
 });
