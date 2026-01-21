@@ -18,7 +18,7 @@ import { join, resolve } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { generateApiName, Messages, SfError } from '@salesforce/core';
-import { Agent, AgentJobSpec } from '@salesforce/agents';
+import { AgentJobSpec, ScriptAgent } from '@salesforce/agents';
 import YAML from 'yaml';
 import { input as inquirerInput } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
@@ -102,7 +102,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
 
   public async run(): Promise<AgentGenerateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
-    const { 'output-dir': outputDir, 'target-org': targetOrg } = flags;
+    const { 'output-dir': outputDir } = flags;
 
     // If we don't have a spec yet, prompt for it
     const spec = flags.spec ?? (await promptForYamlFile(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
@@ -135,10 +135,8 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml`);
 
       // Write Agent file
-      const conn = targetOrg.getConnection(flags['api-version']);
       const specContents = YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec;
-      await Agent.createAuthoringBundle({
-        connection: conn,
+      await ScriptAgent.createAuthoringBundle({
         agentSpec: { ...specContents, ...{ name, developerName: bundleApiName } },
         project: this.project!,
         bundleApiName,

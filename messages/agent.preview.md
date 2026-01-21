@@ -17,8 +17,6 @@ The interface is simple: in the "Start typing..." prompt, enter a statement, que
 
 When the session concludes, the command asks if you want to save the API responses and chat transcripts. By default, the files are saved to the "./temp/agent-preview" directory. Specify a new default directory with the --output-dir flag.
 
-NOTE: You can also use this command to connect to a published and active agent, which are labeled "(Published)" if you let this command provide the list of agents to preview. That use case, however, requires additional security and configuration in both your org and your DX project. The examples in this help are for previewing an agent from its Agent Script file in your DX project and require only simple authorization of your org, such as with the "org login web" command. The --client-app and --api-name flags are used only for previewing published and active agents, they don't apply to Agent Script agents. See "Connect to a Published Agent" in the "Agentforce Developer Guide" for complete documentation: https://developer.salesforce.com/docs/einstein/genai/guide/agent-dx-preview.html.
-
 # flags.api-name.summary
 
 API name of the published and active agent you want to interact with.
@@ -26,10 +24,6 @@ API name of the published and active agent you want to interact with.
 # flags.authoring-bundle.summary
 
 API name of the authoring bundle metadata component that contains the agent's Agent Script file.
-
-# flags.client-app.summary
-
-Name of the linked client app to use for the connection to the published and active agent.
 
 # flags.output-dir.summary
 

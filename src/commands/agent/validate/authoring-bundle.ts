@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { Agent } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { throwAgentCompilationError } from '../../../common.js';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
@@ -67,21 +65,12 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
-    const apiName =
+    const aabName =
       flags['api-name'] ??
       (await promptForAgentFiles(this.project!, AgentValidateAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    const authoringBundleDir = findAuthoringBundle(
-      this.project!.getPackageDirectories().map((dir) => dir.fullPath),
-      apiName
-    );
-    if (!authoringBundleDir) {
-      throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
-        messages.getMessage('error.agentNotFoundAction'),
-      ]);
-    }
     const mso = new MultiStageOutput<{ status: string; errors: string }>({
       jsonEnabled: this.jsonEnabled(),
-      title: `Validating ${apiName} Authoring Bundle`,
+      title: `Validating ${aabName} Authoring Bundle`,
       showTitle: true,
       stages: ['Validating Authoring Bundle'],
       stageSpecificBlock: [
@@ -104,10 +93,8 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       mso.skipTo('Validating Authoring Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
-      const result = await Agent.compileAgentScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
-      );
+      const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
+      const result = await agent.compile();
       if (result.status === 'success') {
         mso.updateData({ status: 'COMPLETED' });
         mso.stop('completed');

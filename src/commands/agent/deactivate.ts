@@ -39,13 +39,12 @@ export default class AgentDeactivate extends SfCommand<void> {
 
     const apiNameFlag = flags['api-name'];
     const targetOrg = flags['target-org'];
-    const conn = targetOrg.getConnection(flags['api-version']);
 
     if (!apiNameFlag && this.jsonEnabled()) {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
 
-    const agent = await getAgentForActivation({ conn, targetOrg, status: 'Inactive', apiNameFlag });
+    const agent = await getAgentForActivation({ targetOrg, status: 'Inactive', apiNameFlag });
     await agent.deactivate();
     const agentName = (await agent.getBotMetadata()).DeveloperName;
 

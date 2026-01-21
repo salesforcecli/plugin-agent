@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 import { EOL } from 'node:os';
-import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
-import { Agent, findAuthoringBundle } from '@salesforce/agents';
+import { Agent } from '@salesforce/agents';
 import { RequestStatus, ScopedPostDeploy, type ScopedPostRetrieve } from '@salesforce/source-deploy-retrieve';
 import { ensureArray } from '@salesforce/kit';
 import { FlaggablePrompt, promptForAgentFiles } from '../../../flags.js';
@@ -70,24 +68,15 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
   public async run(): Promise<AgentPublishAuthoringBundleResult> {
     const { flags } = await this.parse(AgentPublishAuthoringBundle);
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
-    const apiName =
+    const aabName =
       flags['api-name'] ??
       (await promptForAgentFiles(this.project!, AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
-    const authoringBundleDir = findAuthoringBundle(
-      this.project!.getPackageDirectories().map((dir) => dir.fullPath),
-      apiName
-    );
 
-    if (!authoringBundleDir) {
-      throw new SfError(messages.getMessage('error.agentNotFound', [apiName]), 'AgentNotFoundError', [
-        messages.getMessage('error.agentNotFoundAction'),
-      ]);
-    }
     // Create multi-stage output
     const mso = new MultiStageOutput<{ agentName: string }>({
       stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata', 'Deploy Metadata'],
       title: 'Publishing Agent',
-      data: { agentName: apiName },
+      data: { agentName: aabName },
       jsonEnabled: this.jsonEnabled(),
       postStagesBlock: [
         {
@@ -103,12 +92,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       mso.goto('Validate Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
+      const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
 
       // First compile the .agent file to get the Agent JSON
-      const compileResponse = await Agent.compileAgentScript(
-        conn,
-        readFileSync(join(authoringBundleDir, `${apiName}.agent`), 'utf8')
-      );
+      const compileResponse = await agent.compile();
       if (compileResponse.status === 'success') {
         mso.skipTo('Publish Agent');
       } else {
@@ -156,7 +143,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
-      const result = await Agent.publishAgentJson(conn, this.project!, compileResponse.compiledArtifact);
+      const result = await agent.publish();
       mso.stop();
 
       return {

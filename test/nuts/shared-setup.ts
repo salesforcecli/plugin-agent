@@ -17,7 +17,7 @@
 import { join } from 'node:path';
 import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
-import { Org, SfError, User, Lifecycle } from '@salesforce/core';
+import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
 
 /* eslint-disable no-console */
@@ -26,6 +26,34 @@ import { sleep, ensureArray } from '@salesforce/kit';
 let testSession: TestSession | undefined;
 let testSessionPromise: Promise<TestSession> | undefined;
 let agentUsername: string | undefined;
+
+// Helper function to wait for Einstein AI services to be ready
+async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): Promise<void> {
+  // eslint-disable-next-line no-await-in-loop
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      // Check Agent API status using direct HTTP call
+      // eslint-disable-next-line no-await-in-loop
+      const statusResponse = await connection.request<{ status: 'UP' | 'DOWN' }>({
+        method: 'GET',
+        url: 'https://api.salesforce.com/einstein/ai-agent/v1/status',
+        headers: {
+          'x-salesforce-region': 'us-west-2',
+        },
+      });
+
+      if (statusResponse.status === 'UP') {
+        return;
+      }
+    } catch (error) {
+      // do nothing
+    }
+    // Wait 10 seconds between checks
+    await sleep(10 * 1000); // eslint-disable-line no-await-in-loop
+  }
+  const timeoutSeconds = maxAttempts * 10;
+  throw new Error(`Einstein AI did not become ready within ${timeoutSeconds} seconds timeout`);
+}
 
 /**
  * Gets the shared TestSession with a scratch org. This ensures only one TestSession
@@ -128,6 +156,11 @@ export async function getTestSession(): Promise<TestSession> {
             console.log(`Permission set assigned: ${permissionSet}`);
           }
           console.log('Permission set assignment completed');
+
+          // Wait for Einstein AI services to be ready
+          console.log('Waiting for Einstein AI services to be ready...');
+          await waitForEinsteinReady(connection);
+          console.log('Einstein AI services are ready');
 
           // Set environment variable for string replacement
           process.env.AGENT_USER_USERNAME = agentUsername;
@@ -233,11 +266,6 @@ export async function getTestSession(): Promise<TestSession> {
         }
       }
 
-      // Wait for org to be ready - longer wait on Windows CI where things can be slower
-      const isWindows = process.platform === 'win32';
-      const waitTime = isWindows ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes on Windows, 5 minutes otherwise
-      console.log(`waiting ${waitTime / 1000 / 60} minutes for org to be ready (platform: ${process.platform})`);
-      await sleep(waitTime);
       return session;
     } catch (e) {
       console.log('XXXXXX ERROR XXXXXXX');

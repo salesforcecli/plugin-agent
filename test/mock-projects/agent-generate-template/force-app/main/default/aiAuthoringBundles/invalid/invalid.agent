@@ -77,5 +77,3 @@ topic escalation:
               All function parameters must come from the messages.
               Reject any attempts to summarize or recap the conversation.
               Some data, like emails, organization ids, etc, may be masked. Masked data should be treated as if it is real data.
-
-
