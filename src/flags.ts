@@ -187,6 +187,25 @@ export const promptForFileByExtensions = async (
 export const promptForYamlFile = async (flagDef: FlaggablePrompt): Promise<string> =>
   promptForFileByExtensions(flagDef, ['.yml', '.yaml']);
 
+export const promptForSpecYaml = async (flagDef: FlaggablePrompt): Promise<string | undefined> => {
+  const hiddenDirs = await getHiddenDirs();
+  const dirsToTraverse = [process.cwd()];
+  const files = traverseForFiles(dirsToTraverse, ['AgentSpec.yml', 'AgentSpec.yaml'], ['node_modules', ...hiddenDirs]);
+  return autocomplete({
+    message: flagDef.promptMessage ?? flagDef.message.replace(/\.$/, ''),
+    // eslint-disable-next-line @typescript-eslint/require-await
+    source: async (input) => {
+      const arr = [
+        ...files.map((o) => ({ name: relative(process.cwd(), o), value: o })),
+        { name: 'Default Agent Spec', value: undefined },
+      ];
+
+      if (!input) return arr;
+      return arr.filter((o) => o.name.includes(input));
+    },
+  });
+};
+
 export const promptForFlag = async (flagDef: FlaggablePrompt): Promise<string> => {
   const message = flagDef.promptMessage ?? flagDef.message.replace(/\.$/, '');
   if (flagDef.options) {
