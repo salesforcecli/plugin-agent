@@ -1,3 +1,9 @@
+## [1.26.6](https://github.com/salesforcecli/plugin-agent/compare/1.26.5...1.26.6) (2026-01-21)
+
+### Bug Fixes
+
+- add 'Default Agent Spec' as option when prompted ([dc83755](https://github.com/salesforcecli/plugin-agent/commit/dc8375567f23ec4436be8eb511e82d0853f201d6))
+
 ## [1.26.5](https://github.com/salesforcecli/plugin-agent/compare/1.26.4...1.26.5) (2026-01-18)
 
 ### Bug Fixes
