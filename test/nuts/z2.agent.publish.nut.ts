@@ -18,19 +18,48 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+import { Connection, Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
+
+type BotDefinitionWithVersions = {
+  Id: string;
+  BotVersions: {
+    records: Array<{ DeveloperName: string }>;
+  };
+};
+
+const verifyPublishedAgent = async (
+  botApiName: string,
+  expectedVersion: string,
+  connection: Connection
+): Promise<void> => {
+  let botDefinition;
+  try {
+    botDefinition = await connection.singleRecordQuery<BotDefinitionWithVersions>(
+      `SELECT SELECT Id, (SELECT DeveloperName FROM BotVersions LIMIT 10) FROM BotDefinition WHERE DeveloperName = '${botApiName}' LIMIT 1`
+    );
+    const botVersion = botDefinition.BotVersions.records[0].DeveloperName;
+    expect(botVersion).to.equal(expectedVersion);
+  } catch (error) {
+    // bot not found
+    void Promise.reject(error);
+  }
+};
 
 describe('agent publish authoring-bundle NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
   this.timeout(30 * 60 * 1000); // 30 minutes
 
   let session: TestSession;
+  let connection: Connection;
   const bundleApiName = genUniqueString('Test_Agent_%s');
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
+    const org = await Org.create({ aliasOrUsername: getUsername() });
+    connection = org.getConnection();
   });
 
   it('should publish a new agent (first version)', async function () {
@@ -73,6 +102,7 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(publishResult?.success).to.be.true;
     expect(publishResult?.botDeveloperName).to.be.a('string');
     expect(publishResult?.errors).to.be.undefined;
+    await verifyPublishedAgent(bundleApiName, 'v1', connection);
   });
 
   it('should publish a new version of an existing agent', async function () {
@@ -83,6 +113,43 @@ describe('agent publish authoring-bundle NUTs', function () {
     // Publish the existing Willie_Resort_Manager authoring bundle
     const result = execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(result).to.be.ok;
+    expect(result?.success).to.be.true;
+    expect(result?.botDeveloperName).to.be.a('string');
+    expect(result?.errors).to.be.undefined;
+    await verifyPublishedAgent(bundleApiName, 'v2', connection);
+  });
+
+  it('should publish agent with skip-retrieve flag', async function () {
+    // Test that the --skip-retrieve flag works correctly
+    // This flag skips the metadata retrieval step in the publishing process
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(result).to.be.ok;
+    expect(result?.success).to.be.true;
+    expect(result?.botDeveloperName).to.be.a('string');
+    expect(result?.errors).to.be.undefined;
+  });
+
+  it('should publish agent with skip-retrieve and custom api-version', async function () {
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve --api-version 59.0 --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
