@@ -46,6 +46,9 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       char: 'n',
       summary: messages.getMessage('flags.api-name.summary'),
     }),
+    'skip-retrieve': Flags.boolean({
+      summary: messages.getMessage('flags.skip-retrieve.summary'),
+    }),
   };
 
   private static readonly FLAGGABLE_PROMPTS = {
@@ -92,7 +95,12 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       mso.goto('Validate Bundle');
       const targetOrg = flags['target-org'];
       const conn = targetOrg.getConnection(flags['api-version']);
-      const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
+      const agent = await Agent.init({
+        connection: conn,
+        project: this.project!,
+        aabName,
+        skipMetadataRetrieve: flags['skip-retrieve'],
+      });
 
       // First compile the .agent file to get the Agent JSON
       const compileResponse = await agent.compile();
@@ -103,10 +111,12 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       }
       // Then publish the Agent JSON to create the agent
       // Set up lifecycle listeners for retrieve events
-      Lifecycle.getInstance().on('scopedPreRetrieve', () => {
-        mso.skipTo('Retrieve Metadata');
-        return Promise.resolve();
-      });
+      if (!flags['skip-retrieve']) {
+        Lifecycle.getInstance().on('scopedPreRetrieve', () => {
+          mso.skipTo('Retrieve Metadata');
+          return Promise.resolve();
+        });
+      }
       // Set up lifecycle listeners for deploy events
       Lifecycle.getInstance().on('scopedPreDeploy', () => {
         mso.skipTo('Deploy Metadata');
