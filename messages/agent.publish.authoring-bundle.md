@@ -30,7 +30,7 @@ API name of the authoring bundle to publish
 
 # flags.skip-retrieve.summary
 
-Skips the retrieval of metadata associated with the agent.
+Don't retrieve the metadata associated with the agent to your DX project.
 
 # error.missingRequiredFlags
 
