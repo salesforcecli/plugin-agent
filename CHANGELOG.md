@@ -1,3 +1,9 @@
+## [1.26.7](https://github.com/salesforcecli/plugin-agent/compare/1.26.6...1.26.7) (2026-01-23)
+
+### Bug Fixes
+
+- edit messages for "agent preview" ([3ed9338](https://github.com/salesforcecli/plugin-agent/commit/3ed9338623b543dfa15578adbcb5d8fcb4528139))
+
 ## [1.26.6](https://github.com/salesforcecli/plugin-agent/compare/1.26.5...1.26.6) (2026-01-21)
 
 ### Bug Fixes
