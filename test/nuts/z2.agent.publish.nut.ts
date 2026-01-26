@@ -54,7 +54,14 @@ async function verifyGenAiPlannerBundleExistsOrNot(
   expectedVersion: string,
   shouldExist: boolean
 ): Promise<void> {
-  const genAiPlannerBundleDir = join(projectDir, 'genAiPlannerBundles', expectedBundleName, `_${expectedVersion}`);
+  const genAiPlannerBundleDir = join(
+    projectDir,
+    'force-app',
+    'main',
+    'default',
+    'genAiPlannerBundles',
+    `${expectedBundleName}_${expectedVersion}`
+  );
 
   // Verify the genAiPlannerBundles directory exists
   expect(existsSync(genAiPlannerBundleDir)).to.equal(shouldExist);
