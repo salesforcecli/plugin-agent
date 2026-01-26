@@ -1,3 +1,21 @@
+## [1.26.9](https://github.com/salesforcecli/plugin-agent/compare/1.26.8...1.26.9) (2026-01-25)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([339c78a](https://github.com/salesforcecli/plugin-agent/commit/339c78a319f9b2d0bb8822e03aa2fa1a6733b3b9))
+
+## [1.26.8](https://github.com/salesforcecli/plugin-agent/compare/1.26.7...1.26.8) (2026-01-24)
+
+### Bug Fixes
+
+- **deps:** bump lodash from 4.17.21 to 4.17.23 ([59685fb](https://github.com/salesforcecli/plugin-agent/commit/59685fbdbf9560ba2d345af6b5c5c632d6b24ba5))
+
+## [1.26.7](https://github.com/salesforcecli/plugin-agent/compare/1.26.6...1.26.7) (2026-01-23)
+
+### Bug Fixes
+
+- edit messages for "agent preview" ([3ed9338](https://github.com/salesforcecli/plugin-agent/commit/3ed9338623b543dfa15578adbcb5d8fcb4528139))
+
 ## [1.26.6](https://github.com/salesforcecli/plugin-agent/compare/1.26.5...1.26.6) (2026-01-21)
 
 ### Bug Fixes
