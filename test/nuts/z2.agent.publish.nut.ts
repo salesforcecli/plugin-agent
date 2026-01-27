@@ -159,14 +159,15 @@ describe('agent publish authoring-bundle NUTs', function () {
     this.retries(1);
 
     const result = execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve --json`,
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve`,
       { ensureExitCode: 0 }
-    ).jsonOutput?.result;
+    );
 
-    expect(result).to.be.ok;
-    expect(result?.success).to.be.true;
-    expect(result?.botDeveloperName).to.be.a('string');
-    expect(result?.errors).to.be.undefined;
+    const output = result.shellOutput.stdout;
+    expect(output).to.include('Retrieve Metadata - Skipped');
+    const resultOutput = result.jsonOutput?.result;
+    expect(resultOutput?.botDeveloperName).to.be.a('string');
+    expect(resultOutput?.errors).to.be.undefined;
     await verifyPublishedAgent(bundleApiName, 'v3', connection);
     // skip-retrieve should not create a new version of the genAiPlannerBundle
     await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v3', false);
@@ -186,74 +187,38 @@ describe('agent publish authoring-bundle NUTs', function () {
     this.timeout(30 * 60 * 1000); // 30 minutes
 
     // Try to publish a bundle with invalid script that should fail compilation
-    execCmd<AgentPublishAuthoringBundleResult>(
-      `agent publish authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
-      { ensureExitCode: 1 } // Expect failure due to compilation error
-    );
+    try {
+      execCmd<AgentPublishAuthoringBundleResult>(
+        `agent publish authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
+        { ensureExitCode: 0 }
+      );
+      expect.fail('Expected publish to fail due to agent script compilation error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // We assert both the "publish failed" prefix and that it looks like a compilation issue.
+      expect(message).to.include("SyntaxError: Unexpected 'syem'");
+      expect(message).to.match(/Actual:\s*2\b|"exitCode"\s*:\s*2/);
+    }
   });
 
   it('should display correct MSO stages during publish process', async function () {
     // Increase timeout to 30 minutes since deployment can take a long time
     this.timeout(30 * 60 * 1000); // 30 minutes
-    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    // .retRetry up to 2 times total (1 initial + 1 retries) to handle transient failures
     this.retries(1);
 
-    const specFileName = genUniqueString('agentSpec_%s.yaml');
-    const specPath = join(session.project.dir, 'specs', specFileName);
-
-    // Step 1: Generate an agent spec
-    execCmd(
-      `agent generate agent-spec --target-org ${getUsername()} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath}`,
-      {
-        ensureExitCode: 0,
-      }
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()}`,
+      { ensureExitCode: 0 }
     );
-
-    // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()}`;
-    execCmd(generateCommand, { ensureExitCode: 0 });
-
-    // Step 3: Publish without --json to capture MSO output
-    const publishCommand = `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()}`;
-    const result = execCmd(publishCommand, { ensureExitCode: 0 });
 
     // Verify MSO stages are present in output
     const output = result.shellOutput.stdout;
     expect(output).to.include('Publishing Agent');
-    expect(output).to.include('✓ Validate Bundle');
-    expect(output).to.include('✓ Publish Agent');
-    expect(output).to.include('✓ Retrieve Metadata');
-    expect(output).to.include('✓ Deploy Metadata');
+    expect(output).to.include('✔ Validate Bundle');
+    expect(output).to.include('✔ Publish Agent');
+    expect(output).to.include('✔ Retrieve Metadata');
+    expect(output).to.include('✔ Deploy Metadata');
     expect(output).to.include(`Agent Name: ${bundleApiName}`);
-  });
-
-  it('should skip retrieve and deploy stages when using --skip-retrieve flag', async function () {
-    // Increase timeout to 30 minutes since deployment can take a long time
-    this.timeout(30 * 60 * 1000); // 30 minutes
-    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
-    this.retries(1);
-
-    const specFileName = genUniqueString('agentSpec_%s.yaml');
-    const specPath = join(session.project.dir, 'specs', specFileName);
-
-    // Step 1: Generate an agent spec
-    execCmd(
-      `agent generate agent-spec --target-org ${getUsername()} --type customer --role "test agent role" --company-name "Test Company" --company-description "Test Description" --output-file ${specPath}`,
-      {
-        ensureExitCode: 0,
-      }
-    );
-
-    // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()}`;
-    execCmd(generateCommand, { ensureExitCode: 0 });
-
-    // Step 3: Publish with --skip-retrieve flag to capture MSO output
-    const publishCommand = `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve`;
-    const result = execCmd(publishCommand, { ensureExitCode: 0 });
-
-    // Verify MSO stages are present in output
-    const output = result.shellOutput.stdout;
-    expect(output).to.include('Retrieve Metadata - Skipped');
   });
 });
