@@ -99,7 +99,6 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         connection: conn,
         project: this.project!,
         aabName,
-        skipMetadataRetrieve: flags['skip-retrieve'],
       });
 
       // First compile the .agent file to get the Agent JSON
@@ -153,7 +152,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
-      const result = await agent.publish();
+      const result = await agent.publish(flags['skip-retrieve']);
       mso.stop();
 
       return {
