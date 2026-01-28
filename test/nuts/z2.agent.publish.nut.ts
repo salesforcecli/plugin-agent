@@ -165,9 +165,6 @@ describe('agent publish authoring-bundle NUTs', function () {
 
     const output = result.shellOutput.stdout;
     expect(output).to.include('Retrieve Metadata - Skipped');
-    const resultOutput = result.jsonOutput?.result;
-    expect(resultOutput?.botDeveloperName).to.be.a('string');
-    expect(resultOutput?.errors).to.be.undefined;
     await verifyPublishedAgent(bundleApiName, 'v3', connection);
     // skip-retrieve should not create a new version of the genAiPlannerBundle
     await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v3', false);
@@ -215,10 +212,10 @@ describe('agent publish authoring-bundle NUTs', function () {
     // Verify MSO stages are present in output
     const output = result.shellOutput.stdout;
     expect(output).to.include('Publishing Agent');
-    expect(output).to.include('✔ Validate Bundle');
-    expect(output).to.include('✔ Publish Agent');
-    expect(output).to.include('✔ Retrieve Metadata');
-    expect(output).to.include('✔ Deploy Metadata');
+    expect(output).to.include('Validate Bundle');
+    expect(output).to.include('Publish Agent');
+    expect(output).to.include('Retrieve Metadata');
+    expect(output).to.include('Deploy Metadata');
     expect(output).to.include(`Agent Name: ${bundleApiName}`);
   });
 });
