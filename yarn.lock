@@ -631,6 +631,7 @@
   resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.968.0.tgz#0ccecb461d24ad69df50749b06e7987e97aaa3b1"
   integrity sha512-Wuumj/1cuiuXTMdHmvH88zbEl+5Pw++fOFQuMCF4yP0R+9k1lwX8rVst+oy99xaxtdluJZXrsccoZoA67ST1Ow==
   dependencies:
+    "@smithy/types" "^4.11.0"
     tslib "^2.6.2"
 
 "@aws-sdk/types@^3.973.0":
@@ -1789,10 +1790,10 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@0.21.2-beta.2":
-  version "0.21.2-beta.2"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.21.2-beta.2.tgz#66fbd47ab32c7594aa1282148ca2062dc9b0e85d"
-  integrity sha512-o4I1Hw8LQtxfHNJicE+xu7Vsdz0tAK5e7HqKroWLgHEKn6qFCJKFbe8Z/lzY1b8mTPVbuhXIESjdaXxNziOCiw==
+"@salesforce/agents@^0.22.0":
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.22.0.tgz#de812b29d8cd3d2c260a0550d744f980c7dbec6a"
+  integrity sha512-Od2c6Iu+32Fv06YB8qS1Q/ajW4npzUZ5r9/giOVJDJPvNLTm7gcYKZ3rjc/WD3sP9y8KFvxJZPtsJoZoWvALAg==
   dependencies:
     "@salesforce/core" "^8.24.0"
     "@salesforce/kit" "^3.2.4"
