@@ -2421,7 +2421,7 @@
     "@smithy/util-stream" "^4.5.10"
     tslib "^2.6.2"
 
-"@smithy/types@^4.12.0":
+"@smithy/types@^4.11.0", "@smithy/types@^4.12.0":
   version "4.12.0"
   resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.12.0.tgz#55d2479080922bda516092dbf31916991d9c6fee"
   integrity sha512-9YcuJVTOBDjg9LWo23Qp0lTQ3D7fQsQtwle0jVfpbUHy9qBwCEgKuVH4FqFB3VYu0nwdHKiEMA+oXz7oV8X1kw==

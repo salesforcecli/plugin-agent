@@ -1,3 +1,9 @@
+# [1.27.0](https://github.com/salesforcecli/plugin-agent/compare/1.26.9...1.27.0) (2026-01-28)
+
+### Features
+
+- add new flag to avoid metadata retrieval on publish ([8a57f10](https://github.com/salesforcecli/plugin-agent/commit/8a57f1029449a3778fe49ec8f93be774bb397ed2))
+
 ## [1.26.9](https://github.com/salesforcecli/plugin-agent/compare/1.26.8...1.26.9) (2026-01-25)
 
 ### Bug Fixes
