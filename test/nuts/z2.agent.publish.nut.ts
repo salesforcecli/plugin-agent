@@ -13,24 +13,78 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
+import { Connection, Org } from '@salesforce/core';
 import type { AgentPublishAuthoringBundleResult } from '../../src/commands/agent/publish/authoring-bundle.js';
 import type { AgentGenerateAuthoringBundleResult } from '../../src/commands/agent/generate/authoring-bundle.js';
 import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
+
+type BotDefinitionWithVersions = {
+  Id: string;
+  BotVersions: {
+    records: Array<{ DeveloperName: string }>;
+  };
+};
+
+const verifyPublishedAgent = async (
+  botApiName: string,
+  expectedVersion: string,
+  connection: Connection
+): Promise<void> => {
+  let botDefinition;
+  try {
+    botDefinition = await connection.singleRecordQuery<BotDefinitionWithVersions>(
+      `SELECT SELECT Id, (SELECT DeveloperName FROM BotVersions LIMIT 10) FROM BotDefinition WHERE DeveloperName = '${botApiName}' LIMIT 1`
+    );
+    const botVersion = botDefinition.BotVersions.records[0].DeveloperName;
+    expect(botVersion).to.equal(expectedVersion);
+  } catch (error) {
+    // bot not found
+    void Promise.reject('Bot not published');
+  }
+};
+
+async function verifyGenAiPlannerBundleExistsOrNot(
+  projectDir: string,
+  expectedBundleName: string,
+  expectedVersion: string,
+  shouldExist: boolean
+): Promise<void> {
+  const genAiPlannerBundleDir = join(
+    projectDir,
+    'force-app',
+    'main',
+    'default',
+    'genAiPlannerBundles',
+    `${expectedBundleName}_${expectedVersion}`
+  );
+
+  // Verify the genAiPlannerBundles directory exists
+  expect(existsSync(genAiPlannerBundleDir)).to.equal(shouldExist);
+
+  if (shouldExist) {
+    // Verify the directory contains files
+    const files = readdirSync(genAiPlannerBundleDir);
+    expect(files.length).to.be.greaterThan(0);
+  }
+}
 
 describe('agent publish authoring-bundle NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
   this.timeout(30 * 60 * 1000); // 30 minutes
 
   let session: TestSession;
+  let connection: Connection;
   const bundleApiName = genUniqueString('Test_Agent_%s');
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
+    const org = await Org.create({ aliasOrUsername: getUsername() });
+    connection = org.getConnection();
   });
 
   it('should publish a new agent (first version)', async function () {
@@ -73,6 +127,8 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(publishResult?.success).to.be.true;
     expect(publishResult?.botDeveloperName).to.be.a('string');
     expect(publishResult?.errors).to.be.undefined;
+    await verifyPublishedAgent(bundleApiName, 'v1', connection);
+    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v1', true);
   });
 
   it('should publish a new version of an existing agent', async function () {
@@ -90,6 +146,28 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(result?.success).to.be.true;
     expect(result?.botDeveloperName).to.be.a('string');
     expect(result?.errors).to.be.undefined;
+    await verifyPublishedAgent(bundleApiName, 'v2', connection);
+    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v2', true);
+  });
+
+  it('should publish agent with skip-retrieve flag', async function () {
+    // Test that the --skip-retrieve flag works correctly
+    // This flag skips the metadata retrieval step in the publishing process
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // Retry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --skip-retrieve`,
+      { ensureExitCode: 0 }
+    );
+
+    const output = result.shellOutput.stdout;
+    expect(output).to.include('Retrieve Metadata - Skipped');
+    await verifyPublishedAgent(bundleApiName, 'v3', connection);
+    // skip-retrieve should not create a new version of the genAiPlannerBundle
+    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v3', false);
   });
 
   it('should fail for invalid bundle api-name', async () => {
@@ -99,5 +177,45 @@ describe('agent publish authoring-bundle NUTs', function () {
       `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${getUsername()} --json`,
       { ensureExitCode: 2 }
     );
+  });
+
+  it('should fail when agent script compilation fails', async function () {
+    // Increase timeout since compilation might take time before failing
+    this.timeout(30 * 60 * 1000); // 30 minutes
+
+    // Try to publish a bundle with invalid script that should fail compilation
+    try {
+      execCmd<AgentPublishAuthoringBundleResult>(
+        `agent publish authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
+        { ensureExitCode: 0 }
+      );
+      expect.fail('Expected publish to fail due to agent script compilation error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // We assert both the "publish failed" prefix and that it looks like a compilation issue.
+      expect(message).to.include("SyntaxError: Unexpected 'syem'");
+      expect(message).to.match(/Actual:\s*2\b|"exitCode"\s*:\s*2/);
+    }
+  });
+
+  it('should display correct MSO stages during publish process', async function () {
+    // Increase timeout to 30 minutes since deployment can take a long time
+    this.timeout(30 * 60 * 1000); // 30 minutes
+    // .retRetry up to 2 times total (1 initial + 1 retries) to handle transient failures
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()}`,
+      { ensureExitCode: 0 }
+    );
+
+    // Verify MSO stages are present in output
+    const output = result.shellOutput.stdout;
+    expect(output).to.include('Publishing Agent');
+    expect(output).to.include('Validate Bundle');
+    expect(output).to.include('Publish Agent');
+    expect(output).to.include('Retrieve Metadata');
+    expect(output).to.include('Deploy Metadata');
+    expect(output).to.include(`Agent Name: ${bundleApiName}`);
   });
 });

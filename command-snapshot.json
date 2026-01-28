@@ -97,7 +97,7 @@
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "skip-retrieve", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
