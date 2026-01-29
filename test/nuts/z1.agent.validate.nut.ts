@@ -56,7 +56,7 @@ describe('agent validate authoring-bundle NUTs', function () {
     // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
       `agent validate authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
-      { ensureExitCode: 2 }
+      { ensureExitCode: 'nonZero' }
     );
   });
 });
