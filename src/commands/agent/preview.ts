@@ -46,7 +46,6 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = false;
   public static readonly requiresProject = true;
-  public static state = 'beta';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
