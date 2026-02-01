@@ -2227,17 +2227,17 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^12.31.6", "@salesforce/source-deploy-retrieve@^12.31.8":
-  version "12.31.8"
-  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.31.8.tgz#0eade61d5f117722fed81a4f2c04eb7a7d5f4703"
-  integrity sha512-gp2yJUuAsR86v8QkGY50Sxyiup4H0QNyT7bC3rowxUnR/mw1q3gkXSDnhHOWt5toWsZr78oL1ztGQxG89l89XQ==
+"@salesforce/source-deploy-retrieve@^12.31.10", "@salesforce/source-deploy-retrieve@^12.31.6":
+  version "12.31.10"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.31.10.tgz#612886356d81c87eb9053bbc9173546556fd5f36"
+  integrity sha512-kUdJicJUd3/lzNQOvDW1Sc5iBl8PVv2Tz7L59YA/Le0fzZCYM72oyKwdbl/f6kc+MzJpMVia2+AxrvVZir8oJw==
   dependencies:
     "@salesforce/core" "^8.24.0"
     "@salesforce/kit" "^3.2.4"
     "@salesforce/ts-types" "^2.0.12"
     "@salesforce/types" "^1.6.0"
     fast-levenshtein "^3.0.0"
-    fast-xml-parser "^4.5.3"
+    fast-xml-parser "^5.3.4"
     got "^11.8.6"
     graceful-fs "^4.2.11"
     ignore "^5.3.2"
@@ -5137,17 +5137,17 @@ fast-xml-parser@5.2.5:
   dependencies:
     strnum "^2.1.0"
 
-fast-xml-parser@^4.5.1, fast-xml-parser@^4.5.3:
+fast-xml-parser@^4.5.1:
   version "4.5.3"
   resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.5.3.tgz#c54d6b35aa0f23dc1ea60b6c884340c006dc6efb"
   integrity sha512-RKihhV+SHsIUGXObeVy9AXiBbFwkVk7Syp8XgwN5U3JV416+Gwp/GO9i0JYKmikykgz/UHRrrV4ROuZEo/T0ig==
   dependencies:
     strnum "^1.1.1"
 
-fast-xml-parser@^5.3.2:
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.3.3.tgz#84b678e44eb81207c8585795152b4b1c94738b4d"
-  integrity sha512-2O3dkPAAC6JavuMm8+4+pgTk+5hoAs+CjZ+sWcQLkX9+/tHRuTkQh/Oaifr8qDmZ8iEHb771Ea6G8CdwkrgvYA==
+fast-xml-parser@^5.3.2, fast-xml-parser@^5.3.4:
+  version "5.3.4"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.3.4.tgz#06f39aafffdbc97bef0321e626c7ddd06a043ecf"
+  integrity sha512-EFd6afGmXlCx8H8WTZHhAoDaWaGyuIBoZJ2mknrNxug+aZKjkp0a0dlars9Izl+jF+7Gu1/5f/2h68cQpe0IiA==
   dependencies:
     strnum "^2.1.0"
 
