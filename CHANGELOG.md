@@ -1,3 +1,9 @@
+## [1.27.2](https://github.com/salesforcecli/plugin-agent/compare/1.27.1...1.27.2) (2026-02-02)
+
+### Bug Fixes
+
+- remove beta tags from NGA commands ([7550e20](https://github.com/salesforcecli/plugin-agent/commit/7550e20079c22538243166a552f42e02345ccd3b))
+
 ## [1.27.1](https://github.com/salesforcecli/plugin-agent/compare/1.27.0...1.27.1) (2026-02-01)
 
 ### Bug Fixes
