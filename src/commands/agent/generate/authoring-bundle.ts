@@ -56,7 +56,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     'api-version': Flags.orgApiVersion(),
     spec: Flags.string({
       summary: messages.getMessage('flags.spec.summary'),
-      description: messages.getMessage('flags.spec.description'),
       char: 'f',
     }),
     'output-dir': Flags.directory({

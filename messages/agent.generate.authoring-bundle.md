@@ -18,10 +18,6 @@ This command requires an org because it uses it to access an LLM for generating 
 
 Path to the agent spec YAML file, or "none" for no spec file (default agent spec); if not specified, the command provides a list that you can choose from.
 
-# flags.spec.description
-
-Path to an agent spec YAML file, or the literal "none" to use no spec file (default agent spec). When not specified, the command prompts you to select a file or the default.
-
 # flags.spec.prompt
 
 Path to the agent spec YAML file
