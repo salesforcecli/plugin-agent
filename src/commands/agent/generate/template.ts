@@ -205,7 +205,7 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
   mkdirSync(dirname(filename), { recursive: true });
 
   try {
-    const xml = builder.build(json) as string;
+    const xml = builder.build(json);
     writeFileSync(filename, xml);
   } catch (error) {
     throw new SfError(`Failed save to file: ${filename}`);

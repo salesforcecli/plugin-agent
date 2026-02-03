@@ -6,7 +6,7 @@ Generate an authoring bundle from an existing agent spec YAML file.
 
 Authoring bundles are metadata components that contain an agent's Agent Script file. The Agent Script file is the agent's blueprint; it fully describes what the agent can do using the Agent Script language.
 
-Use this command to generate a new authoring bundle based on an agent spec YAML file, which you create with the "agent generate agent-spec" command. The agent spec YAML file is a high-level description of the agent; it describes its essence rather than exactly what it can do.  The resulting Agent Script file is customized to reflect what's in the agent spec file.  You can also create an authoring bundle without an agent spec file by specifying the "--spec none" flag; in this case, the resulting Agent Script file is just the default boilerplate.  
+Use this command to generate a new authoring bundle based on an agent spec YAML file, which you create with the "agent generate agent-spec" command. The agent spec YAML file is a high-level description of the agent; it describes its essence rather than exactly what it can do. The resulting Agent Script file is customized to reflect what's in the agent spec file. You can also create an authoring bundle without an agent spec file by specifying the "--no-spec" flag; in this case, the resulting Agent Script file is just the default boilerplate.
 
 The metadata type for authoring bundles is aiAuthoringBundle, which consist of a standard "<bundle-api-name>.bundle-meta.xml" metadata file and the Agent Script file (with extension ".agent"). When you run this command, the new authoring bundle is generated in the force-app/main/default/aiAuthoringBundles/<bundle-api-name> directory. Use the --output-dir flag to generate them elsewhere.
 
@@ -16,11 +16,15 @@ This command requires an org because it uses it to access an LLM for generating 
 
 # flags.spec.summary
 
-Path to the agent spec YAML file; specify the literal "none" to not use an agent spec file. If the flag isn't specified, the command provides a list that you can choose from.
+Path to the agent spec YAML file. If the flag isn't specified, the command provides a list that you can choose from (unless --no-spec is used).
 
 # flags.spec.prompt
 
 Path to the agent spec YAML file
+
+# flags.no-spec.summary
+
+Skip prompting for the agent spec and use the default boilerplate.
 
 # flags.output-dir.summary
 
@@ -50,7 +54,7 @@ API name of the new authoring bundle
 
 - Generate an authoring bundle without using an agent spec file; give the bundle the label "My Authoring Bundle" and use your default org:
 
-  <%= config.bin %> <%= command.id %> --spec none --name "My Authoring Bundle"
+  <%= config.bin %> <%= command.id %> --no-spec --name "My Authoring Bundle"
 
 - Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My Authoring Bundle"; use your default org:
 
@@ -59,6 +63,10 @@ API name of the new authoring bundle
 - Similar to previous example, but generate the authoring bundle files in the "other-package-dir/main/default" package directory; use the org with alias "my-dev-org":
 
   <%= config.bin %> <%= command.id %> --spec specs/agentSpec.yaml --name "My Authoring Bundle" --output-dir other-package-dir/main/default --target-org my-dev-org
+
+# error.specAndNoSpec
+
+Cannot specify both --spec and --no-spec.
 
 # error.no-spec-file
 

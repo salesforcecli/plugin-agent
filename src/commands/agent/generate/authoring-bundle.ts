@@ -33,15 +33,6 @@ export type AgentGenerateAuthoringBundleResult = {
   outputDir: string;
 };
 
-/**
- * Returns true if the --spec flag value means "use no spec" (default agent spec).
- *
- * @internal Exported for testing.
- */
-export function isNoSpecValue(value: string): boolean {
-  return value.trim().toLowerCase() === 'none';
-}
-
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -57,6 +48,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     spec: Flags.string({
       summary: messages.getMessage('flags.spec.summary'),
       char: 'f',
+    }),
+    'no-spec': Flags.boolean({
+      summary: messages.getMessage('flags.no-spec.summary'),
     }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
@@ -111,18 +105,20 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
 
-    // Resolve spec: "none" => undefined (no spec file), file path => path, missing => prompt
-    let spec = flags.spec;
-    if (spec !== undefined) {
-      if (isNoSpecValue(spec)) {
-        spec = undefined;
-      } else {
-        const specPath = resolve(spec);
-        if (!existsSync(specPath)) {
-          throw new SfError(messages.getMessage('error.no-spec-file'));
-        }
-        spec = specPath;
+    if (flags.spec && flags['no-spec']) {
+      throw new SfError(messages.getMessage('error.specAndNoSpec'));
+    }
+
+    // Resolve spec: --no-spec => undefined (default spec), --spec <path> => path, missing => prompt
+    let spec: string | undefined;
+    if (flags['no-spec']) {
+      spec = undefined;
+    } else if (flags.spec !== undefined) {
+      const specPath = resolve(flags.spec);
+      if (!existsSync(specPath)) {
+        throw new SfError(messages.getMessage('error.no-spec-file'));
       }
+      spec = specPath;
     } else {
       spec = await promptForSpecYaml(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']);
     }
