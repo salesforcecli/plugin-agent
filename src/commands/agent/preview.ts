@@ -39,12 +39,15 @@ export type AgentData = {
 // https://developer.salesforce.com/docs/einstein/genai/guide/agent-api-get-started.html#prerequisites
 export const UNSUPPORTED_AGENTS = ['Copilot_for_Salesforce'];
 
-export type AgentPreviewResult = void;
+export type AgentPreviewResult = {
+  sessionId: string;
+  response: string;
+};
 export default class AgentPreview extends SfCommand<AgentPreviewResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly enableJsonFlag = false;
+  public static readonly enableJsonFlag = true;
   public static readonly requiresProject = true;
 
   public static readonly flags = {
@@ -69,8 +72,15 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.use-live-actions.summary'),
       default: false,
     }),
+    utterance: Flags.string({
+      summary: messages.getMessage('flags.utterance.summary'),
+    }),
+    'session-id': Flags.string({
+      summary: messages.getMessage('flags.session-id.summary'),
+    }),
   };
 
+  // eslint-disable-next-line complexity
   public async run(): Promise<AgentPreviewResult> {
     // STAGES OF PREVIEW
     // get user's agent selection either from flags, or interaction
@@ -78,7 +88,22 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     // if published agent, use AgentPreview for preview
     const { flags } = await this.parse(AgentPreview);
 
-    const { 'api-name': apiNameOrId, 'use-live-actions': useLiveActions, 'authoring-bundle': aabName } = flags;
+    const {
+      'api-name': apiNameOrId,
+      'use-live-actions': useLiveActions,
+      'authoring-bundle': aabName,
+      utterance,
+      'session-id': sessionId,
+    } = flags;
+
+    if (sessionId && !utterance) {
+      throw new SfError(messages.getMessage('error.sessionIdRequiresUtterance'), 'SessionIdRequiresUtterance');
+    }
+
+    if (utterance && !aabName && !apiNameOrId) {
+      throw new SfError(messages.getMessage('error.utteranceRequiresAgent'), 'UtteranceRequiresAgent');
+    }
+
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
     let selectedAgent: ScriptAgent | ProductionAgent;
@@ -129,6 +154,38 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     selectedAgent.preview.setApexDebugging(flags['apex-debug']);
 
+    if (utterance) {
+      // Non-interactive: send message and return response
+      if (sessionId) {
+        // Send to existing session
+        (selectedAgent as unknown as { sessionId?: string }).sessionId = sessionId;
+        const response = await selectedAgent.preview.send(utterance);
+        const responseMessage = response.messages[0]?.message ?? '';
+        if (!this.jsonEnabled()) {
+          this.log(responseMessage);
+        }
+        return { sessionId, response: responseMessage };
+      }
+
+      // New session: start, send, end
+      const session = await selectedAgent.preview.start();
+      try {
+        const response = await selectedAgent.preview.send(utterance);
+        const responseMessage = response.messages[0]?.message ?? '';
+        if (!this.jsonEnabled()) {
+          this.log(messages.getMessage('output.sessionId', [session.sessionId]));
+          this.log(responseMessage);
+        }
+        return { sessionId: session.sessionId, response: responseMessage };
+      } finally {
+        if (selectedAgent instanceof ScriptAgent) {
+          await selectedAgent.preview.end();
+        } else {
+          await selectedAgent.preview.end('UserRequest');
+        }
+      }
+    }
+
     const instance = render(
       React.createElement(AgentPreviewReact, {
         agent: selectedAgent.preview,
@@ -139,6 +196,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       { exitOnCtrlC: false }
     );
     await instance.waitUntilExit();
+    // Interactive mode: return empty result for --json (non-interactive --utterance returns sessionId/response)
+    return { sessionId: '', response: '' };
   }
 }
 

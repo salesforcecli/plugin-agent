@@ -39,6 +39,26 @@ Use real actions in the org; if not specified, preview uses AI to simulate (mock
 
 Enable Apex debug logging during the agent preview conversation.
 
+# flags.utterance.summary
+
+Message to send to the agent; creates a new session, returns the response, and exits without starting the interactive preview.
+
+# flags.session-id.summary
+
+Session ID of an in-progress preview session; use with --utterance to send a message to that session and return the response without starting the interactive preview.
+
+# error.sessionIdRequiresUtterance
+
+--session-id must be used with --utterance.
+
+# error.utteranceRequiresAgent
+
+When using --utterance, specify the agent with --api-name or --authoring-bundle.
+
+# output.sessionId
+
+Session ID: %s
+
 # examples
 
 - Preview an agent by choosing from the list of available local Agent Script or published agents. If previewing a local Agent Script agent, use simulated mode. Use the org with alias "my-dev-org".
@@ -48,3 +68,11 @@ Enable Apex debug logging during the agent preview conversation.
 - Preview an agent in live mode by choosing from a list of authoring bundles. Save the conversation transcripts to the "./transcripts/my-preview" directory, enable the Apex debug logs, and use your default org:
 
   <%= config.bin %> <%= command.id %> --use-live-actions --apex-debug --output-dir transcripts/my-preview
+
+- Send a message to the agent and print the response without starting the interactive preview (requires --api-name or --authoring-bundle):
+
+  <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --utterance "What can you help me with?" --target-org my-dev-org
+
+- Send a follow-up message to an existing preview session:
+
+  <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --session-id <session-id> --utterance "Tell me more" --target-org my-dev-org

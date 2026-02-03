@@ -3,7 +3,17 @@
   "$ref": "#/definitions/AgentPreviewResult",
   "definitions": {
     "AgentPreviewResult": {
-      "type": "null"
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "response": {
+          "type": "string"
+        }
+      },
+      "required": ["sessionId", "response"],
+      "additionalProperties": false
     }
   }
 }

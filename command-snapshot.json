@@ -86,9 +86,12 @@
       "api-version",
       "authoring-bundle",
       "flags-dir",
+      "json",
       "output-dir",
+      "session-id",
       "target-org",
-      "use-live-actions"
+      "use-live-actions",
+      "utterance"
     ],
     "plugin": "@salesforce/plugin-agent"
   },
