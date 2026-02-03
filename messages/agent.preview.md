@@ -49,7 +49,7 @@ Session ID of an in-progress preview session; use with --utterance to send a mes
 
 # error.sessionIdRequiresUtterance
 
---session-id must be used with --utterance.
+When using --session-id, you must also specify --utterance.
 
 # error.utteranceRequiresAgent
 
