@@ -52,7 +52,7 @@ API name of the new authoring bundle
 
   <%= config.bin %> <%= command.id %>
 
-- Generate an authoring bundle using no spec file (default agent spec) with the label "My Authoring Bundle"; use your default org:
+- Generate an authoring bundle without using an agent spec file; give the bundle the label "My Authoring Bundle" and use your default org:
 
   <%= config.bin %> <%= command.id %> --spec none --name "My Authoring Bundle"
 
