@@ -2076,16 +2076,16 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^0.22.0":
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.22.0.tgz#de812b29d8cd3d2c260a0550d744f980c7dbec6a"
-  integrity sha512-Od2c6Iu+32Fv06YB8qS1Q/ajW4npzUZ5r9/giOVJDJPvNLTm7gcYKZ3rjc/WD3sP9y8KFvxJZPtsJoZoWvALAg==
+"@salesforce/agents@^0.22.1":
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.22.1.tgz#987ee07365811ccdd00d614807f90bc995549927"
+  integrity sha512-4hqhpO7w08D+Po5KFywFpXlAOS6/jn/wiWWdinIgFx0XGEPUBJTz8OXxMmVQ7s9e1/gmqaoyGzBy8m3C9GCpJA==
   dependencies:
     "@salesforce/core" "^8.24.0"
     "@salesforce/kit" "^3.2.4"
     "@salesforce/source-deploy-retrieve" "^12.31.6"
     "@salesforce/types" "^1.5.0"
-    fast-xml-parser "^5.3.2"
+    fast-xml-parser "^5.3.4"
     nock "^13.5.6"
     yaml "^2.8.2"
 
@@ -5137,7 +5137,7 @@ fast-xml-parser@5.2.5:
   dependencies:
     strnum "^2.1.0"
 
-fast-xml-parser@^5.3.2, fast-xml-parser@^5.3.4:
+fast-xml-parser@^5.3.4:
   version "5.3.4"
   resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.3.4.tgz#06f39aafffdbc97bef0321e626c7ddd06a043ecf"
   integrity sha512-EFd6afGmXlCx8H8WTZHhAoDaWaGyuIBoZJ2mknrNxug+aZKjkp0a0dlars9Izl+jF+7Gu1/5f/2h68cQpe0IiA==
