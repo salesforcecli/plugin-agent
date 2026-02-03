@@ -1720,9 +1720,9 @@
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
 "@salesforce/agents@^0.22.1":
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.22.1.tgz#987ee07365811ccdd00d614807f90bc995549927"
-  integrity sha512-4hqhpO7w08D+Po5KFywFpXlAOS6/jn/wiWWdinIgFx0XGEPUBJTz8OXxMmVQ7s9e1/gmqaoyGzBy8m3C9GCpJA==
+  version "0.22.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.22.2.tgz#b9c6612040938c37cfa85f250cb6ee5a0a055135"
+  integrity sha512-TF/hvrM2wv3rSLWkBbLCjBGax6y5EaO5t6cevM+i/VMX140M+ls63O/8AaoXAwjNo3udorNUhm0wbs1HE3QfRw==
   dependencies:
     "@salesforce/core" "^8.24.0"
     "@salesforce/kit" "^3.2.4"
