@@ -39,7 +39,7 @@ export type AgentGenerateAuthoringBundleResult = {
  * @internal Exported for testing.
  */
 export function isNoSpecValue(value: string): boolean {
-  return value.trim().toLowerCase() === 'no-spec';
+  return value.trim().toLowerCase() === 'none';
 }
 
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
@@ -112,7 +112,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
 
-    // Resolve spec: "no-spec" => undefined (no spec file), file path => path, missing => prompt
+    // Resolve spec: "none" => undefined (no spec file), file path => path, missing => prompt
     let spec = flags.spec;
     if (spec !== undefined) {
       if (isNoSpecValue(spec)) {

@@ -19,20 +19,20 @@ import { isNoSpecValue } from '../../../../src/commands/agent/generate/authoring
 
 describe('Agent Generate Authoring Bundle', () => {
   describe('isNoSpecValue', () => {
-    it('should return true for "no-spec"', () => {
-      expect(isNoSpecValue('no-spec')).to.be.true;
+    it('should return true for "none"', () => {
+      expect(isNoSpecValue('none')).to.be.true;
     });
 
-    it('should return true for "NO-SPEC" (case-insensitive)', () => {
-      expect(isNoSpecValue('NO-SPEC')).to.be.true;
+    it('should return true for "NONE" (case-insensitive)', () => {
+      expect(isNoSpecValue('NONE')).to.be.true;
     });
 
-    it('should return true for "No-Spec"', () => {
-      expect(isNoSpecValue('No-Spec')).to.be.true;
+    it('should return true for "None"', () => {
+      expect(isNoSpecValue('None')).to.be.true;
     });
 
-    it('should return true for "  no-spec  " (trimmed)', () => {
-      expect(isNoSpecValue('  no-spec  ')).to.be.true;
+    it('should return true for "  none  " (trimmed)', () => {
+      expect(isNoSpecValue('  none  ')).to.be.true;
     });
 
     it('should return false for a file path', () => {
@@ -43,8 +43,8 @@ describe('Agent Generate Authoring Bundle', () => {
       expect(isNoSpecValue('')).to.be.false;
     });
 
-    it('should return false for string that contains "no-spec" but is not exactly it', () => {
-      expect(isNoSpecValue('path/no-spec-file.yaml')).to.be.false;
+    it('should return false for string that contains "none" but is not exactly it', () => {
+      expect(isNoSpecValue('path/none-spec-file.yaml')).to.be.false;
     });
   });
 });

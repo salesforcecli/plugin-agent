@@ -60,10 +60,10 @@ describe('agent generate authoring-bundle NUTs', function () {
     expect(agent).to.include(`developer_name: "${bundleName}"`);
   });
 
-  it('should generate authoring bundle from --spec no-spec', async () => {
-    const bundleName = genUniqueString('Test_Bundle_NoSpec_%s');
+  it('should generate authoring bundle from --spec none', async () => {
+    const bundleName = genUniqueString('Test_Bundle_None_%s');
 
-    const command = `agent generate authoring-bundle --spec no-spec --name "${bundleName}" --api-name ${bundleName} --target-org ${getUsername()} --json`;
+    const command = `agent generate authoring-bundle --spec none --name "${bundleName}" --api-name ${bundleName} --target-org ${getUsername()} --json`;
     const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
 
     expect(result).to.be.ok;
