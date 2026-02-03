@@ -157,8 +157,8 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     if (utterance) {
       // Non-interactive: send message and return response
       if (sessionId) {
-        // Send to existing session
-        (selectedAgent as unknown as { sessionId?: string }).sessionId = sessionId;
+        // @ts-expect-error - access protected member here
+        selectedAgent.sessionId = sessionId;
         const response = await selectedAgent.preview.send(utterance);
         const responseMessage = response.messages[0]?.message ?? '';
         if (!this.jsonEnabled()) {
@@ -169,21 +169,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
       // New session: start, send, end
       const session = await selectedAgent.preview.start();
-      try {
-        const response = await selectedAgent.preview.send(utterance);
-        const responseMessage = response.messages[0]?.message ?? '';
-        if (!this.jsonEnabled()) {
-          this.log(messages.getMessage('output.sessionId', [session.sessionId]));
-          this.log(responseMessage);
-        }
-        return { sessionId: session.sessionId, response: responseMessage };
-      } finally {
-        if (selectedAgent instanceof ScriptAgent) {
-          await selectedAgent.preview.end();
-        } else {
-          await selectedAgent.preview.end('UserRequest');
-        }
+      const response = await selectedAgent.preview.send(utterance);
+      const responseMessage = response.messages[0]?.message ?? '';
+      if (!this.jsonEnabled()) {
+        this.log(messages.getMessage('output.sessionId', [session.sessionId]));
+        this.log(responseMessage);
       }
+      return { sessionId: session.sessionId, response: responseMessage };
     }
 
     const instance = render(
