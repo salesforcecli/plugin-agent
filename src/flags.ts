@@ -119,7 +119,7 @@ export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[
 
       if (file.isDirectory() && !excludeDirs?.includes(file.name)) {
         results.push(...traverseForFiles(fullPath, suffixes, excludeDirs));
-      } else if (suffixes.some((suffix) => file.name.endsWith(suffix))) {
+      } else if (suffixes.some((suffix) => file.name.toLowerCase().endsWith(suffix.toLowerCase()))) {
         results.push(fullPath);
       }
     }
