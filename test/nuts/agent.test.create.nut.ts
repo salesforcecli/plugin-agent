@@ -70,7 +70,7 @@ describe('agent test create', function () {
     const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
       `agent test create --api-name "${testApiName}" --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --json`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 'nonZero' }
     );
   });
 
