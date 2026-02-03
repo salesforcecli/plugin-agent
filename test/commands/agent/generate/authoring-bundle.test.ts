@@ -15,36 +15,36 @@
  */
 
 import { expect } from 'chai';
-import { isDefaultSpecValue } from '../../../../src/commands/agent/generate/authoring-bundle.js';
+import { isNoSpecValue } from '../../../../src/commands/agent/generate/authoring-bundle.js';
 
 describe('Agent Generate Authoring Bundle', () => {
-  describe('isDefaultSpecValue', () => {
-    it('should return true for "default"', () => {
-      expect(isDefaultSpecValue('default')).to.be.true;
+  describe('isNoSpecValue', () => {
+    it('should return true for "no-spec"', () => {
+      expect(isNoSpecValue('no-spec')).to.be.true;
     });
 
-    it('should return true for "DEFAULT" (case-insensitive)', () => {
-      expect(isDefaultSpecValue('DEFAULT')).to.be.true;
+    it('should return true for "NO-SPEC" (case-insensitive)', () => {
+      expect(isNoSpecValue('NO-SPEC')).to.be.true;
     });
 
-    it('should return true for "Default"', () => {
-      expect(isDefaultSpecValue('Default')).to.be.true;
+    it('should return true for "No-Spec"', () => {
+      expect(isNoSpecValue('No-Spec')).to.be.true;
     });
 
-    it('should return true for "  default  " (trimmed)', () => {
-      expect(isDefaultSpecValue('  default  ')).to.be.true;
+    it('should return true for "  no-spec  " (trimmed)', () => {
+      expect(isNoSpecValue('  no-spec  ')).to.be.true;
     });
 
     it('should return false for a file path', () => {
-      expect(isDefaultSpecValue('specs/agentSpec.yaml')).to.be.false;
+      expect(isNoSpecValue('specs/agentSpec.yaml')).to.be.false;
     });
 
     it('should return false for empty string', () => {
-      expect(isDefaultSpecValue('')).to.be.false;
+      expect(isNoSpecValue('')).to.be.false;
     });
 
-    it('should return false for string that contains "default"', () => {
-      expect(isDefaultSpecValue('my-default-spec.yaml')).to.be.false;
+    it('should return false for string that contains "no-spec" but is not exactly it', () => {
+      expect(isNoSpecValue('path/no-spec-file.yaml')).to.be.false;
     });
   });
 });

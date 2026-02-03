@@ -34,12 +34,12 @@ export type AgentGenerateAuthoringBundleResult = {
 };
 
 /**
- * Returns true if the --spec flag value means "use default agent spec".
+ * Returns true if the --spec flag value means "use no spec" (default agent spec).
  *
  * @internal Exported for testing.
  */
-export function isDefaultSpecValue(value: string): boolean {
-  return value.trim().toLowerCase() === 'default';
+export function isNoSpecValue(value: string): boolean {
+  return value.trim().toLowerCase() === 'no-spec';
 }
 
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
@@ -112,10 +112,10 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
 
-    // Resolve spec: "default" => undefined (default agent spec), file path => path, missing => prompt
+    // Resolve spec: "no-spec" => undefined (no spec file), file path => path, missing => prompt
     let spec = flags.spec;
     if (spec !== undefined) {
-      if (isDefaultSpecValue(spec)) {
+      if (isNoSpecValue(spec)) {
         spec = undefined;
       } else {
         const specPath = resolve(spec);

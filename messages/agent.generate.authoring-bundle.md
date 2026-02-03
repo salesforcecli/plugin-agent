@@ -16,11 +16,11 @@ This command requires an org because it uses it to access an LLM for generating 
 
 # flags.spec.summary
 
-Path to the agent spec YAML file, or "default" for the default agent spec; if not specified, the command provides a list that you can choose from.
+Path to the agent spec YAML file, or "no-spec" for no spec file (default agent spec); if not specified, the command provides a list that you can choose from.
 
 # flags.spec.description
 
-Path to an agent spec YAML file, or the literal "default" to use the default agent spec (no spec file). When not specified, the command prompts you to select a file or the default.
+Path to an agent spec YAML file, or the literal "no-spec" to use no spec file (default agent spec). When not specified, the command prompts you to select a file or the default.
 
 # flags.spec.prompt
 
@@ -52,9 +52,9 @@ API name of the new authoring bundle
 
   <%= config.bin %> <%= command.id %>
 
-- Generate an authoring bundle using the default agent spec (no spec file) with the label "My Authoring Bundle"; use your default org:
+- Generate an authoring bundle using no spec file (default agent spec) with the label "My Authoring Bundle"; use your default org:
 
-  <%= config.bin %> <%= command.id %> --spec default --name "My Authoring Bundle"
+  <%= config.bin %> <%= command.id %> --spec no-spec --name "My Authoring Bundle"
 
 - Generate an authoring bundle from the "specs/agentSpec.yaml" agent spec YAML file and give it the label "My Authoring Bundle"; use your default org:
 
