@@ -66,7 +66,7 @@ API name of the new authoring bundle
 
 # error.specAndNoSpec
 
-Cannot specify both --spec and --no-spec.
+You can't specify both --spec and --no-spec.
 
 # error.no-spec-file
 
