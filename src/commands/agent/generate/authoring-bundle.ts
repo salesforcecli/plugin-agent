@@ -45,10 +45,12 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       summary: messages.getMessage('flags.api-name.summary'),
     }),
     'api-version': Flags.orgApiVersion(),
-    spec: Flags.file({
+    spec: Flags.string({
       summary: messages.getMessage('flags.spec.summary'),
       char: 'f',
-      exists: true,
+    }),
+    'no-spec': Flags.boolean({
+      summary: messages.getMessage('flags.no-spec.summary'),
     }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
@@ -103,8 +105,23 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
 
-    // If we don't have a spec yet, prompt for it
-    const spec = flags.spec ?? (await promptForSpecYaml(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']));
+    if (flags.spec && flags['no-spec']) {
+      throw new SfError(messages.getMessage('error.specAndNoSpec'));
+    }
+
+    // Resolve spec: --no-spec => undefined (default spec), --spec <path> => path, missing => prompt
+    let spec: string | undefined;
+    if (flags['no-spec']) {
+      spec = undefined;
+    } else if (flags.spec !== undefined) {
+      const specPath = resolve(flags.spec);
+      if (!existsSync(specPath)) {
+        throw new SfError(messages.getMessage('error.no-spec-file'));
+      }
+      spec = specPath;
+    } else {
+      spec = await promptForSpecYaml(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']);
+    }
 
     // If we don't have a name yet, prompt for it
     const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));

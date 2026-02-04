@@ -59,4 +59,36 @@ describe('agent generate authoring-bundle NUTs', function () {
     expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
     expect(agent).to.include(`developer_name: "${bundleName}"`);
   });
+
+  it('should generate authoring bundle with --no-spec', async () => {
+    const bundleName = genUniqueString('Test_Bundle_None_%s');
+
+    const command = `agent generate authoring-bundle --no-spec --name "${bundleName}" --api-name ${bundleName} --target-org ${getUsername()} --json`;
+    const result = execCmd<AgentGenerateAuthoringBundleResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
+
+    expect(result).to.be.ok;
+    expect(result?.agentPath).to.be.ok;
+    expect(result?.metaXmlPath).to.be.ok;
+    expect(result?.outputDir).to.be.ok;
+
+    expect(existsSync(result!.agentPath)).to.be.true;
+    expect(existsSync(result!.metaXmlPath)).to.be.true;
+
+    const agent = readFileSync(result!.agentPath, 'utf8');
+    const metaXml = readFileSync(result!.metaXmlPath, 'utf8');
+    expect(agent).to.be.ok;
+    expect(metaXml).to.include('<AiAuthoringBundle');
+    expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
+    expect(agent).to.include(`developer_name: "${bundleName}"`);
+  });
+
+  it('should fail when both --spec and --no-spec are provided', async () => {
+    const bundleName = genUniqueString('Test_Bundle_%s');
+    const specPath = join(session.project.dir, 'specs', 'agentSpec.yaml');
+
+    execCmd(
+      `agent generate authoring-bundle --spec ${specPath} --no-spec --name "${bundleName}" --api-name ${bundleName} --target-org ${getUsername()} --json`,
+      { ensureExitCode: 1 }
+    );
+  });
 });
