@@ -1,3 +1,9 @@
+## [1.27.5](https://github.com/salesforcecli/plugin-agent/compare/1.27.4...1.27.5) (2026-02-04)
+
+### Bug Fixes
+
+- add 'default' value to --spec, update help, case agnostic search ([421c2b6](https://github.com/salesforcecli/plugin-agent/commit/421c2b623a7e795e9c6a5e73a22ac7d3da52b0e5))
+
 ## [1.27.4](https://github.com/salesforcecli/plugin-agent/compare/1.27.3...1.27.4) (2026-02-04)
 
 ### Bug Fixes
