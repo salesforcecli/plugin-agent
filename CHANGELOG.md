@@ -1,3 +1,9 @@
+## [1.27.4](https://github.com/salesforcecli/plugin-agent/compare/1.27.3...1.27.4) (2026-02-04)
+
+### Bug Fixes
+
+- **deps:** bump @isaacs/brace-expansion from 5.0.0 to 5.0.1 ([d14ab5a](https://github.com/salesforcecli/plugin-agent/commit/d14ab5a56914dd7d546bae2a19ab296d9dd313de))
+
 ## [1.27.3](https://github.com/salesforcecli/plugin-agent/compare/1.27.2...1.27.3) (2026-02-03)
 
 ### Bug Fixes
