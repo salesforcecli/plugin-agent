@@ -24,7 +24,7 @@ Path to the agent spec YAML file
 
 # flags.no-spec.summary
 
-Skip prompting for the agent spec and use the default boilerplate.
+Skip prompting for an agent spec and use the default Agent Script boilerplate in the generated authoring bundle.
 
 # flags.output-dir.summary
 
