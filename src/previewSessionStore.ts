@@ -14,90 +14,37 @@
  * limitations under the License.
  */
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SfError } from '@salesforce/core';
+import type { AgentInstance } from '@salesforce/agents';
 
-const CACHE_DIR = '.sfdx';
-const AGENTS_DIR = 'agents';
-const SESSIONS_FILE = 'preview-sessions.json';
+const SESSION_META_FILE = 'session-meta.json';
 
-export type PreviewSessionEntry = {
-  sessionId: string;
-  orgUsername: string;
-  apiNameOrId?: string;
-  aabName?: string;
-};
-
-type SessionsStore = Record<string, Omit<PreviewSessionEntry, 'sessionId'>>;
-
-function getStorePath(projectPath: string): string {
-  return join(projectPath, CACHE_DIR, AGENTS_DIR, SESSIONS_FILE);
+/**
+ * Save a marker so send/end can validate that the session was started for this agent.
+ * Caller must have started the session (agent has sessionId set). Uses agent.getHistoryDir() for the path.
+ */
+export async function createCache(agent: AgentInstance): Promise<void> {
+  const historyDir = await agent.getHistoryDir();
+  const path = join(historyDir, SESSION_META_FILE);
+  await writeFile(path, JSON.stringify({}), 'utf-8');
 }
 
 /**
- * Save a preview session so send/end can validate that the session was started with the same agent and org.
+ * Validate that the session was started for this agent (marker file exists in agent's history dir for current sessionId).
+ * Caller must set sessionId on the agent (agent.setSessionId) before calling.
+ * Throws SfError if the session marker is not found.
  */
-export async function createCache(projectPath: string, entry: PreviewSessionEntry): Promise<void> {
-  const dir = join(projectPath, CACHE_DIR, AGENTS_DIR);
-  await mkdir(dir, { recursive: true });
-  const path = getStorePath(projectPath);
-  let store: SessionsStore = {};
+export async function validatePreviewSession(agent: AgentInstance): Promise<void> {
+  const historyDir = await agent.getHistoryDir();
+  const path = join(historyDir, SESSION_META_FILE);
   try {
-    const data = await readFile(path, 'utf-8');
-    store = JSON.parse(data) as SessionsStore;
-  } catch {
-    // file missing or invalid
-  }
-  const { sessionId, ...rest } = entry;
-  store[sessionId] = rest;
-  await writeFile(path, JSON.stringify(store, null, 2), 'utf-8');
-}
-
-/**
- * Validate that the given session was started with the specified agent and org.
- * Throws SfError if the session is unknown or does not match.
- */
-export async function validatePreviewSession(
-  projectPath: string,
-  sessionId: string,
-  agentAndOrg: { apiNameOrId?: string; aabName?: string; orgUsername: string }
-): Promise<void> {
-  let data: string;
-  try {
-    data = await readFile(getStorePath(projectPath), 'utf-8');
+    await readFile(path, 'utf-8');
   } catch {
     throw new SfError(
-      `No preview session found for session ID "${sessionId}". Run "sf agent preview start" first.`,
+      'No preview session found for this session ID. Run "sf agent preview start" first.',
       'PreviewSessionNotFound'
-    );
-  }
-  const store = JSON.parse(data) as SessionsStore;
-  const entry = store[sessionId];
-  if (!entry) {
-    throw new SfError(
-      `No preview session found for session ID "${sessionId}". Run "sf agent preview start" first.`,
-      'PreviewSessionNotFound'
-    );
-  }
-  if (entry.orgUsername !== agentAndOrg.orgUsername) {
-    throw new SfError(
-      `Session ${sessionId} was started with a different target org. Use --target-org ${entry.orgUsername} for this session.`,
-      'PreviewSessionOrgMismatch'
-    );
-  }
-  const entryAgent = entry.aabName ? `--authoring-bundle ${entry.aabName}` : `--api-name ${entry.apiNameOrId ?? ''}`;
-  if (entry.aabName) {
-    if (agentAndOrg.aabName !== entry.aabName) {
-      throw new SfError(
-        `Session ${sessionId} was started with ${entryAgent}. Use the same agent for send/end.`,
-        'PreviewSessionAgentMismatch'
-      );
-    }
-  } else if (agentAndOrg.apiNameOrId !== entry.apiNameOrId) {
-    throw new SfError(
-      `Session ${sessionId} was started with ${entryAgent}. Use the same agent for send/end.`,
-      'PreviewSessionAgentMismatch'
     );
   }
 }

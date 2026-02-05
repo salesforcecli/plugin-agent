@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { join } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
@@ -56,26 +55,22 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
   public async run(): Promise<AgentPreviewEndResult> {
     const { flags } = await this.parse(AgentPreviewEnd);
     const sessionId = flags['session-id'];
-    const projectPath = this.project!.getPath();
-
-    await validatePreviewSession(projectPath, sessionId, {
-      apiNameOrId: flags['api-name'],
-      aabName: flags['authoring-bundle'],
-      orgUsername: flags['target-org'].getUsername() ?? '',
-    });
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
 
+    agent.setSessionId(sessionId);
+    await validatePreviewSession(agent);
+
+    const tracesPath = await (agent as unknown as { getHistoryDir(): Promise<string> }).getHistoryDir();
+
     if (agent instanceof ScriptAgent) {
       await agent.preview.end();
     } else if (agent instanceof ProductionAgent) {
       await agent.preview.end('UserRequest');
     }
-
-    const tracesPath = join(projectPath, '.sfdx', 'agents', agent.getAgentIdForStorage(), 'sessions', sessionId);
     const result = { sessionId, tracesPath };
     this.log(messages.getMessage('output.tracesPath', [tracesPath]));
     return result;

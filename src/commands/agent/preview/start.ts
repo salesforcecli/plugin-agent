@@ -70,13 +70,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     const session = await agent.preview.start();
-
-    await createCache(this.project!.getPath(), {
-      sessionId: session.sessionId,
-      orgUsername: flags['target-org'].getUsername() ?? '',
-      apiNameOrId: flags['api-name'],
-      aabName: flags['authoring-bundle'],
-    });
+    await createCache(agent);
 
     const result: AgentPreviewStartResult = { sessionId: session.sessionId };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));

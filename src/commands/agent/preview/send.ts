@@ -59,12 +59,6 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
   public async run(): Promise<AgentPreviewSendResult> {
     const { flags } = await this.parse(AgentPreviewSend);
 
-    await validatePreviewSession(this.project!.getPath(), flags['session-id'], {
-      apiNameOrId: flags['api-name'],
-      aabName: flags['authoring-bundle'],
-      orgUsername: flags['target-org'].getUsername() ?? '',
-    });
-
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
@@ -74,6 +68,7 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
     }
 
     agent.setSessionId(flags['session-id']);
+    await validatePreviewSession(agent);
 
     const response = await agent.preview.send(flags.utterance);
     this.log(response.messages[0].message);
