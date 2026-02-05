@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
+import { validatePreviewSession } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.end');
@@ -56,6 +57,12 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
     const { flags } = await this.parse(AgentPreviewEnd);
     const sessionId = flags['session-id'];
     const projectPath = this.project!.getPath();
+
+    await validatePreviewSession(projectPath, sessionId, {
+      apiNameOrId: flags['api-name'],
+      aabName: flags['authoring-bundle'],
+      orgUsername: flags['target-org'].getUsername() ?? '',
+    });
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const agent = flags['authoring-bundle']

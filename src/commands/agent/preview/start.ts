@@ -17,6 +17,7 @@
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Lifecycle, Messages } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
+import { createCache } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.start');
@@ -69,6 +70,13 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     const session = await agent.preview.start();
+
+    await createCache(this.project!.getPath(), {
+      sessionId: session.sessionId,
+      orgUsername: flags['target-org'].getUsername() ?? '',
+      apiNameOrId: flags['api-name'],
+      aabName: flags['authoring-bundle'],
+    });
 
     const result: AgentPreviewStartResult = { sessionId: session.sessionId };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));

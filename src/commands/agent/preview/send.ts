@@ -17,6 +17,7 @@
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { Agent, ScriptAgent } from '@salesforce/agents';
+import { validatePreviewSession } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.send');
@@ -57,6 +58,12 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
 
   public async run(): Promise<AgentPreviewSendResult> {
     const { flags } = await this.parse(AgentPreviewSend);
+
+    await validatePreviewSession(this.project!.getPath(), flags['session-id'], {
+      apiNameOrId: flags['api-name'],
+      aabName: flags['authoring-bundle'],
+      orgUsername: flags['target-org'].getUsername() ?? '',
+    });
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const agent = flags['authoring-bundle']
