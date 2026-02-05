@@ -4,20 +4,25 @@
   "definitions": {
     "AgentPreviewSendResult": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "messages": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "message": { "type": "string" },
-              "role": { "type": "string" }
-            }
+              "message": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         }
       },
-      "required": ["messages"]
+      "required": ["messages"],
+      "additionalProperties": false
     }
   }
 }

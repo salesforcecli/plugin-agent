@@ -4,7 +4,6 @@
   "definitions": {
     "AgentPreviewEndResult": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "sessionId": {
           "type": "string"
@@ -13,7 +12,8 @@
           "type": "string"
         }
       },
-      "required": ["sessionId", "tracesPath"]
+      "required": ["sessionId", "tracesPath"],
+      "additionalProperties": false
     }
   }
 }

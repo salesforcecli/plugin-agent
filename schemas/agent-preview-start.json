@@ -4,13 +4,13 @@
   "definitions": {
     "AgentPreviewStartResult": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "sessionId": {
           "type": "string"
         }
       },
-      "required": ["sessionId"]
+      "required": ["sessionId"],
+      "additionalProperties": false
     }
   }
 }

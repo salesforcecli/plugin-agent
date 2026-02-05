@@ -94,6 +94,39 @@
   },
   {
     "alias": [],
+    "command": "agent:preview:end",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "authoring-bundle", "flags-dir", "json", "session-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:send",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "u"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "session-id",
+      "target-org",
+      "utterance"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:start",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "authoring-bundle", "flags-dir", "json", "target-org", "use-live-actions"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],
