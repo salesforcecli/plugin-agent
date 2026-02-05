@@ -63,7 +63,15 @@ export async function validatePreviewSession(
   sessionId: string,
   agentAndOrg: { apiNameOrId?: string; aabName?: string; orgUsername: string }
 ): Promise<void> {
-  const data = await readFile(getStorePath(projectPath), 'utf-8');
+  let data: string;
+  try {
+    data = await readFile(getStorePath(projectPath), 'utf-8');
+  } catch {
+    throw new SfError(
+      `No preview session found for session ID "${sessionId}". Run "sf agent preview start" first.`,
+      'PreviewSessionNotFound'
+    );
+  }
   const store = JSON.parse(data) as SessionsStore;
   const entry = store[sessionId];
   if (!entry) {
