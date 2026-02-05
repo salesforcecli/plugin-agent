@@ -21,6 +21,23 @@ import { expect } from 'chai';
 import { SfError } from '@salesforce/core';
 import { createCache, validatePreviewSession } from '../src/previewSessionStore.js';
 
+function makeMockAgent(baseDir: string, agentId: string) {
+  let sessionId: string | undefined;
+  const agent = {
+    setSessionId(id: string) {
+      sessionId = id;
+    },
+    async getHistoryDir(): Promise<string> {
+      if (!sessionId) throw new Error('sessionId not set');
+      const dir = join(baseDir, 'agents', agentId, 'sessions', sessionId);
+      const { mkdir } = await import('node:fs/promises');
+      await mkdir(dir, { recursive: true });
+      return dir;
+    },
+  };
+  return agent;
+}
+
 describe('previewSessionStore', () => {
   let projectPath: string;
 
@@ -33,79 +50,49 @@ describe('previewSessionStore', () => {
   });
 
   describe('createCache', () => {
-    it('saves session with authoring-bundle', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        aabName: 'My_Bundle',
-      });
-      await validatePreviewSession(projectPath, 'sess-1', {
-        aabName: 'My_Bundle',
-        orgUsername: 'user@org.com',
-      });
+    it('saves session and validates with same agent', async () => {
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent as never);
+      agent.setSessionId('sess-1');
+      await validatePreviewSession(agent as never);
     });
 
-    it('saves session with api-name', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-2',
-        orgUsername: 'user@org.com',
-        apiNameOrId: 'My_Published_Agent',
-      });
-      await validatePreviewSession(projectPath, 'sess-2', {
-        apiNameOrId: 'My_Published_Agent',
-        orgUsername: 'user@org.com',
-      });
-    });
-
-    it('allows multiple sessions in same store', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-a',
-        orgUsername: 'user@org.com',
-        aabName: 'Bundle_A',
-      });
-      await createCache(projectPath, {
-        sessionId: 'sess-b',
-        orgUsername: 'user@org.com',
-        apiNameOrId: 'Agent_B',
-      });
-      await validatePreviewSession(projectPath, 'sess-a', {
-        aabName: 'Bundle_A',
-        orgUsername: 'user@org.com',
-      });
-      await validatePreviewSession(projectPath, 'sess-b', {
-        apiNameOrId: 'Agent_B',
-        orgUsername: 'user@org.com',
-      });
+    it('allows multiple sessions for same agent', async () => {
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-a');
+      await createCache(agent as never);
+      agent.setSessionId('sess-b');
+      await createCache(agent as never);
+      agent.setSessionId('sess-a');
+      await validatePreviewSession(agent as never);
+      agent.setSessionId('sess-b');
+      await validatePreviewSession(agent as never);
     });
   });
 
   describe('validatePreviewSession', () => {
-    it('throws PreviewSessionNotFound when store file does not exist', async () => {
+    it('throws PreviewSessionNotFound when session file does not exist', async () => {
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('unknown-sess');
       try {
-        await validatePreviewSession(projectPath, 'unknown-sess', {
-          aabName: 'My_Bundle',
-          orgUsername: 'user@org.com',
-        });
+        await validatePreviewSession(agent as never);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
         expect((e as SfError).name).to.equal('PreviewSessionNotFound');
         expect((e as SfError).message).to.include('No preview session found');
-        expect((e as SfError).message).to.include('unknown-sess');
       }
     });
 
-    it('throws PreviewSessionNotFound when session id not in store', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        aabName: 'My_Bundle',
-      });
+    it('throws PreviewSessionNotFound when session id is for different agent', async () => {
+      const agentA = makeMockAgent(projectPath, 'agent-a');
+      const agentB = makeMockAgent(projectPath, 'agent-b');
+      (agentA as { setSessionId: (id: string) => void }).setSessionId('sess-1');
+      await createCache(agentA as never);
+      (agentB as { setSessionId: (id: string) => void }).setSessionId('sess-1');
       try {
-        await validatePreviewSession(projectPath, 'other-sess', {
-          aabName: 'My_Bundle',
-          orgUsername: 'user@org.com',
-        });
+        await validatePreviewSession(agentB as never);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
@@ -113,123 +100,12 @@ describe('previewSessionStore', () => {
       }
     });
 
-    it('throws PreviewSessionOrgMismatch when org differs', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org-a.com',
-        aabName: 'My_Bundle',
-      });
-      try {
-        await validatePreviewSession(projectPath, 'sess-1', {
-          aabName: 'My_Bundle',
-          orgUsername: 'user@org-b.com',
-        });
-        expect.fail('Expected validatePreviewSession to throw');
-      } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionOrgMismatch');
-        expect((e as SfError).message).to.include('different target org');
-        expect((e as SfError).message).to.include('user@org-a.com');
-      }
-    });
-
-    it('throws PreviewSessionAgentMismatch when authoring-bundle differs', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        aabName: 'Bundle_A',
-      });
-      try {
-        await validatePreviewSession(projectPath, 'sess-1', {
-          aabName: 'Bundle_B',
-          orgUsername: 'user@org.com',
-        });
-        expect.fail('Expected validatePreviewSession to throw');
-      } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionAgentMismatch');
-        expect((e as SfError).message).to.include('Session sess-1 was started with');
-        expect((e as SfError).message).to.include('Bundle_A');
-      }
-    });
-
-    it('throws PreviewSessionAgentMismatch when api-name differs', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        apiNameOrId: 'Agent_A',
-      });
-      try {
-        await validatePreviewSession(projectPath, 'sess-1', {
-          apiNameOrId: 'Agent_B',
-          orgUsername: 'user@org.com',
-        });
-        expect.fail('Expected validatePreviewSession to throw');
-      } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionAgentMismatch');
-        expect((e as SfError).message).to.include('Agent_A');
-      }
-    });
-
-    it('throws when session was started with authoring-bundle but send uses api-name', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        aabName: 'My_Bundle',
-      });
-      try {
-        await validatePreviewSession(projectPath, 'sess-1', {
-          apiNameOrId: 'Some_Agent',
-          orgUsername: 'user@org.com',
-        });
-        expect.fail('Expected validatePreviewSession to throw');
-      } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionAgentMismatch');
-      }
-    });
-
-    it('throws when session was started with api-name but send uses authoring-bundle', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        apiNameOrId: 'My_Agent',
-      });
-      try {
-        await validatePreviewSession(projectPath, 'sess-1', {
-          aabName: 'Some_Bundle',
-          orgUsername: 'user@org.com',
-        });
-        expect.fail('Expected validatePreviewSession to throw');
-      } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionAgentMismatch');
-      }
-    });
-
-    it('succeeds when agent and org match (authoring-bundle)', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        aabName: 'My_Bundle',
-      });
-      await validatePreviewSession(projectPath, 'sess-1', {
-        aabName: 'My_Bundle',
-        orgUsername: 'user@org.com',
-      });
-    });
-
-    it('succeeds when agent and org match (api-name)', async () => {
-      await createCache(projectPath, {
-        sessionId: 'sess-1',
-        orgUsername: 'user@org.com',
-        apiNameOrId: 'My_Agent',
-      });
-      await validatePreviewSession(projectPath, 'sess-1', {
-        apiNameOrId: 'My_Agent',
-        orgUsername: 'user@org.com',
-      });
+    it('succeeds when session exists for this agent', async () => {
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent as never);
+      agent.setSessionId('sess-1');
+      await validatePreviewSession(agent as never);
     });
   });
 });
