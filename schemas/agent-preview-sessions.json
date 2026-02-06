@@ -10,6 +10,9 @@
           "agentId": {
             "type": "string"
           },
+          "displayName": {
+            "type": "string"
+          },
           "sessionId": {
             "type": "string"
           }
