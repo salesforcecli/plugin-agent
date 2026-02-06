@@ -17,7 +17,7 @@
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
-import { getCachedSessionIds, validatePreviewSession } from '../../../previewSessionStore.js';
+import { getCachedSessionIds, removeCache, validatePreviewSession } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.end');
@@ -78,6 +78,8 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
     await validatePreviewSession(agent);
 
     const tracesPath = await agent.getHistoryDir();
+
+    await removeCache(agent);
 
     if (agent instanceof ScriptAgent) {
       await agent.preview.end();

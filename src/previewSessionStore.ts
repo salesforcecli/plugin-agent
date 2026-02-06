@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SfError } from '@salesforce/core';
 import type { SfProject } from '@salesforce/core';
@@ -51,6 +51,20 @@ export async function validatePreviewSession(agent: ScriptAgent | ProductionAgen
       'No preview session found for this session ID. Run "sf agent preview start" first.',
       'PreviewSessionNotFound'
     );
+  }
+}
+
+/**
+ * Remove the session marker so this session is no longer considered "active" for send/end without --session-id.
+ * Call after ending the session. Caller must set sessionId on the agent before calling.
+ */
+export async function removeCache(agent: ScriptAgent | ProductionAgent): Promise<void> {
+  const historyDir = await agent.getHistoryDir();
+  const metaPath = join(historyDir, SESSION_META_FILE);
+  try {
+    await unlink(metaPath);
+  } catch {
+    // already removed or never created
   }
 }
 

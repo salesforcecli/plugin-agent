@@ -24,6 +24,7 @@ import {
   createCache,
   getCachedSessionIds,
   getCurrentSessionId,
+  removeCache,
   validatePreviewSession,
 } from '../src/previewSessionStore.js';
 
@@ -151,6 +152,36 @@ describe('previewSessionStore', () => {
       });
       const ids = await getCachedSessionIds(project, agent);
       expect(ids).to.deep.equal(['sess-1']);
+    });
+  });
+
+  describe('removeCache', () => {
+    it('removes session from cache so getCachedSessionIds no longer includes it', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent);
+      agent.setSessionId('sess-2');
+      await createCache(agent);
+      let ids = await getCachedSessionIds(project, agent);
+      expect(ids).to.have.members(['sess-1', 'sess-2']);
+      agent.setSessionId('sess-1');
+      await removeCache(agent);
+      ids = await getCachedSessionIds(project, agent);
+      expect(ids).to.deep.equal(['sess-2']);
+    });
+
+    it('after removing one of two sessions, getCurrentSessionId returns the remaining session', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-a');
+      await createCache(agent);
+      agent.setSessionId('sess-b');
+      await createCache(agent);
+      expect(await getCurrentSessionId(project, agent)).to.be.undefined;
+      agent.setSessionId('sess-a');
+      await removeCache(agent);
+      expect(await getCurrentSessionId(project, agent)).to.equal('sess-b');
     });
   });
 
