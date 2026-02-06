@@ -28,6 +28,10 @@ Session ID: %s
 
   <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --target-org my-dev-org
 
-- Start a preview session with a published agent in live mode:
+- Start a preview session with an authoring bundle and use real actions:
 
-  <%= config.bin %> <%= command.id %> --api-name My_Published_Agent --use-live-actions --target-org my-dev-org
+  <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --use-live-actions --target-org my-dev-org
+
+- Start a preview session with a published agent:
+
+  <%= config.bin %> <%= command.id %> --api-name My_Published_Agent

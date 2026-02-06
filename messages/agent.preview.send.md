@@ -32,9 +32,13 @@ Multiple preview sessions found for this agent. Specify --session-id. Sessions: 
 
 # examples
 
-- Send a message to a preview session:
+- Send a message to a simulated Agent:
 
-  <%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --target-org my-dev-org
+  <%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --authoring-bundle My_Agent
+
+Send a message to a published Agent:
+
+<%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --api-name My_Published_Agent
 
 - Send to a specific session when multiple exist:
 
