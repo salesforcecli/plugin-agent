@@ -22,16 +22,23 @@ import type { ProductionAgent, ScriptAgent } from '@salesforce/agents';
 
 const SESSION_META_FILE = 'session-meta.json';
 
+export type SessionMeta = { displayName?: string };
+
 /**
  * Save a marker so send/end can validate that the session was started for this agent.
  * Caller must have started the session (agent has sessionId set). Uses agent.getHistoryDir() for the path.
+ * Pass displayName (authoring bundle name or production agent API name) so "agent preview sessions" can show it.
  */
-export async function createCache(agent: ScriptAgent | ProductionAgent): Promise<void> {
+export async function createCache(
+  agent: ScriptAgent | ProductionAgent,
+  options?: { displayName?: string }
+): Promise<void> {
   /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
   /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
-  await writeFile(metaPath, JSON.stringify({}), 'utf-8');
+  const meta: SessionMeta = { displayName: options?.displayName };
+  await writeFile(metaPath, JSON.stringify(meta), 'utf-8');
 }
 
 /**
@@ -113,11 +120,11 @@ export async function getCurrentSessionId(
   return ids.length === 1 ? ids[0] : undefined;
 }
 
-export type CachedSessionEntry = { agentId: string; sessionIds: string[] };
+export type CachedSessionEntry = { agentId: string; displayName?: string; sessionIds: string[] };
 
 /**
  * List all cached preview sessions in the project, grouped by agent ID.
- * Agent ID is the authoring bundle name (for script agents) or agent ID (for published agents).
+ * displayName (when present in session-meta.json) is the authoring bundle name or production agent API name for display.
  * Use this to show users which sessions exist so they can end or clean up.
  */
 export async function listCachedSessions(project: SfProject): Promise<CachedSessionEntry[]> {
@@ -132,6 +139,7 @@ export async function listCachedSessions(project: SfProject): Promise<CachedSess
           const agentId = ent.name;
           const sessionsDir = join(base, agentId, 'sessions');
           let sessionIds: string[] = [];
+          let displayName: string | undefined;
           try {
             const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
             const withMarker = await Promise.all(
@@ -147,10 +155,19 @@ export async function listCachedSessions(project: SfProject): Promise<CachedSess
                 })
             );
             sessionIds = withMarker.filter((id): id is string => id !== null);
+            if (sessionIds.length > 0) {
+              try {
+                const raw = await readFile(join(sessionsDir, sessionIds[0], SESSION_META_FILE), 'utf-8');
+                const meta = JSON.parse(raw) as SessionMeta;
+                displayName = meta.displayName;
+              } catch {
+                // ignore
+              }
+            }
           } catch {
             // no sessions dir or unreadable
           }
-          return { agentId, sessionIds };
+          return { agentId, displayName, sessionIds };
         })
     );
     result.push(...entries.filter((e) => e.sessionIds.length > 0));

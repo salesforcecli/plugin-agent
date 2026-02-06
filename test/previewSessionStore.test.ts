@@ -209,6 +209,18 @@ describe('previewSessionStore', () => {
       expect(byAgent['bundle-a']).to.have.members(['s1', 's2']);
       expect(byAgent['bundle-b']).to.deep.equal(['s3']);
     });
+
+    it('returns displayName from session-meta when createCache was called with displayName', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'some-id');
+      agent.setSessionId('s1');
+      await createCache(agent, { displayName: 'My_Production_Agent' });
+      const list = await listCachedSessions(project);
+      expect(list).to.have.lengthOf(1);
+      expect(list[0].agentId).to.equal('some-id');
+      expect(list[0].displayName).to.equal('My_Production_Agent');
+      expect(list[0].sessionIds).to.deep.equal(['s1']);
+    });
   });
 
   describe('getCurrentSessionId', () => {

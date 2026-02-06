@@ -21,7 +21,7 @@ import { listCachedSessions } from '../../../previewSessionStore.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.sessions');
 
-export type AgentPreviewSessionsResult = Array<{ agentId: string; sessionId: string }>;
+export type AgentPreviewSessionsResult = Array<{ agentId: string; displayName?: string; sessionId: string }>;
 
 export default class AgentPreviewSessions extends SfCommand<AgentPreviewSessionsResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -33,9 +33,9 @@ export default class AgentPreviewSessions extends SfCommand<AgentPreviewSessions
   public async run(): Promise<AgentPreviewSessionsResult> {
     const entries = await listCachedSessions(this.project!);
     const rows: AgentPreviewSessionsResult = [];
-    for (const { agentId, sessionIds } of entries) {
+    for (const { agentId, displayName, sessionIds } of entries) {
       for (const sessionId of sessionIds) {
-        rows.push({ agentId, sessionId });
+        rows.push({ agentId, displayName, sessionId });
       }
     }
 
@@ -48,12 +48,16 @@ export default class AgentPreviewSessions extends SfCommand<AgentPreviewSessions
       return rows;
     }
 
-    const agentIdHeader = messages.getMessage('output.tableHeader.agentId');
+    const agentColumnHeader = messages.getMessage('output.tableHeader.agent');
     const sessionIdHeader = messages.getMessage('output.tableHeader.sessionId');
+    const tableData = rows.map((r) => ({
+      agent: r.displayName ?? r.agentId,
+      sessionId: r.sessionId,
+    }));
     this.table({
-      data: rows,
+      data: tableData,
       columns: [
-        { key: 'agentId', name: agentIdHeader },
+        { key: 'agent', name: agentColumnHeader },
         { key: 'sessionId', name: sessionIdHeader },
       ],
     });

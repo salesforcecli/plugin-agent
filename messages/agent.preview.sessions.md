@@ -10,9 +10,9 @@ List preview sessions that were started with "agent preview start" and are still
 
 No cached preview sessions found.
 
-# output.tableHeader.agentId
+# output.tableHeader.agent
 
-Agent ID (authoring bundle or agent)
+Agent (authoring bundle or API name)
 
 # output.tableHeader.sessionId
 
