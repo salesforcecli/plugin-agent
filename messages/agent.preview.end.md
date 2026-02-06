@@ -8,7 +8,7 @@ End an existing preview session and print the local path where session traces ar
 
 # flags.session-id.summary
 
-Session ID from "agent preview start" (required).
+Session ID from "agent preview start". Omit when the agent has exactly one active session.
 
 # flags.api-name.summary
 
@@ -18,12 +18,24 @@ API name or ID of the published agent.
 
 API name of the authoring bundle (Agent Script).
 
+# error.noSession
+
+No preview session found. Run "sf agent preview start" first.
+
+# error.multipleSessions
+
+Multiple preview sessions found for this agent. Specify --session-id. Sessions: %s
+
 # output.tracesPath
 
 Session traces: %s
 
 # examples
 
-- End a preview session:
+- End the single active preview session:
+
+  <%= config.bin %> <%= command.id %> --target-org my-dev-org
+
+- End a specific session when multiple exist:
 
   <%= config.bin %> <%= command.id %> --session-id <SESSION_ID> --target-org my-dev-org

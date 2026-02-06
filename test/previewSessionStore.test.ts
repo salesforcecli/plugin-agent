@@ -18,24 +18,36 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect } from 'chai';
-import { SfError } from '@salesforce/core';
-import { createCache, validatePreviewSession } from '../src/previewSessionStore.js';
+import { SfError, SfProject } from '@salesforce/core';
+import type { ProductionAgent, ScriptAgent } from '@salesforce/agents';
+import {
+  createCache,
+  getCachedSessionIds,
+  getCurrentSessionId,
+  validatePreviewSession,
+} from '../src/previewSessionStore.js';
 
-function makeMockAgent(baseDir: string, agentId: string) {
+function makeMockProject(getPath: () => string): SfProject {
+  return { getPath } as SfProject;
+}
+
+function makeMockAgent(projectDir: string, agentId: string): ScriptAgent | ProductionAgent {
   let sessionId: string | undefined;
-  const agent = {
+  return {
     setSessionId(id: string) {
       sessionId = id;
     },
+    getAgentIdForStorage(): string {
+      return agentId;
+    },
     async getHistoryDir(): Promise<string> {
       if (!sessionId) throw new Error('sessionId not set');
-      const dir = join(baseDir, 'agents', agentId, 'sessions', sessionId);
+      const dir = join(projectDir, '.sfdx', 'agents', agentId, 'sessions', sessionId);
       const { mkdir } = await import('node:fs/promises');
       await mkdir(dir, { recursive: true });
       return dir;
     },
-  };
-  return agent;
+  } as ScriptAgent | ProductionAgent;
 }
 
 describe('previewSessionStore', () => {
@@ -53,21 +65,21 @@ describe('previewSessionStore', () => {
     it('saves session and validates with same agent', async () => {
       const agent = makeMockAgent(projectPath, 'agent-1');
       agent.setSessionId('sess-1');
-      await createCache(agent as never);
+      await createCache(agent);
       agent.setSessionId('sess-1');
-      await validatePreviewSession(agent as never);
+      await validatePreviewSession(agent);
     });
 
     it('allows multiple sessions for same agent', async () => {
       const agent = makeMockAgent(projectPath, 'agent-1');
       agent.setSessionId('sess-a');
-      await createCache(agent as never);
+      await createCache(agent);
       agent.setSessionId('sess-b');
-      await createCache(agent as never);
+      await createCache(agent);
       agent.setSessionId('sess-a');
-      await validatePreviewSession(agent as never);
+      await validatePreviewSession(agent);
       agent.setSessionId('sess-b');
-      await validatePreviewSession(agent as never);
+      await validatePreviewSession(agent);
     });
   });
 
@@ -76,7 +88,7 @@ describe('previewSessionStore', () => {
       const agent = makeMockAgent(projectPath, 'agent-1');
       agent.setSessionId('unknown-sess');
       try {
-        await validatePreviewSession(agent as never);
+        await validatePreviewSession(agent);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
@@ -88,11 +100,11 @@ describe('previewSessionStore', () => {
     it('throws PreviewSessionNotFound when session id is for different agent', async () => {
       const agentA = makeMockAgent(projectPath, 'agent-a');
       const agentB = makeMockAgent(projectPath, 'agent-b');
-      (agentA as { setSessionId: (id: string) => void }).setSessionId('sess-1');
-      await createCache(agentA as never);
-      (agentB as { setSessionId: (id: string) => void }).setSessionId('sess-1');
+      agentA.setSessionId('sess-1');
+      await createCache(agentA);
+      agentB.setSessionId('sess-1');
       try {
-        await validatePreviewSession(agentB as never);
+        await validatePreviewSession(agentB);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
@@ -103,9 +115,71 @@ describe('previewSessionStore', () => {
     it('succeeds when session exists for this agent', async () => {
       const agent = makeMockAgent(projectPath, 'agent-1');
       agent.setSessionId('sess-1');
-      await createCache(agent as never);
+      await createCache(agent);
       agent.setSessionId('sess-1');
-      await validatePreviewSession(agent as never);
+      await validatePreviewSession(agent);
+    });
+  });
+
+  describe('getCachedSessionIds', () => {
+    it('returns empty when no sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      const ids = await getCachedSessionIds(project, agent);
+      expect(ids).to.deep.equal([]);
+    });
+
+    it('returns session ids that have session-meta.json', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent);
+      agent.setSessionId('sess-2');
+      await createCache(agent);
+      const ids = await getCachedSessionIds(project, agent);
+      expect(ids).to.have.members(['sess-1', 'sess-2']);
+    });
+
+    it('does not return session dirs without session-meta.json', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent);
+      const { mkdir } = await import('node:fs/promises');
+      await mkdir(join(projectPath, '.sfdx', 'agents', 'agent-1', 'sessions', 'other-dir'), {
+        recursive: true,
+      });
+      const ids = await getCachedSessionIds(project, agent);
+      expect(ids).to.deep.equal(['sess-1']);
+    });
+  });
+
+  describe('getCurrentSessionId', () => {
+    it('returns undefined when no sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      const id = await getCurrentSessionId(project, agent);
+      expect(id).to.be.undefined;
+    });
+
+    it('returns session id when exactly one session', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-1');
+      await createCache(agent);
+      const id = await getCurrentSessionId(project, agent);
+      expect(id).to.equal('sess-1');
+    });
+
+    it('returns undefined when multiple sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'agent-1');
+      agent.setSessionId('sess-a');
+      await createCache(agent);
+      agent.setSessionId('sess-b');
+      await createCache(agent);
+      const id = await getCurrentSessionId(project, agent);
+      expect(id).to.be.undefined;
     });
   });
 });

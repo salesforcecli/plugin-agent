@@ -15,9 +15,9 @@
  */
 
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
-import { Agent, ScriptAgent } from '@salesforce/agents';
-import { validatePreviewSession } from '../../../previewSessionStore.js';
+import { Messages, SfError } from '@salesforce/core';
+import { Agent } from '@salesforce/agents';
+import { getCachedSessionIds, validatePreviewSession } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.send');
@@ -38,7 +38,7 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
     'api-version': Flags.orgApiVersion(),
     'session-id': Flags.string({
       summary: messages.getMessage('flags.session-id.summary'),
-      required: true,
+      required: false,
     }),
     utterance: Flags.string({
       summary: messages.getMessage('flags.utterance.summary'),
@@ -60,14 +60,26 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
     const { flags } = await this.parse(AgentPreviewSend);
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
+
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
-    if (agent instanceof ScriptAgent) {
-      agent.preview.setMockMode('Mock');
-    }
 
-    agent.setSessionId(flags['session-id']);
+    let sessionId = flags['session-id'];
+    if (sessionId === undefined) {
+      const cached = await getCachedSessionIds(this.project!, agent);
+      if (cached.length === 0) {
+        throw new SfError(messages.getMessage('error.noSession'), 'PreviewSessionNotFound');
+      }
+      if (cached.length > 1) {
+        throw new SfError(
+          messages.getMessage('error.multipleSessions', [cached.join(', ')]),
+          'PreviewSessionAmbiguous'
+        );
+      }
+      sessionId = cached[0];
+    }
+    agent.setSessionId(sessionId);
     await validatePreviewSession(agent);
 
     const response = await agent.preview.send(flags.utterance);

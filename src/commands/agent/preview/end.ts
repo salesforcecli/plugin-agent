@@ -15,9 +15,9 @@
  */
 
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
-import { validatePreviewSession } from '../../../previewSessionStore.js';
+import { getCachedSessionIds, validatePreviewSession } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.end');
@@ -39,7 +39,7 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
     'api-version': Flags.orgApiVersion(),
     'session-id': Flags.string({
       summary: messages.getMessage('flags.session-id.summary'),
-      required: true,
+      required: false,
     }),
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
@@ -54,17 +54,30 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
 
   public async run(): Promise<AgentPreviewEndResult> {
     const { flags } = await this.parse(AgentPreviewEnd);
-    const sessionId = flags['session-id'];
 
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
 
+    let sessionId = flags['session-id'];
+    if (sessionId === undefined) {
+      const cached = await getCachedSessionIds(this.project!, agent);
+      if (cached.length === 0) {
+        throw new SfError(messages.getMessage('error.noSession'), 'PreviewSessionNotFound');
+      }
+      if (cached.length > 1) {
+        throw new SfError(
+          messages.getMessage('error.multipleSessions', [cached.join(', ')]),
+          'PreviewSessionAmbiguous'
+        );
+      }
+      sessionId = cached[0];
+    }
     agent.setSessionId(sessionId);
     await validatePreviewSession(agent);
 
-    const tracesPath = await (agent as unknown as { getHistoryDir(): Promise<string> }).getHistoryDir();
+    const tracesPath = await agent.getHistoryDir();
 
     if (agent instanceof ScriptAgent) {
       await agent.preview.end();
