@@ -119,6 +119,14 @@
   },
   {
     "alias": [],
+    "command": "agent:preview:sessions",
+    "flagAliases": [],
+    "flagChars": [],
+    "flags": ["flags-dir", "json"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:preview:start",
     "flagAliases": [],
     "flagChars": ["n", "o"],

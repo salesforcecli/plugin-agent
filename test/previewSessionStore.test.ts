@@ -24,6 +24,7 @@ import {
   createCache,
   getCachedSessionIds,
   getCurrentSessionId,
+  listCachedSessions,
   removeCache,
   validatePreviewSession,
 } from '../src/previewSessionStore.js';
@@ -182,6 +183,31 @@ describe('previewSessionStore', () => {
       agent.setSessionId('sess-a');
       await removeCache(agent);
       expect(await getCurrentSessionId(project, agent)).to.equal('sess-b');
+    });
+  });
+
+  describe('listCachedSessions', () => {
+    it('returns empty when no cached sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const list = await listCachedSessions(project);
+      expect(list).to.deep.equal([]);
+    });
+
+    it('returns agent ids and session ids for all cached sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent1 = makeMockAgent(projectPath, 'bundle-a');
+      agent1.setSessionId('s1');
+      await createCache(agent1);
+      agent1.setSessionId('s2');
+      await createCache(agent1);
+      const agent2 = makeMockAgent(projectPath, 'bundle-b');
+      agent2.setSessionId('s3');
+      await createCache(agent2);
+      const list = await listCachedSessions(project);
+      expect(list).to.have.lengthOf(2);
+      const byAgent = Object.fromEntries(list.map((e) => [e.agentId, e.sessionIds]));
+      expect(byAgent['bundle-a']).to.have.members(['s1', 's2']);
+      expect(byAgent['bundle-b']).to.deep.equal(['s3']);
     });
   });
 

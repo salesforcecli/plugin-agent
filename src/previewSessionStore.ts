@@ -59,8 +59,10 @@ export async function validatePreviewSession(agent: ScriptAgent | ProductionAgen
  * Call after ending the session. Caller must set sessionId on the agent before calling.
  */
 export async function removeCache(agent: ScriptAgent | ProductionAgent): Promise<void> {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   try {
     await unlink(metaPath);
   } catch {
@@ -109,4 +111,51 @@ export async function getCurrentSessionId(
 ): Promise<string | undefined> {
   const ids = await getCachedSessionIds(project, agent);
   return ids.length === 1 ? ids[0] : undefined;
+}
+
+export type CachedSessionEntry = { agentId: string; sessionIds: string[] };
+
+/**
+ * List all cached preview sessions in the project, grouped by agent ID.
+ * Agent ID is the authoring bundle name (for script agents) or agent ID (for published agents).
+ * Use this to show users which sessions exist so they can end or clean up.
+ */
+export async function listCachedSessions(project: SfProject): Promise<CachedSessionEntry[]> {
+  const base = join(project.getPath(), '.sfdx', 'agents');
+  const result: CachedSessionEntry[] = [];
+  try {
+    const agentDirs = await readdir(base, { withFileTypes: true });
+    const entries = await Promise.all(
+      agentDirs
+        .filter((ent) => ent.isDirectory())
+        .map(async (ent) => {
+          const agentId = ent.name;
+          const sessionsDir = join(base, agentId, 'sessions');
+          let sessionIds: string[] = [];
+          try {
+            const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
+            const withMarker = await Promise.all(
+              sessionDirs
+                .filter((s) => s.isDirectory())
+                .map(async (s) => {
+                  try {
+                    await readFile(join(sessionsDir, s.name, SESSION_META_FILE), 'utf-8');
+                    return s.name;
+                  } catch {
+                    return null;
+                  }
+                })
+            );
+            sessionIds = withMarker.filter((id): id is string => id !== null);
+          } catch {
+            // no sessions dir or unreadable
+          }
+          return { agentId, sessionIds };
+        })
+    );
+    result.push(...entries.filter((e) => e.sessionIds.length > 0));
+  } catch {
+    // no agents dir or unreadable
+  }
+  return result;
 }
