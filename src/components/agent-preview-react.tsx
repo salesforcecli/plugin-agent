@@ -125,7 +125,7 @@ export function AgentPreviewReact(props: {
           if (isLocalAgent) {
             await agent.end();
           } else {
-            await (agent as ProductionAgentPreview).end('UserRequest');
+            await agent.end('UserRequest');
           }
           process.exit(0);
         } catch (e) {
