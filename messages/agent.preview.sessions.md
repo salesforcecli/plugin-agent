@@ -1,14 +1,16 @@
 # summary
 
-List cached preview sessions (beta).
+List all known programmatic agent preview sessions.
 
 # description
 
-List preview sessions that were started with "agent preview start" and are still in the cache. Use this to see which sessions exist so you can end them with "agent preview end" (e.g. to clean up or resolve "multiple sessions" when using send without --session-id). Agent ID is the authoring bundle name for Agent Script agents, or the agent ID for published agents.
+This command lists the agent preview sessions that were started with the "agent preview start" command and are still in the local cache. Use this command to discover specific session IDs that you can pass to the "agent preview send" or "agent preview end" commands with the --session-id flag.
+
+Programmatic agent preview sessions can be started for published activated agents and by using an agent's local authoring bundle, which contains its Agent Script file.  In this command's output table, the Agent column contains either the API name of the authoring bundle or published agent, whichever was used when starting the session.
 
 # output.empty
 
-No cached preview sessions found.
+No cached agent preview sessions found.
 
 # output.tableHeader.agent
 
@@ -20,6 +22,6 @@ Session ID
 
 # examples
 
-- List all cached preview sessions:
+- List all cached agent preview sessions:
 
-  <%= config.bin %> <%= command.id %>
+   <%= config.bin %> <%= command.id %>
