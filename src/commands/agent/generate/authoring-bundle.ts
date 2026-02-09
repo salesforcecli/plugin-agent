@@ -151,10 +151,13 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml`);
 
       // Write Agent file
+      const parsedSpec = spec ? (YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec) : undefined;
       await ScriptAgent.createAuthoringBundle({
         agentSpec: {
-          ...(spec ? (YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec) : {}),
-          ...{ name, developerName: bundleApiName, role: `${name} description` },
+          ...parsedSpec,
+          name,
+          developerName: bundleApiName,
+          role: parsedSpec?.role ?? `${name} description`,
         } as AgentJobSpec & { name: string; developerName: string },
         project: this.project!,
         bundleApiName,

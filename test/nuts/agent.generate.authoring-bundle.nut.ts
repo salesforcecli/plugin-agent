@@ -59,7 +59,7 @@ describe('agent generate authoring-bundle NUTs', function () {
     expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
     expect(agent).to.include(`developer_name: "${bundleName}"`);
     expect(agent).to.include(`agent_label: "${bundleName}"`);
-    expect(agent).to.include(`description: "${bundleName} description"`);
+    expect(agent).to.include('description: "test agent role"');
   });
 
   it('should generate authoring bundle with --no-spec', async () => {
