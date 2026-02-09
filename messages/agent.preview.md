@@ -21,7 +21,7 @@ When the session concludes, the command asks if you want to save the API respons
 
 # flags.api-name.summary
 
-API name of the published and active agent you want to interact with.
+API name of the activated published agent you want to interact with.
 
 # flags.authoring-bundle.summary
 
