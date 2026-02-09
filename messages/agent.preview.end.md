@@ -6,7 +6,7 @@ End an existing programmatic agent preview session and get trace location.
 
 You must have previously started a programmatic agent preview session with the "agent preview start" command to then use this command to end it. This command also displays the local directory where the session trace files are stored. 
 
-The original "agent preview start" command outputs a session ID which you then use with this command. Alternatively, you can use the --authoring-bundle or --api-name flags to specify the API name of the authoring bundle, or the agent itself, as long as the agent has only one active preview session. If it has multiple sessions, then you must instead use --session-id to identify the exact one you want to end.
+The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this command.  You don't have to specify the --session-id flag if an agent has only one active preview session. You must also specify either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory. 
 
 # flags.session-id.summary
 
@@ -14,7 +14,7 @@ Session ID outputted by "agent preview start". Not required when the agent has e
 
 # flags.api-name.summary
 
-API name of the activated published agent you want to preview.
+API name of the activated published agent you want to preview. 
 
 # flags.authoring-bundle.summary
 
@@ -34,11 +34,11 @@ Session traces: %s
 
 # examples
 
-- End an agent preview session by specifying its session ID; use the default org:
+- End an agent preview session by specifying its session ID and the API name of the published agent; use the default org:
 
-    <%= config.bin %> <%= command.id %> --session-id <SESSION_ID>
+    <%= config.bin %> <%= command.id %> --session-id <SESSION_ID> --api-name My_Published_Agent 
 
-- End an agent preview session using the API name of the published agent; you get an error if the agent has more than one active session. Use the org with alias "my-dev-org":
+- Similar to previous example, but don't specify a session ID; you get an error if the agent has more than one active session. Use the org with alias "my-dev-org":
 
     <%= config.bin %> <%= command.id %> --api-name My_Published_Agent --target-org my-dev-org
 
