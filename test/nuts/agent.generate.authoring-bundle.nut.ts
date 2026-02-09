@@ -58,6 +58,8 @@ describe('agent generate authoring-bundle NUTs', function () {
     expect(metaXml).to.include('<AiAuthoringBundle');
     expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
     expect(agent).to.include(`developer_name: "${bundleName}"`);
+    expect(agent).to.include(`agent_label: "${bundleName}"`);
+    expect(agent).to.include(`description: "${bundleName} description"`);
   });
 
   it('should generate authoring bundle with --no-spec', async () => {
@@ -80,6 +82,8 @@ describe('agent generate authoring-bundle NUTs', function () {
     expect(metaXml).to.include('<AiAuthoringBundle');
     expect(metaXml).to.include('<bundleType>AGENT</bundleType>');
     expect(agent).to.include(`developer_name: "${bundleName}"`);
+    expect(agent).to.include(`agent_label: "${bundleName}"`);
+    expect(agent).to.include(`description: "${bundleName} description"`);
   });
 
   it('should fail when both --spec and --no-spec are provided', async () => {
