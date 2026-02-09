@@ -34,14 +34,14 @@ Session traces: %s
 
 # examples
 
-- End an agent preview session by specifying its session ID and the API name of the published agent; use the default org:
+- End a preview session of a published agent by specifying its session ID and API name ; use the default org:
 
     <%= config.bin %> <%= command.id %> --session-id <SESSION_ID> --api-name My_Published_Agent 
 
-- Similar to previous example, but don't specify a session ID; you get an error if the agent has more than one active session. Use the org with alias "my-dev-org":
+- Similar to previous example, but don't specify a session ID; you get an error if the published agent has more than one active session. Use the org with alias "my-dev-org":
 
     <%= config.bin %> <%= command.id %> --api-name My_Published_Agent --target-org my-dev-org
 
-- End an agent preview session using its authoring bundle API name; you get an error if the agent has more than one active session.
+- End a preview session of an agent using its authoring bundle API name; you get an error if the agent has more than one active session.
 
     <%= config.bin %> <%= command.id %> --authoring-bundle My_Local_Agent
