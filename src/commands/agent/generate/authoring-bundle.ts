@@ -152,9 +152,10 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
 
       // Write Agent file
       await ScriptAgent.createAuthoringBundle({
-        agentSpec: spec
-          ? { ...(YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec), ...{ name, developerName: bundleApiName } }
-          : undefined,
+        agentSpec: {
+          ...(spec ? (YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec) : {}),
+          ...{ name, developerName: bundleApiName, role: `${name} description` },
+        } as AgentJobSpec & { name: string; developerName: string },
         project: this.project!,
         bundleApiName,
       });
