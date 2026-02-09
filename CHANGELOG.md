@@ -1,3 +1,10 @@
+## [1.27.6](https://github.com/salesforcecli/plugin-agent/compare/1.27.5...1.27.6) (2026-02-09)
+
+### Bug Fixes
+
+- always pass agentSpec to createAuthoringBundle so agent_label and description reflect user input ([85a48ff](https://github.com/salesforcecli/plugin-agent/commit/85a48ff262de6f0fc26420d03f9adddc4295984b))
+- preserve spec role when provided, fall back to name-derived description ([51768c5](https://github.com/salesforcecli/plugin-agent/commit/51768c5ff2f45b1e33f9a1d4c574f6ac2bf7f93c))
+
 ## [1.27.5](https://github.com/salesforcecli/plugin-agent/compare/1.27.4...1.27.5) (2026-02-04)
 
 ### Bug Fixes
