@@ -6,7 +6,7 @@ Send a message to an existing agent preview session.
 
 You must have previously started a programmatic agent preview session with the "agent preview start" command to then use this command to send the agent a message (utterance). This command then displays the agent's response.
 
-The original "agent preview start" command outputs a session ID which you then use with this command. Alternatively, you can use the --authoring-bundle or --api-name flags to specify the API name of the authoring bundle, or the agent itself, as long as the agent has only one active preview session. If it has multiple sessions, then you must instead use --session-id to identify the exact one you want to send a message to.
+The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this command to send a message.  You don't have to specify the --session-id flag if an agent has only one active preview session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory. 
 
 # flags.session-id.summary
 
@@ -34,11 +34,11 @@ Multiple preview sessions found for this agent. Use the --session-id flag to ide
 
 # examples
 
-- Send a message to an agent identified by its session ID; use the default org:
+- Send a message to an activated published agent using its API name and session ID; use the default org:
 
-   <%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --session-id <SESSION_ID>
+   <%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --api-name My_Published_Agent --session-id <SESSION_ID>
 
-- Send a message to an activated published agent using its API name; you get an error if the agent has more than one active session. Use the org with alias "my-dev-org":
+- Similar to previous example, but don't specify a session ID; you get an error if the agent has more than one active session. Use the org with alias "my-dev-org":
 
     <%= config.bin %> <%= command.id %> --utterance "What can you help me with?" --api-name My_Published_Agent --target-org my-dev-org
 
