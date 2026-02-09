@@ -6,7 +6,7 @@ End an existing programmatic agent preview session and get trace location.
 
 You must have previously started a programmatic agent preview session with the "agent preview start" command to then use this command to end it. This command also displays the local directory where the session trace files are stored. 
 
-The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this command.  You don't have to specify the --session-id flag if an agent has only one active preview session. You must also specify either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory. 
+The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this command to end the session.  You don't have to specify the --session-id flag if an agent has only one active preview session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory. 
 
 # flags.session-id.summary
 
