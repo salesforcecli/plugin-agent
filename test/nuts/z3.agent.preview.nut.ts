@@ -17,7 +17,10 @@
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Agent } from '@salesforce/agents';
-import { Org, SfProject } from '@salesforce/core';
+import { Org } from '@salesforce/core';
+import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
+import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
+import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 /* eslint-disable no-console */
 
@@ -42,110 +45,102 @@ describe('agent preview', function () {
     execCmd(`agent preview --api-name ${invalidApiName} --target-org ${getUsername()}`, { ensureExitCode: 1 });
   });
 
-  describe('using agent library directly', function () {
-    it("should start,send,end a preview (AgentScript, preview API, mockMode = 'Mock'", async () => {
+  describe('using preview start/send/end commands', () => {
+    it('should start, send, end a preview (Agent Script, mock mode)', async function () {
       this.timeout(5 * 60 * 1000); // 5 minutes for this test
 
       const bundleApiName = 'Willie_Resort_Manager';
-      const projectPath = session.project.dir;
+      const targetOrg = getUsername();
 
-      const org = await Org.create({ aliasOrUsername: getUsername() });
-      const connection = org.getConnection();
-      const project = await SfProject.resolve(projectPath);
+      const startResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(startResult?.sessionId).to.be.a('string');
+      const sessionId = startResult!.sessionId;
 
-      const agent = await Agent.init({
-        connection,
-        project,
-        aabName: bundleApiName,
-      });
+      const sendResult1 = execCmd<AgentPreviewSendResult>(
+        `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
 
-      agent.preview.setMockMode('Mock');
+      const sendResult2 = execCmd<AgentPreviewSendResult>(
+        `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "Tell me more" --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(sendResult2?.messages).to.be.an('array').with.length.greaterThan(0);
 
-      // Start session
-      const previewSession = await agent.preview.start();
-      expect(previewSession.sessionId).to.be.a('string');
-
-      // Send first message
-      const response1 = await agent.preview.send('What can you help me with?');
-      expect(response1.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // Send second message
-      const response2 = await agent.preview.send('Tell me more');
-      expect(response2.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // End session
-      await agent.preview.end();
-    });
-    it("should start,send,end a preview (AgentScript, preview API, mockMode = 'Live Test'", async () => {
-      this.timeout(5 * 60 * 1000); // 5 minutes for this test
-
-      const bundleApiName = 'Willie_Resort_Manager';
-      const projectPath = session.project.dir;
-
-      const org = await Org.create({ aliasOrUsername: getUsername() });
-      const connection = org.getConnection();
-      const project = await SfProject.resolve(projectPath);
-
-      const agent = await Agent.init({
-        connection,
-        project,
-        aabName: bundleApiName,
-      });
-
-      // Start session
-      const previewSession = await agent.preview.start();
-      expect(previewSession.sessionId).to.be.a('string');
-
-      // Send first message
-      const response1 = await agent.preview.send('What can you help me with?');
-      expect(response1.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // Send second message
-      const response2 = await agent.preview.send('Tell me more');
-      expect(response2.messages).to.be.an('array').with.length.greaterThan(0);
-
-      // End session
-      await agent.preview.end();
+      const endResult = execCmd<AgentPreviewEndResult>(
+        `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(endResult?.sessionId).to.equal(sessionId);
+      expect(endResult?.tracesPath).to.be.a('string').and.include('.sfdx').and.include('agents');
     });
 
-    it('should start,send,end a preview (Published) session', async () => {
+    it('should start, send, end a preview (Agent Script, live mode)', async function () {
       this.timeout(5 * 60 * 1000); // 5 minutes for this test
-
-      const org = await Org.create({ aliasOrUsername: getUsername() });
+      const targetOrg = getUsername();
+      // live tests require a valid 'default_agent_user' defined in the org, this is done for the publish tests, use that same agent, but from authoring-bundle source
+      const org = await Org.create({ aliasOrUsername: targetOrg });
       const connection = org.getConnection();
-      const project = await SfProject.resolve(session.project.dir);
-
-      // Find the published agent from the publish test (starts with "Test_Agent_")
       const publishedAgents = await Agent.listRemote(connection);
-      const publishedAgent = publishedAgents.find((agent) => agent.DeveloperName?.startsWith('Test_Agent_'));
-
+      const publishedAgent = publishedAgents.find((a) => a.DeveloperName?.startsWith('Test_Agent_'));
       expect(publishedAgent).to.not.be.undefined;
       expect(publishedAgent?.DeveloperName).to.be.a('string');
 
-      // Query the Bot object to get the Id
-      const botResult = await connection.singleRecordQuery<{ Id: string }>(
-        `SELECT ID FROM BotDefinition WHERE DeveloperName = '${publishedAgent!.DeveloperName}'`
+      const startResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${publishedAgent?.DeveloperName} --use-live-actions --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(startResult?.sessionId).to.be.a('string');
+      const sessionId = startResult!.sessionId;
+
+      const sendResult1 = execCmd<AgentPreviewSendResult>(
+        `agent preview send --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
+
+      execCmd<AgentPreviewEndResult>(
+        `agent preview end --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --target-org ${targetOrg} --json`
       );
+    });
 
-      expect(botResult).to.not.be.undefined;
-      expect(botResult.Id).to.be.a('string').and.not.be.empty;
+    it('should start, send, end a preview (Published agent)', async function () {
+      this.timeout(5 * 60 * 1000); // 5 minutes for this test
 
-      // Initialize the published agent using its Bot Id
-      const agent = await Agent.init({
-        connection,
-        project,
-        apiNameOrId: botResult.Id,
+      const org = await Org.create({ aliasOrUsername: getUsername() });
+      const connection = org.getConnection();
+
+      const publishedAgents = await Agent.listRemote(connection);
+      const publishedAgent = publishedAgents.find((a) => a.DeveloperName?.startsWith('Test_Agent_'));
+      expect(publishedAgent).to.not.be.undefined;
+      expect(publishedAgent?.DeveloperName).to.be.a('string');
+
+      // Activate published agent before previewing
+      execCmd(`agent activate --api-name ${publishedAgent!.DeveloperName} --target-org ${getUsername()} --json`, {
+        ensureExitCode: 0,
+        cwd: session.project.dir,
       });
 
-      // gotta activate published agents before previewing
-      await agent.activate();
+      const targetOrg = getUsername();
 
-      // Start session
-      const previewSession = await agent.preview.start();
-      expect(previewSession.sessionId).to.be.a('string');
+      const startResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --api-name ${publishedAgent!.DeveloperName} --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(startResult?.sessionId).to.be.a('string');
+      const sessionId = startResult!.sessionId;
 
-      const response = await agent.preview.send('What can you help me with?');
-      expect(response.messages).to.be.an('array').with.length.greaterThan(0);
+      const sendResult = execCmd<AgentPreviewSendResult>(
+        `agent preview send --session-id ${sessionId} --api-name ${
+          publishedAgent!.DeveloperName
+        } --utterance "What can you help me with?" --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(sendResult?.messages).to.be.an('array').with.length.greaterThan(0);
+
+      const endResult = execCmd<AgentPreviewEndResult>(
+        `agent preview end --session-id ${sessionId} --api-name ${
+          publishedAgent!.DeveloperName
+        } --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(endResult?.sessionId).to.equal(sessionId);
+      expect(endResult?.tracesPath).to.be.a('string');
     });
   });
 });

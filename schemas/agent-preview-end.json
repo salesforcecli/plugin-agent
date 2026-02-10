@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentPreviewEndResult",
+  "definitions": {
+    "AgentPreviewEndResult": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "tracesPath": {
+          "type": "string"
+        }
+      },
+      "required": ["sessionId", "tracesPath"],
+      "additionalProperties": false
+    }
+  }
+}
