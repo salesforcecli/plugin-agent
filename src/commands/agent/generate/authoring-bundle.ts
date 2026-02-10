@@ -15,14 +15,14 @@
  */
 
 import { join, resolve } from 'node:path';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { generateApiName, Messages, SfError } from '@salesforce/core';
 import { AgentJobSpec, ScriptAgent } from '@salesforce/agents';
+import { MultiStageOutput } from '@oclif/multi-stage-output';
 import YAML from 'yaml';
-import { input as inquirerInput } from '@inquirer/prompts';
+import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
-import { FlaggablePrompt, promptForFlag, promptForSpecYaml } from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.authoring-bundle');
@@ -62,45 +62,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     }),
   };
 
-  private static readonly FLAGGABLE_PROMPTS = {
-    name: {
-      message: messages.getMessage('flags.name.summary'),
-      promptMessage: messages.getMessage('flags.name.prompt'),
-      validate: (d: string): boolean | string =>
-        d.trim().length > 0 || 'Name cannot be empty or contain only whitespace',
-      required: true,
-    },
-    'api-name': {
-      message: messages.getMessage('flags.api-name.summary'),
-      promptMessage: messages.getMessage('flags.api-name.prompt'),
-      validate: (d: string): boolean | string => {
-        if (d.length === 0) {
-          return true;
-        }
-        if (d.length > 80) {
-          return 'API name cannot be over 80 characters.';
-        }
-        const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
-        if (!regex.test(d)) {
-          return 'Invalid API name.';
-        }
-        return true;
-      },
-    },
-    spec: {
-      message: messages.getMessage('flags.spec.summary'),
-      promptMessage: messages.getMessage('flags.spec.prompt'),
-      validate: (d: string): boolean | string => {
-        const specPath = resolve(d);
-        if (!existsSync(specPath)) {
-          return 'Please enter an existing agent spec (yaml) file';
-        }
-        return true;
-      },
-      required: true,
-    },
-  } satisfies Record<string, FlaggablePrompt>;
-
   public async run(): Promise<AgentGenerateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
@@ -109,7 +70,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       throw new SfError(messages.getMessage('error.specAndNoSpec'));
     }
 
-    // Resolve spec: --no-spec => undefined (default spec), --spec <path> => path, missing => prompt
+    // Resolve spec: --no-spec => undefined, --spec <path> => path, missing => wizard prompts
     let spec: string | undefined;
     if (flags['no-spec']) {
       spec = undefined;
@@ -120,26 +81,83 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       }
       spec = specPath;
     } else {
-      spec = await promptForSpecYaml(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['spec']);
-    }
+      // Find spec files in specs/ directory
+      const specsDir = join(this.project!.getPath(), 'specs');
+      let specFiles: string[] = [];
 
-    // If we don't have a name yet, prompt for it
-    const name = flags['name'] ?? (await promptForFlag(AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['name']));
+      if (existsSync(specsDir)) {
+        specFiles = readdirSync(specsDir).filter(
+          (f) => (f.endsWith('.yaml') || f.endsWith('.yml')) && !f.includes('-testSpec')
+        );
+      } else {
+        this.warn(messages.getMessage('warning.noSpecDir', [specsDir]));
+      }
 
-    // If we don't have an api name yet, prompt for it
-    let bundleApiName = flags['api-name'];
-    if (!bundleApiName) {
-      bundleApiName = generateApiName(name);
-      const promptedValue = await inquirerInput({
-        message: messages.getMessage('flags.api-name.prompt'),
-        validate: AgentGenerateAuthoringBundle.FLAGGABLE_PROMPTS['api-name'].validate,
-        default: bundleApiName,
+      // Build spec type choices
+      const specTypeChoices: Array<{ name: string; value: 'default' | 'fromSpec'; description: string }> = [
+        {
+          name: messages.getMessage('wizard.specType.option.default.name'),
+          value: 'default',
+          description: messages.getMessage('wizard.specType.option.default.description'),
+        },
+      ];
+
+      if (specFiles.length > 0) {
+        specTypeChoices.push({
+          name: messages.getMessage('wizard.specType.option.fromSpec.name'),
+          value: 'fromSpec',
+          description: messages.getMessage('wizard.specType.option.fromSpec.description'),
+        });
+      }
+
+      const specType = await select({
+        message: messages.getMessage('wizard.specType.prompt'),
+        choices: specTypeChoices,
         theme,
       });
-      if (promptedValue?.length) {
-        bundleApiName = promptedValue;
+
+      if (specType === 'fromSpec') {
+        const selectedFile = await select({
+          message: messages.getMessage('wizard.specFile.prompt'),
+          choices: specFiles.map((f) => ({ name: f, value: join(specsDir, f) })),
+          theme,
+        });
+        spec = selectedFile;
+      } else {
+        spec = undefined;
       }
     }
+
+    // Resolve name: --name flag or prompt
+    const name =
+      flags['name'] ??
+      (await inquirerInput({
+        message: messages.getMessage('wizard.name.prompt'),
+        validate: (d: string): boolean | string => {
+          if (d.length === 0) {
+            return messages.getMessage('wizard.name.validation.required');
+          }
+          if (d.trim().length === 0) {
+            return messages.getMessage('wizard.name.validation.empty');
+          }
+          return true;
+        },
+        theme,
+      }));
+
+    // Resolve API name: --api-name flag or auto-generate from name
+    const bundleApiName = flags['api-name'] ?? generateApiName(name);
+
+    const mso = new MultiStageOutput<{ apiName: string }>({
+      stages: [
+        messages.getMessage('progress.stage.creating'),
+        messages.getMessage('progress.stage.generating'),
+        messages.getMessage('progress.stage.complete'),
+      ],
+      title: messages.getMessage('progress.title', [bundleApiName]),
+      jsonEnabled: this.jsonEnabled(),
+      data: { apiName: bundleApiName },
+    });
 
     try {
       // Get default output directory if not specified
@@ -150,8 +168,12 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const agentPath = join(targetOutputDir, `${bundleApiName}.agent`);
       const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml`);
 
-      // Write Agent file
+      mso.goto(messages.getMessage('progress.stage.creating'));
+
       const parsedSpec = spec ? (YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec) : undefined;
+
+      mso.goto(messages.getMessage('progress.stage.generating'));
+
       await ScriptAgent.createAuthoringBundle({
         agentSpec: {
           ...parsedSpec,
@@ -163,7 +185,10 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         bundleApiName,
       });
 
-      this.logSuccess(`Successfully generated ${bundleApiName} Authoring Bundle`);
+      mso.goto(messages.getMessage('progress.stage.complete'));
+      mso.stop();
+
+      this.logSuccess(messages.getMessage('success.message', [name]));
 
       return {
         agentPath,
@@ -171,8 +196,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         outputDir: targetOutputDir,
       };
     } catch (error) {
+      mso.error();
       const err = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.failed-to-create-agent'), 'AgentGenerationError', [err.message]);
+      throw new SfError(messages.getMessage('error.failed-to-create-agent', [err.message]), 'AgentGenerationError');
     }
   }
 }
