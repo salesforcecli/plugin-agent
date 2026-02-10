@@ -44,7 +44,7 @@ API name of the new authoring bundle; if not specified, the API name is derived 
 
 # flags.api-name.prompt
 
-API name of the new authoring bundle
+Enter authoring bundle API name
 
 # examples
 
@@ -82,19 +82,19 @@ Failed to generate authoring bundle: %s
 
 # wizard.specType.prompt
 
-Select the type of agent spec to use
+Select authoring bundle template
 
 # wizard.specType.option.default.name
 
-Default Template (Recommended)
+Default template (recommended)
 
 # wizard.specType.option.default.description
 
-Start with a ready-to-use Agent Script
+Start with a ready-to-use Agent Script template
 
 # wizard.specType.option.fromSpec.name
 
-From Spec File (Advanced)
+From YAML spec (advanced)
 
 # wizard.specType.option.fromSpec.description
 
@@ -102,11 +102,11 @@ Generate Agent Script from an existing YAML spec
 
 # wizard.specFile.prompt
 
-Choose a spec to generate your Agent Script
+Select authoring bundle YAML spec
 
 # wizard.name.prompt
 
-Enter a name for the new agent
+Enter authoring bundle name
 
 # wizard.name.validation.required
 
@@ -118,7 +118,7 @@ Bundle name can't be empty.
 
 # progress.title
 
-Generating authoring bundle: %s...
+Generating authoring bundle: %s
 
 # progress.stage.creating
 

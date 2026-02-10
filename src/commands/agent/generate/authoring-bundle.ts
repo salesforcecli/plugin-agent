@@ -145,8 +145,32 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         theme,
       }));
 
-    // Resolve API name: --api-name flag or auto-generate from name
-    const bundleApiName = flags['api-name'] ?? generateApiName(name);
+    // Resolve API name: --api-name flag or auto-generate from name with prompt to confirm
+    let bundleApiName = flags['api-name'];
+    if (!bundleApiName) {
+      bundleApiName = generateApiName(name);
+      const promptedValue = await inquirerInput({
+        message: messages.getMessage('flags.api-name.prompt'),
+        validate: (d: string): boolean | string => {
+          if (d.length === 0) {
+            return true;
+          }
+          if (d.length > 80) {
+            return 'API name cannot be over 80 characters.';
+          }
+          const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+          if (!regex.test(d)) {
+            return 'Invalid API name.';
+          }
+          return true;
+        },
+        default: bundleApiName,
+        theme,
+      });
+      if (promptedValue?.length) {
+        bundleApiName = promptedValue;
+      }
+    }
 
     const mso = new MultiStageOutput<{ apiName: string }>({
       stages: [
