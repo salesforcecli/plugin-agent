@@ -114,7 +114,7 @@ Authoring bundle name is required.
 
 # wizard.name.validation.empty
 
-Authroring bundle name can't be empty.
+Authoring bundle name can't be empty.
 
 # progress.title
 

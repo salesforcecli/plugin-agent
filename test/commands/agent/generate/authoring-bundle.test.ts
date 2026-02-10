@@ -277,7 +277,7 @@ describe('agent generate authoring-bundle', () => {
     });
 
     it('should reject whitespace-only name', () => {
-      expect(validate('   ')).to.equal("Authroring bundle name can't be empty.");
+      expect(validate('   ')).to.equal("Authoring bundle name can't be empty.");
     });
 
     it('should accept valid name', () => {
