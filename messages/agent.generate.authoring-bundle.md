@@ -78,43 +78,43 @@ The specified file is not a valid agent spec YAML file.
 
 # error.failed-to-create-agent
 
-Failed to generate authoring bundle: %s
+Failed to generate authoring bundle: %s.
 
 # wizard.specType.prompt
 
-Select authoring bundle template
+Select an authoring bundle template
 
 # wizard.specType.option.default.name
 
-Default template (recommended)
+Default template (Recommended)
 
 # wizard.specType.option.default.description
 
-Start with a ready-to-use Agent Script template
+Start with a ready-to-use Agent Script template.
 
 # wizard.specType.option.fromSpec.name
 
-From YAML spec (advanced)
+From an agent spec YAML file (Advanced)
 
 # wizard.specType.option.fromSpec.description
 
-Generate Agent Script from an existing YAML spec
+Generate an Agent Script file from an existing agent spec YAML file.
 
 # wizard.specFile.prompt
 
-Select authoring bundle YAML spec
+Select the agent spec YAML file.
 
 # wizard.name.prompt
 
-Enter authoring bundle name
+Enter the authoring bundle name.
 
 # wizard.name.validation.required
 
-Bundle name is required
+Authoring bundle name is required.
 
 # wizard.name.validation.empty
 
-Bundle name can't be empty.
+Authroring bundle name can't be empty.
 
 # progress.title
 
@@ -138,4 +138,4 @@ Authoring bundle "%s" was generated successfully.
 
 # warning.noSpecDir
 
-No agent spec directory found at %s
+No agent spec directory found at %s.

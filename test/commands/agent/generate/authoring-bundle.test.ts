@@ -206,10 +206,10 @@ describe('agent generate authoring-bundle', () => {
       expect(result.agentPath).to.include('InteractiveAgent.agent');
 
       const selectCall = selectStub.firstCall.args[0] as PromptConfig;
-      expect(selectCall.message).to.equal('Select authoring bundle template');
+      expect(selectCall.message).to.equal('Select an authoring bundle template');
 
       const nameInputCall = inputStub.firstCall.args[0] as PromptConfig;
-      expect(nameInputCall.message).to.equal('Enter authoring bundle name');
+      expect(nameInputCall.message).to.equal('Enter the authoring bundle name.');
     });
 
     it('should show spec file selection when "fromSpec" is chosen', async () => {
@@ -224,7 +224,7 @@ describe('agent generate authoring-bundle', () => {
       expect(result.agentPath).to.include('FromSpecAgent.agent');
 
       const specFileCall = selectStub.secondCall.args[0] as PromptConfig;
-      expect(specFileCall.message).to.equal('Select authoring bundle YAML spec');
+      expect(specFileCall.message).to.equal('Select the agent spec YAML file.');
 
       const callArgs = createAuthoringBundleStub.firstCall.args[0] as CreateAuthoringBundleArgs;
       expect(callArgs.agentSpec.role).to.equal('test agent role');
@@ -262,9 +262,9 @@ describe('agent generate authoring-bundle', () => {
       const selectCall = selectStub.firstCall.args[0] as PromptConfig;
       expect(selectCall.choices).to.have.length(2);
       expect(selectCall.choices![0].value).to.equal('default');
-      expect(selectCall.choices![0].name).to.equal('Default template (recommended)');
+      expect(selectCall.choices![0].name).to.equal('Default template (Recommended)');
       expect(selectCall.choices![1].value).to.equal('fromSpec');
-      expect(selectCall.choices![1].name).to.equal('From YAML spec (advanced)');
+      expect(selectCall.choices![1].name).to.equal('From an agent spec YAML file (Advanced)');
     });
   });
 
@@ -280,11 +280,11 @@ describe('agent generate authoring-bundle', () => {
     });
 
     it('should reject empty name', () => {
-      expect(validate('')).to.equal('Bundle name is required');
+      expect(validate('')).to.equal('Authoring bundle name is required.');
     });
 
     it('should reject whitespace-only name', () => {
-      expect(validate('   ')).to.equal("Bundle name can't be empty.");
+      expect(validate('   ')).to.equal("Authroring bundle name can't be empty.");
     });
 
     it('should accept valid name', () => {
