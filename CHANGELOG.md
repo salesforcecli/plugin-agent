@@ -1,3 +1,9 @@
+## [1.27.7](https://github.com/salesforcecli/plugin-agent/compare/1.27.6...1.27.7) (2026-02-10)
+
+### Bug Fixes
+
+- send pdp events and bump deps ([19bc5f8](https://github.com/salesforcecli/plugin-agent/commit/19bc5f831f45f8535d7c2ccefe982f7243ce90ae))
+
 ## [1.27.6](https://github.com/salesforcecli/plugin-agent/compare/1.27.5...1.27.6) (2026-02-09)
 
 ### Bug Fixes
