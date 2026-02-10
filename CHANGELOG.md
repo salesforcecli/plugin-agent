@@ -1,3 +1,14 @@
+# [1.29.0](https://github.com/salesforcecli/plugin-agent/compare/1.28.0...1.29.0) (2026-02-10)
+
+### Bug Fixes
+
+- correct typo in validation message (Authroring -> Authoring) ([7601628](https://github.com/salesforcecli/plugin-agent/commit/7601628153baf17d2fff87eecd16c5b30a4a38e8))
+
+### Features
+
+- apply PR copy suggestions from code review ([c07243d](https://github.com/salesforcecli/plugin-agent/commit/c07243d4d8c78b265dd8118f3342dc9995688a70))
+- rewrite authoring bundle creation as wizard-style flow ([0d390f1](https://github.com/salesforcecli/plugin-agent/commit/0d390f1cec8bbf1d9cfd796177871a9d7bf6dac4))
+
 # [1.28.0](https://github.com/salesforcecli/plugin-agent/compare/1.27.7...1.28.0) (2026-02-10)
 
 ### Bug Fixes
