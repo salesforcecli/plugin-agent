@@ -102,11 +102,11 @@ Generate an Agent Script file from an existing agent spec YAML file.
 
 # wizard.specFile.prompt
 
-Select the agent spec YAML file.
+Select the agent spec YAML file
 
 # wizard.name.prompt
 
-Enter the authoring bundle name.
+Enter the authoring bundle name
 
 # wizard.name.validation.required
 
@@ -119,18 +119,6 @@ Authroring bundle name can't be empty.
 # progress.title
 
 Generating authoring bundle: %s
-
-# progress.stage.creating
-
-Creating authoring bundle structure...
-
-# progress.stage.generating
-
-Generating Agent Script file...
-
-# progress.stage.complete
-
-Complete!
 
 # success.message
 

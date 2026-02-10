@@ -19,7 +19,6 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { generateApiName, Messages, SfError } from '@salesforce/core';
 import { AgentJobSpec, ScriptAgent } from '@salesforce/agents';
-import { MultiStageOutput } from '@oclif/multi-stage-output';
 import YAML from 'yaml';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
@@ -172,17 +171,6 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       }
     }
 
-    const mso = new MultiStageOutput<{ apiName: string }>({
-      stages: [
-        messages.getMessage('progress.stage.creating'),
-        messages.getMessage('progress.stage.generating'),
-        messages.getMessage('progress.stage.complete'),
-      ],
-      title: messages.getMessage('progress.title', [bundleApiName]),
-      jsonEnabled: this.jsonEnabled(),
-      data: { apiName: bundleApiName },
-    });
-
     try {
       // Get default output directory if not specified
       const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
@@ -192,11 +180,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       const agentPath = join(targetOutputDir, `${bundleApiName}.agent`);
       const metaXmlPath = join(targetOutputDir, `${bundleApiName}.bundle-meta.xml`);
 
-      mso.goto(messages.getMessage('progress.stage.creating'));
+      this.spinner.start(messages.getMessage('progress.title', [bundleApiName]));
 
       const parsedSpec = spec ? (YAML.parse(readFileSync(spec, 'utf8')) as AgentJobSpec) : undefined;
-
-      mso.goto(messages.getMessage('progress.stage.generating'));
 
       await ScriptAgent.createAuthoringBundle({
         agentSpec: {
@@ -209,8 +195,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         bundleApiName,
       });
 
-      mso.goto(messages.getMessage('progress.stage.complete'));
-      mso.stop();
+      this.spinner.stop();
 
       this.logSuccess(messages.getMessage('success.message', [name]));
 
@@ -220,7 +205,7 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
         outputDir: targetOutputDir,
       };
     } catch (error) {
-      mso.error();
+      this.spinner.stop('failed');
       const err = SfError.wrap(error);
       throw new SfError(messages.getMessage('error.failed-to-create-agent', [err.message]), 'AgentGenerationError');
     }

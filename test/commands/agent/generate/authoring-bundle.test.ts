@@ -62,13 +62,6 @@ describe('agent generate authoring-bundle', () => {
           createAuthoringBundle: createAuthoringBundleStub,
         },
       },
-      '@oclif/multi-stage-output': {
-        MultiStageOutput: class MockMSO {
-          public goto(): void {}
-          public stop(): void {}
-          public error(): void {}
-        },
-      },
     });
 
     AgentGenerateAuthoringBundle = mod.default;
@@ -209,7 +202,7 @@ describe('agent generate authoring-bundle', () => {
       expect(selectCall.message).to.equal('Select an authoring bundle template');
 
       const nameInputCall = inputStub.firstCall.args[0] as PromptConfig;
-      expect(nameInputCall.message).to.equal('Enter the authoring bundle name.');
+      expect(nameInputCall.message).to.equal('Enter the authoring bundle name');
     });
 
     it('should show spec file selection when "fromSpec" is chosen', async () => {
@@ -224,7 +217,7 @@ describe('agent generate authoring-bundle', () => {
       expect(result.agentPath).to.include('FromSpecAgent.agent');
 
       const specFileCall = selectStub.secondCall.args[0] as PromptConfig;
-      expect(specFileCall.message).to.equal('Select the agent spec YAML file.');
+      expect(specFileCall.message).to.equal('Select the agent spec YAML file');
 
       const callArgs = createAuthoringBundleStub.firstCall.args[0] as CreateAuthoringBundleArgs;
       expect(callArgs.agentSpec.role).to.equal('test agent role');
