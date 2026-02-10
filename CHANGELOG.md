@@ -1,3 +1,15 @@
+# [1.28.0](https://github.com/salesforcecli/plugin-agent/compare/1.27.7...1.28.0) (2026-02-10)
+
+### Bug Fixes
+
+- add agent preview start,send,end commands ([c06d638](https://github.com/salesforcecli/plugin-agent/commit/c06d6386b8840a757147713ca518cf174ecf9523))
+- edit ([90c924e](https://github.com/salesforcecli/plugin-agent/commit/90c924e977613d5be9697e72734d7cccd174a9de))
+- teeny edit to existing "agent preview" messages file ([2a2d74a](https://github.com/salesforcecli/plugin-agent/commit/2a2d74ab453d98b77c55f365e80809542e38d08a))
+
+### Features
+
+- add 'agent preview sessions' to list sessions' ([8d3e807](https://github.com/salesforcecli/plugin-agent/commit/8d3e80734a1cd6eaeaffac37532634f06c6cd7af))
+
 ## [1.27.7](https://github.com/salesforcecli/plugin-agent/compare/1.27.6...1.27.7) (2026-02-10)
 
 ### Bug Fixes

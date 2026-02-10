@@ -67,6 +67,10 @@ sf plugins
 - [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
 - [`sf agent preview`](#sf-agent-preview)
+- [`sf agent preview end`](#sf-agent-preview-end)
+- [`sf agent preview send`](#sf-agent-preview-send)
+- [`sf agent preview sessions`](#sf-agent-preview-sessions)
+- [`sf agent preview start`](#sf-agent-preview-start)
 - [`sf agent publish authoring-bundle`](#sf-agent-publish-authoring-bundle)
 - [`sf agent test create`](#sf-agent-test-create)
 - [`sf agent test list`](#sf-agent-test-list)
@@ -112,7 +116,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -179,7 +183,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -219,7 +223,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -326,7 +330,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -401,7 +405,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -449,7 +453,7 @@ EXAMPLES
       force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -510,7 +514,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -523,7 +527,7 @@ USAGE
 
 FLAGS
   -d, --output-dir=<value>        Directory where conversation transcripts are saved.
-  -n, --api-name=<value>          API name of the published and active agent you want to interact with.
+  -n, --api-name=<value>          API name of the activated published agent you want to interact with.
   -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
                                   configuration variable is already set.
   -x, --apex-debug                Enable Apex debug logging during the agent preview conversation.
@@ -583,7 +587,210 @@ EXAMPLES
     $ sf agent preview --use-live-actions --apex-debug --output-dir transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/preview.ts)_
+
+## `sf agent preview end`
+
+End an existing programmatic agent preview session and get trace location.
+
+```
+USAGE
+  $ sf agent preview end -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--session-id <value>] [-n
+    <value>] [--authoring-bundle <value>]
+
+FLAGS
+  -n, --api-name=<value>          API name of the activated published agent you want to preview.
+  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
+                                  configuration variable is already set.
+      --api-version=<value>       Override the api version used for api requests made by this command
+      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
+                                  Script file.
+      --session-id=<value>        Session ID outputted by "agent preview start". Not required when the agent has exactly
+                                  one active session. Run "agent preview sessions" to see the list of all sessions.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  End an existing programmatic agent preview session and get trace location.
+
+  You must have previously started a programmatic agent preview session with the "agent preview start" command to then
+  use this command to end it. This command also displays the local directory where the session trace files are stored.
+
+  The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this
+  command to end the session.  You don't have to specify the --session-id flag if an agent has only one active preview
+  session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring
+  bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX
+  project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata
+  directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata
+  directory.
+
+EXAMPLES
+  End a preview session of a published agent by specifying its session ID and API name ; use the default org:
+
+    $ sf agent preview end --session-id <SESSION_ID> --api-name My_Published_Agent
+
+  Similar to previous example, but don't specify a session ID; you get an error if the published agent has more than
+  one active session. Use the org with alias "my-dev-org":
+
+    $ sf agent preview end --api-name My_Published_Agent --target-org my-dev-org
+
+  End a preview session of an agent using its authoring bundle API name; you get an error if the agent has more than
+  one active session.
+
+    $ sf agent preview end --authoring-bundle My_Local_Agent
+```
+
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/preview/end.ts)_
+
+## `sf agent preview send`
+
+Send a message to an existing agent preview session.
+
+```
+USAGE
+  $ sf agent preview send -o <value> -u <value> [--json] [--flags-dir <value>] [--api-version <value>] [--session-id
+    <value>] [-n <value>] [--authoring-bundle <value>]
+
+FLAGS
+  -n, --api-name=<value>          API name of the activated published agent you want to preview.
+  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
+                                  configuration variable is already set.
+  -u, --utterance=<value>         (required) Utterance to send to the agent, enclosed in double quotes.
+      --api-version=<value>       Override the api version used for api requests made by this command
+      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
+                                  Script file.
+      --session-id=<value>        Session ID outputted by "agent preview start". Not required when the agent has exactly
+                                  one active session. Run "agent preview sessions" to see list of all sessions.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Send a message to an existing agent preview session.
+
+  You must have previously started a programmatic agent preview session with the "agent preview start" command to then
+  use this command to send the agent a message (utterance). This command then displays the agent's response.
+
+  The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this
+  command to send a message.  You don't have to specify the --session-id flag if an agent has only one active preview
+  session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring
+  bundle or the published agent, respecitvely.  To find either API name, navigate to your package directory in your DX
+  project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata
+  directory.  Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata
+  directory.
+
+EXAMPLES
+  Send a message to an activated published agent using its API name and session ID; use the default org:
+
+    $ sf agent preview send --utterance "What can you help me with?" --api-name My_Published_Agent --session-id \
+      <SESSION_ID>
+
+  Similar to previous example, but don't specify a session ID; you get an error if the agent has more than one active
+  session. Use the org with alias "my-dev-org":
+
+    $ sf agent preview send --utterance "What can you help me with?" --api-name My_Published_Agent --target-org \
+      my-dev-org
+
+  Send a message to an agent using its authoring bundle API name; you get an error if the agent has more than one
+  active session:
+
+    $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
+```
+
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/preview/send.ts)_
+
+## `sf agent preview sessions`
+
+List all known programmatic agent preview sessions.
+
+```
+USAGE
+  $ sf agent preview sessions [--json] [--flags-dir <value>]
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List all known programmatic agent preview sessions.
+
+  This command lists the agent preview sessions that were started with the "agent preview start" command and are still
+  in the local cache. Use this command to discover specific session IDs that you can pass to the "agent preview send" or
+  "agent preview end" commands with the --session-id flag.
+
+  Programmatic agent preview sessions can be started for both published activated agents and by using an agent's local
+  authoring bundle, which contains its Agent Script file.  In this command's output table, the Agent column contains
+  either the API name of the authoring bundle or the published agent, whichever was used when starting the session. In
+  the table, if the same API name has multiple rows with different session IDs, then it means that you previously
+  started multiple preview sessions with the associated agent.
+
+EXAMPLES
+  List all cached agent preview sessions:
+
+    $ sf agent preview sessions
+```
+
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/preview/sessions.ts)_
+
+## `sf agent preview start`
+
+Start a programmatic agent preview session.
+
+```
+USAGE
+  $ sf agent preview start -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
+    [--authoring-bundle <value>] [--use-live-actions]
+
+FLAGS
+  -n, --api-name=<value>          API name of the activated published agent you want to preview.
+  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
+                                  configuration variable is already set.
+      --api-version=<value>       Override the api version used for api requests made by this command
+      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
+                                  Script file.
+      --use-live-actions          Use real actions in the org; if not specified, preview uses AI to simulate (mock)
+                                  actions.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Start a programmatic agent preview session.
+
+  This command outputs a session ID that you then use with the "agent preview send" command to send an utterance to the
+  agent.  Use the "agent preview sessions" command to list all active sessions and the "agent preview end" command to
+  end a specific session.
+
+  Identify the agent you want to start previewing with either the --authoring-bundle flag to specify a local authoring
+  bundle's API name or --api-name to specify an activated published agent's API name.  To find either API name, navigate
+  to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name
+  under the "aiAuthoringBundles" metadata directory.  Similarly, the published agent's API name is the same as its
+  directory name under the "Bots" metadata directory.
+
+  When starting a preview session using the authoring bundle, which contains the agent's Agent Script file, the preview
+  uses mocked actions by default.  Specify --use-live-actions for live mode, which uses the real Apex classes, flows,
+  etc, in the org for the actions.
+
+EXAMPLES
+  Start a programmatic agent preview session by specifying an authoring bundle; uses mocked actions by default. Use
+  the org with alias "my-dev-org":
+
+    $ sf agent preview start --authoring-bundle My_Agent_Bundle --target-org my-dev-org
+
+  Similar to previous example but use live actions and the default org:
+
+    $ sf agent preview start --authoring-bundle My_Agent_Bundle --use-live-actions
+
+  Start a preview session with an activated published agent:
+
+    $ sf agent preview start --api-name My_Published_Agent
+```
+
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -632,7 +839,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -687,7 +894,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -722,7 +929,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -788,7 +995,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -861,7 +1068,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -935,7 +1142,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/test/run.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -982,6 +1189,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.27.7/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.28.0/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
