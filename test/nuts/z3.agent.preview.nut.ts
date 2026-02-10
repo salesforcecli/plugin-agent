@@ -77,23 +77,28 @@ describe('agent preview', function () {
 
     it('should start, send, end a preview (Agent Script, live mode)', async function () {
       this.timeout(5 * 60 * 1000); // 5 minutes for this test
-
-      const bundleApiName = 'Willie_Resort_Manager';
       const targetOrg = getUsername();
+      // live tests require a valid 'default_agent_user' defined in the org, this is done for the publish tests, use that same agent, but from authoring-bundle source
+      const org = await Org.create({ aliasOrUsername: targetOrg });
+      const connection = org.getConnection();
+      const publishedAgents = await Agent.listRemote(connection);
+      const publishedAgent = publishedAgents.find((a) => a.DeveloperName?.startsWith('Test_Agent_'));
+      expect(publishedAgent).to.not.be.undefined;
+      expect(publishedAgent?.DeveloperName).to.be.a('string');
 
       const startResult = execCmd<AgentPreviewStartResult>(
-        `agent preview start --authoring-bundle ${bundleApiName} --use-live-actions --target-org ${targetOrg} --json`
+        `agent preview start --authoring-bundle ${publishedAgent?.DeveloperName} --use-live-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
       const sessionId = startResult!.sessionId;
 
       const sendResult1 = execCmd<AgentPreviewSendResult>(
-        `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
+        `agent preview send --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
 
       execCmd<AgentPreviewEndResult>(
-        `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
+        `agent preview end --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --target-org ${targetOrg} --json`
       );
     });
 
