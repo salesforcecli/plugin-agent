@@ -16,7 +16,7 @@ This command requires an org because it uses it to access an LLM for generating 
 
 # flags.spec.summary
 
-Path to the agent spec YAML file. If you don't specify the flag, the command provides a list that you can choose from. Use the --no-spec flag to skip using an agent spec entirely. 
+Path to the agent spec YAML file. If you don't specify the flag, the command provides a list that you can choose from. Use the --no-spec flag to skip using an agent spec entirely.
 
 # flags.spec.prompt
 
@@ -44,7 +44,7 @@ API name of the new authoring bundle; if not specified, the API name is derived 
 
 # flags.api-name.prompt
 
-API name of the new authoring bundle
+Enter authoring bundle API name
 
 # examples
 
@@ -78,4 +78,52 @@ The specified file is not a valid agent spec YAML file.
 
 # error.failed-to-create-agent
 
-Failed to create an authoring bundle from the agent spec YAML file.
+Failed to generate authoring bundle: %s.
+
+# wizard.specType.prompt
+
+Select an authoring bundle template
+
+# wizard.specType.option.default.name
+
+Default template (Recommended)
+
+# wizard.specType.option.default.description
+
+Start with a ready-to-use Agent Script template.
+
+# wizard.specType.option.fromSpec.name
+
+From an agent spec YAML file (Advanced)
+
+# wizard.specType.option.fromSpec.description
+
+Generate an Agent Script file from an existing agent spec YAML file.
+
+# wizard.specFile.prompt
+
+Select the agent spec YAML file
+
+# wizard.name.prompt
+
+Enter the authoring bundle name
+
+# wizard.name.validation.required
+
+Authoring bundle name is required.
+
+# wizard.name.validation.empty
+
+Authoring bundle name can't be empty.
+
+# progress.title
+
+Generating authoring bundle: %s
+
+# success.message
+
+Authoring bundle "%s" was generated successfully.
+
+# warning.noSpecDir
+
+No agent spec directory found at %s.
