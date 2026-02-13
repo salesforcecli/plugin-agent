@@ -124,6 +124,18 @@ Generating authoring bundle: %s
 
 Authoring bundle "%s" was generated successfully.
 
+# flags.force-overwrite.summary
+
+Overwrite the existing authoring bundle if one with the same API name already exists locally.
+
+# prompt.overwrite
+
+An authoring bundle with the API name "%s" already exists locally. Overwrite it?
+
+# info.cancel
+
+Canceled authoring bundle generation.
+
 # warning.noSpecDir
 
 No agent spec directory found at %s.
