@@ -56,7 +56,18 @@
     "command": "agent:generate:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["d", "f", "n", "o"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "name", "no-spec", "output-dir", "spec", "target-org"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "flags-dir",
+      "force-overwrite",
+      "json",
+      "name",
+      "no-spec",
+      "output-dir",
+      "spec",
+      "target-org"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {

@@ -79,7 +79,7 @@ const yesNoOrCancel: ReturnType<typeof createPrompt<boolean | 'cancel', ConfirmC
   if (status === 'done') {
     formattedValue = theme.style.answer(value);
   } else {
-    defaultValue = ` ${theme.style.defaultAnswer(config.default === false ? 'y/n/cancel' : 'Y/n/cancel')}`;
+    defaultValue = ` ${theme.style.defaultAnswer(config.default === false ? 'y/N/cancel' : 'Y/n/cancel')}`;
   }
 
   const message = theme.style.message(config.message, status);
