@@ -91,7 +91,10 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     } else {
       const previewableAgents = await Agent.listPreviewable(conn, this.project!);
       const choices = previewableAgents.map((agent) => ({
-        name: agent.source === AgentSource.PUBLISHED ? `${agent.name} (Published)` : `${agent.name} (Agent Script)`,
+        name:
+          agent.source === AgentSource.PUBLISHED
+            ? `${agent.developerName ?? agent.name} (Published)`
+            : `${agent.name} (Agent Script)`,
         value: agent,
       }));
       const choice = await select<PreviewableAgent>({
