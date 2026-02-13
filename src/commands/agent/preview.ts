@@ -90,19 +90,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });
     } else {
       const previewableAgents = await Agent.listPreviewable(conn, this.project!);
-      const sorted = previewableAgents.sort((a, b) => {
-        if (a.source !== b.source) {
-          return a.source === AgentSource.SCRIPT ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-      });
-      const choices = sorted.map((agent) => ({
-        name:
-          agent.source === AgentSource.PUBLISHED
-            ? `${agent.developerName ?? agent.name} (Published)`
-            : `${agent.name} (Agent Script)`,
-        value: agent,
-      }));
+      const choices = getPreviewChoices(previewableAgents);
       const choice = await select<PreviewableAgent>({
         message: 'Select an agent',
         choices,
@@ -171,3 +159,24 @@ export const validateAgent = (agent: AgentData): boolean => {
 
   return true;
 };
+
+export const sortPreviewableAgents = (agents: PreviewableAgent[]): PreviewableAgent[] =>
+  [...agents].sort((a, b) => {
+    if (a.source !== b.source) {
+      return a.source === AgentSource.SCRIPT ? -1 : 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+export const getPreviewChoiceLabel = (agent: PreviewableAgent): string =>
+  agent.source === AgentSource.PUBLISHED
+    ? `${agent.developerName ?? agent.name} (Published)`
+    : `${agent.name} (Agent Script)`;
+
+export const getPreviewChoices = (
+  agents: PreviewableAgent[]
+): Array<{ name: string; value: PreviewableAgent }> =>
+  sortPreviewableAgents(agents).map((agent) => ({
+    name: getPreviewChoiceLabel(agent),
+    value: agent,
+  }));
