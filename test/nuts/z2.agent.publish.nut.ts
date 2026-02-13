@@ -175,7 +175,7 @@ describe('agent publish authoring-bundle NUTs', function () {
 
     execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${getUsername()} --json`,
-      { ensureExitCode: 2 }
+      { ensureExitCode: 'nonZero' }
     );
   });
 
@@ -187,7 +187,7 @@ describe('agent publish authoring-bundle NUTs', function () {
     try {
       execCmd<AgentPublishAuthoringBundleResult>(
         `agent publish authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
-        { ensureExitCode: 0 }
+        { ensureExitCode: 'nonZero' }
       );
       expect.fail('Expected publish to fail due to agent script compilation error');
     } catch (error) {

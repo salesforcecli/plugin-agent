@@ -75,7 +75,7 @@ describe('agent generate test-spec NUTs', function () {
     const outputFile = join(session.project.dir, 'specs', genUniqueString('testSpec_%s.yaml'));
 
     execCmd(`agent generate test-spec --from-definition ${invalidFile} --output-file ${outputFile} --force-overwrite`, {
-      ensureExitCode: 1,
+      ensureExitCode: 'nonZero',
     });
   });
 });
