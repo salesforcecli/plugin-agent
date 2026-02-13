@@ -130,7 +130,7 @@ Overwrite the existing authoring bundle if one with the same API name already ex
 
 # prompt.overwrite
 
-An authoring bundle with the API name "%s" already exists locally. Overwrite it?
+An authoring bundle with the API name "%s" already exists. Overwrite it?
 
 # info.cancel
 
