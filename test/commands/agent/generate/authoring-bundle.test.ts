@@ -44,12 +44,14 @@ describe('agent generate authoring-bundle', () => {
   let selectStub: sinon.SinonStub;
   let inputStub: sinon.SinonStub;
   let createAuthoringBundleStub: sinon.SinonStub;
+  let yesNoOrCancelStub: sinon.SinonStub;
   let AgentGenerateAuthoringBundle: any;
 
   beforeEach(async () => {
     selectStub = $$.SANDBOX.stub();
     inputStub = $$.SANDBOX.stub();
     createAuthoringBundleStub = $$.SANDBOX.stub().resolves();
+    yesNoOrCancelStub = $$.SANDBOX.stub();
 
     // Use esmock to replace ESM module imports
     const mod = await esmock('../../../../src/commands/agent/generate/authoring-bundle.js', {
@@ -61,6 +63,9 @@ describe('agent generate authoring-bundle', () => {
         ScriptAgent: {
           createAuthoringBundle: createAuthoringBundleStub,
         },
+      },
+      '../../../../src/yes-no-cancel.js': {
+        default: yesNoOrCancelStub,
       },
     });
 
@@ -351,6 +356,107 @@ describe('agent generate authoring-bundle', () => {
       for (const name of choiceNames) {
         expect(name).to.not.include('-testSpec');
       }
+    });
+  });
+
+  describe('duplicate bundle detection', () => {
+    // Willie_Resort_Manager already exists in the mock project's aiAuthoringBundles directory
+    const EXISTING_BUNDLE_API_NAME = 'Willie_Resort_Manager';
+
+    it('should prompt when bundle with same API name already exists', async () => {
+      yesNoOrCancelStub.resolves(true);
+
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--no-spec',
+        '--name',
+        'Willie Resort Manager',
+        '--api-name',
+        EXISTING_BUNDLE_API_NAME,
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.calledOnce).to.be.true;
+      const promptCall = yesNoOrCancelStub.firstCall.args[0] as { message: string };
+      expect(promptCall.message).to.include(EXISTING_BUNDLE_API_NAME);
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      expect(result.agentPath).to.include(`${EXISTING_BUNDLE_API_NAME}.agent`);
+    });
+
+    it('should cancel when user chooses cancel on duplicate prompt', async () => {
+      yesNoOrCancelStub.resolves('cancel');
+
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--no-spec',
+        '--name',
+        'Willie Resort Manager',
+        '--api-name',
+        EXISTING_BUNDLE_API_NAME,
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.calledOnce).to.be.true;
+      expect(createAuthoringBundleStub.called).to.be.false;
+      expect(result.agentPath).to.equal('');
+    });
+
+    it('should re-prompt for name and API name when user chooses no on duplicate prompt', async () => {
+      yesNoOrCancelStub.resolves(false);
+      // inputStub is called for both name and API name re-prompts
+      inputStub.onFirstCall().resolves('New Agent');
+      inputStub.onSecondCall().resolves('NewAgent');
+
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--no-spec',
+        '--name',
+        'Willie Resort Manager',
+        '--api-name',
+        EXISTING_BUNDLE_API_NAME,
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.calledOnce).to.be.true;
+      expect(inputStub.calledTwice).to.be.true;
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      const callArgs = createAuthoringBundleStub.firstCall.args[0] as CreateAuthoringBundleArgs;
+      expect(callArgs.bundleApiName).to.equal('NewAgent');
+      expect(callArgs.agentSpec.name).to.equal('New Agent');
+      expect(result.agentPath).to.include('NewAgent.agent');
+    });
+
+    it('should skip duplicate check with --force-overwrite', async () => {
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--no-spec',
+        '--name',
+        'Willie Resort Manager',
+        '--api-name',
+        EXISTING_BUNDLE_API_NAME,
+        '--force-overwrite',
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.called).to.be.false;
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      expect(result.agentPath).to.include(`${EXISTING_BUNDLE_API_NAME}.agent`);
+    });
+
+    it('should not prompt when API name does not exist locally', async () => {
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--no-spec',
+        '--name',
+        'Brand New Agent',
+        '--api-name',
+        'BrandNewAgent',
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.called).to.be.false;
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      expect(result.agentPath).to.include('BrandNewAgent.agent');
     });
   });
 });

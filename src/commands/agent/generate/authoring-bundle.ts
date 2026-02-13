@@ -22,6 +22,7 @@ import { AgentJobSpec, ScriptAgent } from '@salesforce/agents';
 import YAML from 'yaml';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import { theme } from '../../../inquirer-theme.js';
+import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.authoring-bundle');
@@ -31,6 +32,79 @@ export type AgentGenerateAuthoringBundleResult = {
   metaXmlPath: string;
   outputDir: string;
 };
+
+async function resolveUniqueBundle(
+  baseOutputDir: string,
+  forceOverwrite: boolean,
+  flagName?: string,
+  flagApiName?: string
+): Promise<{ name: string; apiName: string } | undefined> {
+  const name =
+    flagName ??
+    (await inquirerInput({
+      message: messages.getMessage('wizard.name.prompt'),
+      validate: (d: string): boolean | string => {
+        if (d.length === 0) {
+          return messages.getMessage('wizard.name.validation.required');
+        }
+        if (d.trim().length === 0) {
+          return messages.getMessage('wizard.name.validation.empty');
+        }
+        return true;
+      },
+      theme,
+    }));
+
+  let apiName = flagApiName ?? '';
+  if (!apiName) {
+    apiName = generateApiName(name);
+    const promptedValue = await inquirerInput({
+      message: messages.getMessage('flags.api-name.prompt'),
+      validate: (d: string): boolean | string => {
+        if (d.length === 0) {
+          return true;
+        }
+        if (d.length > 80) {
+          return 'API name cannot be over 80 characters.';
+        }
+        const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
+        if (!regex.test(d)) {
+          return 'Invalid API name.';
+        }
+        return true;
+      },
+      default: apiName,
+      theme,
+    });
+    if (promptedValue?.length) {
+      apiName = promptedValue;
+    }
+  }
+
+  if (forceOverwrite) {
+    return { name, apiName };
+  }
+
+  const bundleDir = join(baseOutputDir, 'aiAuthoringBundles', apiName);
+  if (!existsSync(bundleDir)) {
+    return { name, apiName };
+  }
+
+  const confirmation = await yesNoOrCancel({
+    message: messages.getMessage('prompt.overwrite', [apiName]),
+    default: false,
+  });
+
+  if (confirmation === 'cancel') {
+    return undefined;
+  }
+  if (confirmation) {
+    return { name, apiName };
+  }
+
+  // User chose "no" — restart from the beginning without flag values
+  return resolveUniqueBundle(baseOutputDir, false);
+}
 
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -58,6 +132,9 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     name: Flags.string({
       summary: messages.getMessage('flags.name.summary'),
       char: 'n',
+    }),
+    'force-overwrite': Flags.boolean({
+      summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
   };
 
@@ -127,54 +204,25 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
       }
     }
 
-    // Resolve name: --name flag or prompt
-    const name =
-      flags['name'] ??
-      (await inquirerInput({
-        message: messages.getMessage('wizard.name.prompt'),
-        validate: (d: string): boolean | string => {
-          if (d.length === 0) {
-            return messages.getMessage('wizard.name.validation.required');
-          }
-          if (d.trim().length === 0) {
-            return messages.getMessage('wizard.name.validation.empty');
-          }
-          return true;
-        },
-        theme,
-      }));
+    const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
+    const baseOutputDir = outputDir ?? defaultOutputDir;
 
-    // Resolve API name: --api-name flag or auto-generate from name with prompt to confirm
-    let bundleApiName = flags['api-name'];
-    if (!bundleApiName) {
-      bundleApiName = generateApiName(name);
-      const promptedValue = await inquirerInput({
-        message: messages.getMessage('flags.api-name.prompt'),
-        validate: (d: string): boolean | string => {
-          if (d.length === 0) {
-            return true;
-          }
-          if (d.length > 80) {
-            return 'API name cannot be over 80 characters.';
-          }
-          const regex = /^[A-Za-z][A-Za-z0-9_]*[A-Za-z0-9]+$/;
-          if (!regex.test(d)) {
-            return 'Invalid API name.';
-          }
-          return true;
-        },
-        default: bundleApiName,
-        theme,
-      });
-      if (promptedValue?.length) {
-        bundleApiName = promptedValue;
-      }
+    const resolved = await resolveUniqueBundle(
+      baseOutputDir,
+      flags['force-overwrite'] ?? false,
+      flags['name'],
+      flags['api-name']
+    );
+
+    if (!resolved) {
+      this.log(messages.getMessage('info.cancel'));
+      return { agentPath: '', metaXmlPath: '', outputDir: '' };
     }
 
+    const { name, apiName: bundleApiName } = resolved;
+
     try {
-      // Get default output directory if not specified
-      const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
-      const targetOutputDir = join(outputDir ?? defaultOutputDir, 'aiAuthoringBundles', bundleApiName);
+      const targetOutputDir = join(baseOutputDir, 'aiAuthoringBundles', bundleApiName);
 
       // Generate file paths
       const agentPath = join(targetOutputDir, `${bundleApiName}.agent`);
