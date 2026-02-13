@@ -90,7 +90,13 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });
     } else {
       const previewableAgents = await Agent.listPreviewable(conn, this.project!);
-      const choices = previewableAgents.map((agent) => ({
+      const sorted = previewableAgents.sort((a, b) => {
+        if (a.source !== b.source) {
+          return a.source === AgentSource.SCRIPT ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      const choices = sorted.map((agent) => ({
         name:
           agent.source === AgentSource.PUBLISHED
             ? `${agent.developerName ?? agent.name} (Published)`
