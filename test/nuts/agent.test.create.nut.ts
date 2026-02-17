@@ -16,7 +16,6 @@
 
 import { join, normalize } from 'node:path';
 import { existsSync } from 'node:fs';
-import * as os from 'node:os';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
@@ -32,11 +31,7 @@ describe('agent test create', function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
-  // this NUT is failing on windows due to an invalid api name, but it seems valid to me, passes on unix
-  //   Error: Unexpected exit code for command: agent test create --api-name Test_Agent_5096f046f91f34e7 --spec "...\agent-generate-template\specs\testSpec.yaml" --target-org test-relsveqne0do@example.com --json. Expected: 0 Actual: 1
-  //   Message: "Name: The AI Evaluation Definition API Name can only contain underscores and alphanumeric characters. It must be unique, begin with a letter, not include spaces, not end with an underscore, and not contain two consecutive underscores.",
-  // Test_Agent_5096f046f91f34e7 only contains underscores, and alphanumeric characters...
-  (os.platform() === 'win32' ? it.skip : it)('should create test from test spec file', async function () {
+  it('should create test from test spec file', async function () {
     // Increase timeout to 30 minutes since deployment can take a long time
     this.timeout(30 * 60 * 1000);
     const testApiName = genUniqueString('Test_Agent_%s');
