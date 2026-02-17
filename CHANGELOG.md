@@ -1,3 +1,13 @@
+# [1.30.0](https://github.com/salesforcecli/plugin-agent/compare/1.29.2...1.30.0) (2026-02-17)
+
+### Bug Fixes
+
+- use API name instead of label for published agents in preview picker ([c54cd16](https://github.com/salesforcecli/plugin-agent/commit/c54cd1627167c5932ff5ac3d0c9329cbb8fd5c4b))
+
+### Features
+
+- sort preview picker by type (script first) and alphabetically ([9b969d3](https://github.com/salesforcecli/plugin-agent/commit/9b969d3935766924828d14b6beb2795b82c87c9b))
+
 ## [1.29.2](https://github.com/salesforcecli/plugin-agent/compare/1.29.1...1.29.2) (2026-02-15)
 
 ### Bug Fixes
