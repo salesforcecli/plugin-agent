@@ -1,3 +1,11 @@
+## [1.30.1](https://github.com/salesforcecli/plugin-agent/compare/1.30.0...1.30.1) (2026-02-17)
+
+### Bug Fixes
+
+- update command snapshot and revert yes-no-cancel hint ([39bcf27](https://github.com/salesforcecli/plugin-agent/commit/39bcf27ad471f494413a657f0a663c4bdf12ce4c))
+- update overwrite prompt copy and hint display ([207c53e](https://github.com/salesforcecli/plugin-agent/commit/207c53e2a88639b86e06d8423672b9e18c5a7dcf))
+- validate unique API name before generating authoring bundle ([d81e9e3](https://github.com/salesforcecli/plugin-agent/commit/d81e9e38e9735c95ee1be77c61a12162ec2eb979))
+
 # [1.30.0](https://github.com/salesforcecli/plugin-agent/compare/1.29.2...1.30.0) (2026-02-17)
 
 ### Bug Fixes
