@@ -1,3 +1,9 @@
+## [1.30.2](https://github.com/salesforcecli/plugin-agent/compare/1.30.1...1.30.2) (2026-02-19)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.25.1 to 8.26.0 ([f699dc6](https://github.com/salesforcecli/plugin-agent/commit/f699dc6ba0bc80580953eb3a1b99677f029e4805))
+
 ## [1.30.1](https://github.com/salesforcecli/plugin-agent/compare/1.30.0...1.30.1) (2026-02-17)
 
 ### Bug Fixes
