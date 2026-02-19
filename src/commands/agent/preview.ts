@@ -86,6 +86,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     if (aabName) {
       // user specified --authoring-bundle, use the API name directly
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabName });
+      selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
     } else if (apiNameOrId) {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });
     } else {
@@ -173,9 +174,7 @@ export const getPreviewChoiceLabel = (agent: PreviewableAgent): string =>
     ? `${agent.developerName ?? agent.name} (Published)`
     : `${agent.name} (Agent Script)`;
 
-export const getPreviewChoices = (
-  agents: PreviewableAgent[]
-): Array<{ name: string; value: PreviewableAgent }> =>
+export const getPreviewChoices = (agents: PreviewableAgent[]): Array<{ name: string; value: PreviewableAgent }> =>
   sortPreviewableAgents(agents).map((agent) => ({
     name: getPreviewChoiceLabel(agent),
     value: agent,
