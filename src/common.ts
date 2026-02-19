@@ -37,6 +37,6 @@ export function throwAgentCompilationError(compilationErrors: CompilationError[]
   throw SfError.create({
     name: 'CompileAgentScriptError',
     message: errors.map((e) => `${e.errorType}: ${e.description} [Ln ${e.lineStart}, Col ${e.colStart}]`).join(EOL),
-    data: errors,
+    data: { errors },
   });
 }
