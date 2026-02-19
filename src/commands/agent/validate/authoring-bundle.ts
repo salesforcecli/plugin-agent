@@ -92,6 +92,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
     const targetOrg = flags['target-org'];
     const conn = targetOrg.getConnection(flags['api-version']);
     const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
+
     const result = await agent.compile();
     if (result.status === 'success') {
       mso.updateData({ status: 'COMPLETED' });
@@ -99,22 +100,21 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       return {
         success: true,
       };
-    } else {
-      // we have errors, in non --json
-      mso.updateData({ errors: result.errors.length.toString(), status: 'ERROR' });
-      mso.error();
-
-      this.log(
-        messages.getMessage('error.compilationFailed', [
-          result.errors
-            .map(
-              (line) =>
-                `- ${colorize('red', line.errorType)}: ${line.description} [Ln ${line.lineStart}, Col ${line.colStart}]`
-            )
-            .join('\n'),
-        ])
-      );
-      throwAgentCompilationError(result.errors);
     }
+    // Validation failed with compilation errors -> exit 1 (404/500 set by @salesforce/agents)
+    mso.updateData({ errors: result.errors.length.toString(), status: 'ERROR' });
+    mso.error();
+
+    this.log(
+      messages.getMessage('error.compilationFailed', [
+        result.errors
+          .map(
+            (line) =>
+              `- ${colorize('red', line.errorType)}: ${line.description} [Ln ${line.lineStart}, Col ${line.colStart}]`
+          )
+          .join('\n'),
+      ])
+    );
+    throwAgentCompilationError(result.errors);
   }
 }
