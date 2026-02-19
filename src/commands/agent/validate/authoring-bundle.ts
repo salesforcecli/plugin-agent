@@ -99,15 +99,12 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       return {
         success: true,
       };
-    } else if (this.jsonEnabled()) {
-      // we have errors, and --json
-      throwAgentCompilationError(result.errors);
     } else {
       // we have errors, in non --json
       mso.updateData({ errors: result.errors.length.toString(), status: 'ERROR' });
       mso.error();
 
-      this.error(
+      this.log(
         messages.getMessage('error.compilationFailed', [
           result.errors
             .map(
@@ -117,6 +114,7 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
             .join('\n'),
         ])
       );
+      throwAgentCompilationError(result.errors);
     }
   }
 }
