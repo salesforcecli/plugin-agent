@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
@@ -88,44 +88,35 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       ],
     });
 
-    try {
-      mso.skipTo('Validating Authoring Bundle');
-      const targetOrg = flags['target-org'];
-      const conn = targetOrg.getConnection(flags['api-version']);
-      const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
-      const result = await agent.compile();
-      if (result.status === 'success') {
-        mso.updateData({ status: 'COMPLETED' });
-        mso.stop('completed');
-        return {
-          success: true,
-        };
-      } else {
-        throwAgentCompilationError(result.errors);
-      }
-    } catch (error) {
-      // Handle validation errors
-      const err = SfError.wrap(error);
-      let count = 0;
-      const rawError = err.message ? err.message : err.name;
-      const formattedError = rawError
-        .split('\n')
-        .map((line) => {
-          count += 1;
-          const type = line.split(':')[0];
-          const rest = line.includes(':') ? line.substring(line.indexOf(':')).trim() : '';
-          return `- ${colorize('red', type)}${rest}`;
-        })
-        .join('\n');
-
-      mso.updateData({ errors: count.toString(), status: 'ERROR' });
+    mso.skipTo('Validating Authoring Bundle');
+    const targetOrg = flags['target-org'];
+    const conn = targetOrg.getConnection(flags['api-version']);
+    const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
+    const result = await agent.compile();
+    if (result.status === 'success') {
+      mso.updateData({ status: 'COMPLETED' });
+      mso.stop('completed');
+      return {
+        success: true,
+      };
+    } else if (this.jsonEnabled()) {
+      // we have errors, and --json
+      throwAgentCompilationError(result.errors);
+    } else {
+      // we have errors, in non --json
+      mso.updateData({ errors: result.errors.length.toString(), status: 'ERROR' });
       mso.error();
 
-      this.error(messages.getMessage('error.compilationFailed', [formattedError]));
-      return {
-        success: false,
-        errors: err.message.split('\n'),
-      };
+      this.error(
+        messages.getMessage('error.compilationFailed', [
+          result.errors
+            .map(
+              (line) =>
+                `- ${colorize('red', line.errorType)}: ${line.description} [Ln ${line.lineStart}, Col ${line.colStart}]`
+            )
+            .join('\n'),
+        ])
+      );
     }
   }
 }
