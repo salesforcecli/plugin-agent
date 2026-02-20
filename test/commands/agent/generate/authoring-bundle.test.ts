@@ -459,4 +459,116 @@ describe('agent generate authoring-bundle', () => {
       expect(result.agentPath).to.include('BrandNewAgent.agent');
     });
   });
+
+  describe('when --json is used', () => {
+    it('should throw when --name is not specified', async () => {
+      try {
+        await AgentGenerateAuthoringBundle.run([
+          '--json',
+          '--no-spec',
+          '--api-name',
+          'MyAgent',
+          '--target-org',
+          'test@org.com',
+        ]);
+        expect.fail('Expected error');
+      } catch (error) {
+        expect((error as Error).message).to.include('you must specify --name');
+      }
+    });
+
+    it('should throw when neither --spec nor --no-spec is specified', async () => {
+      try {
+        await AgentGenerateAuthoringBundle.run([
+          '--json',
+          '--name',
+          'My Agent',
+          '--api-name',
+          'MyAgent',
+          '--target-org',
+          'test@org.com',
+        ]);
+        expect.fail('Expected error');
+      } catch (error) {
+        expect((error as Error).message).to.include('you must specify either --spec or --no-spec');
+      }
+    });
+
+    it('should throw when existing AAB matches api-name and --force-overwrite is not set', async () => {
+      const EXISTING_BUNDLE_API_NAME = 'Willie_Resort_Manager';
+      try {
+        await AgentGenerateAuthoringBundle.run([
+          '--json',
+          '--no-spec',
+          '--name',
+          'Willie Resort Manager',
+          '--api-name',
+          EXISTING_BUNDLE_API_NAME,
+          '--target-org',
+          'test@org.com',
+        ]);
+        expect.fail('Expected error');
+      } catch (error) {
+        expect((error as Error).message).to.include(EXISTING_BUNDLE_API_NAME);
+        expect((error as Error).message).to.include('--force-overwrite');
+      }
+    });
+
+    it('should use generateApiName(name) as api-name when --api-name is omitted and not prompt', async () => {
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--json',
+        '--no-spec',
+        '--name',
+        'My Custom Agent',
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(inputStub.called).to.be.false;
+      const expectedApiName = generateApiName('My Custom Agent');
+      expect(result.outputDir).to.include(expectedApiName);
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      const callArgs = createAuthoringBundleStub.firstCall.args[0] as CreateAuthoringBundleArgs;
+      expect(callArgs.bundleApiName).to.equal(expectedApiName);
+      expect(callArgs.agentSpec.name).to.equal('My Custom Agent');
+    });
+
+    it('should succeed with --json when all required flags provided and no existing AAB', async () => {
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--json',
+        '--no-spec',
+        '--name',
+        'Json Agent',
+        '--api-name',
+        'JsonAgent',
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(selectStub.called).to.be.false;
+      expect(inputStub.called).to.be.false;
+      expect(yesNoOrCancelStub.called).to.be.false;
+      expect(result.agentPath).to.include('JsonAgent.agent');
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+    });
+
+    it('should succeed with --json and --force-overwrite when existing AAB matches', async () => {
+      const EXISTING_BUNDLE_API_NAME = 'Willie_Resort_Manager';
+      const result = await AgentGenerateAuthoringBundle.run([
+        '--json',
+        '--no-spec',
+        '--name',
+        'Willie Resort Manager',
+        '--api-name',
+        EXISTING_BUNDLE_API_NAME,
+        '--force-overwrite',
+        '--target-org',
+        'test@org.com',
+      ]);
+
+      expect(yesNoOrCancelStub.called).to.be.false;
+      expect(createAuthoringBundleStub.calledOnce).to.be.true;
+      expect(result.agentPath).to.include(`${EXISTING_BUNDLE_API_NAME}.agent`);
+    });
+  });
 });
