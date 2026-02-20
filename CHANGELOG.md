@@ -1,3 +1,9 @@
+## [1.30.3](https://github.com/salesforcecli/plugin-agent/compare/1.30.2...1.30.3) (2026-02-20)
+
+### Bug Fixes
+
+- fix --json error output to remove color info ([325ae15](https://github.com/salesforcecli/plugin-agent/commit/325ae151ba1ac00f14ccaaa4c2d7a4d2ecf78ef5))
+
 ## [1.30.2](https://github.com/salesforcecli/plugin-agent/compare/1.30.1...1.30.2) (2026-02-19)
 
 ### Bug Fixes
