@@ -73,6 +73,7 @@ describe('Agent Validate Authoring Bundle', () => {
       } catch (error) {
         expect(error).to.be.instanceOf(SfError);
         expect((error as SfError).name).to.equal('CompileAgentScriptError');
+        expect((error as SfError).exitCode).to.equal(1);
         expect((error as SfError).message).to.include('SyntaxError: Invalid syntax [Ln 10, Col 5]');
         expect((error as SfError).message).to.include('SyntaxError: Unknown error [Ln 15, Col 1]');
       }
@@ -85,6 +86,7 @@ describe('Agent Validate Authoring Bundle', () => {
       } catch (error) {
         expect(error).to.be.instanceOf(SfError);
         expect((error as SfError).name).to.equal('CompileAgentScriptError');
+        expect((error as SfError).exitCode).to.equal(1);
         expect((error as SfError).message).to.equal('Unknown compilation error occurred');
       }
     });

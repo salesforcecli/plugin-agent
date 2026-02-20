@@ -53,10 +53,9 @@ describe('agent validate authoring-bundle NUTs', function () {
     // Retry up to 3 times total (1 initial + 2 retries) to handle transient failures
     this.retries(2);
 
-    // Use the invalid authoring bundle (expects exit code 2 for compilation errors)
     execCmd<AgentValidateAuthoringBundleResult>(
       `agent validate authoring-bundle --api-name invalid --target-org ${getUsername()} --json`,
-      { ensureExitCode: 2 }
+      { ensureExitCode: 1 }
     );
   });
 });

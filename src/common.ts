@@ -15,7 +15,10 @@
  */
 import { EOL } from 'node:os';
 import { SfError } from '@salesforce/core';
-import { CompilationError } from '@salesforce/agents';
+import { CompilationError, COMPILATION_API_EXIT_CODES } from '@salesforce/agents';
+
+/** Re-export so consumers can use the library's exit code contract (404 → 2, 500 → 3). */
+export { COMPILATION_API_EXIT_CODES };
 
 /**
  * Utility function to generate SfError when there are agent compilation errors.
@@ -29,6 +32,7 @@ export function throwAgentCompilationError(compilationErrors: CompilationError[]
       name: 'CompileAgentScriptError',
       message: 'Unknown compilation error occurred',
       data: compilationErrors,
+      exitCode: 1,
     });
   }
 
@@ -37,6 +41,7 @@ export function throwAgentCompilationError(compilationErrors: CompilationError[]
   throw SfError.create({
     name: 'CompileAgentScriptError',
     message: errors.map((e) => `${e.errorType}: ${e.description} [Ln ${e.lineStart}, Col ${e.colStart}]`).join(EOL),
-    data: errors,
+    data: { errors },
+    exitCode: 1,
   });
 }
