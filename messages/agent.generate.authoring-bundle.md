@@ -139,3 +139,15 @@ Canceled authoring bundle generation.
 # warning.noSpecDir
 
 No agent spec directory found at %s.
+
+# error.jsonRequiresName
+
+When using --json, you must specify --name.
+
+# error.jsonRequiresSpecOrNoSpec
+
+When using --json, you must specify either --spec or --no-spec.
+
+# error.jsonAabExists
+
+An authoring bundle with the API name "%s" already exists in the project. Use --force-overwrite to overwrite it, or specify a different --api-name.

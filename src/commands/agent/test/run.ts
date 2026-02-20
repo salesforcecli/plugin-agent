@@ -84,6 +84,11 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestRun);
     const connection = flags['target-org'].getConnection(flags['api-version']);
+
+    if (this.jsonEnabled() && !flags['api-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['api-name']);
+    }
+
     const apiName =
       flags['api-name'] ?? (await promptForAiEvaluationDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection));
 

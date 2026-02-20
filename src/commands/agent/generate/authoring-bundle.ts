@@ -106,6 +106,19 @@ async function resolveUniqueBundle(
   return resolveUniqueBundle(baseOutputDir, false);
 }
 
+function resolveNameAndApiNameForJson(
+  flags: { name: string; 'api-name'?: string; 'force-overwrite'?: boolean },
+  baseOutputDir: string
+): { name: string; bundleApiName: string } {
+  const name = flags.name;
+  const bundleApiName = flags['api-name'] ?? generateApiName(name);
+  const bundleDir = join(baseOutputDir, 'aiAuthoringBundles', bundleApiName);
+  if (existsSync(bundleDir) && !flags['force-overwrite']) {
+    throw messages.createError('error.jsonAabExists', [bundleApiName]);
+  }
+  return { name, bundleApiName };
+}
+
 export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerateAuthoringBundleResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -138,12 +151,23 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     }),
   };
 
+  // eslint-disable-next-line complexity -- run() branches on json vs interactive, spec source, and name resolution
   public async run(): Promise<AgentGenerateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentGenerateAuthoringBundle);
     const { 'output-dir': outputDir } = flags;
 
     if (flags.spec && flags['no-spec']) {
       throw new SfError(messages.getMessage('error.specAndNoSpec'));
+    }
+
+    const jsonMode = this.jsonEnabled();
+    if (jsonMode) {
+      if (!flags.name) {
+        throw messages.createError('error.jsonRequiresName');
+      }
+      if (flags.spec === undefined && !flags['no-spec']) {
+        throw messages.createError('error.jsonRequiresSpecOrNoSpec');
+      }
     }
 
     // Resolve spec: --no-spec => undefined, --spec <path> => path, missing => wizard prompts
@@ -207,19 +231,26 @@ export default class AgentGenerateAuthoringBundle extends SfCommand<AgentGenerat
     const defaultOutputDir = join(this.project!.getDefaultPackage().fullPath, 'main', 'default');
     const baseOutputDir = outputDir ?? defaultOutputDir;
 
-    const resolved = await resolveUniqueBundle(
-      baseOutputDir,
-      flags['force-overwrite'] ?? false,
-      flags['name'],
-      flags['api-name']
-    );
-
+    let resolved: { name: string; bundleApiName: string } | undefined;
+    if (jsonMode) {
+      resolved = resolveNameAndApiNameForJson(
+        { name: flags.name!, 'api-name': flags['api-name'], 'force-overwrite': flags['force-overwrite'] },
+        baseOutputDir
+      );
+    } else {
+      const unique = await resolveUniqueBundle(
+        baseOutputDir,
+        flags['force-overwrite'] ?? false,
+        flags['name'],
+        flags['api-name']
+      );
+      resolved = unique ? { name: unique.name, bundleApiName: unique.apiName } : undefined;
+    }
     if (!resolved) {
       this.log(messages.getMessage('info.cancel'));
       return { agentPath: '', metaXmlPath: '', outputDir: '' };
     }
-
-    const { name, apiName: bundleApiName } = resolved;
+    const { name, bundleApiName } = resolved;
 
     try {
       const targetOutputDir = join(baseOutputDir, 'aiAuthoringBundles', bundleApiName);
