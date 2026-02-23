@@ -142,7 +142,7 @@ No agent spec directory found at %s.
 
 # error.jsonRequiresName
 
-When using --json, you must specify --name.
+When using --json, you must also specify --name.
 
 # error.jsonRequiresSpecOrNoSpec
 
