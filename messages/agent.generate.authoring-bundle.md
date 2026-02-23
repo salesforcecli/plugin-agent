@@ -146,7 +146,7 @@ When using --json, you must also specify --name.
 
 # error.jsonRequiresSpecOrNoSpec
 
-When using --json, you must specify either --spec or --no-spec.
+When using --json, you must also specify either --spec or --no-spec.
 
 # error.jsonAabExists
 
