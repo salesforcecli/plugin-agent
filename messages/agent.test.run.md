@@ -38,4 +38,4 @@ Number of minutes to wait for the command to complete and display results to the
 
 # error.missingRequiredFlags
 
-When using --json, you must specify the required flag(s): %s.
+When using --json, you must also specify the required flag(s): %s.
