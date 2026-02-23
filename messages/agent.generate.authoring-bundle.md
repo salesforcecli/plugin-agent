@@ -150,4 +150,4 @@ When using --json, you must also specify either --spec or --no-spec.
 
 # error.jsonAabExists
 
-An authoring bundle with the API name "%s" already exists in the project. Use --force-overwrite to overwrite it, or specify a different --api-name.
+An authoring bundle with the API name "%s" already exists in the project. Use --force-overwrite to overwrite it or specify a different authoring bundle using the --api-name flag. 
