@@ -473,7 +473,7 @@ describe('agent generate authoring-bundle', () => {
         ]);
         expect.fail('Expected error');
       } catch (error) {
-        expect((error as Error).message).to.include('you must specify --name');
+        expect((error as Error).message).to.include('you must also specify --name');
       }
     });
 
@@ -490,7 +490,7 @@ describe('agent generate authoring-bundle', () => {
         ]);
         expect.fail('Expected error');
       } catch (error) {
-        expect((error as Error).message).to.include('you must specify either --spec or --no-spec');
+        expect((error as Error).message).to.include('you must also specify either --spec or --no-spec');
       }
     });
 
