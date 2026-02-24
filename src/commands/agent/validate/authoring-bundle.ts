@@ -63,6 +63,11 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
+
+    if (this.jsonEnabled() && !flags['api-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['api-name']);
+    }
+
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
     const aabName =
       flags['api-name'] ??

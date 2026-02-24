@@ -35,3 +35,7 @@ Number of minutes to wait for the command to complete and display results to the
 - Start an agent test and write the JSON-formatted results into a directory called "test-results":
 
   <%= config.bin %> <%= command.id %> --api-name Resort_Manager_Test --wait 10 --output-dir ./test-results --result-format json
+
+# error.missingRequiredFlags
+
+When using --json, you must also specify the required flag(s): %s.
