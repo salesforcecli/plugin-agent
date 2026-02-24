@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
@@ -63,6 +63,11 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
 
   public async run(): Promise<AgentValidateAuthoringBundleResult> {
     const { flags } = await this.parse(AgentValidateAuthoringBundle);
+
+    if (this.jsonEnabled() && !flags['api-name']) {
+      throw messages.createError('error.missingRequiredFlags', ['api-name']);
+    }
+
     // If api-name is not provided, prompt user to select an .agent file from the project and extract the API name from it
     const aabName =
       flags['api-name'] ??
@@ -88,44 +93,33 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
       ],
     });
 
-    try {
-      mso.skipTo('Validating Authoring Bundle');
-      const targetOrg = flags['target-org'];
-      const conn = targetOrg.getConnection(flags['api-version']);
-      const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
-      const result = await agent.compile();
-      if (result.status === 'success') {
-        mso.updateData({ status: 'COMPLETED' });
-        mso.stop('completed');
-        return {
-          success: true,
-        };
-      } else {
-        throwAgentCompilationError(result.errors);
-      }
-    } catch (error) {
-      // Handle validation errors
-      const err = SfError.wrap(error);
-      let count = 0;
-      const rawError = err.message ? err.message : err.name;
-      const formattedError = rawError
-        .split('\n')
-        .map((line) => {
-          count += 1;
-          const type = line.split(':')[0];
-          const rest = line.includes(':') ? line.substring(line.indexOf(':')).trim() : '';
-          return `- ${colorize('red', type)}${rest}`;
-        })
-        .join('\n');
+    mso.skipTo('Validating Authoring Bundle');
+    const targetOrg = flags['target-org'];
+    const conn = targetOrg.getConnection(flags['api-version']);
+    const agent = await Agent.init({ connection: conn, project: this.project!, aabName });
 
-      mso.updateData({ errors: count.toString(), status: 'ERROR' });
-      mso.error();
-
-      this.error(messages.getMessage('error.compilationFailed', [formattedError]));
+    const result = await agent.compile();
+    if (result.status === 'success') {
+      mso.updateData({ status: 'COMPLETED' });
+      mso.stop('completed');
       return {
-        success: false,
-        errors: err.message.split('\n'),
+        success: true,
       };
     }
+    // Validation failed with compilation errors -> exit 1 (404/500 set by @salesforce/agents)
+    mso.updateData({ errors: result.errors.length.toString(), status: 'ERROR' });
+    mso.error();
+
+    this.log(
+      messages.getMessage('error.compilationFailed', [
+        result.errors
+          .map(
+            (line) =>
+              `- ${colorize('red', line.errorType)}: ${line.description} [Ln ${line.lineStart}, Col ${line.colStart}]`
+          )
+          .join('\n'),
+      ])
+    );
+    throwAgentCompilationError(result.errors);
   }
 }
