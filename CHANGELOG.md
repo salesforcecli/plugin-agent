@@ -1,3 +1,10 @@
+## [1.30.6](https://github.com/salesforcecli/plugin-agent/compare/1.30.5...1.30.6) (2026-02-24)
+
+### Bug Fixes
+
+- allow --use-live-actions to affect --authoring-bundle ([6579537](https://github.com/salesforcecli/plugin-agent/commit/6579537a8b9522d10b9373ddfc41dc2535c30f87))
+- error on missing info for --json ([21f47c8](https://github.com/salesforcecli/plugin-agent/commit/21f47c8afd9d0e1475015be220a28582d4333968))
+
 ## [1.30.5](https://github.com/salesforcecli/plugin-agent/compare/1.30.4...1.30.5) (2026-02-24)
 
 ### Bug Fixes
