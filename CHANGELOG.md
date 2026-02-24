@@ -1,3 +1,9 @@
+## [1.30.5](https://github.com/salesforcecli/plugin-agent/compare/1.30.4...1.30.5) (2026-02-24)
+
+### Bug Fixes
+
+- override productFeatureId and add test ([fc4f5f9](https://github.com/salesforcecli/plugin-agent/commit/fc4f5f918cc87bb9f62863917712a5a2257e2a53))
+
 ## [1.30.4](https://github.com/salesforcecli/plugin-agent/compare/1.30.3...1.30.4) (2026-02-22)
 
 ### Bug Fixes
