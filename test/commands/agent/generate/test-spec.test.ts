@@ -194,6 +194,22 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
           fullName: 'myGenAiPlannerBundle',
           type: { name: 'GenAiPlannerBundle', id: 'genaiplannerbundle', directoryName: 'genaiplannerbundle' },
         },
+        {
+          fullName: 'ambiguous_question_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'event_management_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'off_topic_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'topic_selector_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
       ]);
 
       $$.stub(cs, 'getComponentFilenamesByNameAndType')
@@ -202,7 +218,15 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         .onSecondCall()
         .rejects() // genAiPlanner attempt
         .onThirdCall()
-        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml']);
+        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml'])
+        .onCall(3)
+        .returns(['ambiguous_question.genAiPlugin-meta.xml'])
+        .onCall(4)
+        .returns(['event_management.genAiPlugin-meta.xml'])
+        .onCall(5)
+        .returns(['off_topic.genAiPlugin-meta.xml'])
+        .onCall(6)
+        .returns(['topic_selector.genAiPlugin-meta.xml']);
 
       $$.stub(fs.promises, 'readFile')
         .onFirstCall()
@@ -264,34 +288,6 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
             <sortOrder>1</sortOrder>
         </genAiPluginInstructions>
         <language>en_US</language>
-        <localActionLinks>
-            <functionName>lookup_events_179KS000000Gn49</functionName>
-        </localActionLinks>
-        <localActionLinks>
-            <functionName>book_venue_179KS000000Gn49</functionName>
-        </localActionLinks>
-        <localActions>
-            <fullName>lookup_events_179KS000000Gn49</fullName>
-            <description>Search for upcoming company events by date or category</description>
-            <developerName>lookup_events_179KS000000Gn49</developerName>
-            <invocationTarget>EventLookupController</invocationTarget>
-            <invocationTargetType>apex</invocationTargetType>
-            <isConfirmationRequired>false</isConfirmationRequired>
-            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
-            <localDeveloperName>lookup_events</localDeveloperName>
-            <masterLabel>Lookup Events</masterLabel>
-        </localActions>
-        <localActions>
-            <fullName>book_venue_179KS000000Gn49</fullName>
-            <description>Check venue availability and reserve a room for an event</description>
-            <developerName>book_venue_179KS000000Gn49</developerName>
-            <invocationTarget>VenueBookingController</invocationTarget>
-            <invocationTargetType>apex</invocationTargetType>
-            <isConfirmationRequired>false</isConfirmationRequired>
-            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
-            <localDeveloperName>book_venue</localDeveloperName>
-            <masterLabel>Book Venue</masterLabel>
-        </localActions>
         <localDeveloperName>event_management</localDeveloperName>
         <masterLabel>Event Management</masterLabel>
         <pluginType>Topic</pluginType>
@@ -337,7 +333,7 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         );
 
       const result = await getPluginsAndFunctions(name, cs);
-      expect(result.genAiFunctions).to.deep.equal([undefined]);
+      expect(result.genAiFunctions).to.deep.equal([]);
     });
   });
 
