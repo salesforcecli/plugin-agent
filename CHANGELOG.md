@@ -1,3 +1,9 @@
+## [1.30.8](https://github.com/salesforcecli/plugin-agent/compare/1.30.7...1.30.8) (2026-02-27)
+
+### Bug Fixes
+
+- update parsing ([11edaf9](https://github.com/salesforcecli/plugin-agent/commit/11edaf9ee04f3f0551cd3c08ee19757c5a02b984))
+
 ## [1.30.7](https://github.com/salesforcecli/plugin-agent/compare/1.30.6...1.30.7) (2026-02-26)
 
 ### Bug Fixes
