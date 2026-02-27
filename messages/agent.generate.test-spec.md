@@ -55,4 +55,4 @@ File must be an AiEvaluationDefinition metadata XML file.
 
 # error.NoAgentsFound
 
-No agents found in %s.
+No published agents ('GenAiPlannerBundle', 'GenAiPlugin', 'Bot') found in %s.

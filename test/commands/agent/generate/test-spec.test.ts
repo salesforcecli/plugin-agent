@@ -87,29 +87,101 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         .rejects()
         .onThirdCall().resolves(`<?xml version="1.0" encoding="UTF-8"?>
 <GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <genAiPlugins>
-        <genAiPluginName>PluginName</genAiPluginName>
-    </genAiPlugins>
-    <genAiPlugins>
-        <genAiPluginName>PluginName2</genAiPluginName>
-        <genAiCustomizedPlugin>
-          <genAiFunctions>
-            <functionName>function1</functionName>
-          </genAiFunctions>
-          <genAiFunctions>
-            <functionName></functionName>
-          </genAiFunctions>
-        </genAiCustomizedPlugin>
-    </genAiPlugins>
+    <description>Helps internal employees manage company events, including event lookup, venue booking, and announcement drafting.</description>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jKS000000CaeR</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>off_topic_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to event-related topics when user request goes off-topic</description>
+        <developerName>off_topic_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn4A</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn4A</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>event_management_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Handle event lookup, venue booking, and event announcement requests</description>
+        <developerName>event_management_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn49</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn49</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>lookup_events_179KS000000Gn49</functionName>
+        </localActionLinks>
+        <localActionLinks>
+            <functionName>book_venue_179KS000000Gn49</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>lookup_events_179KS000000Gn49</fullName>
+            <description>Search for upcoming company events by date or category</description>
+            <developerName>lookup_events_179KS000000Gn49</developerName>
+            <invocationTarget>EventLookupController</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>lookup_events</localDeveloperName>
+            <masterLabel>Lookup Events</masterLabel>
+        </localActions>
+        <localActions>
+            <fullName>book_venue_179KS000000Gn49</fullName>
+            <description>Check venue availability and reserve a room for an event</description>
+            <developerName>book_venue_179KS000000Gn49</developerName>
+            <invocationTarget>VenueBookingController</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>book_venue</localDeveloperName>
+            <masterLabel>Book Venue</masterLabel>
+        </localActions>
+        <localDeveloperName>event_management</localDeveloperName>
+        <masterLabel>Event Management</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>topic_selector_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Welcome the user and route to the appropriate topic based on their request</description>
+        <developerName>topic_selector_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn48</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn48</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>topic_selector</localDeveloperName>
+        <masterLabel>Topic Selector</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Event Coordinator</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
 </GenAiPlannerBundle>
+
 `);
 
       const result = await getPluginsAndFunctions(name, cs);
       expect(result).to.deep.equal({
-        genAiFunctions: ['function1'],
+        genAiFunctions: ['lookup_events_179KS000000Gn49', 'book_venue_179KS000000Gn49'],
         genAiPlugins: {
-          PluginName: 'PluginName.genAiPlugin-meta.xml',
-          PluginName2: 'PluginName2.genAiPlugin-meta.xml',
+          // eslint-disable-next-line camelcase
+          ambiguous_question_16jKS000000CaeR: 'PluginName.genAiPlugin-meta.xml',
         },
       });
     });
@@ -122,6 +194,22 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
           fullName: 'myGenAiPlannerBundle',
           type: { name: 'GenAiPlannerBundle', id: 'genaiplannerbundle', directoryName: 'genaiplannerbundle' },
         },
+        {
+          fullName: 'ambiguous_question_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'event_management_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'off_topic_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+        {
+          fullName: 'topic_selector_16jKS000000CaeR',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
       ]);
 
       $$.stub(cs, 'getComponentFilenamesByNameAndType')
@@ -130,7 +218,15 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         .onSecondCall()
         .rejects() // genAiPlanner attempt
         .onThirdCall()
-        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml']);
+        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml'])
+        .onCall(3)
+        .returns(['ambiguous_question.genAiPlugin-meta.xml'])
+        .onCall(4)
+        .returns(['event_management.genAiPlugin-meta.xml'])
+        .onCall(5)
+        .returns(['off_topic.genAiPlugin-meta.xml'])
+        .onCall(6)
+        .returns(['topic_selector.genAiPlugin-meta.xml']);
 
       $$.stub(fs.promises, 'readFile')
         .onFirstCall()
@@ -149,30 +245,95 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
         .resolves(
           `<?xml version="1.0" encoding="UTF-8"?>
 <GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <genAiPlugins>
-        <genAiCustomizedPlugin>
-            <canEscalate>false</canEscalate>
-            <description>System level instructions for config.</description>
-            <genAiPluginInstructions>
-                <description>...</description>
-                <developerName>instruction_0_1756241650786</developerName>
-                <language xsi:nil="true"/>
-                <masterLabel>instruction_0_1756241650786</masterLabel>
-            </genAiPluginInstructions>
+    <description>Helps internal employees manage company events, including event lookup, venue booking, and announcement drafting.</description>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jKS000000CaeR</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>event_management_16jKS000000CaeR</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>off_topic_16jKS000000CaeR</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>topic_selector_16jKS000000CaeR</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>off_topic_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation to event-related topics when user request goes off-topic</description>
+        <developerName>off_topic_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn4A</developerName>
             <language>en_US</language>
-            <masterLabel>B2C Global Instructions</masterLabel>
-            <name>B2CGlobalInstructions1</name>
-            <pluginType>Topic</pluginType>
-            <scope>Define system-level instructions, including hardcoded values.</scope>
-        </genAiCustomizedPlugin>
-        <genAiPluginName>COMMERCE_SHOPPER_COPILOT_B2C__B2CGlobalInstructions</genAiPluginName>
-    </genAiPlugins>
+            <masterLabel>instruction0_179KS000000Gn4A</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>event_management_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Handle event lookup, venue booking, and event announcement requests</description>
+        <developerName>event_management_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn49</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn49</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>event_management</localDeveloperName>
+        <masterLabel>Event Management</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>topic_selector_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Welcome the user and route to the appropriate topic based on their request</description>
+        <developerName>topic_selector_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn48</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn48</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>topic_selector</localDeveloperName>
+        <masterLabel>Topic Selector</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>ambiguous_question_16jKS000000CaeR</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Ask for clarification when user request is unclear</description>
+        <developerName>ambiguous_question_16jKS000000CaeR</developerName>
+        <genAiPluginInstructions>
+            <description>You are the Event Coordinator assistant, helping internal employees manage company events. Be professional, helpful, and concise.</description>
+            <developerName>instruction0_179KS000000Gn47</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179KS000000Gn47</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>ambiguous_question</localDeveloperName>
+        <masterLabel>Ambiguous Question</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Event Coordinator</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
 </GenAiPlannerBundle>
 `
         );
 
       const result = await getPluginsAndFunctions(name, cs);
-      expect(result.genAiFunctions).to.deep.equal([undefined]);
+      expect(result.genAiFunctions).to.deep.equal([]);
     });
   });
 

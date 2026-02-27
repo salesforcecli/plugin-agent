@@ -346,22 +346,36 @@ export async function getPluginsAndFunctions(
       );
       const parsedPlannerBundle = parser.parse(plannerBundleXml) as {
         GenAiPlannerBundle: {
-          genAiPlugins: Array<
-            | {
-                genAiPluginName: string;
-              }
-            | { genAiPluginName: string; genAiCustomizedPlugin: { genAiFunctions: Array<{ functionName: string }> } }
-          >;
+          localTopicLinks: Array<{
+            genAiPluginName: string;
+          }>;
+          localTopics: Array<{
+            fullName: string;
+            canEscalate: boolean;
+            description: string;
+            developerName: string;
+            language: string;
+            localDeveloperName: string;
+            masterLabel: string;
+            pluginType: string;
+            localActionLinks?: Array<{ functionName: string }>;
+            genAiPluginInstructions: {
+              description: string;
+              developerName: string;
+              language: string;
+              masterLabel: string;
+              sortOrder: number;
+            };
+          }>;
         };
       };
-      genAiFunctions = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins)
-        .filter((f) => 'genAiCustomizedPlugin' in f)
-        .map(
-          ({ genAiCustomizedPlugin }) =>
-            genAiCustomizedPlugin.genAiFunctions?.find((plugin) => plugin.functionName !== '')!.functionName
-        );
+      genAiFunctions = ensureArray(
+        parsedPlannerBundle.GenAiPlannerBundle.localTopics
+          .flatMap((topic) => topic.localActionLinks?.map((lal) => lal.functionName))
+          .filter((f) => typeof f === 'string')
+      );
 
-      genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.genAiPlugins).reduce(
+      genAiPlugins = ensureArray(parsedPlannerBundle.GenAiPlannerBundle.localTopicLinks).reduce(
         (acc, { genAiPluginName }) => ({
           ...acc,
           [genAiPluginName]: cs.getComponentFilenamesByNameAndType({
@@ -480,7 +494,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
 
     const cs = await ComponentSetBuilder.build({
       metadata: {
-        metadataEntries: ['GenAiPlanner', 'GenAiPlannerBundle', 'GenAiPlugin', 'Bot'],
+        metadataEntries: ['GenAiPlanner:*', 'GenAiPlannerBundle:*', 'GenAiPlugin:*', 'Bot:*'],
         directoryPaths,
       },
     });
