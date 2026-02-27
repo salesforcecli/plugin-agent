@@ -19,7 +19,7 @@
     "@salesforce/source-deploy-retrieve": "^12.31.14",
     "@salesforce/types": "^1.6.0",
     "ansis": "^3.3.2",
-    "fast-xml-parser": "^5.3.7",
+    "fast-xml-parser": "^5.3.8",
     "glob": "^11.0.3",
     "ink": "5.0.1",
     "ink-text-input": "^6.0.0",
