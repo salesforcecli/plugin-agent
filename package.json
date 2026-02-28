@@ -17,7 +17,7 @@
     "@salesforce/kit": "^3.2.4",
     "@salesforce/sf-plugins-core": "^12.2.6",
     "@salesforce/source-deploy-retrieve": "^12.31.14",
-    "@salesforce/types": "^1.6.0",
+    "@salesforce/types": "^1.7.1",
     "ansis": "^3.3.2",
     "fast-xml-parser": "^5.3.8",
     "glob": "^11.0.3",
