@@ -17,13 +17,16 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { getAgentForActivation } from '../../agentActivation.js';
 
+export type AgentActivateResult = { success: boolean; version: number };
+
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.activate');
 
-export default class AgentActivate extends SfCommand<void> {
+export default class AgentActivate extends SfCommand<AgentActivateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static readonly enableJsonFlag = true;
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -32,9 +35,10 @@ export default class AgentActivate extends SfCommand<void> {
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
     }),
+    version: Flags.integer({ summary: messages.getMessage('flags.version.summary') }),
   };
 
-  public async run(): Promise<void> {
+  public async run(): Promise<AgentActivateResult> {
     const { flags } = await this.parse(AgentActivate);
 
     const apiNameFlag = flags['api-name'];
@@ -43,11 +47,10 @@ export default class AgentActivate extends SfCommand<void> {
     if (!apiNameFlag && this.jsonEnabled()) {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
-
     const agent = await getAgentForActivation({ targetOrg, status: 'Active', apiNameFlag });
-    await agent.activate();
-    const agentName = (await agent.getBotMetadata()).DeveloperName;
+    const result = await agent.activate(flags.version);
 
-    this.log(`Agent ${agentName} activated.`);
+    this.log(`Agent ${result.DeveloperName} activated.`);
+    return { success: true, version: result.VersionNumber };
   }
 }
