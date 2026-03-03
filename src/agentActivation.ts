@@ -149,7 +149,8 @@ export const getVersionForActivation = async (config: {
 
   // Get bot metadata to access versions
   const botMetadata = await agent.getBotMetadata();
-  const versions = botMetadata.BotVersions.records;
+  // Filter out deleted versions as a defensive measure
+  const versions = botMetadata.BotVersions.records.filter((v) => !v.IsDeleted);
 
   // If there's only one version, return it
   if (versions.length === 1) {
