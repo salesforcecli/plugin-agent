@@ -50,8 +50,9 @@ export default class AgentActivate extends SfCommand<AgentActivateResult> {
     const agent = await getAgentForActivation({ targetOrg, status: 'Active', apiNameFlag });
     const version = await getVersionForActivation({ agent, status: 'Active', versionFlag: flags.version });
     const result = await agent.activate(version);
+    const metadata = await agent.getBotMetadata();
 
-    this.log(`Agent v${result.VersionNumber} activated.`);
+    this.log(`${metadata.DeveloperName} v${result.VersionNumber} activated.`);
     return { success: true, version: result.VersionNumber };
   }
 }

@@ -47,8 +47,9 @@ export default class AgentDeactivate extends SfCommand<AgentActivateResult> {
 
     const agent = await getAgentForActivation({ targetOrg, status: 'Inactive', apiNameFlag });
     const result = await agent.deactivate();
+    const metadata = await agent.getBotMetadata();
 
-    this.log(`Agent v${result.VersionNumber} deactivated.`);
+    this.log(`${metadata.DeveloperName} v${result.VersionNumber} deactivated.`);
     return { success: true, version: result.VersionNumber };
   }
 }
