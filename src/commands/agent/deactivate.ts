@@ -33,7 +33,6 @@ export default class AgentDeactivate extends SfCommand<AgentActivateResult> {
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
     }),
-    version: Flags.integer({ summary: messages.getMessage('flags.version.summary') }),
   };
 
   public async run(): Promise<AgentActivateResult> {
@@ -47,9 +46,9 @@ export default class AgentDeactivate extends SfCommand<AgentActivateResult> {
     }
 
     const agent = await getAgentForActivation({ targetOrg, status: 'Inactive', apiNameFlag });
-    const result = await agent.deactivate(flags.version);
+    const result = await agent.deactivate();
 
-    this.log(`Agent ${result.DeveloperName} deactivated.`);
+    this.log(`Agent v${result.VersionNumber} deactivated.`);
     return { success: true, version: result.VersionNumber };
   }
 }

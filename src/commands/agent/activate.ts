@@ -15,7 +15,7 @@
  */
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { getAgentForActivation } from '../../agentActivation.js';
+import { getAgentForActivation, getVersionForActivation } from '../../agentActivation.js';
 
 export type AgentActivateResult = { success: boolean; version: number };
 
@@ -48,9 +48,10 @@ export default class AgentActivate extends SfCommand<AgentActivateResult> {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
     const agent = await getAgentForActivation({ targetOrg, status: 'Active', apiNameFlag });
-    const result = await agent.activate(flags.version);
+    const version = await getVersionForActivation({ agent, status: 'Active', versionFlag: flags.version });
+    const result = await agent.activate(version);
 
-    this.log(`Agent ${result.DeveloperName} activated.`);
+    this.log(`Agent v${result.VersionNumber} activated.`);
     return { success: true, version: result.VersionNumber };
   }
 }

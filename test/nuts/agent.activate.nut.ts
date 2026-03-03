@@ -85,11 +85,51 @@ describe('agent activate/deactivate NUTs', function () {
     expect(finalStatus).to.equal('Active');
   });
 
+  it('should activate the agent with version flag', async () => {
+    // Ensure agent is inactive first
+    const initialStatus = await getBotStatus();
+    if (initialStatus === 'Active') {
+      execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, {
+        ensureExitCode: 0,
+      });
+      await sleep(5000);
+    }
+
+    // Activate with version 1
+    execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --version 1 --json`, {
+      ensureExitCode: 0,
+    });
+
+    // Verify the BotVersion status is now 'Active'
+    const finalStatus = await getBotStatus();
+    expect(finalStatus).to.equal('Active');
+  });
+
   it('should deactivate the agent', async () => {
     // Verify the BotVersion status has 'Active' initial state
     const initialStatus = await getBotStatus();
     expect(initialStatus).to.equal('Active');
 
+    execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, {
+      ensureExitCode: 0,
+    });
+
+    // Verify the BotVersion status is now 'Inactive'
+    const finalStatus = await getBotStatus();
+    expect(finalStatus).to.equal('Inactive');
+  });
+
+  it('should deactivate the agent (version automatically detected)', async () => {
+    // Ensure agent is active first
+    const initialStatus = await getBotStatus();
+    if (initialStatus === 'Inactive') {
+      execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --version 1 --json`, {
+        ensureExitCode: 0,
+      });
+      await sleep(5000);
+    }
+
+    // Deactivate (version is automatically detected)
     execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, {
       ensureExitCode: 0,
     });

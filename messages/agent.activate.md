@@ -22,6 +22,10 @@ You must know the agent's API name to activate it; you can either be prompted fo
 
 API name of the agent to activate.
 
+# flags.version.summary
+
+Version number of the agent to activate.
+
 # error.missingRequiredFlags
 
 Missing required flags: %s.

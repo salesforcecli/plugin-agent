@@ -15,7 +15,7 @@
  */
 
 import { Messages, Org, SfError, SfProject } from '@salesforce/core';
-import { Agent, type BotMetadata, ProductionAgent } from '@salesforce/agents';
+import { Agent, type BotMetadata, type BotVersionMetadata, ProductionAgent } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 
 type Choice<Value> = {
@@ -26,6 +26,11 @@ type Choice<Value> = {
 type AgentValue = {
   Id: string;
   DeveloperName: string;
+};
+
+type VersionChoice = {
+  version: number;
+  status: string;
 };
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -48,8 +53,10 @@ export const getAgentChoices = (agents: BotMetadata[], status: 'Active' | 'Inact
   agents.map((agent) => {
     let disabled: string | boolean = false;
 
-    const lastBotVersion = agent.BotVersions.records[agent.BotVersions.records.length - 1];
-    if (lastBotVersion.Status === status) {
+    // For deactivate (status='Inactive'), check if any version is Active (can be deactivated)
+    // For activate (status='Active'), check if any version is Inactive (can be activated)
+    const hasAvailableVersion = agent.BotVersions.records.some((version) => version.Status !== status);
+    if (!hasAvailableVersion) {
       disabled = `(Already ${status})`;
     }
     if (agentIsUnsupported(agent.DeveloperName)) {
@@ -63,6 +70,22 @@ export const getAgentChoices = (agents: BotMetadata[], status: 'Active' | 'Inact
         DeveloperName: agent.DeveloperName,
       },
       disabled,
+    };
+  });
+
+export const getVersionChoices = (
+  versions: BotVersionMetadata[],
+  status: 'Active' | 'Inactive'
+): Array<Choice<VersionChoice>> =>
+  versions.map((version) => {
+    const isTargetStatus = version.Status === status;
+    return {
+      name: `Version ${version.VersionNumber}`,
+      value: {
+        version: version.VersionNumber,
+        status: version.Status,
+      },
+      disabled: isTargetStatus ? `(Already ${status})` : false,
     };
   });
 
@@ -109,4 +132,43 @@ export const getAgentForActivation = async (config: {
     apiNameOrId: selectedAgent!.Id,
     project: SfProject.getInstance(),
   });
+};
+
+export const getVersionForActivation = async (config: {
+  agent: ProductionAgent;
+  status: 'Active' | 'Inactive';
+  versionFlag?: number;
+}): Promise<number | undefined> => {
+  const { agent, status, versionFlag } = config;
+
+  // If version flag is provided, return it
+  if (versionFlag !== undefined) {
+    return versionFlag;
+  }
+
+  // Get bot metadata to access versions
+  const botMetadata = await agent.getBotMetadata();
+  const versions = botMetadata.BotVersions.records;
+
+  // If there's only one version, return it
+  if (versions.length === 1) {
+    return versions[0].VersionNumber;
+  }
+
+  // Get version choices and filter out disabled ones
+  const choices = getVersionChoices(versions, status);
+  const availableChoices = choices.filter((choice) => !choice.disabled);
+
+  // If there's only one available choice, return it automatically
+  if (availableChoices.length === 1) {
+    return availableChoices[0].value.version;
+  }
+
+  // Prompt user to select a version
+  const versionChoice = await select({
+    message: 'Select a version',
+    choices,
+  });
+
+  return versionChoice.version;
 };
