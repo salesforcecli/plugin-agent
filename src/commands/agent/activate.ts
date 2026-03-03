@@ -48,11 +48,19 @@ export default class AgentActivate extends SfCommand<AgentActivateResult> {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
     const agent = await getAgentForActivation({ targetOrg, status: 'Active', apiNameFlag });
-    const version = await getVersionForActivation({ agent, status: 'Active', versionFlag: flags.version });
+    const { version, warning } = await getVersionForActivation({
+      agent,
+      status: 'Active',
+      versionFlag: flags.version,
+      jsonEnabled: this.jsonEnabled(),
+    });
     const result = await agent.activate(version);
     const metadata = await agent.getBotMetadata();
 
     this.log(`${metadata.DeveloperName} v${result.VersionNumber} activated.`);
+    if (warning) {
+      this.warn(warning);
+    }
     return { success: true, version: result.VersionNumber };
   }
 }

@@ -4,7 +4,7 @@
     "command": "agent:activate",
     "flagAliases": [],
     "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org", "version"],
     "plugin": "@salesforce/plugin-agent"
   },
   {

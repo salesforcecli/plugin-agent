@@ -105,6 +105,39 @@ describe('agent activate/deactivate NUTs', function () {
     expect(finalStatus).to.equal('Active');
   });
 
+  it('should auto-select latest version in JSON mode without version flag', async () => {
+    // Ensure agent is inactive first
+    const initialStatus = await getBotStatus();
+    if (initialStatus === 'Active') {
+      execCmd(`agent deactivate --api-name ${botApiName} --target-org ${username} --json`, {
+        ensureExitCode: 0,
+      });
+      await sleep(5000);
+    }
+
+    // Activate with --json but no --version flag
+    const result = execCmd<{ version: number; success: boolean }>(
+      `agent activate --api-name ${botApiName} --target-org ${username} --json`,
+      {
+        ensureExitCode: 0,
+      }
+    );
+
+    // Parse the JSON result
+    const jsonResult = result.jsonOutput!.result;
+    expect(jsonResult?.success).to.equal(true);
+    expect(jsonResult?.version).to.be.a('number');
+
+    // Verify the warning was included in the output
+    expect(result.shellOutput.stderr).to.include(
+      'No version specified, automatically selected latest available version'
+    );
+
+    // Verify the BotVersion status is now 'Active'
+    const finalStatus = await getBotStatus();
+    expect(finalStatus).to.equal('Active');
+  });
+
   it('should deactivate the agent', async () => {
     // Verify the BotVersion status has 'Active' initial state
     const initialStatus = await getBotStatus();

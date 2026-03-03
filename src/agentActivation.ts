@@ -138,12 +138,13 @@ export const getVersionForActivation = async (config: {
   agent: ProductionAgent;
   status: 'Active' | 'Inactive';
   versionFlag?: number;
-}): Promise<number | undefined> => {
-  const { agent, status, versionFlag } = config;
+  jsonEnabled?: boolean;
+}): Promise<{ version: number | undefined; warning?: string }> => {
+  const { agent, status, versionFlag, jsonEnabled } = config;
 
   // If version flag is provided, return it
   if (versionFlag !== undefined) {
-    return versionFlag;
+    return { version: versionFlag };
   }
 
   // Get bot metadata to access versions
@@ -152,7 +153,7 @@ export const getVersionForActivation = async (config: {
 
   // If there's only one version, return it
   if (versions.length === 1) {
-    return versions[0].VersionNumber;
+    return { version: versions[0].VersionNumber };
   }
 
   // Get version choices and filter out disabled ones
@@ -161,7 +162,19 @@ export const getVersionForActivation = async (config: {
 
   // If there's only one available choice, return it automatically
   if (availableChoices.length === 1) {
-    return availableChoices[0].value.version;
+    return { version: availableChoices[0].value.version };
+  }
+
+  // If JSON mode is enabled, automatically select the latest available version
+  if (jsonEnabled) {
+    // Find the latest (highest version number) available version
+    const latestVersion = availableChoices.reduce((latest, choice) =>
+      choice.value.version > latest.value.version ? choice : latest
+    );
+    return {
+      version: latestVersion.value.version,
+      warning: `No version specified, automatically selected latest available version: ${latestVersion.value.version}`,
+    };
   }
 
   // Prompt user to select a version
@@ -170,5 +183,5 @@ export const getVersionForActivation = async (config: {
     choices,
   });
 
-  return versionChoice.version;
+  return { version: versionChoice.version };
 };
