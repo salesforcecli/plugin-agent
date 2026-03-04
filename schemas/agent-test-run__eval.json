@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/RunEvalResult",
+  "definitions": {
+    "RunEvalResult": {
+      "type": "object",
+      "properties": {
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "evaluations": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": ["id", "status", "evaluations"],
+            "additionalProperties": false
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "passed": {
+              "type": "number"
+            },
+            "failed": {
+              "type": "number"
+            },
+            "scored": {
+              "type": "number"
+            },
+            "errors": {
+              "type": "number"
+            }
+          },
+          "required": ["passed", "failed", "scored", "errors"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["tests", "summary"],
+      "additionalProperties": false
+    }
+  }
+}
