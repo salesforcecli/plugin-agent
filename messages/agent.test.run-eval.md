@@ -1,22 +1,24 @@
 # summary
 
-Run evaluation tests against the Einstein Eval Labs API.
+Run evaluation tests against an Agentforce agent.
 
 # description
 
-Execute rich evaluation tests against an Agentforce agent using the Einstein Evaluation API. Supports 8+ evaluator types including string assertions, topic routing verification, semantic similarity scoring, and LLM-based quality ratings.
+Execute rich evaluation tests against an Agentforce agent using the Einstein Evaluation API. Supports both YAML test specs (same format as `sf agent generate test-spec`) and JSON payloads.
 
-Unlike `sf agent test run` which requires deploying YAML test specs as org metadata, this command sends JSON test payloads directly to the API with no deployment step.
+When you provide a YAML test spec, the command automatically translates test cases into Evaluation API calls and infers the agent name from the spec's `subjectName` field. This means you can use the same test spec with both `sf agent test run` and `sf agent test run-eval`.
 
-The payload normalizer auto-corrects common field name mistakes (e.g., `agentId` to `agent_id`, `text` to `utterance`), converts `{step_id.field}` shorthand references to JSONPath, and injects default values. Use `--no-normalize` to disable.
+When you provide a JSON payload, it's sent directly to the API with optional normalization. The normalizer auto-corrects common field name mistakes, converts shorthand references to JSONPath, and injects defaults. Use `--no-normalize` to disable.
 
-# flags.payload.summary
+Supports 8+ evaluator types including topic routing assertions, action invocation checks, string/numeric assertions, semantic similarity scoring, and LLM-based quality ratings.
 
-Path to JSON test payload file (use - for stdin).
+# flags.spec.summary
+
+Path to test spec file (YAML or JSON). Use `-` for stdin.
 
 # flags.agent-api-name.summary
 
-Auto-resolve agent_id and agent_version_id from the agent's DeveloperName.
+Agent DeveloperName to resolve agent_id and agent_version_id. Auto-inferred from YAML spec's subjectName.
 
 # flags.wait.summary
 
@@ -36,29 +38,29 @@ Disable auto-normalization of field names and shorthand references.
 
 # examples
 
-- Run tests from a JSON file:
+- Run tests from a YAML test spec:
 
-  <%= config.bin %> <%= command.id %> --payload tests/eval.json --target-org my-org
+  <%= config.bin %> <%= command.id %> --spec tests/my-agent-testSpec.yaml --target-org my-org
 
-- Auto-resolve agent IDs by DeveloperName:
+- Run tests from a YAML spec with explicit agent name override:
 
-  <%= config.bin %> <%= command.id %> --payload tests/eval.json --agent-api-name Customer_Support_Agent --target-org my-org
+  <%= config.bin %> <%= command.id %> --spec tests/my-agent-testSpec.yaml --agent-api-name My_Agent --target-org my-org
 
-- Pipe payload from stdin:
+- Run tests from a JSON payload:
 
-  echo '{"tests":[...]}' | <%= config.bin %> <%= command.id %> --payload - --target-org my-org
+  <%= config.bin %> <%= command.id %> --spec tests/eval-payload.json --target-org my-org
 
 - JUnit output for CI/CD:
 
-  <%= config.bin %> <%= command.id %> --payload tests/eval.json --target-org my-org --result-format junit
+  <%= config.bin %> <%= command.id %> --spec tests/my-agent-testSpec.yaml --target-org my-org --result-format junit
 
-- Skip normalization for pre-validated payloads:
+- Pipe JSON payload from stdin:
 
-  <%= config.bin %> <%= command.id %> --payload tests/eval.json --target-org my-org --no-normalize
+  echo '{"tests":[...]}' | <%= config.bin %> <%= command.id %> --spec - --target-org my-org
 
 # info.batchProgress
 
-Running batch %d of %d (%d tests)...
+Running batch %s of %s (%s tests)...
 
 # info.testComplete
 
@@ -66,7 +68,11 @@ Test %s: %s
 
 # info.summary
 
-Results: %d passed, %d failed, %d scored, %d errors
+Results: %s passed, %s failed, %s scored, %s errors
+
+# info.yamlDetected
+
+Detected YAML test spec for agent '%s' with %s test case(s). Translating to Evaluation API format.
 
 # error.invalidPayload
 

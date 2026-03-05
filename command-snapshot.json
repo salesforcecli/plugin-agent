@@ -217,7 +217,7 @@
     "alias": [],
     "command": "agent:test:run-eval",
     "flagAliases": [],
-    "flagChars": ["n", "o", "p", "w"],
+    "flagChars": ["n", "o", "s", "w"],
     "flags": [
       "agent-api-name",
       "api-version",
@@ -225,8 +225,8 @@
       "flags-dir",
       "json",
       "no-normalize",
-      "payload",
       "result-format",
+      "spec",
       "target-org",
       "wait"
     ],

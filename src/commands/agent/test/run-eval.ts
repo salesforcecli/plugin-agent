@@ -20,6 +20,7 @@ import { Messages, Connection } from '@salesforce/core';
 import { normalizePayload, splitIntoBatches, type EvalPayload } from '../../../evalNormalizer.js';
 import { formatResults, type ResultFormat, type EvalApiResponse } from '../../../evalFormatter.js';
 import { resultFormatFlag } from '../../../flags.js';
+import { isYamlTestSpec, parseTestSpec, translateTestSpec } from '../../../yamlSpecTranslator.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run-eval');
@@ -162,10 +163,10 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    payload: Flags.file({
-      char: 'p',
+    spec: Flags.file({
+      char: 's',
       required: true,
-      summary: messages.getMessage('flags.payload.summary'),
+      summary: messages.getMessage('flags.spec.summary'),
     }),
     'agent-api-name': Flags.string({
       char: 'n',
@@ -191,31 +192,46 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     const { flags } = await this.parse(AgentTestRunEval);
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    // 1. Read payload from file or stdin
-    const payloadPath = flags.payload;
-    let rawPayload: string;
+    // 1. Read from file or stdin
+    const specPath = flags.spec;
+    let rawContent: string;
 
-    if (payloadPath === '-') {
-      rawPayload = await readStdin();
+    if (specPath === '-') {
+      rawContent = await readStdin();
     } else {
-      rawPayload = fs.readFileSync(payloadPath, 'utf-8');
+      rawContent = fs.readFileSync(specPath, 'utf-8');
     }
 
-    // 2. Parse JSON and validate
+    // 2. Detect format and parse
     let payload: EvalPayload;
-    try {
-      payload = JSON.parse(rawPayload) as EvalPayload;
-    } catch (e) {
-      throw messages.createError('error.invalidPayload', [(e as Error).message]);
+    let agentApiName = flags['agent-api-name'];
+
+    if (isYamlTestSpec(rawContent)) {
+      // YAML TestSpec detected — translate to EvalPayload
+      const spec = parseTestSpec(rawContent);
+      payload = translateTestSpec(spec);
+
+      // Auto-infer agent-api-name from subjectName if not explicitly provided
+      if (!agentApiName) {
+        agentApiName = spec.subjectName;
+        this.log(messages.getMessage('info.yamlDetected', [spec.subjectName, spec.testCases.length.toString()]));
+      }
+    } else {
+      // JSON EvalPayload (original behavior)
+      try {
+        payload = JSON.parse(rawContent) as EvalPayload;
+      } catch (e) {
+        throw messages.createError('error.invalidPayload', [(e as Error).message]);
+      }
     }
 
     if (!payload.tests || !Array.isArray(payload.tests) || payload.tests.length === 0) {
       throw messages.createError('error.invalidPayload', ['missing or empty "tests" array']);
     }
 
-    // 3. If --agent-api-name, resolve IDs and inject
-    if (flags['agent-api-name']) {
-      const { agentId, versionId } = await resolveAgent(conn, flags['agent-api-name']);
+    // 3. If --agent-api-name (or auto-inferred from YAML), resolve IDs and inject
+    if (agentApiName) {
+      const { agentId, versionId } = await resolveAgent(conn, agentApiName);
       for (const test of payload.tests) {
         for (const step of test.steps) {
           if (step.type === 'agent.create_session') {
