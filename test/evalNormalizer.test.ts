@@ -19,6 +19,7 @@
 import { expect } from 'chai';
 import {
   normalizePayload,
+  normalizeMcpShorthand,
   autoCorrectFields,
   normalizeCamelCase,
   normalizeEvaluatorFields,
@@ -31,6 +32,152 @@ import {
 } from '../src/evalNormalizer.js';
 
 describe('evalNormalizer', () => {
+  describe('normalizeMcpShorthand', () => {
+    it('should convert type="evaluator" + evaluator_type to type="evaluator.xxx"', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'planner_topic_assertion',
+          field: 'gs1.planner_state.topic',
+          expected: 'my_topic',
+          operator: 'contains',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('type', 'evaluator.planner_topic_assertion');
+      expect(result[0]).to.not.have.property('evaluator_type');
+    });
+
+    it('should convert field to actual with mapped JSONPath', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'planner_topic_assertion',
+          field: 'gs1.planner_state.topic',
+          expected: 'my_topic',
+          operator: 'contains',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('actual', '{gs1.response.planner_response.lastExecution.topic}');
+      expect(result[0]).to.not.have.property('field');
+    });
+
+    it('should map planner_state.invokedActions correctly', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'planner_actions_assertion',
+          field: 'gs1.planner_state.invokedActions',
+          expected: ['Get_Order'],
+          operator: 'includes_items',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('actual', '{gs1.response.planner_response.lastExecution.invokedActions}');
+    });
+
+    it('should map response field for send_message refs', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'string_assertion',
+          field: 'sm1.response',
+          expected: 'hello',
+          operator: 'contains',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('actual', '{sm1.response}');
+    });
+
+    it('should auto-generate id when missing', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: '',
+          evaluator_type: 'planner_topic_assertion',
+          field: 'gs1.planner_state.topic',
+          expected: 'test',
+          operator: 'contains',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0].id).to.equal('eval_0');
+    });
+
+    it('should preserve existing id when present', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'my_eval',
+          evaluator_type: 'string_assertion',
+          field: 'sm1.response',
+          expected: 'test',
+          operator: 'equals',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0].id).to.equal('my_eval');
+    });
+
+    it('should not modify steps that already use raw API format', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator.planner_topic_assertion',
+          id: 'e1',
+          actual: '{gs.response.planner_response.lastExecution.topic}',
+          expected: 'test',
+          operator: 'contains',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.deep.equal(steps[0]);
+    });
+
+    it('should not modify agent steps', () => {
+      const steps: EvalStep[] = [{ type: 'agent.create_session', id: 'cs', use_agent_api: true }];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.deep.equal(steps[0]);
+    });
+
+    it('should leave unmapped field paths as-is', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'string_assertion',
+          field: 'sm1.custom_field',
+          expected: 'test',
+          operator: 'equals',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('actual', '{sm1.custom_field}');
+    });
+
+    it('should not overwrite existing actual field', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'evaluator',
+          id: 'e1',
+          evaluator_type: 'string_assertion',
+          field: 'sm1.response',
+          actual: '{sm1.response}',
+          expected: 'test',
+          operator: 'equals',
+        },
+      ];
+      const result = normalizeMcpShorthand(steps);
+      expect(result[0]).to.have.property('actual', '{sm1.response}');
+      expect(result[0]).to.not.have.property('field');
+    });
+  });
+
   describe('autoCorrectFields', () => {
     it('should correct camelCase agent fields to snake_case', () => {
       const steps: EvalStep[] = [{ type: 'agent.create_session', id: 's1', agentId: 'abc', agentVersionId: 'v1' }];
@@ -233,6 +380,52 @@ describe('evalNormalizer', () => {
       expect(steps[2]).to.have.property('actual', '$.outputs[1].response');
       expect(steps[2]).to.have.property('expected', 'hi');
       expect(steps[2]).to.have.property('metric_name', 'string_assertion');
+    });
+  });
+
+  describe('normalizePayload with MCP shorthand', () => {
+    it('should normalize a full MCP-format payload end-to-end', () => {
+      const payload: EvalPayload = {
+        tests: [
+          {
+            id: 'mcp_test',
+            steps: [
+              { type: 'agent.create_session', id: 'cs1', agent_id: 'abc', use_agent_api: true },
+              { type: 'agent.send_message', id: 'sm1', session_id: '{cs1.session_id}', utterance: 'hello' },
+              { type: 'agent.get_state', id: 'gs1', session_id: '{cs1.session_id}' },
+              {
+                type: 'evaluator',
+                id: 'eval1',
+                evaluator_type: 'planner_topic_assertion',
+                field: 'gs1.planner_state.topic',
+                expected: 'greeting',
+                operator: 'contains',
+              },
+              {
+                type: 'evaluator',
+                id: 'eval2',
+                evaluator_type: 'string_assertion',
+                field: 'sm1.response',
+                expected: 'hello',
+                operator: 'contains',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = normalizePayload(payload);
+      const steps = result.tests[0].steps;
+
+      // MCP shorthand should be fully normalized
+      expect(steps[3]).to.have.property('type', 'evaluator.planner_topic_assertion');
+      expect(steps[3]).to.not.have.property('evaluator_type');
+      expect(steps[3]).to.not.have.property('field');
+      // actual should be expanded from shorthand to JSONPath
+      expect(steps[3].actual).to.match(/\$\.outputs\[\d+\]/);
+
+      expect(steps[4]).to.have.property('type', 'evaluator.string_assertion');
+      expect(steps[4].actual).to.match(/\$\.outputs\[\d+\]/);
     });
   });
 

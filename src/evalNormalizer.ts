@@ -140,16 +140,28 @@ const ASSERTION_FIELD_ALIASES: Record<string, string> = {
   ground_truth: 'expected',
 };
 
+// --- MCP shorthand field mapping ---
+
+// MCP uses `field: "gs1.planner_state.topic"` — map to Eval API `actual` with correct JSONPath
+const MCP_FIELD_MAP: Record<string, string> = {
+  'planner_state.topic': 'response.planner_response.lastExecution.topic',
+  'planner_state.invokedActions': 'response.planner_response.lastExecution.invokedActions',
+  'planner_state.actionsSequence': 'response.planner_response.lastExecution.invokedActions',
+  response: 'response',
+  'response.messages': 'response',
+};
+
 // --- Main entry point ---
 
 /**
  * Apply all normalizations to a test payload.
- * Passes run in order: auto-correct -> camelCase -> evaluator fields -> shorthand refs -> defaults -> strip.
+ * Passes run in order: mcp-shorthand -> auto-correct -> camelCase -> evaluator fields -> shorthand refs -> defaults -> strip.
  */
 export function normalizePayload(payload: EvalPayload): EvalPayload {
   const normalized: EvalPayload = {
     tests: payload.tests.map((test) => {
       let steps = [...test.steps];
+      steps = normalizeMcpShorthand(steps);
       steps = autoCorrectFields(steps);
       steps = normalizeCamelCase(steps);
       steps = normalizeEvaluatorFields(steps);
@@ -163,6 +175,55 @@ export function normalizePayload(payload: EvalPayload): EvalPayload {
 }
 
 // --- Individual normalization passes ---
+
+/**
+ * Convert MCP shorthand format to raw Eval API format.
+ * MCP uses type="evaluator" + evaluator_type, raw API uses type="evaluator.xxx".
+ * Also maps `field` to `actual` with proper JSONPath and auto-generates missing `id` fields.
+ */
+export function normalizeMcpShorthand(steps: EvalStep[]): EvalStep[] {
+  let evalCounter = 0;
+
+  return steps.map((step) => {
+    const evaluator_type = step.evaluator_type as string | undefined;
+
+    // Only applies to MCP shorthand: type="evaluator" with evaluator_type field
+    if (step.type !== 'evaluator' || !evaluator_type) return step;
+
+    const normalized = { ...step };
+
+    // Merge type: "evaluator" + evaluator_type: "xxx" → type: "evaluator.xxx"
+    normalized.type = `evaluator.${evaluator_type}`;
+    delete normalized.evaluator_type;
+
+    // Convert `field` to `actual` with proper shorthand ref format
+    if ('field' in normalized) {
+      if (!('actual' in normalized)) {
+        const fieldValue = normalized.field as string;
+
+        // Parse "gs1.planner_state.topic" → stepId="gs1", fieldPath="planner_state.topic"
+        const dotIdx = fieldValue.indexOf('.');
+        if (dotIdx > 0) {
+          const stepId = fieldValue.substring(0, dotIdx);
+          const fieldPath = fieldValue.substring(dotIdx + 1);
+          const mappedPath = MCP_FIELD_MAP[fieldPath] ?? fieldPath;
+          normalized.actual = `{${stepId}.${mappedPath}}`;
+        } else {
+          normalized.actual = fieldValue;
+        }
+      }
+      delete normalized.field;
+    }
+
+    // Auto-generate id if missing
+    if (!normalized.id || normalized.id === '') {
+      normalized.id = `eval_${evalCounter}`;
+    }
+    evalCounter++;
+
+    return normalized as EvalStep;
+  });
+}
 
 /**
  * Auto-correct common field name mistakes.
