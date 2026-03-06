@@ -15,10 +15,10 @@
  */
 
 import * as fs from 'node:fs';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, Connection } from '@salesforce/core';
-import { normalizePayload, splitIntoBatches, type EvalPayload } from '../../../evalNormalizer.js';
-import { formatResults, type ResultFormat, type EvalApiResponse } from '../../../evalFormatter.js';
+import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Messages, Org } from '@salesforce/core';
+import { type EvalPayload, normalizePayload, splitIntoBatches } from '../../../evalNormalizer.js';
+import { type EvalApiResponse, formatResults, type ResultFormat } from '../../../evalFormatter.js';
 import { resultFormatFlag } from '../../../flags.js';
 import { isYamlTestSpec, parseTestSpec, translateTestSpec } from '../../../yamlSpecTranslator.js';
 
@@ -44,14 +44,22 @@ async function readStdin(): Promise<string> {
   });
 }
 
-async function callEvalApi(conn: Connection, payload: EvalPayload, orgId: string, userId: string): Promise<unknown> {
-  const instanceUrl = conn.instanceUrl;
-  const accessToken = conn.accessToken!;
+async function getUserId(org: Org): Promise<string> {
+  const conn = org.getConnection();
+  const userInfo = await conn.request<{ user_id: string }>(`${conn.instanceUrl}/services/oauth2/userinfo`);
+  return userInfo.user_id;
+}
 
-  const response = await fetch('https://api.salesforce.com/einstein/evaluation/v1/tests', {
+async function callEvalApi(org: Org, payload: EvalPayload): Promise<{ results?: unknown[] }> {
+  const conn = org.getConnection();
+  const instanceUrl = conn.instanceUrl;
+  const orgId = org.getOrgId();
+  const userId = await getUserId(org);
+
+  return conn.request<{ results?: unknown[] }>({
+    url: 'https://api.salesforce.com/einstein/evaluation/v1/tests',
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
       'x-sfdc-core-tenant-id': `core/prod/${orgId}`,
       'x-org-id': orgId,
@@ -62,26 +70,10 @@ async function callEvalApi(conn: Connection, payload: EvalPayload, orgId: string
     },
     body: JSON.stringify(payload),
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw messages.createError('error.apiError', [response.status.toString(), errorText]);
-  }
-
-  return response.json();
 }
 
-async function resolveOrgMetadata(conn: Connection): Promise<{ orgId: string; userId: string }> {
-  const orgResult = await conn.query<{ Id: string }>('SELECT Id FROM Organization');
-  const orgId = orgResult.records[0].Id;
-
-  const userInfo = await conn.request<{ user_id: string }>(`${conn.instanceUrl}/services/oauth2/userinfo`);
-  const userId = userInfo.user_id;
-
-  return { orgId, userId };
-}
-
-async function resolveAgent(conn: Connection, apiName: string): Promise<{ agentId: string; versionId: string }> {
+async function resolveAgent(org: Org, apiName: string): Promise<{ agentId: string; versionId: string }> {
+  const conn = org.getConnection();
   const botResult = await conn.query<{ Id: string }>(`SELECT Id FROM BotDefinition WHERE DeveloperName = '${apiName}'`);
   if (!botResult.records.length) {
     throw messages.createError('error.agentNotFound', [apiName]);
@@ -100,10 +92,8 @@ async function resolveAgent(conn: Connection, apiName: string): Promise<{ agentI
 }
 
 async function executeBatches(
-  conn: Connection,
+  org: Org,
   batches: Array<EvalPayload['tests']>,
-  orgId: string,
-  userId: string,
   log: (msg: string) => void
 ): Promise<unknown[]> {
   const allResults: unknown[] = [];
@@ -115,8 +105,7 @@ async function executeBatches(
 
     const batchPayload: EvalPayload = { tests: batches[i] };
     // eslint-disable-next-line no-await-in-loop
-    const result = await callEvalApi(conn, batchPayload, orgId, userId);
-    const resultObj = result as { results?: unknown[] };
+    const resultObj = await callEvalApi(org, batchPayload);
     allResults.push(...(resultObj.results ?? []));
   }
 
@@ -159,6 +148,8 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static state = 'beta';
+  public static readonly hidden = true;
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -190,7 +181,7 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
   public async run(): Promise<RunEvalResult> {
     const { flags } = await this.parse(AgentTestRunEval);
-    const conn = flags['target-org'].getConnection(flags['api-version']);
+    const org = flags['target-org'];
 
     // 1. Read from file or stdin
     const specPath = flags.spec;
@@ -231,7 +222,7 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     // 3. If --agent-api-name (or auto-inferred from YAML), resolve IDs and inject
     if (agentApiName) {
-      const { agentId, versionId } = await resolveAgent(conn, agentApiName);
+      const { agentId, versionId } = await resolveAgent(org, agentApiName);
       for (const test of payload.tests) {
         for (const step of test.steps) {
           if (step.type === 'agent.create_session') {
@@ -255,11 +246,8 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     // 6. Split into batches
     const batches = splitIntoBatches(payload.tests, batchSize);
 
-    // 7. Resolve org metadata for API headers
-    const { orgId, userId } = await resolveOrgMetadata(conn);
-
-    // 8. Execute batches
-    const allResults = await executeBatches(conn, batches, orgId, userId, (msg) => this.log(msg));
+    // 7. Execute batches
+    const allResults = await executeBatches(org, batches, (msg) => this.log(msg));
 
     const mergedResponse: EvalApiResponse = { results: allResults as EvalApiResponse['results'] };
 
