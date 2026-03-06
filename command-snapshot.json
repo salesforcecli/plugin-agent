@@ -219,7 +219,7 @@
     "flagAliases": [],
     "flagChars": ["n", "o", "s", "w"],
     "flags": [
-      "agent-api-name",
+      "api-name",
       "api-version",
       "batch-size",
       "flags-dir",

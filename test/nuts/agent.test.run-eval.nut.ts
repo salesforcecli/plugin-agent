@@ -37,7 +37,7 @@ describe('agent test run-eval', function () {
 
   describe('run-eval with JSON file', () => {
     it('should run evaluation with JSON payload file', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -53,7 +53,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should run evaluation with normalized payload', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -84,7 +84,7 @@ describe('agent test run-eval', function () {
         ensureExitCode: 0,
       }).jsonOutput;
 
-      // Should succeed without explicit --agent-api-name flag
+      // Should succeed without explicit --api-name flag
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
     });
@@ -92,7 +92,7 @@ describe('agent test run-eval', function () {
 
   describe('run-eval with stdin', () => {
     it('should run evaluation with JSON payload from stdin', async () => {
-      const command = `cat ${jsonPayloadPath} | sf agent test run-eval --spec - --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `cat ${jsonPayloadPath} | sf agent test run-eval --spec - --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
         cli: 'sf',
@@ -118,7 +118,7 @@ describe('agent test run-eval', function () {
 
   describe('run-eval with flags', () => {
     it('should respect --no-normalize flag', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --no-normalize --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --no-normalize --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -128,7 +128,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should use custom batch size', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --batch-size 1 --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --batch-size 1 --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -139,7 +139,7 @@ describe('agent test run-eval', function () {
 
     it('should support different result formats', async () => {
       // Test human format (default)
-      const humanCommand = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --result-format human --target-org ${getUsername()}`;
+      const humanCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format human --target-org ${getUsername()}`;
       const humanOutput = execCmd(humanCommand, {
         ensureExitCode: 0,
       }).shellOutput.stdout;
@@ -148,7 +148,7 @@ describe('agent test run-eval', function () {
       expect(humanOutput).to.be.a('string');
 
       // Test tap format
-      const tapCommand = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --result-format tap --target-org ${getUsername()}`;
+      const tapCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format tap --target-org ${getUsername()}`;
       const tapOutput = execCmd(tapCommand, {
         ensureExitCode: 0,
       }).shellOutput.stdout;
@@ -156,7 +156,7 @@ describe('agent test run-eval', function () {
       expect(tapOutput).to.include('TAP version');
 
       // Test junit format
-      const junitCommand = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --result-format junit --target-org ${getUsername()}`;
+      const junitCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format junit --target-org ${getUsername()}`;
       const junitOutput = execCmd(junitCommand, {
         ensureExitCode: 0,
       }).shellOutput.stdout;
@@ -169,7 +169,7 @@ describe('agent test run-eval', function () {
   describe('run-eval error handling', () => {
     it('should fail with invalid JSON payload', async () => {
       const invalidJson = join(mockProjectDir, 'invalid-payload.json');
-      const command = `agent test run-eval --spec ${invalidJson} --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${invalidJson} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
 
       try {
         execCmd<RunEvalResult>(command);
@@ -180,7 +180,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should fail when agent not found', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name NonExistentAgent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name NonExistentAgent --target-org ${getUsername()} --json`;
 
       try {
         execCmd<RunEvalResult>(command);
@@ -191,7 +191,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should require --spec flag', async () => {
-      const command = `agent test run-eval --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
 
       try {
         execCmd<RunEvalResult>(command);
@@ -204,7 +204,7 @@ describe('agent test run-eval', function () {
 
   describe('run-eval output structure', () => {
     it('should include test summaries with correct structure', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;
@@ -218,7 +218,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should include summary with all metrics', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --agent-api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
       const output = execCmd<RunEvalResult>(command, {
         ensureExitCode: 0,
       }).jsonOutput;

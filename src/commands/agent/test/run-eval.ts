@@ -148,9 +148,9 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       summary: messages.getMessage('flags.spec.summary'),
       allowStdin: true,
     }),
-    'agent-api-name': Flags.string({
+    'api-name': Flags.string({
       char: 'n',
-      summary: messages.getMessage('flags.agent-api-name.summary'),
+      summary: messages.getMessage('flags.api-name.summary'),
     }),
     wait: Flags.integer({
       char: 'w',
@@ -190,14 +190,14 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     // 2. Detect format and parse
     let payload: EvalPayload;
-    let agentApiName = flags['agent-api-name'];
+    let agentApiName = flags['api-name'];
 
     if (isYamlTestSpec(rawContent)) {
       // YAML TestSpec detected — translate to EvalPayload
       const spec = parseTestSpec(rawContent);
       payload = translateTestSpec(spec);
 
-      // Auto-infer agent-api-name from subjectName if not explicitly provided
+      // Auto-infer api-name from subjectName if not explicitly provided
       if (!agentApiName) {
         agentApiName = spec.subjectName;
         this.log(messages.getMessage('info.yamlDetected', [spec.subjectName, spec.testCases.length.toString()]));
@@ -215,7 +215,7 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       throw messages.createError('error.invalidPayload', ['missing or empty "tests" array']);
     }
 
-    // 3. If --agent-api-name (or auto-inferred from YAML), resolve IDs and inject
+    // 3. If --api-name (or auto-inferred from YAML), resolve IDs and inject
     if (agentApiName) {
       const { agentId, versionId } = await resolveAgent(org, agentApiName);
       for (const test of payload.tests) {
