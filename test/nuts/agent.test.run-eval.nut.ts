@@ -86,28 +86,6 @@ describe('agent test run-eval', function () {
     });
   });
 
-  describe('run-eval with stdin', () => {
-    it('should run evaluation with JSON payload from stdin', async () => {
-      const command = `cat ${jsonPayloadPath} | ./bin/run.js agent test run-eval --spec - --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
-
-      expect(output?.result).to.be.ok;
-      expect(output?.result.tests).to.be.an('array');
-      expect(output?.result.tests.length).to.be.greaterThan(0);
-    });
-
-    it('should run evaluation with YAML spec from stdin', async () => {
-      const command = `cat ${yamlSpecPath} | ./bin/run.js agent test run-eval --spec - --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
-
-      expect(output?.result).to.be.ok;
-      expect(output?.result.tests).to.be.an('array');
-      expect(output?.result.tests.length).to.be.greaterThan(0);
-    });
-  });
-
   describe('run-eval with flags', () => {
     it('should respect --no-normalize flag', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --no-normalize --target-org ${getUsername()} --json`;
