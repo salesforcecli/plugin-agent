@@ -32,27 +32,35 @@ export type RunEvalResult = {
 
 // --- Standalone helper functions ---
 
-async function getUserId(org: Org): Promise<string> {
+type ApiHeaders = {
+  orgId: string;
+  userId: string;
+  instanceUrl: string;
+};
+
+async function getApiHeaders(org: Org): Promise<ApiHeaders> {
   const conn = org.getConnection();
   const userInfo = await conn.request<{ user_id: string }>(`${conn.instanceUrl}/services/oauth2/userinfo`);
-  return userInfo.user_id;
+
+  return {
+    orgId: org.getOrgId(),
+    userId: userInfo.user_id,
+    instanceUrl: conn.instanceUrl,
+  };
 }
 
-async function callEvalApi(org: Org, payload: EvalPayload): Promise<{ results?: unknown[] }> {
+async function callEvalApi(org: Org, payload: EvalPayload, headers: ApiHeaders): Promise<{ results?: unknown[] }> {
   const conn = org.getConnection();
-  const instanceUrl = conn.instanceUrl;
-  const orgId = org.getOrgId();
-  const userId = await getUserId(org);
 
   return conn.request<{ results?: unknown[] }>({
     url: 'https://api.salesforce.com/einstein/evaluation/v1/tests',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-sfdc-core-tenant-id': `core/prod/${orgId}`,
-      'x-org-id': orgId,
-      'x-sfdc-core-instance-url': instanceUrl,
-      'x-sfdc-user-id': userId,
+      'x-sfdc-core-tenant-id': `core/prod/${headers.orgId}`,
+      'x-org-id': headers.orgId,
+      'x-sfdc-core-instance-url': headers.instanceUrl,
+      'x-sfdc-user-id': headers.userId,
       'x-client-feature-id': 'AIPlatformEvaluation',
       'x-sfdc-app-context': 'EinsteinGPT',
     },
@@ -91,20 +99,22 @@ async function executeBatches(
   batches: Array<EvalPayload['tests']>,
   log: (msg: string) => void
 ): Promise<unknown[]> {
-  const allResults: unknown[] = [];
+  // Pre-calculate headers once to avoid redundant API calls
+  const headers = await getApiHeaders(org);
 
-  for (let i = 0; i < batches.length; i++) {
-    if (batches.length > 1) {
-      log(messages.getMessage('info.batchProgress', [i + 1, batches.length, batches[i].length]));
-    }
-
-    const batchPayload: EvalPayload = { tests: batches[i] };
-    // eslint-disable-next-line no-await-in-loop
-    const resultObj = await callEvalApi(org, batchPayload);
-    allResults.push(...(resultObj.results ?? []));
+  // Execute all batches in parallel for better performance
+  if (batches.length > 1) {
+    log(messages.getMessage('info.batchProgress', [batches.length, batches.length, 'total']));
   }
 
-  return allResults;
+  const batchPromises = batches.map(async (batch) => {
+    const batchPayload: EvalPayload = { tests: batch };
+    const resultObj = await callEvalApi(org, batchPayload, headers);
+    return resultObj.results ?? [];
+  });
+
+  const batchResults = await Promise.all(batchPromises);
+  return batchResults.flat();
 }
 
 function buildResultSummary(mergedResponse: EvalApiResponse): {
