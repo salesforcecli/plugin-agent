@@ -62,14 +62,21 @@ async function callEvalApi(org: Org, payload: EvalPayload): Promise<{ results?: 
 
 async function resolveAgent(org: Org, apiName: string): Promise<{ agentId: string; versionId: string }> {
   const conn = org.getConnection();
-  const botResult = await conn.query<{ Id: string }>(`SELECT Id FROM BotDefinition WHERE DeveloperName = '${apiName}'`);
+
+  // Escape single quotes to prevent SOQL injection
+  const escapedApiName = apiName.replace(/'/g, "\\'");
+
+  const botResult = await conn.query<{ Id: string }>(
+    `SELECT Id FROM BotDefinition WHERE DeveloperName = '${escapedApiName}'`
+  );
   if (!botResult.records.length) {
     throw messages.createError('error.agentNotFound', [apiName]);
   }
   const agentId = botResult.records[0].Id;
 
+  // Filter to published/active versions only
   const versionResult = await conn.query<{ Id: string }>(
-    `SELECT Id FROM BotVersion WHERE BotDefinitionId = '${agentId}' ORDER BY VersionNumber DESC LIMIT 1`
+    `SELECT Id FROM BotVersion WHERE BotDefinitionId = '${agentId}' AND Status = 'Published' ORDER BY VersionNumber DESC LIMIT 1`
   );
   if (!versionResult.records.length) {
     throw messages.createError('error.agentVersionNotFound', [apiName]);

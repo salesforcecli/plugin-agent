@@ -342,10 +342,9 @@ export function normalizeEvaluatorFields(steps: EvalStep[]): EvalStep[] {
       normalizeScoringEvaluator(normalized, evalType);
     } else if (ASSERTION_EVALUATORS.has(evalType)) {
       normalizeAssertionEvaluator(normalized, evalType);
-    } else if (!('metric_name' in normalized) && evalType.includes('.')) {
-      // Unknown evaluator type -- just auto-inject metric_name
-      normalized.metric_name = evalType.split('.')[1];
     }
+    // Don't inject metric_name for unknown evaluator types to avoid API validation errors
+    // Unknown evaluators like bot_response_rating and planner_topic_assertion don't use metric_name
 
     return normalized as EvalStep;
   });
