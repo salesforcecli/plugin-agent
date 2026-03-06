@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as fs from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages, Org } from '@salesforce/core';
 import { type EvalPayload, normalizePayload, splitIntoBatches } from '../../../evalNormalizer.js';
@@ -31,18 +31,6 @@ export type RunEvalResult = {
 };
 
 // --- Standalone helper functions ---
-
-async function readStdin(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    process.stdin.setEncoding('utf-8');
-    process.stdin.on('data', (chunk: string) => {
-      data += chunk;
-    });
-    process.stdin.on('end', () => resolve(data));
-    process.stdin.on('error', (err: Error) => reject(err));
-  });
-}
 
 async function getUserId(org: Org): Promise<string> {
   const conn = org.getConnection();
@@ -154,10 +142,11 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    spec: Flags.file({
+    spec: Flags.string({
       char: 's',
       required: true,
       summary: messages.getMessage('flags.spec.summary'),
+      allowStdin: true,
     }),
     'agent-api-name': Flags.string({
       char: 'n',
@@ -183,14 +172,20 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     const { flags } = await this.parse(AgentTestRunEval);
     const org = flags['target-org'];
 
-    // 1. Read from file or stdin
-    const specPath = flags.spec;
-    let rawContent: string;
+    // 1. Get spec content (from file or stdin via allowStdin)
+    let rawContent = flags.spec;
 
-    if (specPath === '-') {
-      rawContent = await readStdin();
-    } else {
-      rawContent = fs.readFileSync(specPath, 'utf-8');
+    // If spec looks like it might be a file path (not parseable content), read the file
+    try {
+      // Try to detect if it's actual content vs a file path
+      // If it's a valid YAML/JSON, it's content; otherwise treat as file path
+      if (!isYamlTestSpec(rawContent)) {
+        JSON.parse(rawContent);
+      }
+      // If we got here, it's valid content
+    } catch {
+      // Not valid content, must be a file path - read it
+      rawContent = await readFile(flags.spec, 'utf-8');
     }
 
     // 2. Detect format and parse
