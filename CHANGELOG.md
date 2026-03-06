@@ -1,3 +1,15 @@
+# [1.31.0](https://github.com/salesforcecli/plugin-agent/compare/1.30.11...1.31.0) (2026-03-06)
+
+### Bug Fixes
+
+- initial updates, use Org/Connection, make beta/hidden ([2a0f283](https://github.com/salesforcecli/plugin-agent/commit/2a0f28396cd31ae9c8069a303501d77d5eac6bac))
+
+### Features
+
+- add `sf agent test run-eval` for Einstein Eval Labs API testing ([1699d51](https://github.com/salesforcecli/plugin-agent/commit/1699d5188a3e4b165c564680e65e5dc33b20bb6e))
+- add YAML test spec support for `sf agent test run-eval` ([e942e00](https://github.com/salesforcecli/plugin-agent/commit/e942e006e7892d34ae93e6f84a6c6673b8be0c9b))
+- normalize MCP shorthand format in evalNormalizer ([01bc87b](https://github.com/salesforcecli/plugin-agent/commit/01bc87be643b4901ba65d79b205a1977f750c81a))
+
 ## [1.30.11](https://github.com/salesforcecli/plugin-agent/compare/1.30.10...1.30.11) (2026-03-01)
 
 ### Bug Fixes
