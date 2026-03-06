@@ -76,7 +76,7 @@ async function resolveAgent(org: Org, apiName: string): Promise<{ agentId: strin
 
   // Filter to published/active versions only
   const versionResult = await conn.query<{ Id: string }>(
-    `SELECT Id FROM BotVersion WHERE BotDefinitionId = '${agentId}' AND Status = 'Published' ORDER BY VersionNumber DESC LIMIT 1`
+    `SELECT Id FROM BotVersion WHERE BotDefinitionId = '${agentId}'  ORDER BY VersionNumber DESC LIMIT 1`
   );
   if (!versionResult.records.length) {
     throw messages.createError('error.agentVersionNotFound', [apiName]);
