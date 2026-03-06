@@ -215,6 +215,25 @@
   },
   {
     "alias": [],
+    "command": "agent:test:run-eval",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "s", "w"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "batch-size",
+      "flags-dir",
+      "json",
+      "no-normalize",
+      "result-format",
+      "spec",
+      "target-org",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:validate:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],

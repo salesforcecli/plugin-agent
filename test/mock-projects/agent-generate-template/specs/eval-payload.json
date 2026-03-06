@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "id": "test-topic-routing",
+      "steps": [
+        {
+          "type": "agent.create_session",
+          "id": "session"
+        },
+        {
+          "type": "agent.send_message",
+          "id": "msg1",
+          "session_id": "{session.session_id}",
+          "utterance": "What's the weather like today?"
+        },
+        {
+          "type": "agent.get_state",
+          "id": "state1",
+          "session_id": "{session.session_id}"
+        },
+        {
+          "type": "evaluator.planner_topic_assertion",
+          "id": "check-topic",
+          "actual": "{state1.response.planner_response.lastExecution.topic}",
+          "expected": "Weather_and_Temperature_Information",
+          "operator": "equals"
+        }
+      ]
+    }
+  ]
+}
