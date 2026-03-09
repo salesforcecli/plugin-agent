@@ -337,6 +337,60 @@ describe('evalNormalizer', () => {
       expect(result[0]).to.have.property('generated_output', 'test');
     });
 
+    it('should preserve state field on agent.create_session', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'agent.create_session',
+          id: 's1',
+          planner_id: 'p1',
+          state: {
+            state: {
+              plannerType: 'Atlas',
+              sessionContext: {},
+              conversationHistory: [],
+              lastExecution: {},
+            },
+          },
+        },
+      ];
+      const result = stripUnrecognizedFields(steps);
+      expect(result[0]).to.have.property('state');
+      expect((result[0] as Record<string, unknown>).state).to.deep.equal(steps[0].state);
+    });
+
+    it('should preserve setupSessionContext on agent.create_session', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'agent.create_session',
+          id: 's1',
+          planner_id: 'p1',
+          setupSessionContext: { tags: { botId: '0Xx123', botVersionId: '0X9456' } },
+        },
+      ];
+      const result = stripUnrecognizedFields(steps);
+      expect(result[0]).to.have.property('setupSessionContext');
+      expect((result[0] as Record<string, unknown>).setupSessionContext).to.deep.equal({
+        tags: { botId: '0Xx123', botVersionId: '0X9456' },
+      });
+    });
+
+    it('should preserve context_variables on agent.create_session', () => {
+      const steps: EvalStep[] = [
+        {
+          type: 'agent.create_session',
+          id: 's1',
+          use_agent_api: true,
+          context_variables: { RoutableId: '0Mw123', CaseId: '500456' },
+        },
+      ];
+      const result = stripUnrecognizedFields(steps);
+      expect(result[0]).to.have.property('context_variables');
+      expect((result[0] as Record<string, unknown>).context_variables).to.deep.equal({
+        RoutableId: '0Mw123',
+        CaseId: '500456',
+      });
+    });
+
     it('should not strip fields from unknown types', () => {
       const steps: EvalStep[] = [{ type: 'evaluator.future_type', id: 'e1', custom_field: 'keep' }];
       const result = stripUnrecognizedFields(steps);

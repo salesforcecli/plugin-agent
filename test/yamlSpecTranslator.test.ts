@@ -622,6 +622,51 @@ testCases: []
       expect(result.id).to.equal('My_Spec_case_2');
     });
 
+    it('injects context_variables when contextVariables present', () => {
+      const tc: TestCase = {
+        utterance: 'Help with my camera',
+        expectedTopic: 'Product_Help',
+        expectedActions: undefined,
+        expectedOutcome: undefined,
+        contextVariables: [
+          { name: 'RoutableId', value: '0Mw123' },
+          { name: 'CaseId', value: '500456' },
+        ],
+      };
+      const result = translateTestCase(tc, 0);
+      const cs = result.steps.find((s) => s.type === 'agent.create_session');
+      expect(cs).to.have.property('context_variables');
+      expect((cs as Record<string, unknown>).context_variables).to.deep.equal({
+        RoutableId: '0Mw123',
+        CaseId: '500456',
+      });
+    });
+
+    it('does not add context_variables when contextVariables absent', () => {
+      const tc: TestCase = {
+        utterance: 'Hello',
+        expectedTopic: undefined,
+        expectedActions: undefined,
+        expectedOutcome: undefined,
+      };
+      const result = translateTestCase(tc, 0);
+      const cs = result.steps.find((s) => s.type === 'agent.create_session');
+      expect(cs).to.not.have.property('context_variables');
+    });
+
+    it('does not add context_variables when contextVariables is empty', () => {
+      const tc: TestCase = {
+        utterance: 'Hello',
+        expectedTopic: undefined,
+        expectedActions: undefined,
+        expectedOutcome: undefined,
+        contextVariables: [],
+      };
+      const result = translateTestCase(tc, 0);
+      const cs = result.steps.find((s) => s.type === 'agent.create_session');
+      expect(cs).to.not.have.property('context_variables');
+    });
+
     it('sets use_agent_api true on create_session', () => {
       const tc: TestCase = {
         utterance: 'Hello',

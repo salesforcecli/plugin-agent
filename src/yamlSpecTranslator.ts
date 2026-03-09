@@ -101,11 +101,19 @@ export function translateTestCase(testCase: TestCase, index: number, specName?: 
   const steps: EvalStep[] = [];
 
   // 1. agent.create_session
-  steps.push({
+  const createSessionStep: EvalStep = {
     type: 'agent.create_session',
     id: 'cs',
     use_agent_api: true,
-  });
+  };
+
+  if (testCase.contextVariables && testCase.contextVariables.length > 0) {
+    createSessionStep.context_variables = Object.fromEntries(
+      testCase.contextVariables.map((cv) => [cv.name, cv.value])
+    );
+  }
+
+  steps.push(createSessionStep);
 
   // 2. Conversation history — only user messages become send_message steps
   let historyIdx = 0;
