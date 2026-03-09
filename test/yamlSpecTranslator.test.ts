@@ -667,6 +667,45 @@ testCases: []
       expect(cs).to.not.have.property('context_variables');
     });
 
+    it('throws error when contextVariables has duplicate names', () => {
+      const tc: TestCase = {
+        utterance: 'Hello',
+        expectedTopic: undefined,
+        expectedActions: undefined,
+        expectedOutcome: undefined,
+        contextVariables: [
+          { name: 'CaseId', value: '500123' },
+          { name: 'RoutableId', value: '0Mw456' },
+          { name: 'CaseId', value: '500789' },
+        ],
+      };
+      expect(() => translateTestCase(tc, 0)).to.throw(/Duplicate contextVariable names found in test case 0: CaseId/);
+    });
+
+    it('translates contextVariables to context_variables object format', () => {
+      const tc: TestCase = {
+        utterance: 'Test with context',
+        expectedTopic: 'Test_Topic',
+        expectedActions: undefined,
+        expectedOutcome: undefined,
+        contextVariables: [
+          { name: 'CaseId', value: '500ABC' },
+          { name: 'RoutableId', value: '0MwXYZ' },
+          { name: 'UserId', value: '005DEF' },
+        ],
+      };
+      const result = translateTestCase(tc, 0);
+      const cs = result.steps.find((s) => s.type === 'agent.create_session') as Record<string, unknown>;
+
+      expect(cs).to.have.property('context_variables');
+      const contextVars = cs.context_variables as Record<string, string>;
+      expect(contextVars).to.deep.equal({
+        CaseId: '500ABC',
+        RoutableId: '0MwXYZ',
+        UserId: '005DEF',
+      });
+    });
+
     it('sets use_agent_api true on create_session', () => {
       const tc: TestCase = {
         utterance: 'Hello',

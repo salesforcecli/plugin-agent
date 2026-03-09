@@ -15,6 +15,8 @@ To generate a specific agent test case, this command prompts you for this inform
 - (Optional) Custom evaluation: Test an agent's response for specific strings or numbers.
 - (Optional) Conversation history: Boilerplate for additional context you can add to the test in the form of a conversation history.
 
+You can manually add contextVariables to test cases in the generated YAML file to inject contextual data (such as CaseId or RoutableId) into agent sessions. This is useful for testing agent behavior with different contextual information.
+
 When your test spec is ready, you then run the "agent test create" command to actually create the test in your org and synchronize the metadata with your DX project. The metadata type for an agent test is AiEvaluationDefinition.
 
 If you have an existing AiEvaluationDefinition metadata XML file in your DX project, you can generate its equivalent YAML test spec file with the --from-definition flag.

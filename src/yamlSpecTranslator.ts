@@ -108,6 +108,17 @@ export function translateTestCase(testCase: TestCase, index: number, specName?: 
   };
 
   if (testCase.contextVariables && testCase.contextVariables.length > 0) {
+    // Validate for duplicate names
+    const names = testCase.contextVariables.map((cv) => cv.name);
+    const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+    if (duplicates.length > 0) {
+      throw new Error(
+        `Duplicate contextVariable names found in test case ${index}: ${[...new Set(duplicates)].join(
+          ', '
+        )}. Each contextVariable name must be unique.`
+      );
+    }
+
     createSessionStep.context_variables = Object.fromEntries(
       testCase.contextVariables.map((cv) => [cv.name, cv.value])
     );
