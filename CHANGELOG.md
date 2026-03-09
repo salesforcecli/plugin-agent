@@ -1,3 +1,10 @@
+# [1.32.0](https://github.com/salesforcecli/plugin-agent/compare/1.31.3...1.32.0) (2026-03-09)
+
+### Features
+
+- add comprehensive contextVariables validation, tests, and documentation ([2f27bed](https://github.com/salesforcecli/plugin-agent/commit/2f27bedb7aae05ca2254f2b18f63c8d4d073dc26))
+- **run-eval:** whitelist state/setupSessionContext, translate contextVariables, preserve outputs ([610c1e9](https://github.com/salesforcecli/plugin-agent/commit/610c1e93be3e64c89f6f7b91b71ecf9176bacc91))
+
 ## [1.31.3](https://github.com/salesforcecli/plugin-agent/compare/1.31.2...1.31.3) (2026-03-08)
 
 ### Bug Fixes
