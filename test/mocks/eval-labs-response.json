@@ -1,0 +1,80 @@
+{
+  "results": [
+    {
+      "id": "test-topic-routing",
+      "outputs": [
+        {
+          "type": "agent.create_session",
+          "id": "session",
+          "session_id": "sess-abc-123"
+        },
+        {
+          "type": "agent.send_message",
+          "id": "msg1",
+          "response": "I'd be happy to help you with your order. Can you provide your order number?"
+        },
+        {
+          "type": "agent.get_state",
+          "id": "state1",
+          "response": {
+            "planner_response": {
+              "lastExecution": {
+                "topic": "Order_Management",
+                "latency": 245
+              }
+            }
+          }
+        }
+      ],
+      "evaluation_results": [
+        {
+          "id": "check-topic",
+          "score": null,
+          "is_pass": true,
+          "actual_value": "Order_Management",
+          "expected_value": "Order_Management"
+        },
+        {
+          "id": "check-response-quality",
+          "score": 0.92,
+          "is_pass": true,
+          "actual_value": "I'd be happy to help you with your order. Can you provide your order number?",
+          "expected_value": "Help with order inquiry"
+        },
+        {
+          "id": "check-no-hallucination",
+          "score": 0.98,
+          "is_pass": null,
+          "actual_value": null,
+          "expected_value": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "id": "test-fallback",
+      "outputs": [
+        {
+          "type": "agent.create_session",
+          "id": "session",
+          "session_id": "sess-def-456"
+        },
+        {
+          "type": "agent.send_message",
+          "id": "msg1",
+          "response": "I'm sorry, I don't have information about that."
+        }
+      ],
+      "evaluation_results": [
+        {
+          "id": "check-graceful-fallback",
+          "score": null,
+          "is_pass": true,
+          "actual_value": "I'm sorry, I don't have information about that.",
+          "expected_value": "sorry"
+        }
+      ],
+      "errors": []
+    }
+  ]
+}
