@@ -23,14 +23,22 @@ import type {
   Bot,
   BotVersion,
   BotTemplate,
-  GenAiPlanner,
+  GenAiPlannerBundle,
   BotDialogGroup,
   ConversationDefinitionGoal,
   ConversationVariable,
+  GenAiFunction,
+  GenAiPlugin,
+  GenAiPlannerFunctionDef,
 } from '@salesforce/types/metadata';
 
 export type GenAiPlannerBundleExt = {
-  GenAiPlannerBundle: GenAiPlanner & { botTemplate?: string };
+  GenAiPlannerBundle: GenAiPlannerBundle & {
+    botTemplate?: string;
+    localActionLinks?: GenAiPlannerFunctionDef[];
+    localTopicLinks: GenAiPlannerFunctionDef[];
+    localTopics: GenAiPlugin[];
+  };
 };
 
 export type BotTemplateExt = {
@@ -113,6 +121,9 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     // Parse the metadata files as JSON
     const botJson = xmlToJson<BotExt>(join(botDir, `${botName}.bot-meta.xml`), parser);
+    if (botJson.Bot.agentDSLEnabled) {
+      throw new SfError(messages.getMessage('error.nga-agent-not-supported'));
+    }
     const botVersionJson = xmlToJson<BotVersionExt>(join(botDir, `v${botVersion}.botVersion-meta.xml`), parser);
     const genAiPlannerBundleMetaJson = xmlToJson<GenAiPlannerBundleExt>(
       join(genAiPlannerBundleDir, botName, `${botName}.genAiPlannerBundle`),
@@ -122,6 +133,8 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     // Modify the metadata files for final output
     // TODO: Confirm this name (might be conversationDefinitionPlanners)
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
+    const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
+    replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics, localActions);
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
@@ -211,3 +224,104 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
     throw new SfError(`Failed save to file: ${filename}`);
   }
 };
+
+/**
+ * Extracts local topics and actions from the GenAiPlannerBundle and validates that each has a `source` reference to its global counterpart.
+ * Throws if any local topic or action is missing `source`.
+ *
+ * @param genAiPlannerBundleMetaJson - The GenAiPlannerBundle metadata to read from
+ * @returns { localTopics, localActions } - The local topics and the flattened local actions from all plugins
+ */
+const getLocalAssets = (
+  genAiPlannerBundleMetaJson: GenAiPlannerBundleExt
+): { localTopics: GenAiPlugin[]; localActions: GenAiFunction[] } => {
+  const localTopics = genAiPlannerBundleMetaJson.GenAiPlannerBundle.localTopics;
+  const localTopicsWithoutSource = localTopics.filter((topic) => !topic.source);
+  if (localTopicsWithoutSource.length > 0) {
+    throw new SfError(
+      messages.getMessage('error.local-topics-without-source', [
+        localTopicsWithoutSource.map((topic) => topic.developerName).join(', '),
+      ])
+    );
+  }
+  const localActions = localTopics.flatMap((plugin) =>
+    Array.isArray(plugin.localActions) ? plugin.localActions : plugin.localActions ? [plugin.localActions] : []
+  );
+  const localActionsWithoutSource = localActions.filter((action) => !action.source);
+  if (localActionsWithoutSource.length > 0) {
+    throw new SfError(
+      messages.getMessage('error.local-actions-without-source', [
+        localActionsWithoutSource.map((action) => action.developerName ?? action.fullName).join(', '),
+      ])
+    );
+  }
+  return { localTopics, localActions };
+};
+
+/**
+ * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings, ruleExpressionAssignments and ruleExpressions.
+ * Replaces localTopicLinks with genAiPlugins and localActionLinks with genAiFunctions in the output.
+ */
+const replaceReferencesToGlobalAssets = (
+  genAiPlannerBundleMetaJson: GenAiPlannerBundleExt,
+  localTopics: GenAiPlugin[],
+  localActions: GenAiFunction[]
+): void => {
+  const plannerBundle: GenAiPlannerBundleExt['GenAiPlannerBundle'] = genAiPlannerBundleMetaJson.GenAiPlannerBundle;
+
+  // replace localTopicLinks with global genAiPlugins
+  plannerBundle.genAiPlugins = localTopics.map((topic) => ({
+    genAiPluginName: topic.source!,
+  }));
+  plannerBundle.localTopicLinks = [];
+
+  // replace localActionLinks with global genAiFunctions
+  plannerBundle.genAiFunctions = localActions.map((action) => ({
+    genAiFunctionName: action.source!,
+  }));
+  plannerBundle.localActionLinks = [];
+
+  // replace references in attributeMappings and ruleExpressionAssignments
+  const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics);
+  for (const mapping of plannerBundle.attributeMappings ?? []) {
+    mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
+  }
+  for (const assignment of plannerBundle.ruleExpressionAssignments ?? []) {
+    assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
+  }
+
+  // delete local assets from the GenAiPlannerBundle
+  plannerBundle.localTopics = [];
+};
+
+/**
+ * Builds a map from local asset names to their global (source) asset names.
+ *
+ * @param localTopics - The local topics of the GenAiPlannerBundle
+ * @returns A map of local asset name → global asset name
+ */
+const buildLocalToGlobalAssetMap = (localTopics: GenAiPlugin[]): Map<string, string> => {
+  const map = new Map<string, string>();
+  for (const topic of localTopics) {
+    map.set(topic.fullName!, topic.source!);
+    const actions = Array.isArray(topic.localActions)
+      ? topic.localActions
+      : topic.localActions
+      ? [topic.localActions]
+      : [];
+    for (const action of actions) {
+      map.set(action.fullName!, action.source!);
+    }
+  }
+  return map;
+};
+
+/**
+ * Replaces dot-separated local refs with global names. Each segment is replaced only when present in localToGlobalMap;
+ * segments not in localToGlobalMap (e.g. namespace, attribute path) are kept as-is. Used for attributeName, targetName, expression.
+ */
+const replaceLocalRefsWithGlobal = (value: string, localToGlobalMap: Map<string, string>): string =>
+  value
+    .split('.')
+    .map((segment) => localToGlobalMap.get(segment) ?? segment)
+    .join('.');
