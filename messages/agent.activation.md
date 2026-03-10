@@ -13,3 +13,7 @@ Agent %s has been deleted and can't be activated.
 # error.agentIsDefault
 
 Agent %s is the default Agentforce agent in your org and you can't change its activation status.
+
+# error.noVersionsAvailable
+
+No versions available to %s. All versions are already in the target state.

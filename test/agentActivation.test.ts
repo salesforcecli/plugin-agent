@@ -15,8 +15,9 @@
  */
 
 import { expect } from 'chai';
-import { type BotMetadata, type BotVersionMetadata } from '@salesforce/agents';
-import { getAgentChoices, getVersionChoices } from '../src/agentActivation.js';
+import sinon from 'sinon';
+import { type BotMetadata, type BotVersionMetadata, type ProductionAgent } from '@salesforce/agents';
+import { getAgentChoices, getVersionChoices, getVersionForActivation } from '../src/agentActivation.js';
 
 describe('agentActivation', () => {
   describe('getVersionChoices', () => {
@@ -266,6 +267,130 @@ describe('agentActivation', () => {
       expect(choices[0].value.DeveloperName).to.equal('Alpha_Agent');
       expect(choices[1].value.DeveloperName).to.equal('Beta_Agent');
       expect(choices[2].value.DeveloperName).to.equal('Zebra_Agent');
+    });
+  });
+
+  describe('getVersionForActivation', () => {
+    let mockAgent: sinon.SinonStubbedInstance<ProductionAgent>;
+
+    beforeEach(() => {
+      mockAgent = {
+        getBotMetadata: sinon.stub(),
+      } as unknown as sinon.SinonStubbedInstance<ProductionAgent>;
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('should return version flag when provided', async () => {
+      const result = await getVersionForActivation({
+        agent: mockAgent as unknown as ProductionAgent,
+        status: 'Active',
+        versionFlag: 5,
+      });
+
+      expect(result.version).to.equal(5);
+      expect(result.warning).to.be.undefined;
+      expect(mockAgent.getBotMetadata.called).to.be.false;
+    });
+
+    it('should auto-select when only one version exists', async () => {
+      mockAgent.getBotMetadata.resolves({
+        BotVersions: {
+          records: [{ VersionNumber: 3, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata],
+        },
+      } as BotMetadata);
+
+      const result = await getVersionForActivation({
+        agent: mockAgent as unknown as ProductionAgent,
+        status: 'Active',
+      });
+
+      expect(result.version).to.equal(3);
+      expect(result.warning).to.be.undefined;
+    });
+
+    it('should auto-select when only one available choice exists', async () => {
+      mockAgent.getBotMetadata.resolves({
+        BotVersions: {
+          records: [
+            { VersionNumber: 1, Status: 'Active', IsDeleted: false } as BotVersionMetadata,
+            { VersionNumber: 2, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata,
+          ],
+        },
+      } as BotMetadata);
+
+      const result = await getVersionForActivation({
+        agent: mockAgent as unknown as ProductionAgent,
+        status: 'Active',
+      });
+
+      // Only version 2 is available (inactive), version 1 is already active
+      expect(result.version).to.equal(2);
+      expect(result.warning).to.be.undefined;
+    });
+
+    it('should auto-select latest version in JSON mode', async () => {
+      mockAgent.getBotMetadata.resolves({
+        BotVersions: {
+          records: [
+            { VersionNumber: 1, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata,
+            { VersionNumber: 2, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata,
+            { VersionNumber: 3, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata,
+          ],
+        },
+      } as BotMetadata);
+
+      const result = await getVersionForActivation({
+        agent: mockAgent as unknown as ProductionAgent,
+        status: 'Active',
+        jsonEnabled: true,
+      });
+
+      expect(result.version).to.equal(3);
+      expect(result.warning).to.include('automatically selected latest available version: 3');
+    });
+
+    it('should filter out deleted versions', async () => {
+      mockAgent.getBotMetadata.resolves({
+        BotVersions: {
+          records: [
+            { VersionNumber: 1, Status: 'Inactive', IsDeleted: true } as BotVersionMetadata,
+            { VersionNumber: 2, Status: 'Inactive', IsDeleted: false } as BotVersionMetadata,
+          ],
+        },
+      } as BotMetadata);
+
+      const result = await getVersionForActivation({
+        agent: mockAgent as unknown as ProductionAgent,
+        status: 'Active',
+      });
+
+      // Only version 2 should be considered (version 1 is deleted)
+      expect(result.version).to.equal(2);
+    });
+
+    it('should throw error when no versions are available', async () => {
+      mockAgent.getBotMetadata.resolves({
+        BotVersions: {
+          records: [
+            { VersionNumber: 1, Status: 'Active', IsDeleted: false } as BotVersionMetadata,
+            { VersionNumber: 2, Status: 'Active', IsDeleted: false } as BotVersionMetadata,
+          ],
+        },
+      } as BotMetadata);
+
+      try {
+        await getVersionForActivation({
+          agent: mockAgent as unknown as ProductionAgent,
+          status: 'Active',
+          jsonEnabled: true,
+        });
+        expect.fail('Expected error to be thrown');
+      } catch (error) {
+        expect((error as Error).message).to.include('No versions available to activate');
+      }
     });
   });
 });

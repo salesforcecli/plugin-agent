@@ -164,6 +164,12 @@ export const getVersionForActivation = async (config: {
     return { version: availableChoices[0].value.version };
   }
 
+  // If no versions are available, throw an error
+  if (availableChoices.length === 0) {
+    const action = status === 'Active' ? 'activate' : 'deactivate';
+    throw messages.createError('error.noVersionsAvailable', [action]);
+  }
+
   // If JSON mode is enabled, automatically select the latest available version
   if (jsonEnabled) {
     // Find the latest (highest version number) available version
