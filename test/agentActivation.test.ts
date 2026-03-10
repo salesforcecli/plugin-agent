@@ -91,7 +91,7 @@ describe('agentActivation', () => {
   });
 
   describe('getAgentChoices', () => {
-    it('should enable agent when ANY version is available for activation', () => {
+    it('should filter out agent when any version is already active (for activation)', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
@@ -99,7 +99,7 @@ describe('agentActivation', () => {
           BotVersions: {
             records: [
               { Status: 'Active', VersionNumber: 1 } as BotVersionMetadata,
-              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata, // Can be activated
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
               { Status: 'Inactive', VersionNumber: 3 } as BotVersionMetadata,
             ],
           },
@@ -108,12 +108,10 @@ describe('agentActivation', () => {
 
       const choices = getAgentChoices(agents, 'Active');
 
-      expect(choices).to.have.lengthOf(1);
-      expect(choices[0].disabled).to.equal(false); // Has inactive versions that can be activated
-      expect(choices[0].value.DeveloperName).to.equal('Test_Agent');
+      expect(choices).to.have.lengthOf(0); // Filtered out because it already has an active version
     });
 
-    it('should enable agent when ANY version is available for deactivation', () => {
+    it('should include agent when it has an active version (for deactivation)', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
@@ -131,19 +129,19 @@ describe('agentActivation', () => {
       const choices = getAgentChoices(agents, 'Inactive');
 
       expect(choices).to.have.lengthOf(1);
-      expect(choices[0].disabled).to.equal(false); // Has active version that can be deactivated
+      expect(choices[0].value.DeveloperName).to.equal('Test_Agent');
     });
 
-    it('should disable agent when ALL versions are already in target state', () => {
+    it('should include agent when all versions are inactive (for activation)', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
           DeveloperName: 'Test_Agent',
           BotVersions: {
             records: [
-              { Status: 'Active', VersionNumber: 1 } as BotVersionMetadata,
-              { Status: 'Active', VersionNumber: 2 } as BotVersionMetadata,
-              { Status: 'Active', VersionNumber: 3 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 1 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 3 } as BotVersionMetadata,
             ],
           },
         } as BotMetadata,
@@ -151,11 +149,11 @@ describe('agentActivation', () => {
 
       const choices = getAgentChoices(agents, 'Active');
 
-      expect(choices).to.have.lengthOf(1);
-      expect(choices[0].disabled).to.equal('(Already Active)'); // All versions are already active
+      expect(choices).to.have.lengthOf(1); // All versions are inactive, so can activate one
+      expect(choices[0].value.DeveloperName).to.equal('Test_Agent');
     });
 
-    it('should disable agent when ALL versions are inactive for deactivation', () => {
+    it('should filter out agent when all versions are inactive (for deactivation)', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
@@ -171,11 +169,10 @@ describe('agentActivation', () => {
 
       const choices = getAgentChoices(agents, 'Inactive');
 
-      expect(choices).to.have.lengthOf(1);
-      expect(choices[0].disabled).to.equal('(Already Inactive)'); // All versions are already inactive
+      expect(choices).to.have.lengthOf(0); // All versions are already inactive, nothing to deactivate
     });
 
-    it('should disable unsupported agents', () => {
+    it('should filter out unsupported agents', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
@@ -188,28 +185,37 @@ describe('agentActivation', () => {
 
       const choices = getAgentChoices(agents, 'Active');
 
-      expect(choices).to.have.lengthOf(1);
-      expect(choices[0].disabled).to.equal('(Not Supported)');
+      expect(choices).to.have.lengthOf(0); // Unsupported agents are filtered out
     });
 
-    it('should handle multiple agents with mixed states', () => {
+    it('should filter out unavailable agents and sort remaining alphabetically', () => {
       const agents: BotMetadata[] = [
         {
           Id: 'agent1',
-          DeveloperName: 'Agent_All_Active',
+          DeveloperName: 'Zebra_Agent',
           BotVersions: {
             records: [
               { Status: 'Active', VersionNumber: 1 } as BotVersionMetadata,
-              { Status: 'Active', VersionNumber: 2 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
             ],
           },
         } as BotMetadata,
         {
           Id: 'agent2',
-          DeveloperName: 'Agent_Mixed',
+          DeveloperName: 'Beta_Agent',
           BotVersions: {
             records: [
               { Status: 'Active', VersionNumber: 1 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
+            ],
+          },
+        } as BotMetadata,
+        {
+          Id: 'agent3',
+          DeveloperName: 'Alpha_Agent',
+          BotVersions: {
+            records: [
+              { Status: 'Inactive', VersionNumber: 1 } as BotVersionMetadata,
               { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
             ],
           },
@@ -218,11 +224,47 @@ describe('agentActivation', () => {
 
       const choices = getAgentChoices(agents, 'Active');
 
-      expect(choices).to.have.lengthOf(2);
-      expect(choices[0].value.DeveloperName).to.equal('Agent_All_Active');
-      expect(choices[0].disabled).to.equal('(Already Active)');
-      expect(choices[1].value.DeveloperName).to.equal('Agent_Mixed');
-      expect(choices[1].disabled).to.equal(false);
+      expect(choices).to.have.lengthOf(1); // Only Alpha_Agent has no active version (all inactive)
+      expect(choices[0].value.DeveloperName).to.equal('Alpha_Agent');
+    });
+
+    it('should sort multiple available agents alphabetically', () => {
+      const agents: BotMetadata[] = [
+        {
+          Id: 'agent1',
+          DeveloperName: 'Zebra_Agent',
+          BotVersions: {
+            records: [
+              { Status: 'Inactive', VersionNumber: 1 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
+            ],
+          },
+        } as BotMetadata,
+        {
+          Id: 'agent2',
+          DeveloperName: 'Alpha_Agent',
+          BotVersions: {
+            records: [
+              { Status: 'Inactive', VersionNumber: 1 } as BotVersionMetadata,
+              { Status: 'Inactive', VersionNumber: 2 } as BotVersionMetadata,
+            ],
+          },
+        } as BotMetadata,
+        {
+          Id: 'agent3',
+          DeveloperName: 'Beta_Agent',
+          BotVersions: {
+            records: [{ Status: 'Inactive', VersionNumber: 1 } as BotVersionMetadata],
+          },
+        } as BotMetadata,
+      ];
+
+      const choices = getAgentChoices(agents, 'Active');
+
+      expect(choices).to.have.lengthOf(3);
+      expect(choices[0].value.DeveloperName).to.equal('Alpha_Agent');
+      expect(choices[1].value.DeveloperName).to.equal('Beta_Agent');
+      expect(choices[2].value.DeveloperName).to.equal('Zebra_Agent');
     });
   });
 });

@@ -1731,14 +1731,14 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.24.1.tgz#841e34c7cc2ea6d58a14de67725116dbea5e3180"
-  integrity sha512-eU9WRbUwtCsKsv2PhCW8ZXIG2sKS4FFhvKlTFeoCKdEj/rleNseF0Rwn6MI3sIsrP9HfZvhAkh2vbvoPRK/8rQ==
+"@salesforce/agents@^0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-0.24.2.tgz#e67a36bf07c6a4d29231f88dd1cf562b125bb768"
+  integrity sha512-apYmYxeS3bnqUl32BvqZX2ALu50GUfdLw4iyJjR2jGm2q/kVTSeb/UBq8FhJBCnsPocnhu+Hmmb60bU0NCLwbw==
   dependencies:
-    "@salesforce/core" "^8.26.2"
+    "@salesforce/core" "^8.26.3"
     "@salesforce/kit" "^3.2.4"
-    "@salesforce/source-deploy-retrieve" "^12.31.12"
+    "@salesforce/source-deploy-retrieve" "^12.31.14"
     "@salesforce/types" "^1.6.0"
     fast-xml-parser "^5.3.6"
     nock "^13.5.6"
@@ -1882,7 +1882,7 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^12.31.12", "@salesforce/source-deploy-retrieve@^12.31.14":
+"@salesforce/source-deploy-retrieve@^12.31.14":
   version "12.31.14"
   resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.31.14.tgz#6ed0a2fdb9a14d60ed64a2dd8fdc18c16af143a6"
   integrity sha512-tLnTCG6t+d+MN8pGijF6nL4lsqE37FaBINZZvyd+IDAw+7eWffFqIXK/nNyQ1ZARTNeHOs5K/NlNXNBp5+x/YQ==

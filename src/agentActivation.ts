@@ -50,28 +50,24 @@ export const validateAgent = (agent: BotMetadata): boolean => {
 };
 
 export const getAgentChoices = (agents: BotMetadata[], status: 'Active' | 'Inactive'): Array<Choice<AgentValue>> =>
-  agents.map((agent) => {
-    let disabled: string | boolean = false;
-
-    // For deactivate (status='Inactive'), check if any version is Active (can be deactivated)
-    // For activate (status='Active'), check if any version is Inactive (can be activated)
-    const hasAvailableVersion = agent.BotVersions.records.some((version) => version.Status !== status);
-    if (!hasAvailableVersion) {
-      disabled = `(Already ${status})`;
-    }
-    if (agentIsUnsupported(agent.DeveloperName)) {
-      disabled = '(Not Supported)';
-    }
-
-    return {
+  agents
+    .filter((agent) => {
+      // Only one version can be active at a time
+      // For activate (status='Active'): show agents that don't have an active version (all versions are inactive)
+      // For deactivate (status='Inactive'): show agents that have an active version
+      const hasActiveVersion = agent.BotVersions.records.some((version) => version.Status === 'Active');
+      const canPerformOperation = status === 'Active' ? !hasActiveVersion : hasActiveVersion;
+      // Filter out agents that can't perform the operation or are unsupported
+      return canPerformOperation && !agentIsUnsupported(agent.DeveloperName);
+    })
+    .sort((a, b) => a.DeveloperName.localeCompare(b.DeveloperName))
+    .map((agent) => ({
       name: agent.DeveloperName,
       value: {
         Id: agent.Id,
         DeveloperName: agent.DeveloperName,
       },
-      disabled,
-    };
-  });
+    }));
 
 export const getVersionChoices = (
   versions: BotVersionMetadata[],
