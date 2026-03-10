@@ -38,6 +38,7 @@ export type GenAiPlannerBundleExt = {
     localActionLinks?: GenAiPlannerFunctionDef[];
     localTopicLinks: GenAiPlannerFunctionDef[];
     localTopics: GenAiPlugin[];
+    plannerActions?: GenAiFunction[];
   };
 };
 
@@ -244,9 +245,18 @@ const getLocalAssets = (
       ])
     );
   }
-  const localActions = localTopics.flatMap((plugin) =>
+  const actionsFromPlugins = localTopics.flatMap((plugin) =>
     Array.isArray(plugin.localActions) ? plugin.localActions : plugin.localActions ? [plugin.localActions] : []
   );
+  const plannerBundle = genAiPlannerBundleMetaJson.GenAiPlannerBundle;
+  const plannerActions = Array.isArray(plannerBundle.plannerActions)
+    ? plannerBundle.plannerActions
+    : plannerBundle.plannerActions
+    ? [plannerBundle.plannerActions]
+    : [];
+
+  // localActions are the actions from the plugins and the plannerActions
+  const localActions = [...actionsFromPlugins, ...plannerActions];
   const localActionsWithoutSource = localActions.filter((action) => !action.source);
   if (localActionsWithoutSource.length > 0) {
     throw new SfError(
@@ -275,14 +285,19 @@ const replaceReferencesToGlobalAssets = (
   }));
   plannerBundle.localTopicLinks = [];
 
-  // replace localActionLinks with global genAiFunctions
-  plannerBundle.genAiFunctions = localActions.map((action) => ({
-    genAiFunctionName: action.source!,
-  }));
+  // replace localActionLinks with global genAiFunctions (dedupe by genAiFunctionName)
+  const seenFunctions = new Set<string>();
+  plannerBundle.genAiFunctions = localActions
+    .map((action) => ({ genAiFunctionName: action.source! }))
+    .filter((f) => {
+      if (seenFunctions.has(f.genAiFunctionName)) return false;
+      seenFunctions.add(f.genAiFunctionName);
+      return true;
+    });
   plannerBundle.localActionLinks = [];
 
   // replace references in attributeMappings and ruleExpressionAssignments
-  const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics);
+  const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics, plannerBundle);
   for (const mapping of plannerBundle.attributeMappings ?? []) {
     mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
   }
@@ -292,15 +307,20 @@ const replaceReferencesToGlobalAssets = (
 
   // delete local assets from the GenAiPlannerBundle
   plannerBundle.localTopics = [];
+  plannerBundle.plannerActions = [];
 };
 
 /**
  * Builds a map from local asset names to their global (source) asset names.
  *
  * @param localTopics - The local topics of the GenAiPlannerBundle
+ * @param plannerBundle - The GenAiPlannerBundle (for plannerActions)
  * @returns A map of local asset name → global asset name
  */
-const buildLocalToGlobalAssetMap = (localTopics: GenAiPlugin[]): Map<string, string> => {
+const buildLocalToGlobalAssetMap = (
+  localTopics: GenAiPlugin[],
+  plannerBundle: GenAiPlannerBundleExt['GenAiPlannerBundle']
+): Map<string, string> => {
   const map = new Map<string, string>();
   for (const topic of localTopics) {
     map.set(topic.fullName!, topic.source!);
@@ -312,6 +332,14 @@ const buildLocalToGlobalAssetMap = (localTopics: GenAiPlugin[]): Map<string, str
     for (const action of actions) {
       map.set(action.fullName!, action.source!);
     }
+  }
+  const plannerActions = Array.isArray(plannerBundle.plannerActions)
+    ? plannerBundle.plannerActions
+    : plannerBundle.plannerActions
+    ? [plannerBundle.plannerActions]
+    : [];
+  for (const action of plannerActions) {
+    if (action.fullName && action.source) map.set(action.fullName, action.source);
   }
   return map;
 };
