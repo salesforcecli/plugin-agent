@@ -45,9 +45,10 @@ describe('agentActivation', () => {
       const choices = getVersionChoices(versions, 'Inactive');
 
       expect(choices).to.have.lengthOf(3);
-      expect(choices[0].disabled).to.equal(false); // Version 1 is Active, can be deactivated
+      // Sorted descending: v3, v2, v1
+      expect(choices[0].disabled).to.equal('(Already Inactive)'); // Version 3 is already Inactive
       expect(choices[1].disabled).to.equal('(Already Inactive)'); // Version 2 is already Inactive
-      expect(choices[2].disabled).to.equal('(Already Inactive)'); // Version 3 is already Inactive
+      expect(choices[2].disabled).to.equal(false); // Version 1 is Active, can be deactivated
     });
 
     it('should include version numbers in choices', () => {

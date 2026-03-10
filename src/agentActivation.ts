@@ -73,17 +73,19 @@ export const getVersionChoices = (
   versions: BotVersionMetadata[],
   status: 'Active' | 'Inactive'
 ): Array<Choice<VersionChoice>> =>
-  versions.map((version) => {
-    const isTargetStatus = version.Status === status;
-    return {
-      name: `Version ${version.VersionNumber}`,
-      value: {
-        version: version.VersionNumber,
-        status: version.Status,
-      },
-      disabled: isTargetStatus ? `(Already ${status})` : false,
-    };
-  });
+  versions
+    .sort((a, b) => b.VersionNumber - a.VersionNumber)
+    .map((version) => {
+      const isTargetStatus = version.Status === status;
+      return {
+        name: `Version ${version.VersionNumber}`,
+        value: {
+          version: version.VersionNumber,
+          status: version.Status,
+        },
+        disabled: isTargetStatus ? `(Already ${status})` : false,
+      };
+    });
 
 export const getAgentForActivation = async (config: {
   targetOrg: Org;
