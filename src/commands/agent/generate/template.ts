@@ -233,7 +233,7 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
  * @param genAiPlannerBundleMetaJson - The GenAiPlannerBundle metadata to read from
  * @returns { localTopics, localActions } - The local topics and the flattened local actions from all plugins
  */
-const getLocalAssets = (
+export const getLocalAssets = (
   genAiPlannerBundleMetaJson: GenAiPlannerBundleExt
 ): { localTopics: GenAiPlugin[]; localActions: GenAiFunction[] } => {
   const rawLocalTopics = genAiPlannerBundleMetaJson.GenAiPlannerBundle.localTopics;
