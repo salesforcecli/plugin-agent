@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { dirname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { XMLParser } from 'fast-xml-parser';
 import { expect } from 'chai';
@@ -24,6 +23,7 @@ import {
   BotTemplateExt,
   GenAiPlannerBundleExt,
 } from '../../src/commands/agent/generate/template.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
@@ -33,12 +33,7 @@ describe('agent generate template NUTs', function () {
 
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
-    session = await TestSession.create({
-      project: {
-        sourceDir: join(dirname(fileURLToPath(import.meta.url)), '..', 'mock-projects', 'agent-generate-template'),
-      },
-      devhubAuthStrategy: 'AUTO',
-    });
+    session = await getTestSession();
   });
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
