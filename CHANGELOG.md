@@ -1,3 +1,14 @@
+## [1.32.1](https://github.com/salesforcecli/plugin-agent/compare/1.32.0...1.32.1) (2026-03-11)
+
+### Bug Fixes
+
+- add --version flag to agent activate/deactivate ([af07c24](https://github.com/salesforcecli/plugin-agent/commit/af07c242b57b3265dc686e19e421715f4ac84684))
+- add guard for empty available versions and unit tests ([7dea3e4](https://github.com/salesforcecli/plugin-agent/commit/7dea3e488162f2ae90ad68944f900524ee871f17))
+- deactivate only one version anywyays ([4fe0098](https://github.com/salesforcecli/plugin-agent/commit/4fe0098c24a9bce63ff10b37b740cd6a846936c5))
+- edit ([c165ee9](https://github.com/salesforcecli/plugin-agent/commit/c165ee9f9bbf72c737ee9949bc93983d5e28e86c))
+- sort version choices descending so latest appears first ([bf3e742](https://github.com/salesforcecli/plugin-agent/commit/bf3e7423e939a5b41bf8f2dedd2619b356316ade))
+- usability, errors, tests ([a6dd2a7](https://github.com/salesforcecli/plugin-agent/commit/a6dd2a7109ffbecd46d618c77f70014c59fc4dc3))
+
 # [1.32.0](https://github.com/salesforcecli/plugin-agent/compare/1.31.3...1.32.0) (2026-03-09)
 
 ### Features
