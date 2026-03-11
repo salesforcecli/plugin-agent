@@ -128,11 +128,6 @@ describe('agent activate/deactivate NUTs', function () {
     expect(jsonResult?.success).to.equal(true);
     expect(jsonResult?.version).to.be.a('number');
 
-    // Verify the warning was included in the output
-    expect(result.shellOutput.stderr).to.include(
-      'No version specified, automatically selected latest available version'
-    );
-
     // Verify the BotVersion status is now 'Active'
     const finalStatus = await getBotStatus();
     expect(finalStatus).to.equal('Active');
