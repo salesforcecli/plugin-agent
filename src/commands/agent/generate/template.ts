@@ -37,7 +37,7 @@ export type GenAiPlannerBundleExt = {
     botTemplate?: string;
     localActionLinks?: GenAiPlannerFunctionDef[];
     localTopicLinks: GenAiPlannerFunctionDef[];
-    localTopics: GenAiPlugin[];
+    localTopics?: GenAiPlugin[];
     plannerActions?: GenAiFunction[];
   };
 };
@@ -236,7 +236,8 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
 const getLocalAssets = (
   genAiPlannerBundleMetaJson: GenAiPlannerBundleExt
 ): { localTopics: GenAiPlugin[]; localActions: GenAiFunction[] } => {
-  const localTopics = genAiPlannerBundleMetaJson.GenAiPlannerBundle.localTopics;
+  const rawLocalTopics = genAiPlannerBundleMetaJson.GenAiPlannerBundle.localTopics;
+  const localTopics = Array.isArray(rawLocalTopics) ? rawLocalTopics : rawLocalTopics ? [rawLocalTopics] : [];
   const localTopicsWithoutSource = localTopics.filter((topic) => !topic.source);
   if (localTopicsWithoutSource.length > 0) {
     throw new SfError(
@@ -257,13 +258,15 @@ const getLocalAssets = (
 
   // localActions are the actions from the plugins and the plannerActions
   const localActions = [...actionsFromPlugins, ...plannerActions];
-  const localActionsWithoutSource = localActions.filter((action) => !action.source);
-  if (localActionsWithoutSource.length > 0) {
-    throw new SfError(
-      messages.getMessage('error.local-actions-without-source', [
-        localActionsWithoutSource.map((action) => action.developerName ?? action.fullName).join(', '),
-      ])
-    );
+  if (localActions.length > 0) {
+    const localActionsWithoutSource = localActions.filter((action) => !action.source);
+    if (localActionsWithoutSource.length > 0) {
+      throw new SfError(
+        messages.getMessage('error.local-actions-without-source', [
+          localActionsWithoutSource.map((action) => action.developerName ?? action.fullName).join(', '),
+        ])
+      );
+    }
   }
   return { localTopics, localActions };
 };
