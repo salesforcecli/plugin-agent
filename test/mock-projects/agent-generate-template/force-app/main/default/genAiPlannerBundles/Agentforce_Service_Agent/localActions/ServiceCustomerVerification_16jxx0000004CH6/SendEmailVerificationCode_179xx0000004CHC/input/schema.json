@@ -1,0 +1,15 @@
+{
+  "required": ["customerToVerify"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "customerToVerify": {
+      "title": "Customer To Verify",
+      "description": "Stores the email address or username provided by the customer. This input initiates the verification process.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": true,
+      "copilotAction:isUserInput": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

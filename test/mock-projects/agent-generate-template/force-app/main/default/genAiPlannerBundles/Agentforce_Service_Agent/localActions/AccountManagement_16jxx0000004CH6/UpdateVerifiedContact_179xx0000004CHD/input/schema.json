@@ -1,0 +1,57 @@
+{
+  "required": ["verifiedContactID"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "verifiedContactID": {
+      "title": "Verified Contact record ID",
+      "description": "Stores the contact record ID to be updated.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "newCity": {
+      "title": "New City",
+      "description": "Stores the value of the new city provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    },
+    "newEmailAddress": {
+      "title": "New Email Address",
+      "description": "Stores the value of the new email address provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": true,
+      "copilotAction:isUserInput": true
+    },
+    "newPhoneNumber": {
+      "title": "New Phone Number",
+      "description": "Stores the value of the new phone number provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": true,
+      "copilotAction:isUserInput": true
+    },
+    "newPostalCode": {
+      "title": "New Postal Code",
+      "description": "Stores the value of the new postal code provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    },
+    "newState": {
+      "title": "New State",
+      "description": "Stores the value of the new state provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    },
+    "newStreetAddress": {
+      "title": "New Street Address",
+      "description": "Stores the value of the new street address provided by the customer. If no change is desired, this variable is empty.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

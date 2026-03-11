@@ -1,0 +1,47 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "verificationMessage": {
+      "title": "Verification Message",
+      "description": "Stores a generic message that will be displayed to the user.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    },
+    "verificationCode": {
+      "title": "Verification Code",
+      "description": "Stores the generated verification code.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "authenticationKey": {
+      "title": "Authentication Key",
+      "description": "Stores the authentication key that’s used to generate the verification code.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "customerId": {
+      "title": "Customer ID",
+      "description": "Stores the Salesforce user ID or contact ID.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "customerType": {
+      "title": "Customer Type",
+      "description": "Stores the customer ID type, whether it’s a Salesforce user or a contact.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

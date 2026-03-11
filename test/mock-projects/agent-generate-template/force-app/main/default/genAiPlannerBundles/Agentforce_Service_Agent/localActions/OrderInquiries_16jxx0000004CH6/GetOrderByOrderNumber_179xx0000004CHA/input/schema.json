@@ -1,0 +1,25 @@
+{
+  "required": ["contactRecord", "orderNumber"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "contactRecord": {
+      "title": "Contact record",
+      "description": "The contact record associated with the identified customer.",
+      "lightning:type": "lightning__recordInfoType",
+      "lightning:sObjectInfo": {
+        "apiName": "Contact"
+      },
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "orderNumber": {
+      "title": "orderNumber",
+      "description": "Stores the order number provided by the customer to identify a specific order.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

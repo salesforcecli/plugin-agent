@@ -1,0 +1,25 @@
+{
+  "required": ["caseRecord", "caseComment"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "caseRecord": {
+      "title": "Case record",
+      "description": "Stores the case record to be updated with a comment.",
+      "lightning:type": "lightning__recordInfoType",
+      "lightning:sObjectInfo": {
+        "apiName": "Case"
+      },
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "caseComment": {
+      "title": "Case comment",
+      "description": "Stores the text of the comment to add to the case.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

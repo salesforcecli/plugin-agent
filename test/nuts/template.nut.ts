@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { XMLParser } from 'fast-xml-parser';
 import { expect } from 'chai';
@@ -23,7 +24,6 @@ import {
   BotTemplateExt,
   GenAiPlannerBundleExt,
 } from '../../src/commands/agent/generate/template.js';
-import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
@@ -33,7 +33,12 @@ describe('agent generate template NUTs', function () {
 
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
-    session = await getTestSession();
+    session = await TestSession.create({
+      project: {
+        sourceDir: join(dirname(fileURLToPath(import.meta.url)), '..', 'mock-projects', 'agent-generate-template'),
+      },
+      devhubAuthStrategy: 'AUTO',
+    });
   });
 
   it('throws an error if Bot "type" is equal to "Bot"', async () => {
@@ -54,8 +59,8 @@ describe('agent generate template NUTs', function () {
       'main',
       'default',
       'bots',
-      'Guest_Experience_Agent',
-      'Guest_Experience_Agent.bot-meta.xml'
+      'Agentforce_Service_Agent',
+      'Agentforce_Service_Agent.bot-meta.xml'
     );
     const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, {
@@ -67,15 +72,15 @@ describe('agent generate template NUTs', function () {
       'main',
       'default',
       'botTemplates',
-      'Guest_Experience_Agent_v1_Template.botTemplate-meta.xml'
+      'Agentforce_Service_Agent_v1_Template.botTemplate-meta.xml'
     );
     const genAiPlannerBundleFilePath = join(
       'force-app',
       'main',
       'default',
       'genAiPlannerBundles',
-      'Guest_Experience_Agent_v1_Template',
-      'Guest_Experience_Agent_v1_Template.genAiPlannerBundle'
+      'Agentforce_Service_Agent_v1_Template',
+      'Agentforce_Service_Agent_v1_Template.genAiPlannerBundle'
     );
 
     const generatedBotTemplateFilePath = resolve(session.project.dir, botTemplateFilePath);
