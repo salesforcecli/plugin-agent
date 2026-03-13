@@ -10,17 +10,15 @@ At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBund
 
 Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion metadata file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
 
-The new BotTemplate metadata file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+The new BotTemplate metadata file is generated in the "botTemplates" directory in the output directory specified with the required --output-dir flag, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as my-package/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
 
 See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/dev2gp_package_agent_templates.htm) for details about the complete process, which includes using a scratch org to create and test the agent, retrieving the agent metadata to your DX project, running this command to create the agent template, and then packaging the template.
-
-Specify the output directory with the required --output-dir flag. The command generates a BotTemplate file in the "botTemplates" subdirectory and a GenAiPlannerBundle in the "genAiPlannerBundles" subdirectory, both under the path you provide. File names follow the pattern <Agent_API_name>\_v<Version>\_Template. The command displays the full pathname of the generated files when it completes.
 
 # examples
 
 - Generate an agent template from a Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory.
 
-  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir force-app/main/default
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package
 
 # flags.agent-version.summary
 
