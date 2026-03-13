@@ -4,7 +4,7 @@ Generate an agent template from an existing agent in your DX project so you can 
 
 # description
 
-WARNING: This command works with only legacy agents, which are agents that don't use Agent Script as their blueprint. You can't currently generate an agent template from an Agent Script agent.
+WARNING: This command doesn't work for agents that were created from an Agent Script file. In other words, you can't currently package an agent template for agents that use Agent Script.
 
 At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate metadata file for a specific agent (Bot). You then use the BotTemplate metadata file, along with the GenAiPlannerBundle metadata file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
 
@@ -64,7 +64,7 @@ The local action (genAiFunction) you're trying to include in the agent template 
 
 # error.nga-agent-not-supported
 
-This command works with only legacy agents, which are agents that don't use Agent Script as their blueprint. You can't currently generate an agent template from an Agent Script agent.
+This command doesn't work for agents that were created from an Agent Script file. In other words, you can't currently package an agent template for agents that use Agent Script.
 
 # warn.copied-asset-directories
 
