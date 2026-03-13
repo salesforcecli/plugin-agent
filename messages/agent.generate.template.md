@@ -14,11 +14,13 @@ The new BotTemplate metadata file is generated in the "botTemplates" directory i
 
 See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/dev2gp_package_agent_templates.htm) for details about the complete process, which includes using a scratch org to create and test the agent, retrieving the agent metadata to your DX project, running this command to create the agent template, and then packaging the template.
 
+Specify the output directory with the required --output-dir flag. The command generates a BotTemplate file in the "botTemplates" subdirectory and a GenAiPlannerBundle in the "genAiPlannerBundles" subdirectory, both under the path you provide. File names follow the pattern <Agent_API_name>\_v<Version>\_Template. The command displays the full pathname of the generated files when it completes.
+
 # examples
 
-- Generate an agent template from a Bot metadata file in your DX project that corresponds to the My_Awesome_Agent agent; use version 1 of the agent.
+- Generate an agent template from a Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory.
 
-  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir force-app/main/default
 
 # flags.agent-version.summary
 
@@ -27,6 +29,10 @@ Version of the agent (BotVersion).
 # flags.agent-file.summary
 
 Path to an agent (Bot) metadata file.
+
+# flags.output-dir.summary
+
+Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
 
 # error.invalid-agent-file
 
@@ -61,3 +67,8 @@ The local action (genAiFunction) you're trying to include in the agent template 
 # error.nga-agent-not-supported
 
 This command works with only legacy agents, which are agents that don't use Agent Script as their blueprint. You can't currently generate an agent template from an Agent Script agent.
+
+# warn.copied-asset-directories
+
+The following directories have been copied to the target path. Please review and remove any unnecessary assets:
+%s.
