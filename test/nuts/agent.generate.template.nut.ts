@@ -42,10 +42,11 @@ describe('agent generate template NUTs', function () {
       'Local_Info_Agent',
       'Local_Info_Agent.bot-meta.xml'
     );
+    const outputDir = join(session.project.dir, 'force-app', 'main', 'default');
     const agentVersion = 1;
 
     const result = execCmd<AgentGenerateTemplateResult>(
-      `agent generate template --agent-file ${agentFile} --agent-version ${agentVersion} --json`,
+      `agent generate template --agent-file ${agentFile} --agent-version ${agentVersion} --output-dir ${outputDir} --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -60,10 +61,11 @@ describe('agent generate template NUTs', function () {
 
   it('should fail for invalid agent file', () => {
     const invalidAgentFile = join(session.project.dir, 'invalid', 'agent.bot-meta.xml');
+    const outputDir = join(session.project.dir, 'output');
     const agentVersion = 1;
 
     execCmd<AgentGenerateTemplateResult>(
-      `agent generate template --agent-file ${invalidAgentFile} --agent-version ${agentVersion} --json`,
+      `agent generate template --agent-file ${invalidAgentFile} --agent-version ${agentVersion} --output-dir ${outputDir} --json`,
       { ensureExitCode: 1 }
     );
   });
@@ -78,10 +80,11 @@ describe('agent generate template NUTs', function () {
       'Local_Info_Agent',
       'v1.botVersion-meta.xml'
     );
+    const outputDir = join(session.project.dir, 'output');
     const agentVersion = 1;
 
     execCmd<AgentGenerateTemplateResult>(
-      `agent generate template --agent-file ${invalidFile} --agent-version ${agentVersion} --json`,
+      `agent generate template --agent-file ${invalidFile} --agent-version ${agentVersion} --output-dir ${outputDir} --json`,
       { ensureExitCode: 1 }
     );
   });

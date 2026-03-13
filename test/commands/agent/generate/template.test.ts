@@ -37,6 +37,36 @@ const BOT_XML_NGA = `<?xml version="1.0" encoding="UTF-8"?>
   <type>Conversational</type>
 </Bot>`;
 
+const BOT_XML_LEGACY = `<?xml version="1.0" encoding="UTF-8"?>
+<Bot xmlns="http://soap.sforce.com/2006/04/metadata">
+  <agentDSLEnabled>false</agentDSLEnabled>
+  <agentType>EinsteinServiceAgent</agentType>
+  <botMlDomain><label>Local Info Agent</label><name>Local_Info_Agent</name></botMlDomain>
+  <botSource>None</botSource>
+  <label>Local Info Agent</label>
+  <type>Conversational</type>
+</Bot>`;
+
+const BOT_VERSION_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<BotVersion xmlns="http://soap.sforce.com/2006/04/metadata">
+  <entryDialog>Welcome</entryDialog>
+  <botDialogs>
+    <developerName>Welcome</developerName>
+    <label>Welcome</label>
+  </botDialogs>
+  <botDialogs>
+    <developerName>Other</developerName>
+    <label>Other</label>
+  </botDialogs>
+  <conversationVariables/>
+</BotVersion>`;
+
+const BUNDLE_XML_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+  <masterLabel>Local Info Agent</masterLabel>
+  <plannerType>AiCopilot__ReAct</plannerType>
+</GenAiPlannerBundle>`;
+
 describe('agent generate template', () => {
   const $$ = new TestContext();
   // Use existing bot in mock project so --agent-file exists check passes
@@ -49,7 +79,16 @@ describe('agent generate template', () => {
     'Local_Info_Agent',
     'Local_Info_Agent.bot-meta.xml'
   );
-  const runArgs = (): string[] => ['--agent-file', agentFile, '--agent-version', '1', '--json'];
+  const outputDir = join(MOCK_PROJECT_DIR, 'force-app', 'main', 'default');
+  const runArgs = (): string[] => [
+    '--agent-file',
+    agentFile,
+    '--agent-version',
+    '1',
+    '--output-dir',
+    outputDir,
+    '--json',
+  ];
 
   beforeEach(() => {
     $$.inProject(true);
@@ -88,6 +127,42 @@ describe('agent generate template', () => {
       expect((error as SfError).message).to.match(/legacy agents|Agent Script|nga-agent-not-supported/i);
     }
     expect(readCount).to.equal(1);
+  });
+
+  it('should write BotTemplate and GenAiPlannerBundle under --output-dir', async () => {
+    const customOutputDir = join(process.cwd(), 'tmp-template-output-test');
+    const responses = [BOT_XML_LEGACY, BOT_VERSION_XML, BUNDLE_XML_EMPTY];
+    let readIndex = 0;
+    const readFileSyncMock = (): string => responses[readIndex++];
+    const mod = await esmock('../../../../src/commands/agent/generate/template.js', {
+      'node:fs': {
+        readFileSync: readFileSyncMock,
+        mkdirSync: () => {},
+        writeFileSync: () => {},
+        existsSync: () => false,
+        statSync: () => ({ isDirectory: () => false }),
+        cpSync: () => {},
+      },
+    });
+    const AgentGenerateTemplate = mod.default;
+
+    const result = await AgentGenerateTemplate.run([
+      '--agent-file',
+      agentFile,
+      '--agent-version',
+      '1',
+      '--output-dir',
+      customOutputDir,
+      '--json',
+    ]);
+
+    expect(result).to.be.ok;
+    expect(result.botTemplatePath).to.include(customOutputDir);
+    expect(result.botTemplatePath).to.include('botTemplates');
+    expect(result.botTemplatePath).to.match(/Local_Info_Agent_v1_Template\.botTemplate-meta\.xml$/);
+    expect(result.genAiPlannerBundlePath).to.include(customOutputDir);
+    expect(result.genAiPlannerBundlePath).to.include('genAiPlannerBundles');
+    expect(result.genAiPlannerBundlePath).to.match(/Local_Info_Agent_v1_Template\.genAiPlannerBundle$/);
   });
 
   it('should throw local-topics-without-source when a local topic has no source', () => {

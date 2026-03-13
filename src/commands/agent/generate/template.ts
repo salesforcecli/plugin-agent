@@ -15,7 +15,7 @@
  */
 
 import { join, dirname, basename, resolve } from 'node:path';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
@@ -89,11 +89,16 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
       required: true,
       exists: true,
     }),
+    'output-dir': Flags.directory({
+      summary: messages.getMessage('flags.output-dir.summary'),
+      char: 'r',
+      required: true,
+    }),
   };
 
   public async run(): Promise<AgentGenerateTemplateResult> {
     const { flags } = await this.parse(AgentGenerateTemplate);
-    const { 'agent-file': agentFile, 'agent-version': botVersion } = flags;
+    const { 'agent-file': agentFile, 'agent-version': botVersion, 'output-dir': outputDir } = flags;
 
     if (!agentFile.endsWith('.bot-meta.xml')) {
       throw new SfError(messages.getMessage('error.invalid-agent-file'));
@@ -107,15 +112,18 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     // We will use this name for the BotTemplate also to make it clear they are related
     const finalFilename = `${botName}_v${botVersion}_Template`;
 
-    // Build the base dir from the AgentFile
+    // Base path for reading metadata
     const basePath = resolve(dirname(agentFile), '..', '..');
     const botDir = join(basePath, 'bots', botName);
     const genAiPlannerBundleDir = join(basePath, 'genAiPlannerBundles');
-    const botTemplateDir = join(basePath, 'botTemplates');
+
+    const outputBase = resolve(outputDir);
+    const botTemplateDir = join(outputBase, 'botTemplates');
+    const outputGenAiPlannerBundleDir = join(outputBase, 'genAiPlannerBundles');
 
     const botTemplateFilePath = join(botTemplateDir, `${finalFilename}.botTemplate-meta.xml`);
     const clonedGenAiPlannerBundleFilePath = join(
-      genAiPlannerBundleDir,
+      outputGenAiPlannerBundleDir,
       finalFilename,
       `${finalFilename}.genAiPlannerBundle`
     );
@@ -132,7 +140,6 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     );
 
     // Modify the metadata files for final output
-    // TODO: Confirm this name (might be conversationDefinitionPlanners)
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
     const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
     replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics, localActions);
@@ -142,9 +149,11 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     jsonToXml<GenAiPlannerBundleExt>(clonedGenAiPlannerBundleFilePath, genAiPlannerBundleMetaJson, builder);
     jsonToXml<BotTemplateExt>(botTemplateFilePath, botTemplate, builder);
 
+    const copiedDirs = copyMetadataDirsIfPresent(basePath, outputBase);
+
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
     this.log(`Saved GenAiPlannerBundle to:\n - ${clonedGenAiPlannerBundleFilePath}`);
-
+    this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
     return {
       genAiPlannerBundlePath: clonedGenAiPlannerBundleFilePath,
       botTemplatePath: botTemplateFilePath,
@@ -222,7 +231,7 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
     const xml = builder.build(json);
     writeFileSync(filename, xml);
   } catch (error) {
-    throw new SfError(`Failed save to file: ${filename}`);
+    throw new SfError(`Failed save to file: ${filename}`, undefined, undefined, undefined, error);
   }
 };
 
@@ -272,7 +281,7 @@ export const getLocalAssets = (
 };
 
 /**
- * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings, ruleExpressionAssignments and ruleExpressions.
+ * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings and ruleExpressionAssignments.
  * Replaces localTopicLinks with genAiPlugins and localActionLinks with genAiFunctions in the output.
  */
 const replaceReferencesToGlobalAssets = (
@@ -302,7 +311,9 @@ const replaceReferencesToGlobalAssets = (
   // replace references in attributeMappings and ruleExpressionAssignments
   const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics, plannerBundle);
   for (const mapping of plannerBundle.attributeMappings ?? []) {
-    mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
+    if (mapping.attributeName) {
+      mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
+    }
   }
   for (const assignment of plannerBundle.ruleExpressionAssignments ?? []) {
     assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
@@ -356,3 +367,21 @@ const replaceLocalRefsWithGlobal = (value: string, localToGlobalMap: Map<string,
     .split('.')
     .map((segment) => localToGlobalMap.get(segment) ?? segment)
     .join('.');
+
+/**
+ * Copies metadata directories from the source package (basePath) to the output directory if they exist.
+ * Source path is derived from the agent file location (e.g. force-app/main/default).
+ */
+const copyMetadataDirsIfPresent = (basePath: string, outputBase: string): string[] => {
+  const METADATA_DIRS_TO_COPY = ['genAiPlugins', 'genAiFunctions', 'classes', 'flows', 'promptTemplate'];
+  const copiedDirs = [];
+  for (const dirName of METADATA_DIRS_TO_COPY) {
+    const srcDir = join(basePath, dirName);
+    if (existsSync(srcDir) && statSync(srcDir).isDirectory()) {
+      const destDir = join(outputBase, dirName);
+      cpSync(srcDir, destDir, { recursive: true });
+      copiedDirs.push(dirName);
+    }
+  }
+  return copiedDirs;
+};
