@@ -1,0 +1,15 @@
+{
+  "required": ["orderNumber"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "orderNumber": {
+      "title": "orderNumber",
+      "description": "Stores the order number provided by the customer to cancel.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

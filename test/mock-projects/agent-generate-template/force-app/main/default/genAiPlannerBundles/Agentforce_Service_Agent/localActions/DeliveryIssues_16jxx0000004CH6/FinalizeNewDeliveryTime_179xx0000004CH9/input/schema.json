@@ -1,0 +1,25 @@
+{
+  "required": ["dateTime"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "contactRecord": {
+      "title": "Contact record",
+      "description": "The contact record associated with the identified customer.",
+      "lightning:type": "lightning__recordInfoType",
+      "lightning:sObjectInfo": {
+        "apiName": "Contact"
+      },
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "dateTime": {
+      "title": "dateTime",
+      "description": "Stores the order delivery time slot selected by the customer.",
+      "lightning:type": "lightning__dateTimeStringType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}
