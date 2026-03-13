@@ -81,7 +81,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
 
     // Create multi-stage output
     const mso = new MultiStageOutput<{ agentName: string }>({
-      stages: ['Validate Bundle', 'Publish Agent', 'Retrieve Metadata', 'Deploy Metadata'],
+      stages: ['Validate Bundle', 'Deploy Bundle', 'Publish Agent', 'Retrieve Metadata', 'Update Bundle Target'],
       title: 'Publishing Agent',
       data: { agentName: aabName },
       jsonEnabled: this.jsonEnabled(),
@@ -108,7 +108,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       // First compile the .agent file to get the Agent JSON
       const compileResponse = await agent.compile();
       if (compileResponse.status === 'success') {
-        mso.skipTo('Publish Agent');
+        mso.skipTo('Deploy Bundle');
       } else {
         throwAgentCompilationError(compileResponse.errors);
       }
@@ -121,8 +121,17 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         });
       }
       // Set up lifecycle listeners for deploy events
+      // Track deploy count since we deploy twice: once before publish, once after
+      let deployCount = 0;
       Lifecycle.getInstance().on('scopedPreDeploy', () => {
-        mso.skipTo('Deploy Metadata');
+        deployCount++;
+        if (deployCount === 1) {
+          // First deploy happens before publish (without target)
+          // Stage already set to 'Deploy Bundle' after validation
+        } else if (deployCount === 2) {
+          // Second deploy happens after retrieve (with target)
+          mso.skipTo('Update Bundle Target');
+        }
         return Promise.resolve();
       });
 
@@ -140,9 +149,17 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         return Promise.resolve();
       });
 
+      let postDeployCount = 0;
       Lifecycle.getInstance().on('scopedPostDeploy', (result: ScopedPostDeploy) => {
         if (result.deployResult.response.status === RequestStatus.Succeeded) {
-          mso.stop();
+          postDeployCount++;
+          if (postDeployCount === 1) {
+            // First deploy succeeded, move to Publish Agent stage
+            mso.skipTo('Publish Agent');
+          } else if (postDeployCount === 2) {
+            // Second deploy succeeded, we're done
+            mso.stop();
+          }
         } else {
           const deployResponse = result.deployResult.response;
 
