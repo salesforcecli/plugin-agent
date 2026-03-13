@@ -16,14 +16,16 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { getAgentForActivation } from '../../agentActivation.js';
+import { AgentActivateResult } from './activate.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.deactivate');
 
-export default class AgentDeactivate extends SfCommand<void> {
+export default class AgentDeactivate extends SfCommand<AgentActivateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+  public static enableJsonFlag = true;
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -34,7 +36,7 @@ export default class AgentDeactivate extends SfCommand<void> {
     }),
   };
 
-  public async run(): Promise<void> {
+  public async run(): Promise<AgentActivateResult> {
     const { flags } = await this.parse(AgentDeactivate);
 
     const apiNameFlag = flags['api-name'];
@@ -45,9 +47,10 @@ export default class AgentDeactivate extends SfCommand<void> {
     }
 
     const agent = await getAgentForActivation({ targetOrg, status: 'Inactive', apiNameFlag });
-    await agent.deactivate();
-    const agentName = (await agent.getBotMetadata()).DeveloperName;
+    const result = await agent.deactivate();
+    const metadata = await agent.getBotMetadata();
 
-    this.log(`Agent ${agentName} deactivated.`);
+    this.log(`${metadata.DeveloperName} v${result.VersionNumber} deactivated.`);
+    return { success: true, version: result.VersionNumber };
   }
 }
