@@ -140,7 +140,6 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     );
 
     // Modify the metadata files for final output
-    // TODO: Confirm this name (might be conversationDefinitionPlanners)
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
     const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
     replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics, localActions);
@@ -232,7 +231,7 @@ const jsonToXml = <T>(filename: string, json: T, builder: XMLBuilder): void => {
     const xml = builder.build(json);
     writeFileSync(filename, xml);
   } catch (error) {
-    throw new SfError(`Failed save to file: ${filename}`);
+    throw new SfError(`Failed save to file: ${filename}`, undefined, undefined, undefined, error);
   }
 };
 
@@ -282,7 +281,7 @@ export const getLocalAssets = (
 };
 
 /**
- * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings, ruleExpressionAssignments and ruleExpressions.
+ * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings and ruleExpressionAssignments.
  * Replaces localTopicLinks with genAiPlugins and localActionLinks with genAiFunctions in the output.
  */
 const replaceReferencesToGlobalAssets = (
@@ -312,7 +311,9 @@ const replaceReferencesToGlobalAssets = (
   // replace references in attributeMappings and ruleExpressionAssignments
   const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics, plannerBundle);
   for (const mapping of plannerBundle.attributeMappings ?? []) {
-    mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
+    if (mapping.attributeName) {
+      mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
+    }
   }
   for (const assignment of plannerBundle.ruleExpressionAssignments ?? []) {
     assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
