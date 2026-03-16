@@ -20,7 +20,7 @@ import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateTemplateResult } from '../../src/commands/agent/generate/template.js';
-// import { getTestSession } from './shared-setup.js';
+import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
@@ -29,12 +29,7 @@ describe('agent generate template NUTs', function () {
   let session: TestSession;
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
-    // session = await getTestSession();
-    session = new TestSession({
-      project: {
-        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-      },
-    });
+    session = await getTestSession();
   });
 
   it('should generate template from agent file', () => {
