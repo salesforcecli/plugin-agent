@@ -101,11 +101,30 @@ export function translateTestCase(testCase: TestCase, index: number, specName?: 
   const steps: EvalStep[] = [];
 
   // 1. agent.create_session
-  steps.push({
+  const createSessionStep: EvalStep = {
     type: 'agent.create_session',
     id: 'cs',
     use_agent_api: true,
-  });
+  };
+
+  if (testCase.contextVariables && testCase.contextVariables.length > 0) {
+    // Validate for duplicate names
+    const names = testCase.contextVariables.map((cv) => cv.name);
+    const duplicates = names.filter((name, idx) => names.indexOf(name) !== idx);
+    if (duplicates.length > 0) {
+      throw new Error(
+        `Duplicate contextVariable names found in test case ${index}: ${[...new Set(duplicates)].join(
+          ', '
+        )}. Each contextVariable name must be unique.`
+      );
+    }
+
+    createSessionStep.context_variables = Object.fromEntries(
+      testCase.contextVariables.map((cv) => [cv.name, cv.value])
+    );
+  }
+
+  steps.push(createSessionStep);
 
   // 2. Conversation history — only user messages become send_message steps
   let historyIdx = 0;

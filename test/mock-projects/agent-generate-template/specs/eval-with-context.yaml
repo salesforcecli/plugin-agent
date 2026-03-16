@@ -1,0 +1,21 @@
+name: Agent_Context_Test
+description: Test agent with contextVariables
+subjectType: AGENT
+subjectName: Local_Info_Agent
+testCases:
+  - utterance: 'What is the weather?'
+    expectedTopic: Weather_and_Temperature_Information
+    expectedActions: []
+    expectedOutcome: 'The agent should provide weather information'
+    contextVariables:
+      - name: CaseId
+        value: '500ABC123'
+      - name: RoutableId
+        value: '0MwXYZ456'
+  - utterance: 'Tell me about the temperature'
+    expectedTopic: Weather_and_Temperature_Information
+    expectedActions: []
+    expectedOutcome: 'The agent should provide temperature information'
+    contextVariables:
+      - name: UserId
+        value: '005DEF789'

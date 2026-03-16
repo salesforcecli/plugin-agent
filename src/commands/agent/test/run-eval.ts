@@ -26,7 +26,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run-eval');
 
 export type RunEvalResult = {
-  tests: Array<{ id: string; status: string; evaluations: unknown[] }>;
+  tests: Array<{ id: string; status: string; evaluations: unknown[]; outputs: unknown[] }>;
   summary: { passed: number; failed: number; scored: number; errors: number };
 };
 
@@ -122,7 +122,7 @@ function buildResultSummary(mergedResponse: EvalApiResponse): {
   testSummaries: RunEvalResult['tests'];
 } {
   const summary = { passed: 0, failed: 0, scored: 0, errors: 0 };
-  const testSummaries: Array<{ id: string; status: string; evaluations: unknown[] }> = [];
+  const testSummaries: Array<{ id: string; status: string; evaluations: unknown[]; outputs: unknown[] }> = [];
 
   for (const testResult of mergedResponse.results ?? []) {
     const tr = testResult as Record<string, unknown>;
@@ -143,6 +143,7 @@ function buildResultSummary(mergedResponse: EvalApiResponse): {
       id: testId,
       status: failed > 0 || testErrors.length > 0 ? 'failed' : 'passed',
       evaluations: evalResults,
+      outputs: (tr.outputs as unknown[]) ?? [],
     });
   }
 

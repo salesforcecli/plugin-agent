@@ -1,14 +1,18 @@
 # summary
 
-Generate an agent template from an existing agent in your DX project so you can then package the template in a managed package.
+Generate an agent template from an existing agent in your DX project so you can then package the template in a second-generation managed package.
 
 # description
 
-At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use the BotTemplate file, along with the GenAiPlannerBundle file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
+WARNING: This command works with only legacy agents, which are agents that don't use Agent Script as their blueprint. You can't currently generate an agent template from an Agent Script agent.
 
-Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
+At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate metadata file for a specific agent (Bot). You then use the BotTemplate metadata file, along with the GenAiPlannerBundle metadata file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
 
-The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>_v<Version>_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion metadata file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
+
+The new BotTemplate metadata file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+
+See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/dev2gp_package_agent_templates.htm) for details about the complete process, which includes using a scratch org to create and test the agent, retrieving the agent metadata to your DX project, running this command to create the agent template, and then packaging the template.
 
 # examples
 
@@ -26,11 +30,11 @@ Path to an agent (Bot) metadata file.
 
 # error.invalid-agent-file
 
-Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml
+Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml.
 
 # error.no-entry-dialog
 
-No entryDialog found in BotVersion file.
+No entryDialog found in the BotVersion metadata file.
 
 # error.invalid-bot-type
 
@@ -38,8 +42,22 @@ The 'type' attribute of this Bot metadata component XML file can't have a value 
 
 # error.no-label
 
-No label found in Agent (Bot) file: %s.
+No label found in Agent (Bot) metadata file: %s.
 
 # error.no-ml-domain
 
 No botMlDomain found in Agent (Bot) file: %s.
+
+# error.local-topics-without-source
+
+The local topic (genAiPlugin) you're trying to include in the agent template doesn't have a reference to a global topic. All topics in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
+%s.
+
+# error.local-actions-without-source
+
+The local action (genAiFunction) you're trying to include in the agent template doesn't have a reference to a global action. All actions in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
+%s.
+
+# error.nga-agent-not-supported
+
+This command works with only legacy agents, which are agents that don't use Agent Script as their blueprint. You can't currently generate an agent template from an Agent Script agent.

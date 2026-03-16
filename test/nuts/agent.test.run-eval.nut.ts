@@ -29,6 +29,7 @@ describe('agent test run-eval', function () {
   const mockProjectDir = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template', 'specs');
   const jsonPayloadPath = join(mockProjectDir, 'eval-payload.json');
   const yamlSpecPath = join(mockProjectDir, 'eval-test-spec.yaml');
+  const yamlWithContextPath = join(mockProjectDir, 'eval-with-context.yaml');
 
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
@@ -83,6 +84,18 @@ describe('agent test run-eval', function () {
       // Should succeed without explicit --api-name flag
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
+    });
+
+    it('should handle YAML spec with contextVariables', async () => {
+      const command = `agent test run-eval --spec ${yamlWithContextPath} --target-org ${getUsername()} --json`;
+      // Don't enforce exit code 0 since the command exits with 1 if tests fail
+      const output = execCmd<RunEvalResult>(command).jsonOutput;
+
+      // Verify the command succeeds with contextVariables
+      expect(output?.result).to.be.ok;
+      expect(output?.result.tests).to.be.an('array');
+      expect(output?.result.tests.length).to.be.greaterThan(0);
+      expect(output?.result.summary).to.be.ok;
     });
   });
 
@@ -179,6 +192,8 @@ describe('agent test run-eval', function () {
       expect(firstTest).to.have.property('status');
       expect(firstTest).to.have.property('evaluations');
       expect(firstTest?.evaluations).to.be.an('array');
+      expect(firstTest).to.have.property('outputs');
+      expect(firstTest?.outputs).to.be.an('array');
     });
 
     it('should include summary with all metrics', async () => {

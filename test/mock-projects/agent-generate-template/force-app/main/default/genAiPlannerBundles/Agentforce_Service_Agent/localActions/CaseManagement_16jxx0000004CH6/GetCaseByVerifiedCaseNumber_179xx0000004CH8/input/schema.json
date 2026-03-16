@@ -1,0 +1,22 @@
+{
+  "required": ["verifiedContactID", "caseNumber"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "verifiedContactID": {
+      "title": "Verified Contact record ID",
+      "description": "Stores the contact record ID to be updated.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "caseNumber": {
+      "title": "Case Number",
+      "description": "Stores the case number provided by the customer.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

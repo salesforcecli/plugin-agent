@@ -15,7 +15,7 @@
  */
 
 import { Messages, Org, SfError, SfProject } from '@salesforce/core';
-import { Agent, type BotMetadata, ProductionAgent } from '@salesforce/agents';
+import { Agent, type BotMetadata, type BotVersionMetadata, ProductionAgent } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 
 type Choice<Value> = {
@@ -26,6 +26,11 @@ type Choice<Value> = {
 type AgentValue = {
   Id: string;
   DeveloperName: string;
+};
+
+type VersionChoice = {
+  version: number;
+  status: string;
 };
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -45,26 +50,42 @@ export const validateAgent = (agent: BotMetadata): boolean => {
 };
 
 export const getAgentChoices = (agents: BotMetadata[], status: 'Active' | 'Inactive'): Array<Choice<AgentValue>> =>
-  agents.map((agent) => {
-    let disabled: string | boolean = false;
-
-    const lastBotVersion = agent.BotVersions.records[agent.BotVersions.records.length - 1];
-    if (lastBotVersion.Status === status) {
-      disabled = `(Already ${status})`;
-    }
-    if (agentIsUnsupported(agent.DeveloperName)) {
-      disabled = '(Not Supported)';
-    }
-
-    return {
+  agents
+    .filter((agent) => {
+      // Only one version can be active at a time
+      // For activate (status='Active'): show agents that don't have an active version (all versions are inactive)
+      // For deactivate (status='Inactive'): show agents that have an active version
+      const hasActiveVersion = agent.BotVersions.records.some((version) => version.Status === 'Active');
+      const canPerformOperation = status === 'Active' ? !hasActiveVersion : hasActiveVersion;
+      // Filter out agents that can't perform the operation or are unsupported
+      return canPerformOperation && !agentIsUnsupported(agent.DeveloperName);
+    })
+    .sort((a, b) => a.DeveloperName.localeCompare(b.DeveloperName))
+    .map((agent) => ({
       name: agent.DeveloperName,
       value: {
         Id: agent.Id,
         DeveloperName: agent.DeveloperName,
       },
-      disabled,
-    };
-  });
+    }));
+
+export const getVersionChoices = (
+  versions: BotVersionMetadata[],
+  status: 'Active' | 'Inactive'
+): Array<Choice<VersionChoice>> =>
+  versions
+    .sort((a, b) => b.VersionNumber - a.VersionNumber)
+    .map((version) => {
+      const isTargetStatus = version.Status === status;
+      return {
+        name: `Version ${version.VersionNumber}`,
+        value: {
+          version: version.VersionNumber,
+          status: version.Status,
+        },
+        disabled: isTargetStatus ? `(Already ${status})` : false,
+      };
+    });
 
 export const getAgentForActivation = async (config: {
   targetOrg: Org;
@@ -109,4 +130,63 @@ export const getAgentForActivation = async (config: {
     apiNameOrId: selectedAgent!.Id,
     project: SfProject.getInstance(),
   });
+};
+
+export const getVersionForActivation = async (config: {
+  agent: ProductionAgent;
+  status: 'Active' | 'Inactive';
+  versionFlag?: number;
+  jsonEnabled?: boolean;
+}): Promise<{ version: number | undefined; warning?: string }> => {
+  const { agent, status, versionFlag, jsonEnabled } = config;
+
+  // If version flag is provided, return it
+  if (versionFlag !== undefined) {
+    return { version: versionFlag };
+  }
+
+  // Get bot metadata to access versions
+  const botMetadata = await agent.getBotMetadata();
+  // Filter out deleted versions as a defensive measure
+  const versions = botMetadata.BotVersions.records.filter((v) => !v.IsDeleted);
+
+  // If there's only one version, return it
+  if (versions.length === 1) {
+    return { version: versions[0].VersionNumber };
+  }
+
+  // Get version choices and filter out disabled ones
+  const choices = getVersionChoices(versions, status);
+  const availableChoices = choices.filter((choice) => !choice.disabled);
+
+  // If there's only one available choice, return it automatically
+  if (availableChoices.length === 1) {
+    return { version: availableChoices[0].value.version };
+  }
+
+  // If no versions are available, throw an error
+  if (availableChoices.length === 0) {
+    const action = status === 'Active' ? 'activate' : 'deactivate';
+    throw messages.createError('error.noVersionsAvailable', [action]);
+  }
+
+  // If JSON mode is enabled, automatically select the latest available version
+  if (jsonEnabled) {
+    // Find the latest (highest version number) available version
+    const latestVersion = availableChoices.reduce((latest, choice) =>
+      choice.value.version > latest.value.version ? choice : latest
+    );
+    return {
+      version: latestVersion.value.version,
+      warning: `No version specified, automatically selected latest available version: ${latestVersion.value.version}`,
+    };
+  }
+
+  // Prompt user to select a version
+  const versionChoice = await select({
+    message: 'Select a version',
+    choices,
+  });
+
+  return { version: versionChoice.version };
 };

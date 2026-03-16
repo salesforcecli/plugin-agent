@@ -19,9 +19,13 @@
               "evaluations": {
                 "type": "array",
                 "items": {}
+              },
+              "outputs": {
+                "type": "array",
+                "items": {}
               }
             },
-            "required": ["id", "status", "evaluations"],
+            "required": ["id", "status", "evaluations", "outputs"],
             "additionalProperties": false
           }
         },

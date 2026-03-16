@@ -73,7 +73,17 @@ const ASSERTION_VALID_FIELDS = new Set([
 ]);
 
 const VALID_AGENT_FIELDS: Record<string, Set<string>> = {
-  'agent.create_session': new Set(['type', 'id', 'agent_id', 'agent_version_id', 'use_agent_api', 'planner_id']),
+  'agent.create_session': new Set([
+    'type',
+    'id',
+    'agent_id',
+    'agent_version_id',
+    'use_agent_api',
+    'planner_id',
+    'state',
+    'setupSessionContext',
+    'context_variables',
+  ]),
   'agent.send_message': new Set(['type', 'id', 'session_id', 'utterance']),
   'agent.get_state': new Set(['type', 'id', 'session_id']),
 };

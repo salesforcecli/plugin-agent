@@ -1,0 +1,25 @@
+{
+  "required": ["dateTime"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "contactRecord": {
+      "title": "Contact record",
+      "description": "The contact record associated with the identified customer.",
+      "lightning:type": "lightning__recordInfoType",
+      "lightning:sObjectInfo": {
+        "apiName": "Contact"
+      },
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "dateTime": {
+      "title": "Date time",
+      "description": "Stores the date and time of the customer’s reservation.",
+      "lightning:type": "lightning__dateTimeStringType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}
