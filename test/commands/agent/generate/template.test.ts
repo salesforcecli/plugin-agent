@@ -165,6 +165,48 @@ describe('agent generate template', () => {
     expect(result.genAiPlannerBundlePath).to.match(/Local_Info_Agent_v1_Template\.genAiPlannerBundle$/);
   });
 
+  it('should copy metadata dirs to output-dir when they exist', async () => {
+    const customOutputDir = join(process.cwd(), 'my-package');
+    const basePath = join(MOCK_PROJECT_DIR, 'force-app', 'main', 'default');
+    const responses = [BOT_XML_LEGACY, BOT_VERSION_XML, BUNDLE_XML_EMPTY];
+    let readIndex = 0;
+    const readFileSyncMock = (): string => responses[readIndex++];
+    const cpSyncCalls: Array<{ src: string; dest: string; options: { recursive: boolean } }> = [];
+    const dirsThatExist = new Set([join(basePath, 'genAiPlugins'), join(basePath, 'genAiFunctions')]);
+    const mod = await esmock('../../../../src/commands/agent/generate/template.js', {
+      'node:fs': {
+        readFileSync: readFileSyncMock,
+        mkdirSync: () => {},
+        writeFileSync: () => {},
+        existsSync: (path: string) => dirsThatExist.has(path),
+        statSync: (path: string) => ({ isDirectory: () => dirsThatExist.has(path) }),
+        cpSync: (src: string, dest: string, options: { recursive: boolean }) => {
+          cpSyncCalls.push({ src, dest, options });
+        },
+      },
+    });
+    const AgentGenerateTemplate = mod.default;
+
+    await AgentGenerateTemplate.run([
+      '--agent-file',
+      agentFile,
+      '--agent-version',
+      '1',
+      '--output-dir',
+      customOutputDir,
+      '--json',
+    ]);
+
+    expect(cpSyncCalls).to.have.length(2);
+    expect(cpSyncCalls.map((c) => c.src)).to.include(join(basePath, 'genAiPlugins'));
+    expect(cpSyncCalls.map((c) => c.src)).to.include(join(basePath, 'genAiFunctions'));
+    expect(cpSyncCalls.map((c) => c.dest)).to.include(join(customOutputDir, 'genAiPlugins'));
+    expect(cpSyncCalls.map((c) => c.dest)).to.include(join(customOutputDir, 'genAiFunctions'));
+    for (const call of cpSyncCalls) {
+      expect(call.options).to.deep.equal({ recursive: true });
+    }
+  });
+
   it('should throw local-topics-without-source when a local topic has no source', () => {
     const topicWithoutSource = { developerName: 'my_topic', fullName: 'my_topic' } as GenAiPlugin;
     const bundle = {

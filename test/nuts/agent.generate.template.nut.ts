@@ -20,7 +20,7 @@ import { expect } from 'chai';
 import { TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentGenerateTemplateResult } from '../../src/commands/agent/generate/template.js';
-import { getTestSession } from './shared-setup.js';
+// import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
@@ -29,7 +29,12 @@ describe('agent generate template NUTs', function () {
   let session: TestSession;
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
-    session = await getTestSession();
+    // session = await getTestSession();
+    session = new TestSession({
+      project: {
+        sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
+      },
+    });
   });
 
   it('should generate template from agent file', () => {
@@ -42,7 +47,33 @@ describe('agent generate template NUTs', function () {
       'Local_Info_Agent',
       'Local_Info_Agent.bot-meta.xml'
     );
-    const outputDir = join(session.project.dir, 'force-app', 'main', 'default');
+    const agentVersion = 1;
+
+    const result = execCmd<AgentGenerateTemplateResult>(
+      `agent generate template --agent-file ${agentFile} --agent-version ${agentVersion} --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(result).to.be.ok;
+    expect(result?.genAiPlannerBundlePath).to.be.ok;
+    expect(result?.botTemplatePath).to.be.ok;
+
+    // Verify files exist
+    expect(existsSync(result!.genAiPlannerBundlePath)).to.be.true;
+    expect(existsSync(result!.botTemplatePath)).to.be.true;
+  });
+
+  it('should generate template from agent file and output to specified directory', () => {
+    const agentFile = join(
+      session.project.dir,
+      'force-app',
+      'main',
+      'default',
+      'bots',
+      'Local_Info_Agent',
+      'Local_Info_Agent.bot-meta.xml'
+    );
+    const outputDir = join(session.project.dir, 'my-package');
     const agentVersion = 1;
 
     const result = execCmd<AgentGenerateTemplateResult>(

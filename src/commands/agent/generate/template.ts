@@ -92,7 +92,6 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       char: 'r',
-      required: true,
     }),
   };
 
@@ -117,7 +116,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const botDir = join(basePath, 'bots', botName);
     const genAiPlannerBundleDir = join(basePath, 'genAiPlannerBundles');
 
-    const outputBase = resolve(outputDir);
+    const outputBase = resolve(outputDir ?? '.');
     const botTemplateDir = join(outputBase, 'botTemplates');
     const outputGenAiPlannerBundleDir = join(outputBase, 'genAiPlannerBundles');
 
@@ -149,11 +148,13 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     jsonToXml<GenAiPlannerBundleExt>(clonedGenAiPlannerBundleFilePath, genAiPlannerBundleMetaJson, builder);
     jsonToXml<BotTemplateExt>(botTemplateFilePath, botTemplate, builder);
 
-    const copiedDirs = copyMetadataDirsIfPresent(basePath, outputBase);
+    if (outputDir) {
+      const copiedDirs = copyMetadataDirsIfPresent(basePath, outputBase);
+      this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
+    }
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
     this.log(`Saved GenAiPlannerBundle to:\n - ${clonedGenAiPlannerBundleFilePath}`);
-    this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
     return {
       genAiPlannerBundlePath: clonedGenAiPlannerBundleFilePath,
       botTemplatePath: botTemplateFilePath,
@@ -373,7 +374,7 @@ const replaceLocalRefsWithGlobal = (value: string, localToGlobalMap: Map<string,
  * Source path is derived from the agent file location (e.g. force-app/main/default).
  */
 const copyMetadataDirsIfPresent = (basePath: string, outputBase: string): string[] => {
-  const METADATA_DIRS_TO_COPY = ['genAiPlugins', 'genAiFunctions', 'classes', 'flows', 'promptTemplate'];
+  const METADATA_DIRS_TO_COPY = ['genAiPlugins', 'genAiFunctions', 'classes', 'flows', 'genAiPromptTemplates'];
   const copiedDirs = [];
   for (const dirName of METADATA_DIRS_TO_COPY) {
     const srcDir = join(basePath, dirName);
