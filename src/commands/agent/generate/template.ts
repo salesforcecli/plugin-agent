@@ -116,7 +116,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     const botDir = join(basePath, 'bots', botName);
     const genAiPlannerBundleDir = join(basePath, 'genAiPlannerBundles');
 
-    const outputBase = resolve(outputDir ?? '.');
+    const outputBase = resolve(outputDir ?? basePath);
     const botTemplateDir = join(outputBase, 'botTemplates');
     const outputGenAiPlannerBundleDir = join(outputBase, 'genAiPlannerBundles');
 

@@ -58,8 +58,7 @@ describe('agent generate template NUTs', function () {
       'Agentforce_Service_Agent',
       'Agentforce_Service_Agent.bot-meta.xml'
     );
-    const outputDir = 'force-app/main/default';
-    const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --output-dir ${outputDir} --json`;
+    const command = `agent generate template --agent-version ${agentVersion} --agent-file "${agentFile}" --json`;
     const output = execCmd<AgentGenerateTemplateResult>(command, {
       ensureExitCode: 0,
     }).jsonOutput;
