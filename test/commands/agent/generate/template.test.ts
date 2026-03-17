@@ -23,7 +23,11 @@ import { SfError } from '@salesforce/core';
 import { TestContext } from '@salesforce/core/testSetup';
 import { SfProject } from '@salesforce/core';
 import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
-import { getLocalAssets, type GenAiPlannerBundleExt } from '../../../../src/commands/agent/generate/template.js';
+import {
+  getLocalAssets,
+  replaceReferencesToGlobalAssets,
+  type GenAiPlannerBundleExt,
+} from '../../../../src/commands/agent/generate/template.js';
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
@@ -321,5 +325,65 @@ describe('agent generate template', () => {
     expect(localActions).to.have.length(1);
     expect(localActions[0].developerName).to.equal('solo_planner');
     expect(localActions[0].source).to.equal('GlobalSoloAction');
+  });
+
+  describe('replaceReferencesToGlobalAssets (localActionLinks → genAiFunctions)', () => {
+    const ALLOWED_GLOBAL = 'EmployeeCopilot__AnswerQuestionsWithKnowledge';
+
+    it('sets genAiFunctions to [EmployeeCopilot__AnswerQuestionsWithKnowledge] when a localActionLink resolves to that global', () => {
+      const localAction = {
+        developerName: 'AnswerQuestionsWithKnowledge',
+        fullName: 'AnswerQuestionsWithKnowledge',
+        source: ALLOWED_GLOBAL,
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_a',
+        fullName: 'topic_a',
+        source: 'GlobalTopic_A',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
+          plannerActions: [localAction],
+          genAiPlugins: [],
+          genAiFunctions: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([{ genAiFunctionName: ALLOWED_GLOBAL }]);
+      expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
+
+    it('sets genAiFunctions to [] when no localActionLink resolves to EmployeeCopilot__AnswerQuestionsWithKnowledge', () => {
+      const localAction = {
+        developerName: 'OtherAction',
+        fullName: 'OtherAction',
+        source: 'SomePackage__OtherGlobalAction',
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_a',
+        fullName: 'topic_a',
+        source: 'GlobalTopic_A',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
+          plannerActions: [localAction],
+          genAiPlugins: [],
+          genAiFunctions: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
   });
 });

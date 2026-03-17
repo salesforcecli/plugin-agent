@@ -140,8 +140,8 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     // Modify the metadata files for final output
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
-    const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
-    replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics, localActions);
+    const { localTopics } = getLocalAssets(genAiPlannerBundleMetaJson);
+    replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics);
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
@@ -283,14 +283,14 @@ export const getLocalAssets = (
 
 /**
  * Uses localTopics' <source> elements to identify global assets, then updates topic links (genAiPlugins), action links (genAiFunctions), attributeMappings and ruleExpressionAssignments.
- * Replaces localTopicLinks with genAiPlugins and localActionLinks with genAiFunctions in the output.
+ * Replaces localTopicLinks with genAiPlugins. Replaces localActionLinks with genAiFunctions.
  */
-const replaceReferencesToGlobalAssets = (
+export const replaceReferencesToGlobalAssets = (
   genAiPlannerBundleMetaJson: GenAiPlannerBundleExt,
-  localTopics: GenAiPlugin[],
-  localActions: GenAiFunction[]
+  localTopics: GenAiPlugin[]
 ): void => {
   const plannerBundle: GenAiPlannerBundleExt['GenAiPlannerBundle'] = genAiPlannerBundleMetaJson.GenAiPlannerBundle;
+  const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics, plannerBundle);
 
   // replace localTopicLinks with global genAiPlugins
   plannerBundle.genAiPlugins = localTopics.map((topic) => ({
@@ -298,19 +298,21 @@ const replaceReferencesToGlobalAssets = (
   }));
   plannerBundle.localTopicLinks = [];
 
-  // replace localActionLinks with global genAiFunctions (dedupe by genAiFunctionName)
-  const seenFunctions = new Set<string>();
-  plannerBundle.genAiFunctions = localActions
-    .map((action) => ({ genAiFunctionName: action.source! }))
-    .filter((f) => {
-      if (seenFunctions.has(f.genAiFunctionName)) return false;
-      seenFunctions.add(f.genAiFunctionName);
-      return true;
+  // Replaces localActionLinks with global genAiFunctions (currently only EmployeeCopilot__AnswerQuestionsWithKnowledge is allowed)
+  const ALLOWED_GLOBAL_FUNCTION = 'EmployeeCopilot__AnswerQuestionsWithKnowledge';
+  if (plannerBundle.localActionLinks) {
+    plannerBundle.localActionLinks = Array.isArray(plannerBundle.localActionLinks)
+      ? plannerBundle.localActionLinks
+      : [plannerBundle.localActionLinks];
+    const hasAllowedFunction = plannerBundle.localActionLinks.some((link) => {
+      const globalName = localToGlobalAssets.get(link.genAiFunctionName!);
+      return globalName === ALLOWED_GLOBAL_FUNCTION;
     });
-  plannerBundle.localActionLinks = [];
+    plannerBundle.genAiFunctions = hasAllowedFunction ? [{ genAiFunctionName: ALLOWED_GLOBAL_FUNCTION }] : [];
+    plannerBundle.localActionLinks = [];
+  }
 
   // replace references in attributeMappings and ruleExpressionAssignments
-  const localToGlobalAssets = buildLocalToGlobalAssetMap(localTopics, plannerBundle);
   for (const mapping of plannerBundle.attributeMappings ?? []) {
     if (mapping.attributeName) {
       mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);

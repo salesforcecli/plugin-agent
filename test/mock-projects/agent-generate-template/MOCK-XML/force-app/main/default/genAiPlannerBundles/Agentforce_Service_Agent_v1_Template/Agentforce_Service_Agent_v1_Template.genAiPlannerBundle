@@ -172,54 +172,6 @@
         <genAiPluginName>SvcCopilotTmpl__Escalation</genAiPluginName>
     </genAiPlugins>
     <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__UpdateVerifiedContact</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__ResetSecurePassword</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
         <genAiFunctionName>EmployeeCopilot__AnswerQuestionsWithKnowledge</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__SendEmailVerificationCode</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__VerifyCustomer</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__CancelOrder</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__IdentifyCustomerByEmail</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetOrdersByContact</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetOrderByOrderNumber</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetCaseByVerifiedCaseNumber</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetCasesForVerifiedContact</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__CreateCaseEnhancedData</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__AddCaseComment</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__FinalizeNewDeliveryTime</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetDeliveryTimeSlots</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__FinalizeReservation</genAiFunctionName>
-    </genAiFunctions>
-    <genAiFunctions>
-        <genAiFunctionName>SvcCopilotTmpl__GetReservationTimeSlots</genAiFunctionName>
     </genAiFunctions>
 </GenAiPlannerBundle>
