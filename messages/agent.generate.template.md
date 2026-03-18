@@ -16,7 +16,7 @@ See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.
 
 # examples
 
-- Generate an agent template from a Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory.
+- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent:
 
   <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package
 
@@ -68,5 +68,5 @@ This command doesn't work for agents that were created from an Agent Script file
 
 # warn.copied-asset-directories
 
-The following directories have been copied to the target path. Please review and remove any unnecessary assets:
+The following directories have been copied to the target path. Review their contents and remove any unnecessary assets:
 %s.
