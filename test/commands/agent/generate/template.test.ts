@@ -26,6 +26,7 @@ import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
 import {
   getLocalAssets,
   replaceReferencesToGlobalAssets,
+  ALLOWED_GLOBAL_FUNCTIONS,
   type GenAiPlannerBundleExt,
 } from '../../../../src/commands/agent/generate/template.js';
 
@@ -328,13 +329,12 @@ describe('agent generate template', () => {
   });
 
   describe('replaceReferencesToGlobalAssets (localActionLinks → genAiFunctions)', () => {
-    const ALLOWED_GLOBAL = 'EmployeeCopilot__AnswerQuestionsWithKnowledge';
-
-    it('sets genAiFunctions to [EmployeeCopilot__AnswerQuestionsWithKnowledge] when a localActionLink resolves to that global', () => {
+    it('sets genAiFunctions to allowed globals when a localActionLink resolves to one', () => {
+      const [allowedGlobal] = [...ALLOWED_GLOBAL_FUNCTIONS];
       const localAction = {
         developerName: 'AnswerQuestionsWithKnowledge',
         fullName: 'AnswerQuestionsWithKnowledge',
-        source: ALLOWED_GLOBAL,
+        source: allowedGlobal,
       } as GenAiFunction;
       const topic = {
         developerName: 'topic_a',
@@ -354,11 +354,11 @@ describe('agent generate template', () => {
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
-      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([{ genAiFunctionName: ALLOWED_GLOBAL }]);
+      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([{ genAiFunctionName: allowedGlobal }]);
       expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
     });
 
-    it('sets genAiFunctions to [] when no localActionLink resolves to EmployeeCopilot__AnswerQuestionsWithKnowledge', () => {
+    it('sets genAiFunctions to [] when no localActionLink resolves to an allowed global', () => {
       const localAction = {
         developerName: 'OtherAction',
         fullName: 'OtherAction',

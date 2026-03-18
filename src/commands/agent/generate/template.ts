@@ -32,6 +32,9 @@ import type {
   GenAiPlannerFunctionDef,
 } from '@salesforce/types/metadata';
 
+/** Global function names that are allowed to be emitted in genAiFunctions when converting localActionLinks. */
+export const ALLOWED_GLOBAL_FUNCTIONS = new Set<string>(['EmployeeCopilot__AnswerQuestionsWithKnowledge']);
+
 export type GenAiPlannerBundleExt = {
   GenAiPlannerBundle: GenAiPlannerBundle & {
     botTemplate?: string;
@@ -298,17 +301,19 @@ export const replaceReferencesToGlobalAssets = (
   }));
   plannerBundle.localTopicLinks = [];
 
-  // Replaces localActionLinks with global genAiFunctions (currently only EmployeeCopilot__AnswerQuestionsWithKnowledge is allowed)
-  const ALLOWED_GLOBAL_FUNCTION = 'EmployeeCopilot__AnswerQuestionsWithKnowledge';
+  // Replaces localActionLinks with global genAiFunctions (only names in ALLOWED_GLOBAL_FUNCTIONS are emitted)
   if (plannerBundle.localActionLinks) {
     plannerBundle.localActionLinks = Array.isArray(plannerBundle.localActionLinks)
       ? plannerBundle.localActionLinks
       : [plannerBundle.localActionLinks];
-    const hasAllowedFunction = plannerBundle.localActionLinks.some((link) => {
+    const allowedFound = new Set<string>();
+    for (const link of plannerBundle.localActionLinks) {
       const globalName = localToGlobalAssets.get(link.genAiFunctionName!);
-      return globalName === ALLOWED_GLOBAL_FUNCTION;
-    });
-    plannerBundle.genAiFunctions = hasAllowedFunction ? [{ genAiFunctionName: ALLOWED_GLOBAL_FUNCTION }] : [];
+      if (globalName && ALLOWED_GLOBAL_FUNCTIONS.has(globalName)) {
+        allowedFound.add(globalName);
+      }
+    }
+    plannerBundle.genAiFunctions = [...allowedFound].map((genAiFunctionName) => ({ genAiFunctionName }));
     plannerBundle.localActionLinks = [];
   }
 
