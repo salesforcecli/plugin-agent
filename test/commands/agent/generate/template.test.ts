@@ -23,7 +23,12 @@ import { SfError } from '@salesforce/core';
 import { TestContext } from '@salesforce/core/testSetup';
 import { SfProject } from '@salesforce/core';
 import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
-import { getLocalAssets, type GenAiPlannerBundleExt } from '../../../../src/commands/agent/generate/template.js';
+import {
+  getLocalAssets,
+  replaceReferencesToGlobalAssets,
+  ALLOWED_GLOBAL_FUNCTIONS,
+  type GenAiPlannerBundleExt,
+} from '../../../../src/commands/agent/generate/template.js';
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
@@ -37,6 +42,36 @@ const BOT_XML_NGA = `<?xml version="1.0" encoding="UTF-8"?>
   <type>Conversational</type>
 </Bot>`;
 
+const BOT_XML_LEGACY = `<?xml version="1.0" encoding="UTF-8"?>
+<Bot xmlns="http://soap.sforce.com/2006/04/metadata">
+  <agentDSLEnabled>false</agentDSLEnabled>
+  <agentType>EinsteinServiceAgent</agentType>
+  <botMlDomain><label>Local Info Agent</label><name>Local_Info_Agent</name></botMlDomain>
+  <botSource>None</botSource>
+  <label>Local Info Agent</label>
+  <type>Conversational</type>
+</Bot>`;
+
+const BOT_VERSION_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<BotVersion xmlns="http://soap.sforce.com/2006/04/metadata">
+  <entryDialog>Welcome</entryDialog>
+  <botDialogs>
+    <developerName>Welcome</developerName>
+    <label>Welcome</label>
+  </botDialogs>
+  <botDialogs>
+    <developerName>Other</developerName>
+    <label>Other</label>
+  </botDialogs>
+  <conversationVariables/>
+</BotVersion>`;
+
+const BUNDLE_XML_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+  <masterLabel>Local Info Agent</masterLabel>
+  <plannerType>AiCopilot__ReAct</plannerType>
+</GenAiPlannerBundle>`;
+
 describe('agent generate template', () => {
   const $$ = new TestContext();
   // Use existing bot in mock project so --agent-file exists check passes
@@ -49,7 +84,16 @@ describe('agent generate template', () => {
     'Local_Info_Agent',
     'Local_Info_Agent.bot-meta.xml'
   );
-  const runArgs = (): string[] => ['--agent-file', agentFile, '--agent-version', '1', '--json'];
+  const outputDir = join(MOCK_PROJECT_DIR, 'force-app', 'main', 'default');
+  const runArgs = (): string[] => [
+    '--agent-file',
+    agentFile,
+    '--agent-version',
+    '1',
+    '--output-dir',
+    outputDir,
+    '--json',
+  ];
 
   beforeEach(() => {
     $$.inProject(true);
@@ -88,6 +132,84 @@ describe('agent generate template', () => {
       expect((error as SfError).message).to.match(/legacy agents|Agent Script|nga-agent-not-supported/i);
     }
     expect(readCount).to.equal(1);
+  });
+
+  it('should write BotTemplate and GenAiPlannerBundle under --output-dir', async () => {
+    const customOutputDir = join(process.cwd(), 'tmp-template-output-test');
+    const responses = [BOT_XML_LEGACY, BOT_VERSION_XML, BUNDLE_XML_EMPTY];
+    let readIndex = 0;
+    const readFileSyncMock = (): string => responses[readIndex++];
+    const mod = await esmock('../../../../src/commands/agent/generate/template.js', {
+      'node:fs': {
+        readFileSync: readFileSyncMock,
+        mkdirSync: () => {},
+        writeFileSync: () => {},
+        existsSync: () => false,
+        statSync: () => ({ isDirectory: () => false }),
+        cpSync: () => {},
+      },
+    });
+    const AgentGenerateTemplate = mod.default;
+
+    const result = await AgentGenerateTemplate.run([
+      '--agent-file',
+      agentFile,
+      '--agent-version',
+      '1',
+      '--output-dir',
+      customOutputDir,
+      '--json',
+    ]);
+
+    expect(result).to.be.ok;
+    expect(result.botTemplatePath).to.include(customOutputDir);
+    expect(result.botTemplatePath).to.include('botTemplates');
+    expect(result.botTemplatePath).to.match(/Local_Info_Agent_v1_Template\.botTemplate-meta\.xml$/);
+    expect(result.genAiPlannerBundlePath).to.include(customOutputDir);
+    expect(result.genAiPlannerBundlePath).to.include('genAiPlannerBundles');
+    expect(result.genAiPlannerBundlePath).to.match(/Local_Info_Agent_v1_Template\.genAiPlannerBundle$/);
+  });
+
+  it('should copy metadata dirs to output-dir when they exist', async () => {
+    const customOutputDir = join(process.cwd(), 'my-package');
+    const basePath = join(MOCK_PROJECT_DIR, 'force-app', 'main', 'default');
+    const responses = [BOT_XML_LEGACY, BOT_VERSION_XML, BUNDLE_XML_EMPTY];
+    let readIndex = 0;
+    const readFileSyncMock = (): string => responses[readIndex++];
+    const cpSyncCalls: Array<{ src: string; dest: string; options: { recursive: boolean } }> = [];
+    const dirsThatExist = new Set([join(basePath, 'genAiPlugins'), join(basePath, 'genAiFunctions')]);
+    const mod = await esmock('../../../../src/commands/agent/generate/template.js', {
+      'node:fs': {
+        readFileSync: readFileSyncMock,
+        mkdirSync: () => {},
+        writeFileSync: () => {},
+        existsSync: (path: string) => dirsThatExist.has(path),
+        statSync: (path: string) => ({ isDirectory: () => dirsThatExist.has(path) }),
+        cpSync: (src: string, dest: string, options: { recursive: boolean }) => {
+          cpSyncCalls.push({ src, dest, options });
+        },
+      },
+    });
+    const AgentGenerateTemplate = mod.default;
+
+    await AgentGenerateTemplate.run([
+      '--agent-file',
+      agentFile,
+      '--agent-version',
+      '1',
+      '--output-dir',
+      customOutputDir,
+      '--json',
+    ]);
+
+    expect(cpSyncCalls).to.have.length(2);
+    expect(cpSyncCalls.map((c) => c.src)).to.include(join(basePath, 'genAiPlugins'));
+    expect(cpSyncCalls.map((c) => c.src)).to.include(join(basePath, 'genAiFunctions'));
+    expect(cpSyncCalls.map((c) => c.dest)).to.include(join(customOutputDir, 'genAiPlugins'));
+    expect(cpSyncCalls.map((c) => c.dest)).to.include(join(customOutputDir, 'genAiFunctions'));
+    for (const call of cpSyncCalls) {
+      expect(call.options).to.deep.equal({ recursive: true });
+    }
   });
 
   it('should throw local-topics-without-source when a local topic has no source', () => {
@@ -204,5 +326,64 @@ describe('agent generate template', () => {
     expect(localActions).to.have.length(1);
     expect(localActions[0].developerName).to.equal('solo_planner');
     expect(localActions[0].source).to.equal('GlobalSoloAction');
+  });
+
+  describe('replaceReferencesToGlobalAssets (localActionLinks → genAiFunctions)', () => {
+    it('sets genAiFunctions to allowed globals when a localActionLink resolves to one', () => {
+      const [allowedGlobal] = [...ALLOWED_GLOBAL_FUNCTIONS];
+      const localAction = {
+        developerName: 'AnswerQuestionsWithKnowledge',
+        fullName: 'AnswerQuestionsWithKnowledge',
+        source: allowedGlobal,
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_a',
+        fullName: 'topic_a',
+        source: 'GlobalTopic_A',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
+          plannerActions: [localAction],
+          genAiPlugins: [],
+          genAiFunctions: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([{ genAiFunctionName: allowedGlobal }]);
+      expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
+
+    it('sets genAiFunctions to [] when no localActionLink resolves to an allowed global', () => {
+      const localAction = {
+        developerName: 'OtherAction',
+        fullName: 'OtherAction',
+        source: 'SomePackage__OtherGlobalAction',
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_a',
+        fullName: 'topic_a',
+        source: 'GlobalTopic_A',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
+          plannerActions: [localAction],
+          genAiPlugins: [],
+          genAiFunctions: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
   });
 });
