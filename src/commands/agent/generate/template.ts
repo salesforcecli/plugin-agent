@@ -17,7 +17,8 @@
 import { join, dirname, basename, resolve } from 'node:path';
 import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import type { Connection } from '@salesforce/core';
+import { Messages, SfError, validateSalesforceId } from '@salesforce/core';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import type {
   Bot,
@@ -82,6 +83,9 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
   public static readonly flags = {
     'api-version': Flags.orgApiVersion(),
+    'target-org': Flags.requiredOrg({
+      summary: messages.getMessage('flags.target-org.summary'),
+    }),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),
       required: true,
@@ -145,6 +149,11 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
     const { localTopics } = getLocalAssets(genAiPlannerBundleMetaJson);
     replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics);
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const resolvedProjectConfig = await this.project!.resolveProjectConfig();
+    const namespaceFromSfdxProject =
+      typeof resolvedProjectConfig.namespace === 'string' ? resolvedProjectConfig.namespace : '';
+    await validateGlobalAssets(localTopics, connection, namespaceFromSfdxProject);
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
@@ -318,18 +327,99 @@ export const replaceReferencesToGlobalAssets = (
   }
 
   // replace references in attributeMappings and ruleExpressionAssignments
-  for (const mapping of plannerBundle.attributeMappings ?? []) {
+  const attributeMappings = Array.isArray(plannerBundle.attributeMappings)
+    ? plannerBundle.attributeMappings
+    : plannerBundle.attributeMappings
+    ? [plannerBundle.attributeMappings]
+    : [];
+  for (const mapping of attributeMappings) {
     if (mapping.attributeName) {
       mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
     }
   }
-  for (const assignment of plannerBundle.ruleExpressionAssignments ?? []) {
-    assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
+
+  const ruleExpressionAssignments = Array.isArray(plannerBundle.ruleExpressionAssignments)
+    ? plannerBundle.ruleExpressionAssignments
+    : plannerBundle.ruleExpressionAssignments
+    ? [plannerBundle.ruleExpressionAssignments]
+    : [];
+  for (const assignment of ruleExpressionAssignments) {
+    if (assignment.targetName) {
+      assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
+    }
   }
 
   // delete local assets from the GenAiPlannerBundle
   plannerBundle.localTopics = [];
   plannerBundle.plannerActions = [];
+};
+
+export type GenAiPluginDefinitionRecord = {
+  Id: string;
+  DeveloperName: string;
+  NamespacePrefix: string | null;
+  IsLocal: boolean;
+  Source: string | null;
+};
+
+/**
+ * Validates global assets by querying the target org's GenAiPluginDefinition (Tooling API).
+ * Uses localTopics' fullName as DeveloperName filter; requests Id, NamespacePrefix, IsLocal, Source.
+ *
+ * @param localTopics - The local topics (genAiPlugins) from the GenAiPlannerBundle
+ * @param connection - Connection to the target org (from --target-org)
+ * @param namespaceFromSfdxProject - Value of `namespace` from the project's sfdx-project.json (empty string if unset)
+ */
+export const validateGlobalAssets = async (
+  localTopics: GenAiPlugin[],
+  connection: Connection,
+  namespaceFromSfdxProject: string
+): Promise<void> => {
+  const topicFullNames = localTopics.map((topic) => topic.fullName).filter((name): name is string => Boolean(name));
+  const inClause = topicFullNames.map((name) => `'${String(name).replace(/'/g, "''")}'`).join(', ');
+  const soql = `SELECT Id, DeveloperName, NamespacePrefix, IsLocal, Source FROM GenAiPluginDefinition WHERE DeveloperName IN (${inClause}) OR IsLocal = false`;
+  const result = await connection.tooling.query<GenAiPluginDefinitionRecord>(soql);
+  const topicDefinitions = result.records ?? [];
+
+  const localTopicDefinitionsByDeveloperName = new Map<string, GenAiPluginDefinitionRecord>();
+  const globalTopicsById = new Map<string, GenAiPluginDefinitionRecord>();
+  for (const topicDefinition of topicDefinitions) {
+    if (topicDefinition.IsLocal) {
+      localTopicDefinitionsByDeveloperName.set(topicDefinition.DeveloperName, topicDefinition);
+    } else {
+      globalTopicsById.set(topicDefinition.Id, topicDefinition);
+    }
+  }
+
+  const topicsFromManagedPackages = new Set<GenAiPluginDefinitionRecord>();
+  const notFoundInOrg = new Set<string>();
+
+  // validate that the local asset references a global asset that exists in the org
+  for (const topic of localTopics) {
+    const localAsset: GenAiPluginDefinitionRecord | undefined = localTopicDefinitionsByDeveloperName.get(
+      topic.fullName!
+    );
+    if (localAsset) {
+      if (validateSalesforceId(localAsset.Source!)) {
+        // let's validate the global asset
+        const globalAsset = globalTopicsById.get(localAsset.Source!);
+        if (globalAsset) {
+          if (globalAsset.NamespacePrefix && globalAsset.NamespacePrefix !== namespaceFromSfdxProject) {
+            topicsFromManagedPackages.add(localAsset);
+          }
+        } else {
+          // this local asset references a global asset that is not found in the org
+          notFoundInOrg.add(topic.fullName!);
+        }
+      } else {
+        // this is an OOTB salesforce asset, no extra validation needed.
+        // source is a string with format <namespace>__<developerName>
+      }
+    } else {
+      // the local asset is not found in the org
+      notFoundInOrg.add(topic.fullName!);
+    }
+  }
 };
 
 /**

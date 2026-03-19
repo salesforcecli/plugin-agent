@@ -32,6 +32,10 @@ Path to an agent (Bot) metadata file.
 
 Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
 
+# flags.target-org.summary
+
+Username or alias of the namespaced scratch org that contains the agent which this template is based on.
+
 # error.invalid-agent-file
 
 Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml.
@@ -61,6 +65,10 @@ The local topic (genAiPlugin) you're trying to include in the agent template doe
 
 The local action (genAiFunction) you're trying to include in the agent template doesn't have a reference to a global action. All actions in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
 %s.
+
+# warn.reference-asset-from-managed-package
+
+The local asset (genAiPlugin or genAiFunction) you're including in the agent template references an asset from a managed package. Make sure that the managed package exists in the org into which this template is going to be installed. DeveloperName: %s, Id: %s.
 
 # error.nga-agent-not-supported
 
