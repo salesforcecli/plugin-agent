@@ -73,7 +73,7 @@ The local asset (genAiPlugin or genAiFunction) you're including in the agent tem
 
 # error.global-asset-not-found
 
-The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is no present in the target org:
+The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is not present in the target org:
 %s.
 
 # error.nga-agent-not-supported
