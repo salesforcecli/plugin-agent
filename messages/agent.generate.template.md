@@ -16,7 +16,7 @@ See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.
 
 # examples
 
-- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent:
+- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent. The agent that the template is based on is in the org with alias "my-scratch-org":
 
   <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package --source-org my-scratch-org
 
@@ -68,12 +68,12 @@ The local action (genAiFunction) you're trying to include in the agent template 
 
 # warn.reference-asset-from-managed-package
 
-The local asset (genAiPlugin or genAiFunction) you're including in the agent template references an asset from a managed package. Make sure that the managed package is defined as dependency in the sfdx-project.json file:
+The local asset (genAiPlugin or genAiFunction) that you're including in the agent template references an asset from a managed package. Make sure that the managed package is defined as a dependency in the sfdx-project.json file:
 %s.
 
 # error.global-asset-not-found
 
-The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is not present in the source org:
+The following assets (genAiPlugin or genAiFunction) that you're including in the agent template reference an asset that isn't in the source org:
 %s.
 
 # error.nga-agent-not-supported
