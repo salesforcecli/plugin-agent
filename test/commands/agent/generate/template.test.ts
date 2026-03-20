@@ -20,7 +20,7 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import esmock from 'esmock';
 import { SfError } from '@salesforce/core';
-import { TestContext } from '@salesforce/core/testSetup';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { SfProject } from '@salesforce/core';
 import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
 import {
@@ -74,6 +74,7 @@ const BUNDLE_XML_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
 
 describe('agent generate template', () => {
   const $$ = new TestContext();
+  const TARGET_ORG = 'test@org.com';
   // Use existing bot in mock project so --agent-file exists check passes
   const agentFile = join(
     MOCK_PROJECT_DIR,
@@ -92,14 +93,19 @@ describe('agent generate template', () => {
     '1',
     '--output-dir',
     outputDir,
+    '--target-org',
+    TARGET_ORG,
     '--json',
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     $$.inProject(true);
+    const mockOrg = new MockTestOrgData($$.uniqid(), { username: TARGET_ORG });
+    await $$.stubAuths(mockOrg);
     const mockProject = {
       getPath: () => MOCK_PROJECT_DIR,
       getDefaultPackage: () => ({ fullPath: join(MOCK_PROJECT_DIR, 'force-app') }),
+      resolveProjectConfig: async () => ({}),
     } as unknown as SfProject;
     $$.SANDBOX.stub(SfProject, 'resolve').resolves(mockProject);
     $$.SANDBOX.stub(SfProject, 'getInstance').returns(mockProject);
@@ -158,6 +164,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--target-org',
+      TARGET_ORG,
       '--json',
     ]);
 
@@ -199,6 +207,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--target-org',
+      TARGET_ORG,
       '--json',
     ]);
 
