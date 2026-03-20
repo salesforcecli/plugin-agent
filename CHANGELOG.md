@@ -1,3 +1,9 @@
+## [1.32.5](https://github.com/salesforcecli/plugin-agent/compare/1.32.4...1.32.5) (2026-03-20)
+
+### Bug Fixes
+
+- **deps:** bump fast-xml-parser from 5.5.6 to 5.5.7 ([5eea084](https://github.com/salesforcecli/plugin-agent/commit/5eea0843554b6df143d5a9c63096874afcda7260))
+
 ## [1.32.4](https://github.com/salesforcecli/plugin-agent/compare/1.32.3...1.32.4) (2026-03-18)
 
 ### Bug Fixes
