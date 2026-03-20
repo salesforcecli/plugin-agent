@@ -1,3 +1,9 @@
+## [1.32.7](https://github.com/salesforcecli/plugin-agent/compare/1.32.6...1.32.7) (2026-03-20)
+
+### Bug Fixes
+
+- make agent preview start/send/end/sessions GA ([20eb69d](https://github.com/salesforcecli/plugin-agent/commit/20eb69dc898b53099ab07482fcaef87dc803b612))
+
 ## [1.32.6](https://github.com/salesforcecli/plugin-agent/compare/1.32.5...1.32.6) (2026-03-20)
 
 ### Bug Fixes
