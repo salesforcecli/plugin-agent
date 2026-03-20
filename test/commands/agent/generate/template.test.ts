@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
 
 import { join } from 'node:path';
 import { expect } from 'chai';
 import esmock from 'esmock';
+import sinon from 'sinon';
+import type { Connection } from '@salesforce/core';
 import { SfError } from '@salesforce/core';
-import { TestContext } from '@salesforce/core/testSetup';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { SfProject } from '@salesforce/core';
 import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
 import {
   getLocalAssets,
   replaceReferencesToGlobalAssets,
+  validateGlobalAssets,
   ALLOWED_GLOBAL_FUNCTIONS,
   type GenAiPlannerBundleExt,
 } from '../../../../src/commands/agent/generate/template.js';
@@ -72,8 +75,180 @@ const BUNDLE_XML_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
   <plannerType>AiCopilot__ReAct</plannerType>
 </GenAiPlannerBundle>`;
 
+/** 18-char Salesforce Id shape (alphanumeric) for validateSalesforceId */
+const LOCAL_ASSET_ID = 'aaaaaaaaaaaaaaaaaa';
+const GLOBAL_ASSET_ID = 'bbbbbbbbbbbbbbbbbb';
+
+describe('validateGlobalAssets', () => {
+  /** jsforce passes SOQL string as the first argument to `tooling.query` */
+  const makeConnection = (queryImpl: (soql: string) => Promise<{ records: any[] }>): Connection => {
+    const stub = sinon.stub().callsFake((soql: string) => queryImpl(soql));
+    return {
+      tooling: { query: stub },
+    } as unknown as Connection;
+  };
+
+  it('throws when a local topic is not found in the org', async () => {
+    const topic = { fullName: 'GhostTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return { records: [] };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      expect((error as SfError).message).to.match(/target org|not present/i);
+      expect((error as SfError).message).to.include('GhostTopic');
+    }
+    expect(warn.called).to.be.false;
+  });
+
+  it('throws when a local topic references a global asset that is not found in the org', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: GLOBAL_ASSET_ID,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      expect((error as SfError).message).to.include(GLOBAL_ASSET_ID);
+    }
+    expect(warn.called).to.be.false;
+  });
+
+  it('warns when the global asset is from a managed package other than the one in the sfdx-project.json', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: GLOBAL_ASSET_ID,
+            },
+            {
+              Id: GLOBAL_ASSET_ID,
+              DeveloperName: 'GlobalDev',
+              NamespacePrefix: 'otherns',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [], makeConnection(queryImpl), 'myns', warn);
+
+    expect(warn.calledOnce).to.be.true;
+    expect(warn.firstCall.args[0]).to.match(/managed package|reference-asset/i);
+    expect(warn.firstCall.args[0]).to.include('otherns__GlobalDev');
+  });
+
+  it('can valdiate local topics and actions for global assets that are from a managed package', async () => {
+    const topic = { fullName: 'T1', source: 'x' } as GenAiPlugin;
+    const action = { fullName: 'A1', source: 'x' } as GenAiFunction;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: 'cccccccccccccccccc',
+              DeveloperName: 'T1',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'dddddddddddddddddd',
+            },
+            {
+              Id: 'dddddddddddddddddd',
+              DeveloperName: 'G1',
+              NamespacePrefix: 'pkgone',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      if (soql.includes('GenAiFunctionDefinition')) {
+        return {
+          records: [
+            {
+              Id: 'eeeeeeeeeeeeeeeeee',
+              DeveloperName: 'A1',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'ffffffffffffffffff',
+            },
+            {
+              Id: 'ffffffffffffffffff',
+              DeveloperName: 'G2',
+              NamespacePrefix: 'pkgtwo',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [action], makeConnection(queryImpl), 'myns', warn);
+
+    expect(warn.calledOnce).to.be.true;
+    const msg = warn.firstCall.args[0] as string;
+    expect(msg).to.include('pkgone__G1');
+    expect(msg).to.include('pkgtwo__G2');
+  });
+
+  it('can validate local topics and actions for global assets that are not found in the org', async () => {
+    const topic = { fullName: 'MissingTopic', source: 'x' } as GenAiPlugin;
+    const action = { fullName: 'MissingAction', source: 'x' } as GenAiFunction;
+    const queryImpl = sinon.fake.resolves({ records: [] });
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [action], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      const msg = (error as SfError).message;
+      expect(msg).to.include('MissingTopic');
+      expect(msg).to.include('MissingAction');
+    }
+    expect(warn.called).to.be.false;
+  });
+});
+
 describe('agent generate template', () => {
   const $$ = new TestContext();
+  const SOURCE_ORG = 'test@org.com';
   // Use existing bot in mock project so --agent-file exists check passes
   const agentFile = join(
     MOCK_PROJECT_DIR,
@@ -92,14 +267,19 @@ describe('agent generate template', () => {
     '1',
     '--output-dir',
     outputDir,
+    '--source-org',
+    SOURCE_ORG,
     '--json',
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     $$.inProject(true);
+    const mockOrg = new MockTestOrgData($$.uniqid(), { username: SOURCE_ORG });
+    await $$.stubAuths(mockOrg);
     const mockProject = {
       getPath: () => MOCK_PROJECT_DIR,
       getDefaultPackage: () => ({ fullPath: join(MOCK_PROJECT_DIR, 'force-app') }),
+      resolveProjectConfig: async () => ({}),
     } as unknown as SfProject;
     $$.SANDBOX.stub(SfProject, 'resolve').resolves(mockProject);
     $$.SANDBOX.stub(SfProject, 'getInstance').returns(mockProject);
@@ -158,6 +338,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 
@@ -199,6 +381,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 
