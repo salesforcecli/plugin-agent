@@ -381,6 +381,10 @@ const doValidateGlobalAssets = async (
   namespaceFromSfdxProject: string
 ): Promise<{ referenceAssetFromManagedPackage: Set<string>; notFoundInOrg: Set<string> }> => {
   const developerNames = localAssets.map((asset) => asset.fullName).filter((name): name is string => Boolean(name));
+  // early return if there are no local assets to validate
+  if (developerNames.length === 0) {
+    return { referenceAssetFromManagedPackage: new Set<string>(), notFoundInOrg: new Set<string>() };
+  }
 
   const inClause = developerNames.map((name) => `'${String(name).replace(/'/g, "''")}'`).join(', ');
   const soql = `SELECT Id, DeveloperName, NamespacePrefix, IsLocal, Source FROM ${toolingObject} WHERE DeveloperName IN (${inClause}) OR IsLocal = false`;
