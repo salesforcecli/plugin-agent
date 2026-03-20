@@ -75,7 +75,7 @@
     "command": "agent:generate:template",
     "flagAliases": [],
     "flagChars": ["f", "o", "r"],
-    "flags": ["agent-file", "agent-version", "api-version", "flags-dir", "json", "output-dir", "target-org"],
+    "flags": ["agent-file", "agent-version", "api-version", "flags-dir", "json", "output-dir", "source-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {

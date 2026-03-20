@@ -83,8 +83,8 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
   public static readonly flags = {
     'api-version': Flags.orgApiVersion(),
-    'target-org': Flags.requiredOrg({
-      summary: messages.getMessage('flags.target-org.summary'),
+    'source-org': Flags.requiredOrg({
+      summary: messages.getMessage('flags.source-org.summary'),
     }),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),
@@ -150,7 +150,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     // Process local assets
     const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
-    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const connection = flags['source-org'].getConnection(flags['api-version']);
     const resolvedProjectConfig = await this.project!.resolveProjectConfig();
     const namespaceFromSfdxProject =
       typeof resolvedProjectConfig.namespace === 'string' ? resolvedProjectConfig.namespace : '';
@@ -428,11 +428,11 @@ const doValidateGlobalAssets = async (
 };
 
 /**
- * Validates that local topics and actions reference global assets that exist in the target org.
+ * Validates that local topics and actions reference global assets that exist in the source org.
  *
  * @param localTopics - Local genAiPlugin topics (GenAiPluginDefinition)
  * @param localActions - Local genAiFunction actions (GenAiFunctionDefinition)
- * @param connection - Target org connection (--target-org)
+ * @param connection - Source org connection (--source-org)
  * @param namespaceFromSfdxProject - `namespace` from sfdx-project.json (empty if unset)
  * @param warn - Command warn hook (e.g. `(msg) => this.warn(msg)`)
  */

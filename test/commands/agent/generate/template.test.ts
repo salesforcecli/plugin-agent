@@ -248,7 +248,7 @@ describe('validateGlobalAssets', () => {
 
 describe('agent generate template', () => {
   const $$ = new TestContext();
-  const TARGET_ORG = 'test@org.com';
+  const SOURCE_ORG = 'test@org.com';
   // Use existing bot in mock project so --agent-file exists check passes
   const agentFile = join(
     MOCK_PROJECT_DIR,
@@ -267,14 +267,14 @@ describe('agent generate template', () => {
     '1',
     '--output-dir',
     outputDir,
-    '--target-org',
-    TARGET_ORG,
+    '--source-org',
+    SOURCE_ORG,
     '--json',
   ];
 
   beforeEach(async () => {
     $$.inProject(true);
-    const mockOrg = new MockTestOrgData($$.uniqid(), { username: TARGET_ORG });
+    const mockOrg = new MockTestOrgData($$.uniqid(), { username: SOURCE_ORG });
     await $$.stubAuths(mockOrg);
     const mockProject = {
       getPath: () => MOCK_PROJECT_DIR,
@@ -338,8 +338,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
-      '--target-org',
-      TARGET_ORG,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 
@@ -381,8 +381,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
-      '--target-org',
-      TARGET_ORG,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 

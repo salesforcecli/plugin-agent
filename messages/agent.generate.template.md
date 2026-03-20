@@ -18,7 +18,7 @@ See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.
 
 - Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent:
 
-  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package --source-org my-scratch-org
 
 # flags.agent-version.summary
 
@@ -32,7 +32,7 @@ Path to an agent (Bot) metadata file.
 
 Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
 
-# flags.target-org.summary
+# flags.source-org.summary
 
 Username or alias of the namespaced scratch org that contains the agent which this template is based on.
 
@@ -73,7 +73,7 @@ The local asset (genAiPlugin or genAiFunction) you're including in the agent tem
 
 # error.global-asset-not-found
 
-The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is not present in the target org:
+The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is not present in the source org:
 %s.
 
 # error.nga-agent-not-supported
