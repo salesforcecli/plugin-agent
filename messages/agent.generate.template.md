@@ -68,7 +68,13 @@ The local action (genAiFunction) you're trying to include in the agent template 
 
 # warn.reference-asset-from-managed-package
 
-The local asset (genAiPlugin or genAiFunction) you're including in the agent template references an asset from a managed package. Make sure that the managed package exists in the org into which this template is going to be installed. DeveloperName: %s, Id: %s.
+The local asset (genAiPlugin or genAiFunction) you're including in the agent template references an asset from a managed package. Make sure that the managed package is defined as dependency in the sfdx-project.json file:
+%s.
+
+# error.global-asset-not-found
+
+The following assets (genAiPlugin or genAiFunction) you're including in the agent template reference an asset that is no present in the target org:
+%s.
 
 # error.nga-agent-not-supported
 
