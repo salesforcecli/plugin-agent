@@ -86,6 +86,7 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     'api-version': Flags.orgApiVersion(),
     'source-org': Flags.requiredOrg({
       summary: messages.getMessage('flags.source-org.summary'),
+      char: 's',
     }),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),
