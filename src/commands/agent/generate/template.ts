@@ -17,7 +17,9 @@
 import { join, dirname, basename, resolve } from 'node:path';
 import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import type { Connection } from '@salesforce/core';
+import { Messages, SfError, validateSalesforceId } from '@salesforce/core';
+import { ensureArray } from '@salesforce/kit';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import type {
   Bot,
@@ -82,6 +84,10 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
   public static readonly flags = {
     'api-version': Flags.orgApiVersion(),
+    'source-org': Flags.requiredOrg({
+      summary: messages.getMessage('flags.source-org.summary'),
+      char: 's',
+    }),
     'agent-version': Flags.integer({
       summary: messages.getMessage('flags.agent-version.summary'),
       required: true,
@@ -143,7 +149,16 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     // Modify the metadata files for final output
     genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
-    const { localTopics } = getLocalAssets(genAiPlannerBundleMetaJson);
+
+    // Process local assets
+    const { localTopics, localActions } = getLocalAssets(genAiPlannerBundleMetaJson);
+    const connection = flags['source-org'].getConnection(flags['api-version']);
+    const resolvedProjectConfig = await this.project!.resolveProjectConfig();
+    const namespaceFromSfdxProject =
+      typeof resolvedProjectConfig.namespace === 'string' ? resolvedProjectConfig.namespace : '';
+    await validateGlobalAssets(localTopics, localActions, connection, namespaceFromSfdxProject, (msg) =>
+      this.warn(msg)
+    );
     replaceReferencesToGlobalAssets(genAiPlannerBundleMetaJson, localTopics);
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
@@ -153,7 +168,9 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     if (outputDir) {
       const copiedDirs = copyMetadataDirsIfPresent(basePath, outputBase);
-      this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
+      if (copiedDirs.length > 0) {
+        this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
+      }
     }
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
@@ -318,18 +335,147 @@ export const replaceReferencesToGlobalAssets = (
   }
 
   // replace references in attributeMappings and ruleExpressionAssignments
-  for (const mapping of plannerBundle.attributeMappings ?? []) {
+  const attributeMappings = ensureArray(plannerBundle.attributeMappings);
+  for (const mapping of attributeMappings) {
     if (mapping.attributeName) {
       mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
     }
   }
-  for (const assignment of plannerBundle.ruleExpressionAssignments ?? []) {
-    assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
+
+  const ruleExpressionAssignments = ensureArray(plannerBundle.ruleExpressionAssignments);
+  for (const assignment of ruleExpressionAssignments) {
+    if (assignment.targetName) {
+      assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);
+    }
   }
 
   // delete local assets from the GenAiPlannerBundle
   plannerBundle.localTopics = [];
   plannerBundle.plannerActions = [];
+};
+
+/** Tooling API row for GenAiPluginDefinition or GenAiFunctionDefinition (shared field shape). */
+export type GenAiBundledAssetToolingRecord = {
+  Id: string;
+  DeveloperName: string;
+  NamespacePrefix: string | null;
+  IsLocal: boolean;
+  Source: string | null;
+};
+
+type GenAiBundledAssetToolingObject = 'GenAiPluginDefinition' | 'GenAiFunctionDefinition';
+
+/**
+ * Queries the org for asset definitions (topics or functions) and checks each local asset against the results.
+ *
+ * @returns { referenceAssetFromManagedPackage, notFoundInOrg } - The assets that are referenced from managed packages and the assets that are not found in the org
+ */
+const doValidateGlobalAssets = async (
+  connection: Connection,
+  toolingObject: GenAiBundledAssetToolingObject,
+  localAssets: Array<{ fullName?: string | null }>,
+  namespaceFromSfdxProject: string
+): Promise<{ referenceAssetFromManagedPackage: Set<string>; notFoundInOrg: Set<string> }> => {
+  const developerNames = localAssets.map((asset) => asset.fullName).filter((name): name is string => Boolean(name));
+  // early return if there are no local assets to validate
+  if (developerNames.length === 0) {
+    return { referenceAssetFromManagedPackage: new Set<string>(), notFoundInOrg: new Set<string>() };
+  }
+
+  const inClause = developerNames.map((name) => `'${String(name).replace(/'/g, "''")}'`).join(', ');
+  const soql = `SELECT Id, DeveloperName, NamespacePrefix, IsLocal, Source FROM ${toolingObject} WHERE DeveloperName IN (${inClause}) OR IsLocal = false`;
+  const result = await connection.tooling.query<GenAiBundledAssetToolingRecord>(soql);
+  const assetDefinitionResults = result.records ?? [];
+
+  const localAssetDefinitionResults = new Map<string, GenAiBundledAssetToolingRecord>();
+  const globalAssetDefinitionById = new Map<string, GenAiBundledAssetToolingRecord>();
+  for (const assetDefinition of assetDefinitionResults) {
+    if (assetDefinition.IsLocal) {
+      localAssetDefinitionResults.set(assetDefinition.DeveloperName, assetDefinition);
+    } else {
+      globalAssetDefinitionById.set(assetDefinition.Id, assetDefinition);
+    }
+  }
+
+  const referenceAssetFromManagedPackage = new Set<string>();
+  const notFoundInOrg = new Set<string>();
+  for (const localAsset of localAssets) {
+    const currentAssetDefinitionResult = localAssetDefinitionResults.get(localAsset.fullName!);
+    if (currentAssetDefinitionResult) {
+      // if source is an Id, it means it's pointing to a record created in the org
+      // if is not an Id, it means it's pointing to an standard OOTB Salesforce asset
+      if (validateSalesforceId(currentAssetDefinitionResult.Source!)) {
+        const globalAsset = globalAssetDefinitionById.get(currentAssetDefinitionResult.Source!);
+        if (globalAsset) {
+          // find global assets from managed packages other than the one in the sfdx-project.json
+          if (globalAsset.NamespacePrefix && globalAsset.NamespacePrefix !== namespaceFromSfdxProject) {
+            referenceAssetFromManagedPackage.add(`${globalAsset.NamespacePrefix}__${globalAsset.DeveloperName}`);
+          }
+        } else {
+          notFoundInOrg.add(currentAssetDefinitionResult.Source!);
+        }
+      } else {
+        // OOTB Salesforce asset, no validation needed
+      }
+    } else {
+      notFoundInOrg.add(localAsset.fullName!);
+    }
+  }
+  return {
+    referenceAssetFromManagedPackage,
+    notFoundInOrg,
+  };
+};
+
+/**
+ * Validates that local topics and actions reference global assets that exist in the source org.
+ *
+ * @param localTopics - Local genAiPlugin topics (GenAiPluginDefinition)
+ * @param localActions - Local genAiFunction actions (GenAiFunctionDefinition)
+ * @param connection - Source org connection (--source-org)
+ * @param namespaceFromSfdxProject - `namespace` from sfdx-project.json (empty if unset)
+ * @param warn - Command warn hook (e.g. `(msg) => this.warn(msg)`)
+ */
+export const validateGlobalAssets = async (
+  localTopics: GenAiPlugin[],
+  localActions: GenAiFunction[],
+  connection: Connection,
+  namespaceFromSfdxProject: string,
+  warn: (msg: string) => void
+): Promise<void> => {
+  const topicsValidationResults = await doValidateGlobalAssets(
+    connection,
+    'GenAiPluginDefinition',
+    localTopics,
+    namespaceFromSfdxProject
+  );
+  const actionsValidationResults = await doValidateGlobalAssets(
+    connection,
+    'GenAiFunctionDefinition',
+    localActions,
+    namespaceFromSfdxProject
+  );
+
+  const referenceAssetFromManagedPackage = new Set<string>([
+    ...topicsValidationResults.referenceAssetFromManagedPackage,
+    ...actionsValidationResults.referenceAssetFromManagedPackage,
+  ]);
+  const notFoundInOrg = new Set<string>([
+    ...topicsValidationResults.notFoundInOrg,
+    ...actionsValidationResults.notFoundInOrg,
+  ]);
+
+  if (referenceAssetFromManagedPackage.size > 0) {
+    warn(
+      messages.getMessage('warn.reference-asset-from-managed-package', [
+        [...referenceAssetFromManagedPackage].join(', '),
+      ])
+    );
+  }
+
+  if (notFoundInOrg.size > 0) {
+    throw new SfError(messages.getMessage('error.global-asset-not-found', [[...notFoundInOrg].join(', ')]));
+  }
 };
 
 /**

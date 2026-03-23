@@ -16,9 +16,9 @@ See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.
 
 # examples
 
-- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent:
+- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent. The agent that the template is based on is in the org with alias "my-scratch-org":
 
-  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package --source-org my-scratch-org
 
 # flags.agent-version.summary
 
@@ -31,6 +31,10 @@ Path to an agent (Bot) metadata file.
 # flags.output-dir.summary
 
 Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
+
+# flags.source-org.summary
+
+Username or alias of the namespaced scratch org that contains the agent which this template is based on.
 
 # error.invalid-agent-file
 
@@ -60,6 +64,16 @@ The local topic (genAiPlugin) you're trying to include in the agent template doe
 # error.local-actions-without-source
 
 The local action (genAiFunction) you're trying to include in the agent template doesn't have a reference to a global action. All actions in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
+%s.
+
+# warn.reference-asset-from-managed-package
+
+The local asset (genAiPlugin or genAiFunction) that you're including in the agent template references an asset from a managed package. Make sure that the managed package is defined as a dependency in the sfdx-project.json file:
+%s.
+
+# error.global-asset-not-found
+
+The following assets (genAiPlugin or genAiFunction) that you're including in the agent template reference an asset that isn't in the source org:
 %s.
 
 # error.nga-agent-not-supported

@@ -14,23 +14,59 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
 
 import { join } from 'node:path';
 import { expect } from 'chai';
 import esmock from 'esmock';
+import sinon from 'sinon';
+import type { Connection } from '@salesforce/core';
 import { SfError } from '@salesforce/core';
-import { TestContext } from '@salesforce/core/testSetup';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { SfProject } from '@salesforce/core';
 import type { GenAiPlugin, GenAiFunction } from '@salesforce/types/metadata';
 import {
   getLocalAssets,
   replaceReferencesToGlobalAssets,
+  validateGlobalAssets,
   ALLOWED_GLOBAL_FUNCTIONS,
   type GenAiPlannerBundleExt,
 } from '../../../../src/commands/agent/generate/template.js';
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
+
+const minimalGenAiPlannerBundleMock = (): GenAiPlannerBundleExt['GenAiPlannerBundle'] => ({
+  masterLabel: 'Test fixture',
+  plannerType: 'AiCopilot__ReAct',
+  plannerSurfaces: [{ surface: 'TestSurface', surfaceType: 'Messaging', outboundRouteConfigs: [] }],
+  attributeMappings: [],
+  genAiFunctions: [],
+  genAiPlugins: [],
+  ruleExpressionAssignments: [],
+  ruleExpressions: [
+    {
+      conditions: [
+        {
+          leftOperand: 'fixture',
+          leftOperandType: 'Variable',
+          operator: 'equal',
+        },
+      ],
+      expressionLabel: 'Fixture',
+      expressionName: 'Fixture',
+    },
+  ],
+  localTopicLinks: [],
+});
+
+const makeGenAiPlannerBundleExt = (
+  plannerOverrides: Partial<GenAiPlannerBundleExt['GenAiPlannerBundle']>
+): GenAiPlannerBundleExt => ({
+  GenAiPlannerBundle: {
+    ...minimalGenAiPlannerBundleMock(),
+    ...plannerOverrides,
+  },
+});
 
 const BOT_XML_NGA = `<?xml version="1.0" encoding="UTF-8"?>
 <Bot xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -72,8 +108,226 @@ const BUNDLE_XML_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
   <plannerType>AiCopilot__ReAct</plannerType>
 </GenAiPlannerBundle>`;
 
+/** 18-char Salesforce Id shape (alphanumeric) for validateSalesforceId */
+const LOCAL_ASSET_ID = 'aaaaaaaaaaaaaaaaaa';
+const GLOBAL_ASSET_ID = 'bbbbbbbbbbbbbbbbbb';
+
+describe('validateGlobalAssets', () => {
+  /** jsforce passes SOQL string as the first argument to `tooling.query` */
+  const makeConnection = (queryImpl: (soql: string) => Promise<{ records: any[] }>): Connection => {
+    const stub = sinon.stub().callsFake((soql: string) => queryImpl(soql));
+    return {
+      tooling: { query: stub },
+    } as unknown as Connection;
+  };
+
+  it('throws when a local topic is not found in the org', async () => {
+    const topic = { fullName: 'GhostTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return { records: [] };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      expect((error as SfError).message).to.match(/source org|isn't in the source org/i);
+      expect((error as SfError).message).to.include('GhostTopic');
+    }
+    expect(warn.called).to.be.false;
+  });
+
+  it('throws when a local topic references a global asset that is not found in the org', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: GLOBAL_ASSET_ID,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      expect((error as SfError).message).to.include(GLOBAL_ASSET_ID);
+    }
+    expect(warn.called).to.be.false;
+  });
+
+  it('warns when the global asset is from a managed package other than the one in the sfdx-project.json', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: GLOBAL_ASSET_ID,
+            },
+            {
+              Id: GLOBAL_ASSET_ID,
+              DeveloperName: 'GlobalDev',
+              NamespacePrefix: 'otherns',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [], makeConnection(queryImpl), 'myns', warn);
+
+    expect(warn.calledOnce).to.be.true;
+    expect(warn.firstCall.args[0]).to.match(/managed package|reference-asset/i);
+    expect(warn.firstCall.args[0]).to.include('otherns__GlobalDev');
+  });
+
+  it('can validate local topics and actions for global assets that are from a managed package', async () => {
+    const topic = { fullName: 'T1', source: 'x' } as GenAiPlugin;
+    const action = { fullName: 'A1', source: 'x' } as GenAiFunction;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: 'cccccccccccccccccc',
+              DeveloperName: 'T1',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'dddddddddddddddddd',
+            },
+            {
+              Id: 'dddddddddddddddddd',
+              DeveloperName: 'G1',
+              NamespacePrefix: 'pkgone',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      if (soql.includes('GenAiFunctionDefinition')) {
+        return {
+          records: [
+            {
+              Id: 'eeeeeeeeeeeeeeeeee',
+              DeveloperName: 'A1',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'ffffffffffffffffff',
+            },
+            {
+              Id: 'ffffffffffffffffff',
+              DeveloperName: 'G2',
+              NamespacePrefix: 'pkgtwo',
+              IsLocal: false,
+              Source: null,
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [action], makeConnection(queryImpl), 'myns', warn);
+
+    expect(warn.calledOnce).to.be.true;
+    const msg = warn.firstCall.args[0] as string;
+    expect(msg).to.include('pkgone__G1');
+    expect(msg).to.include('pkgtwo__G2');
+  });
+
+  it('can validate local topics and actions for global assets that are not found in the org', async () => {
+    const topic = { fullName: 'MissingTopic', source: 'x' } as GenAiPlugin;
+    const action = { fullName: 'MissingAction', source: 'x' } as GenAiFunction;
+    const queryImpl = sinon.fake.resolves({ records: [] });
+    const warn = sinon.spy();
+
+    try {
+      await validateGlobalAssets([topic], [action], makeConnection(queryImpl), '', warn);
+      expect.fail('expected SfError');
+    } catch (error) {
+      expect(error).to.be.instanceOf(SfError);
+      const msg = (error as SfError).message;
+      expect(msg).to.include('MissingTopic');
+      expect(msg).to.include('MissingAction');
+    }
+    expect(warn.called).to.be.false;
+  });
+
+  it('does not warn  when local topic Source is OOTB topic', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'StandardGlobalTopicName',
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+    expect(warn.called).to.be.false;
+  });
+
+  it('does not warn  when local action Source is OOTB action', async () => {
+    const action = { fullName: 'MyFn', source: 'x' } as GenAiFunction;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiFunctionDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'MyFn',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'SomeOOTBFunction',
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([], [action], makeConnection(queryImpl), '', warn);
+    expect(warn.called).to.be.false;
+  });
+});
+
 describe('agent generate template', () => {
   const $$ = new TestContext();
+  const SOURCE_ORG = 'test@org.com';
   // Use existing bot in mock project so --agent-file exists check passes
   const agentFile = join(
     MOCK_PROJECT_DIR,
@@ -92,14 +346,19 @@ describe('agent generate template', () => {
     '1',
     '--output-dir',
     outputDir,
+    '--source-org',
+    SOURCE_ORG,
     '--json',
   ];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     $$.inProject(true);
+    const mockOrg = new MockTestOrgData($$.uniqid(), { username: SOURCE_ORG });
+    await $$.stubAuths(mockOrg);
     const mockProject = {
       getPath: () => MOCK_PROJECT_DIR,
       getDefaultPackage: () => ({ fullPath: join(MOCK_PROJECT_DIR, 'force-app') }),
+      resolveProjectConfig: async () => ({}),
     } as unknown as SfProject;
     $$.SANDBOX.stub(SfProject, 'resolve').resolves(mockProject);
     $$.SANDBOX.stub(SfProject, 'getInstance').returns(mockProject);
@@ -158,6 +417,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 
@@ -199,6 +460,8 @@ describe('agent generate template', () => {
       '1',
       '--output-dir',
       customOutputDir,
+      '--source-org',
+      SOURCE_ORG,
       '--json',
     ]);
 
@@ -214,12 +477,10 @@ describe('agent generate template', () => {
 
   it('should throw local-topics-without-source when a local topic has no source', () => {
     const topicWithoutSource = { developerName: 'my_topic', fullName: 'my_topic' } as GenAiPlugin;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topicWithoutSource],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topicWithoutSource],
+    });
 
     try {
       getLocalAssets(bundle);
@@ -232,12 +493,10 @@ describe('agent generate template', () => {
 
   it('should throw local-actions-without-source when a local action has no source', () => {
     const actionWithoutSource = { developerName: 'my_action', fullName: 'my_action' } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        plannerActions: [actionWithoutSource],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      plannerActions: [actionWithoutSource],
+    });
 
     try {
       getLocalAssets(bundle);
@@ -255,12 +514,10 @@ describe('agent generate template', () => {
       fullName: 'topic_a',
       source: 'GlobalTopic_A',
     } as GenAiPlugin;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topic],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topic],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -287,13 +544,11 @@ describe('agent generate template', () => {
       fullName: 'planner_action',
       source: 'GlobalPlannerAction',
     } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topicWithAction],
-        plannerActions: [plannerAction],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topicWithAction],
+      plannerActions: [plannerAction],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -312,13 +567,11 @@ describe('agent generate template', () => {
       fullName: 'solo_planner',
       source: 'GlobalSoloAction',
     } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [],
-        plannerActions: [plannerAction],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [],
+      plannerActions: [plannerAction],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -341,16 +594,13 @@ describe('agent generate template', () => {
         fullName: 'topic_a',
         source: 'GlobalTopic_A',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
-          plannerActions: [localAction],
-          genAiPlugins: [],
-          genAiFunctions: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopics: [topic],
+        localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
+        plannerActions: [localAction],
+        genAiPlugins: [],
+        genAiFunctions: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -369,21 +619,184 @@ describe('agent generate template', () => {
         fullName: 'topic_a',
         source: 'GlobalTopic_A',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
-          plannerActions: [localAction],
-          genAiPlugins: [],
-          genAiFunctions: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopics: [topic],
+        localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
+        plannerActions: [localAction],
+        genAiPlugins: [],
+        genAiFunctions: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
       expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([]);
       expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
+  });
+
+  describe('replaceReferencesToGlobalAssets (genAiPlugins and clearing local state)', () => {
+    it('sets genAiPlugins from topic.source, clears localTopicLinks, localTopics, and plannerActions', () => {
+      const topic = {
+        developerName: 't1',
+        fullName: 'Local_Topic_A',
+        source: 'Global_Topic_A',
+      } as GenAiPlugin;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [{ genAiPluginName: 'Local_Topic_A' }],
+        localTopics: [topic],
+        plannerActions: [{ developerName: 'pa', fullName: 'pa', source: 'GlobalPa' } as GenAiFunction],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiPlugins).to.deep.equal([{ genAiPluginName: 'Global_Topic_A' }]);
+      expect(bundle.GenAiPlannerBundle.localTopicLinks).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.localTopics).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.plannerActions).to.deep.equal([]);
+    });
+  });
+
+  describe('replaceReferencesToGlobalAssets (attributeMappings / ruleExpressionAssignments)', () => {
+    it('replaces local topic segments in attributeMappings.attributeName with global names from source', () => {
+      const topic = {
+        developerName: 'Local_Events_Information',
+        fullName: 'Local_Events_Information',
+        source: 'Weather_and_Temperature_Information',
+      } as GenAiPlugin;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
+            attributeName: 'Local_Events_Information.MyNs__MyAction.input_customerId',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'customerId',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('Weather_and_Temperature_Information.MyNs__MyAction.input_customerId');
+    });
+
+    it('replaces local topic segments in ruleExpressionAssignments.targetName', () => {
+      const topic = {
+        developerName: 'Resort_History_Information',
+        fullName: 'Resort_History_Information',
+        source: 'Global_ResortHistory',
+      } as GenAiPlugin;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        ruleExpressionAssignments: [
+          {
+            targetName: 'Resort_History_Information.someField',
+            ruleExpressionName: 'fixture_rule',
+            targetType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const assignments = bundle.GenAiPlannerBundle.ruleExpressionAssignments as Array<{ targetName: string }>;
+      expect(assignments[0].targetName).to.equal('Global_ResortHistory.someField');
+    });
+
+    it('replaces planner action fullName segments when present in dot-separated attributeName', () => {
+      const topic = {
+        developerName: 'topic_z',
+        fullName: 'topic_z',
+        source: 'Global_Topic_Z',
+      } as GenAiPlugin;
+      const plannerAction = {
+        developerName: 'PlannerAct',
+        fullName: 'PlannerAct',
+        source: 'Global_PlannerAct',
+      } as GenAiFunction;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        plannerActions: [plannerAction],
+        attributeMappings: [
+          {
+            attributeName: 'PlannerAct.OtherNs__Fn.output_x',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'x',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('Global_PlannerAct.OtherNs__Fn.output_x');
+    });
+
+    it('replaces plugin localAction fullName segments in attributeMappings (from topic.localActions)', () => {
+      const pluginAction = {
+        developerName: 'CloseCase',
+        fullName: 'CloseCase',
+        source: 'SvcCopilotTmpl__CloseCaseGlobal',
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_x',
+        fullName: 'EmployeeCaseManagement',
+        source: 'GlobalTopicX',
+        localActions: [pluginAction],
+      } as GenAiPlugin;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
+            attributeName: 'EmployeeCaseManagement.CloseCase.input_caseId',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'caseId',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('GlobalTopicX.SvcCopilotTmpl__CloseCaseGlobal.input_caseId');
+    });
+
+    it('normalizes single attributeMapping object (non-array) before replacing', () => {
+      const topic = {
+        fullName: 'L1',
+        source: 'G1',
+      } as GenAiPlugin;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
+            attributeName: 'L1.ns__Fn.out',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'y',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const raw = bundle.GenAiPlannerBundle.attributeMappings;
+      const first = Array.isArray(raw) ? raw[0] : raw;
+      expect((first as { attributeName: string }).attributeName).to.equal('G1.ns__Fn.out');
     });
   });
 });
