@@ -166,7 +166,9 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
 
     if (outputDir) {
       const copiedDirs = copyMetadataDirsIfPresent(basePath, outputBase);
-      this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
+      if (copiedDirs.length > 0) {
+        this.warn(messages.getMessage('warn.copied-asset-directories', [copiedDirs.join(', ')]));
+      }
     }
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);

@@ -172,7 +172,7 @@ describe('validateGlobalAssets', () => {
     expect(warn.firstCall.args[0]).to.include('otherns__GlobalDev');
   });
 
-  it('can valdiate local topics and actions for global assets that are from a managed package', async () => {
+  it('can validate local topics and actions for global assets that are from a managed package', async () => {
     const topic = { fullName: 'T1', source: 'x' } as GenAiPlugin;
     const action = { fullName: 'A1', source: 'x' } as GenAiFunction;
     const queryImpl = async (soql: string) => {
@@ -242,6 +242,52 @@ describe('validateGlobalAssets', () => {
       expect(msg).to.include('MissingTopic');
       expect(msg).to.include('MissingAction');
     }
+    expect(warn.called).to.be.false;
+  });
+
+  it('does not warn  when local topic Source is OOTB topic', async () => {
+    const topic = { fullName: 'LocTopic', source: 'x' } as GenAiPlugin;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiPluginDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'LocTopic',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'StandardGlobalTopicName',
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([topic], [], makeConnection(queryImpl), '', warn);
+    expect(warn.called).to.be.false;
+  });
+
+  it('does not warn  when local action Source is OOTB action', async () => {
+    const action = { fullName: 'MyFn', source: 'x' } as GenAiFunction;
+    const queryImpl = async (soql: string) => {
+      if (soql.includes('GenAiFunctionDefinition')) {
+        return {
+          records: [
+            {
+              Id: LOCAL_ASSET_ID,
+              DeveloperName: 'MyFn',
+              NamespacePrefix: null,
+              IsLocal: true,
+              Source: 'SomeOOTBFunction',
+            },
+          ],
+        };
+      }
+      return { records: [] };
+    };
+    const warn = sinon.spy();
+    await validateGlobalAssets([], [action], makeConnection(queryImpl), '', warn);
     expect(warn.called).to.be.false;
   });
 });
@@ -568,6 +614,181 @@ describe('agent generate template', () => {
 
       expect(bundle.GenAiPlannerBundle.genAiFunctions).to.deep.equal([]);
       expect(bundle.GenAiPlannerBundle.localActionLinks).to.deep.equal([]);
+    });
+  });
+
+  describe('replaceReferencesToGlobalAssets (genAiPlugins and clearing local state)', () => {
+    it('sets genAiPlugins from topic.source, clears localTopicLinks, localTopics, and plannerActions', () => {
+      const topic = {
+        developerName: 't1',
+        fullName: 'Local_Topic_A',
+        source: 'Global_Topic_A',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [{ genAiPluginName: 'Local_Topic_A' }],
+          localTopics: [topic],
+          plannerActions: [{ developerName: 'pa', fullName: 'pa', source: 'GlobalPa' } as GenAiFunction],
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      expect(bundle.GenAiPlannerBundle.genAiPlugins).to.deep.equal([{ genAiPluginName: 'Global_Topic_A' }]);
+      expect(bundle.GenAiPlannerBundle.localTopicLinks).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.localTopics).to.deep.equal([]);
+      expect(bundle.GenAiPlannerBundle.plannerActions).to.deep.equal([]);
+    });
+  });
+
+  describe('replaceReferencesToGlobalAssets (attributeMappings / ruleExpressionAssignments)', () => {
+    it('replaces local topic segments in attributeMappings.attributeName with global names from source', () => {
+      const topic = {
+        developerName: 'Local_Events_Information',
+        fullName: 'Local_Events_Information',
+        source: 'Weather_and_Temperature_Information',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          attributeMappings: [
+            {
+              attributeName: 'Local_Events_Information.MyNs__MyAction.input_customerId',
+              attributeType: 'CustomPluginFunctionAttribute',
+              mappingTargetName: 'customerId',
+              mappingType: 'Variable',
+            },
+          ],
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('Weather_and_Temperature_Information.MyNs__MyAction.input_customerId');
+    });
+
+    it('replaces local topic segments in ruleExpressionAssignments.targetName', () => {
+      const topic = {
+        developerName: 'Resort_History_Information',
+        fullName: 'Resort_History_Information',
+        source: 'Global_ResortHistory',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          ruleExpressionAssignments: [
+            {
+              targetName: 'Resort_History_Information.someField',
+              expression: 'true',
+            },
+          ],
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const assignments = bundle.GenAiPlannerBundle.ruleExpressionAssignments as Array<{ targetName: string }>;
+      expect(assignments[0].targetName).to.equal('Global_ResortHistory.someField');
+    });
+
+    it('replaces planner action fullName segments when present in dot-separated attributeName', () => {
+      const topic = {
+        developerName: 'topic_z',
+        fullName: 'topic_z',
+        source: 'Global_Topic_Z',
+      } as GenAiPlugin;
+      const plannerAction = {
+        developerName: 'PlannerAct',
+        fullName: 'PlannerAct',
+        source: 'Global_PlannerAct',
+      } as GenAiFunction;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          plannerActions: [plannerAction],
+          attributeMappings: [
+            {
+              attributeName: 'PlannerAct.OtherNs__Fn.output_x',
+              attributeType: 'CustomPluginFunctionAttribute',
+              mappingTargetName: 'x',
+              mappingType: 'Variable',
+            },
+          ],
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('Global_PlannerAct.OtherNs__Fn.output_x');
+    });
+
+    it('replaces plugin localAction fullName segments in attributeMappings (from topic.localActions)', () => {
+      const pluginAction = {
+        developerName: 'CloseCase',
+        fullName: 'CloseCase',
+        source: 'SvcCopilotTmpl__CloseCaseGlobal',
+      } as GenAiFunction;
+      const topic = {
+        developerName: 'topic_x',
+        fullName: 'EmployeeCaseManagement',
+        source: 'GlobalTopicX',
+        localActions: [pluginAction],
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          attributeMappings: [
+            {
+              attributeName: 'EmployeeCaseManagement.CloseCase.input_caseId',
+              attributeType: 'CustomPluginFunctionAttribute',
+              mappingTargetName: 'caseId',
+              mappingType: 'Variable',
+            },
+          ],
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const mappings = bundle.GenAiPlannerBundle.attributeMappings as Array<{ attributeName: string }>;
+      expect(mappings[0].attributeName).to.equal('GlobalTopicX.SvcCopilotTmpl__CloseCaseGlobal.input_caseId');
+    });
+
+    it('normalizes single attributeMapping object (non-array) before replacing', () => {
+      const topic = {
+        fullName: 'L1',
+        source: 'G1',
+      } as GenAiPlugin;
+      const bundle = {
+        GenAiPlannerBundle: {
+          localTopicLinks: [],
+          localTopics: [topic],
+          attributeMappings: {
+            attributeName: 'L1.ns__Fn.out',
+            attributeType: 'x',
+            mappingTargetName: 'y',
+            mappingType: 'Variable',
+          },
+          genAiPlugins: [],
+        },
+      } as unknown as GenAiPlannerBundleExt;
+
+      replaceReferencesToGlobalAssets(bundle, [topic]);
+
+      const raw = bundle.GenAiPlannerBundle.attributeMappings;
+      const first = Array.isArray(raw) ? raw[0] : raw;
+      expect((first as { attributeName: string }).attributeName).to.equal('G1.ns__Fn.out');
     });
   });
 });
