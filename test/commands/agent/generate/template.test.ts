@@ -38,7 +38,7 @@ const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-gen
 const minimalGenAiPlannerBundleMock = (): GenAiPlannerBundleExt['GenAiPlannerBundle'] => ({
   masterLabel: 'Test fixture',
   plannerType: 'AiCopilot__ReAct',
-  plannerSurfaces: [{ surface: 'TestSurface', surfaceType: 'Messaging' }],
+  plannerSurfaces: [{ surface: 'TestSurface', surfaceType: 'Messaging', outboundRouteConfigs: [] }],
   attributeMappings: [],
   genAiFunctions: [],
   genAiPlugins: [],
