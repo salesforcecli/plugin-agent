@@ -19,6 +19,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } 
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import type { Connection } from '@salesforce/core';
 import { Messages, SfError, validateSalesforceId } from '@salesforce/core';
+import { ensureArray } from '@salesforce/kit';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import type {
   Bot,
@@ -333,22 +334,14 @@ export const replaceReferencesToGlobalAssets = (
   }
 
   // replace references in attributeMappings and ruleExpressionAssignments
-  const attributeMappings = Array.isArray(plannerBundle.attributeMappings)
-    ? plannerBundle.attributeMappings
-    : plannerBundle.attributeMappings
-    ? [plannerBundle.attributeMappings]
-    : [];
+  const attributeMappings = ensureArray(plannerBundle.attributeMappings);
   for (const mapping of attributeMappings) {
     if (mapping.attributeName) {
       mapping.attributeName = replaceLocalRefsWithGlobal(mapping.attributeName, localToGlobalAssets);
     }
   }
 
-  const ruleExpressionAssignments = Array.isArray(plannerBundle.ruleExpressionAssignments)
-    ? plannerBundle.ruleExpressionAssignments
-    : plannerBundle.ruleExpressionAssignments
-    ? [plannerBundle.ruleExpressionAssignments]
-    : [];
+  const ruleExpressionAssignments = ensureArray(plannerBundle.ruleExpressionAssignments);
   for (const assignment of ruleExpressionAssignments) {
     if (assignment.targetName) {
       assignment.targetName = replaceLocalRefsWithGlobal(assignment.targetName, localToGlobalAssets);

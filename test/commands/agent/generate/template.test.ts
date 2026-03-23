@@ -35,6 +35,39 @@ import {
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
+const minimalGenAiPlannerBundleMock = (): GenAiPlannerBundleExt['GenAiPlannerBundle'] => ({
+  masterLabel: 'Test fixture',
+  plannerType: 'AiCopilot__ReAct',
+  plannerSurfaces: [{ surface: 'TestSurface', surfaceType: 'Messaging' }],
+  attributeMappings: [],
+  genAiFunctions: [],
+  genAiPlugins: [],
+  ruleExpressionAssignments: [],
+  ruleExpressions: [
+    {
+      conditions: [
+        {
+          leftOperand: 'fixture',
+          leftOperandType: 'Variable',
+          operator: 'equal',
+        },
+      ],
+      expressionLabel: 'Fixture',
+      expressionName: 'Fixture',
+    },
+  ],
+  localTopicLinks: [],
+});
+
+const makeGenAiPlannerBundleExt = (
+  plannerOverrides: Partial<GenAiPlannerBundleExt['GenAiPlannerBundle']>
+): GenAiPlannerBundleExt => ({
+  GenAiPlannerBundle: {
+    ...minimalGenAiPlannerBundleMock(),
+    ...plannerOverrides,
+  },
+});
+
 const BOT_XML_NGA = `<?xml version="1.0" encoding="UTF-8"?>
 <Bot xmlns="http://soap.sforce.com/2006/04/metadata">
   <agentDSLEnabled>true</agentDSLEnabled>
@@ -444,12 +477,10 @@ describe('agent generate template', () => {
 
   it('should throw local-topics-without-source when a local topic has no source', () => {
     const topicWithoutSource = { developerName: 'my_topic', fullName: 'my_topic' } as GenAiPlugin;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topicWithoutSource],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topicWithoutSource],
+    });
 
     try {
       getLocalAssets(bundle);
@@ -462,12 +493,10 @@ describe('agent generate template', () => {
 
   it('should throw local-actions-without-source when a local action has no source', () => {
     const actionWithoutSource = { developerName: 'my_action', fullName: 'my_action' } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        plannerActions: [actionWithoutSource],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      plannerActions: [actionWithoutSource],
+    });
 
     try {
       getLocalAssets(bundle);
@@ -485,12 +514,10 @@ describe('agent generate template', () => {
       fullName: 'topic_a',
       source: 'GlobalTopic_A',
     } as GenAiPlugin;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topic],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topic],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -517,13 +544,11 @@ describe('agent generate template', () => {
       fullName: 'planner_action',
       source: 'GlobalPlannerAction',
     } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [topicWithAction],
-        plannerActions: [plannerAction],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [topicWithAction],
+      plannerActions: [plannerAction],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -542,13 +567,11 @@ describe('agent generate template', () => {
       fullName: 'solo_planner',
       source: 'GlobalSoloAction',
     } as GenAiFunction;
-    const bundle = {
-      GenAiPlannerBundle: {
-        localTopicLinks: [],
-        localTopics: [],
-        plannerActions: [plannerAction],
-      },
-    } as unknown as GenAiPlannerBundleExt;
+    const bundle = makeGenAiPlannerBundleExt({
+      localTopicLinks: [],
+      localTopics: [],
+      plannerActions: [plannerAction],
+    });
 
     const { localTopics, localActions } = getLocalAssets(bundle);
 
@@ -571,16 +594,13 @@ describe('agent generate template', () => {
         fullName: 'topic_a',
         source: 'GlobalTopic_A',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
-          plannerActions: [localAction],
-          genAiPlugins: [],
-          genAiFunctions: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopics: [topic],
+        localActionLinks: [{ genAiFunctionName: 'AnswerQuestionsWithKnowledge' }],
+        plannerActions: [localAction],
+        genAiPlugins: [],
+        genAiFunctions: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -599,16 +619,13 @@ describe('agent generate template', () => {
         fullName: 'topic_a',
         source: 'GlobalTopic_A',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
-          plannerActions: [localAction],
-          genAiPlugins: [],
-          genAiFunctions: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopics: [topic],
+        localActionLinks: [{ genAiFunctionName: 'OtherAction' }],
+        plannerActions: [localAction],
+        genAiPlugins: [],
+        genAiFunctions: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -624,14 +641,12 @@ describe('agent generate template', () => {
         fullName: 'Local_Topic_A',
         source: 'Global_Topic_A',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [{ genAiPluginName: 'Local_Topic_A' }],
-          localTopics: [topic],
-          plannerActions: [{ developerName: 'pa', fullName: 'pa', source: 'GlobalPa' } as GenAiFunction],
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [{ genAiPluginName: 'Local_Topic_A' }],
+        localTopics: [topic],
+        plannerActions: [{ developerName: 'pa', fullName: 'pa', source: 'GlobalPa' } as GenAiFunction],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -649,21 +664,19 @@ describe('agent generate template', () => {
         fullName: 'Local_Events_Information',
         source: 'Weather_and_Temperature_Information',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          attributeMappings: [
-            {
-              attributeName: 'Local_Events_Information.MyNs__MyAction.input_customerId',
-              attributeType: 'CustomPluginFunctionAttribute',
-              mappingTargetName: 'customerId',
-              mappingType: 'Variable',
-            },
-          ],
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
+            attributeName: 'Local_Events_Information.MyNs__MyAction.input_customerId',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'customerId',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -677,19 +690,18 @@ describe('agent generate template', () => {
         fullName: 'Resort_History_Information',
         source: 'Global_ResortHistory',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          ruleExpressionAssignments: [
-            {
-              targetName: 'Resort_History_Information.someField',
-              expression: 'true',
-            },
-          ],
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        ruleExpressionAssignments: [
+          {
+            targetName: 'Resort_History_Information.someField',
+            ruleExpressionName: 'fixture_rule',
+            targetType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -708,22 +720,20 @@ describe('agent generate template', () => {
         fullName: 'PlannerAct',
         source: 'Global_PlannerAct',
       } as GenAiFunction;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          plannerActions: [plannerAction],
-          attributeMappings: [
-            {
-              attributeName: 'PlannerAct.OtherNs__Fn.output_x',
-              attributeType: 'CustomPluginFunctionAttribute',
-              mappingTargetName: 'x',
-              mappingType: 'Variable',
-            },
-          ],
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        plannerActions: [plannerAction],
+        attributeMappings: [
+          {
+            attributeName: 'PlannerAct.OtherNs__Fn.output_x',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'x',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -743,21 +753,19 @@ describe('agent generate template', () => {
         source: 'GlobalTopicX',
         localActions: [pluginAction],
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          attributeMappings: [
-            {
-              attributeName: 'EmployeeCaseManagement.CloseCase.input_caseId',
-              attributeType: 'CustomPluginFunctionAttribute',
-              mappingTargetName: 'caseId',
-              mappingType: 'Variable',
-            },
-          ],
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
+            attributeName: 'EmployeeCaseManagement.CloseCase.input_caseId',
+            attributeType: 'CustomPluginFunctionAttribute',
+            mappingTargetName: 'caseId',
+            mappingType: 'Variable',
+          },
+        ],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
@@ -770,19 +778,19 @@ describe('agent generate template', () => {
         fullName: 'L1',
         source: 'G1',
       } as GenAiPlugin;
-      const bundle = {
-        GenAiPlannerBundle: {
-          localTopicLinks: [],
-          localTopics: [topic],
-          attributeMappings: {
+      const bundle = makeGenAiPlannerBundleExt({
+        localTopicLinks: [],
+        localTopics: [topic],
+        attributeMappings: [
+          {
             attributeName: 'L1.ns__Fn.out',
-            attributeType: 'x',
+            attributeType: 'CustomPluginFunctionAttribute',
             mappingTargetName: 'y',
             mappingType: 'Variable',
           },
-          genAiPlugins: [],
-        },
-      } as unknown as GenAiPlannerBundleExt;
+        ],
+        genAiPlugins: [],
+      });
 
       replaceReferencesToGlobalAssets(bundle, [topic]);
 
