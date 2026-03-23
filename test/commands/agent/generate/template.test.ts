@@ -103,7 +103,7 @@ describe('validateGlobalAssets', () => {
       expect.fail('expected SfError');
     } catch (error) {
       expect(error).to.be.instanceOf(SfError);
-      expect((error as SfError).message).to.match(/target org|not present/i);
+      expect((error as SfError).message).to.match(/source org|isn't in the source org/i);
       expect((error as SfError).message).to.include('GhostTopic');
     }
     expect(warn.called).to.be.false;
