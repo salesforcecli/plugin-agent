@@ -115,7 +115,7 @@ export async function getTestSession(): Promise<TestSession> {
           console.log('Creating agent user...');
           const agentUserResult = execCmd<{ username: string }>(
             `org create agent-user --target-org ${defaultOrg.username} --json`,
-            { ensureExitCode: 0 }
+            { ensureExitCode: 0, cli: 'sf' }
           );
 
           if (!agentUserResult.jsonOutput?.result?.username) {
