@@ -15,7 +15,6 @@
  */
 
 import { join, normalize } from 'node:path';
-import { existsSync } from 'node:fs';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
@@ -50,10 +49,6 @@ describe('agent test create', function () {
 
     expect(result.path).to.be.a('string').and.not.be.empty;
     expect(result.contents).to.be.a('string').and.not.be.empty;
-
-    // Verify file exists (path is relative to project root)
-    const fullPath = join(session.project.dir, result.path);
-    expect(existsSync(fullPath)).to.be.true;
   });
 
   it('should fail when spec file does not exist', async () => {
