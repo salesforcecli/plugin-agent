@@ -39,6 +39,11 @@ export type BotTemplateExt = {
   };
 };
 
+export type GenAiPlannerBundleExt = {
+  '?xml': { '@_version': '1.0'; '@_encoding': 'UTF-8' };
+  GenAiPlannerBundle: GenAiPlannerBundle;
+};
+
 type BotExt = {
   Bot: Bot & {
     agentDSLEnabled?: boolean;
@@ -110,18 +115,18 @@ export default class AgentGenerateTemplate extends SfCommand<AgentGenerateTempla
     // Parse the metadata files as JSON
     const botJson = xmlToJson<BotExt>(join(botDir, `${botName}.bot-meta.xml`), parser);
     const botVersionJson = xmlToJson<BotVersionExt>(join(botDir, `v${botVersion}.botVersion-meta.xml`), parser);
-    const genAiPlannerBundleMetaJson = xmlToJson<GenAiPlannerBundle>(
+    const genAiPlannerBundleMetaJson = xmlToJson<GenAiPlannerBundleExt>(
       join(genAiPlannerBundleDir, botName, `${botName}.genAiPlannerBundle`),
       parser
     );
 
     // Modify the metadata files for final output
     // TODO: Confirm this name (might be conversationDefinitionPlanners)
-    genAiPlannerBundleMetaJson.botTemplate = finalFilename;
+    genAiPlannerBundleMetaJson.GenAiPlannerBundle.botTemplate = finalFilename;
     const botTemplate = convertBotToBotTemplate(botJson, botVersionJson, finalFilename, botTemplateFilePath);
 
     // Build and save the metadata files
-    jsonToXml<GenAiPlannerBundle>(clonedGenAiPlannerBundleFilePath, genAiPlannerBundleMetaJson, builder);
+    jsonToXml<GenAiPlannerBundleExt>(clonedGenAiPlannerBundleFilePath, genAiPlannerBundleMetaJson, builder);
     jsonToXml<BotTemplateExt>(botTemplateFilePath, botTemplate, builder);
 
     this.log(`\nSaved BotTemplate to:\n - ${botTemplateFilePath}`);
