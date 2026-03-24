@@ -1,0 +1,39 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "isVerified": {
+      "title": "Verified",
+      "description": "Stores a boolean value that indicates whether the customer code is verified.",
+      "lightning:type": "lightning__booleanType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "customerId": {
+      "title": "Customer Id",
+      "description": "Stores the Salesforce user ID or contact ID.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "customerType": {
+      "title": "Customer Type",
+      "description": "Stores Type of ID",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": false,
+      "copilotAction:isUsedByPlanner": false
+    },
+    "messageAfterVerification": {
+      "title": "Message After Verification",
+      "description": "Stores a generic message to be displayed after successful verification.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

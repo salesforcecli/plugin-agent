@@ -1,0 +1,15 @@
+{
+  "required": ["date"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "date": {
+      "title": "date",
+      "description": "Stores the desired date identified by the customer to schedule a delivery.",
+      "lightning:type": "lightning__dateType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

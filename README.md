@@ -422,14 +422,18 @@ _See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/
 
 ## `sf agent generate template`
 
-Generate an agent template from an existing agent in your DX project so you can then package the template in a managed package.
+Generate an agent template from an existing agent in your DX project so you can then package the template in a second-generation managed package.
 
 ```
 USAGE
-  $ sf agent generate template --agent-version <value> -f <value> [--json] [--flags-dir <value>] [--api-version <value>]
+  $ sf agent generate template -o <value> --agent-version <value> -f <value> [--json] [--flags-dir <value>] [--api-version
+    <value>] [-r <value>]
 
 FLAGS
   -f, --agent-file=<value>     (required) Path to an agent (Bot) metadata file.
+  -o, --source-org=<value>     (required) Username or alias of the namespaced scratch org that contains the agent which
+                               this template is based on.
+  -r, --output-dir=<value>     Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
       --agent-version=<value>  (required) Version of the agent (BotVersion).
       --api-version=<value>    Override the api version used for api requests made by this command
 
@@ -438,32 +442,41 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Generate an agent template from an existing agent in your DX project so you can then package the template in a managed
-  package.
+  Generate an agent template from an existing agent in your DX project so you can then package the template in a
+  second-generation managed package.
+
+  WARNING: This command doesn't work for agents that were created from an Agent Script file. In other words, you can't
+  currently package an agent template for agents that use Agent Script.
 
   At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The
   GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these
-  three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use
-  the BotTemplate file, along with the GenAiPlannerBundle file that references the BotTemplate, to package the template
-  in a managed package that you can share between orgs or on AppExchange.
+  three types, located in your local DX project, to generate a BotTemplate metadata file for a specific agent (Bot). You
+  then use the BotTemplate metadata file, along with the GenAiPlannerBundle metadata file that references the
+  BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
 
   Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as
   force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple
-  BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion file must exist
-  locally. For example, if you specify "--agent-version 4", then the file
+  BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion metadata file must
+  exist locally. For example, if you specify "--agent-version 4", then the file
   force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
 
-  The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the
-  name <Agent_API_name>_v<Version>_Template.botTemplate-meta.xml, such as
-  force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full
-  pathname of the generated files when it completes.
+  The new BotTemplate metadata file is generated in the "botTemplates" directory in the output directory specified with
+  the --output-dir flag, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as
+  my-package/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of
+  the generated files when it completes.
+
+  See "Develop and Package Agent Templates Using Scratch Orgs"
+  (https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/dev2gp_package_agent_templates.htm) for
+  details about the complete process, which includes using a scratch org to create and test the agent, retrieving the
+  agent metadata to your DX project, running this command to create the agent template, and then packaging the template.
 
 EXAMPLES
-  Generate an agent template from a Bot metadata file in your DX project that corresponds to the My_Awesome_Agent
-  agent; use version 1 of the agent.
+  Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate
+  and GenAiPlannerBundle to the specified directory; use version 1 of the agent:
 
     $ sf agent generate template --agent-file \
-      force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
+      force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir \
+      my-package --source-org my-scratch-org
 ```
 
 _See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.32.10/src/commands/agent/generate/template.ts)_

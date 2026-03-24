@@ -1,20 +1,24 @@
 # summary
 
-Generate an agent template from an existing agent in your DX project so you can then package the template in a managed package.
+Generate an agent template from an existing agent in your DX project so you can then package the template in a second-generation managed package.
 
 # description
 
-At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate file for a specific agent (Bot). You then use the BotTemplate file, along with the GenAiPlannerBundle file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
+WARNING: This command doesn't work for agents that were created from an Agent Script file. In other words, you can't currently package an agent template for agents that use Agent Script.
 
-Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
+At a high-level, agents are defined by the Bot, BotVersion, and GenAiPlannerBundle metadata types. The GenAiPlannerBundle type in turn defines the agent's topics and actions. This command uses the metadata files for these three types, located in your local DX project, to generate a BotTemplate metadata file for a specific agent (Bot). You then use the BotTemplate metadata file, along with the GenAiPlannerBundle metadata file that references the BotTemplate, to package the template in a managed package that you can share between orgs or on AppExchange.
 
-The new BotTemplate file is generated in the "botTemplates" directory in your local package directory, and has the name <Agent_API_name>_v<Version>_Template.botTemplate-meta.xml, such as force-app/main/default/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+Use the --agent-file flag to specify the relative or full pathname of the Bot metadata file, such as force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml. A single Bot can have multiple BotVersions, so use the --agent-version flag to specify the version. The corresponding BotVersion metadata file must exist locally. For example, if you specify "--agent-version 4", then the file force-app/main/default/bots/My_Awesome_Agent/v4.botVersion-meta.xml must exist.
+
+The new BotTemplate metadata file is generated in the "botTemplates" directory in the output directory specified with the --output-dir flag, and has the name <Agent_API_name>\_v<Version>\_Template.botTemplate-meta.xml, such as my-package/botTemplates/My_Awesome_Agent_v4_Template.botTemplate-meta.xml. The command displays the full pathname of the generated files when it completes.
+
+See "Develop and Package Agent Templates Using Scratch Orgs" (https://developer.salesforce.com/docs/atlas.en-us.pkg2_dev.meta/pkg2_dev/dev2gp_package_agent_templates.htm) for details about the complete process, which includes using a scratch org to create and test the agent, retrieving the agent metadata to your DX project, running this command to create the agent template, and then packaging the template.
 
 # examples
 
-- Generate an agent template from a Bot metadata file in your DX project that corresponds to the My_Awesome_Agent agent; use version 1 of the agent.
+- Generate an agent template from the My_Awesome_Agent Bot metadata file in your DX project and save the BotTemplate and GenAiPlannerBundle to the specified directory; use version 1 of the agent. The agent that the template is based on is in the org with alias "my-scratch-org":
 
-  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1
+  <%= config.bin %> <%= command.id %> --agent-file force-app/main/default/bots/My_Awesome_Agent/My_Awesome_Agent.bot-meta.xml --agent-version 1 --output-dir my-package --source-org my-scratch-org
 
 # flags.agent-version.summary
 
@@ -24,13 +28,21 @@ Version of the agent (BotVersion).
 
 Path to an agent (Bot) metadata file.
 
+# flags.output-dir.summary
+
+Directory where the generated BotTemplate and GenAiPlannerBundle files are saved.
+
+# flags.source-org.summary
+
+Username or alias of the namespaced scratch org that contains the agent which this template is based on.
+
 # error.invalid-agent-file
 
-Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml
+Invalid Agent file. Must be a Bot metadata file. Example: force-app/main/default/bots/MyBot/MyBot.bot-meta.xml.
 
 # error.no-entry-dialog
 
-No entryDialog found in BotVersion file.
+No entryDialog found in the BotVersion metadata file.
 
 # error.invalid-bot-type
 
@@ -38,8 +50,37 @@ The 'type' attribute of this Bot metadata component XML file can't have a value 
 
 # error.no-label
 
-No label found in Agent (Bot) file: %s.
+No label found in Agent (Bot) metadata file: %s.
 
 # error.no-ml-domain
 
 No botMlDomain found in Agent (Bot) file: %s.
+
+# error.local-topics-without-source
+
+The local topic (genAiPlugin) you're trying to include in the agent template doesn't have a reference to a global topic. All topics in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
+%s.
+
+# error.local-actions-without-source
+
+The local action (genAiFunction) you're trying to include in the agent template doesn't have a reference to a global action. All actions in the agent template must be global assets defined in the Agent Asset Library in the source org that contains the agent that the template is based on.
+%s.
+
+# warn.reference-asset-from-managed-package
+
+The local asset (genAiPlugin or genAiFunction) that you're including in the agent template references an asset from a managed package. Make sure that the managed package is defined as a dependency in the sfdx-project.json file:
+%s.
+
+# error.global-asset-not-found
+
+The following assets (genAiPlugin or genAiFunction) that you're including in the agent template reference an asset that isn't in the source org:
+%s.
+
+# error.nga-agent-not-supported
+
+This command doesn't work for agents that were created from an Agent Script file. In other words, you can't currently package an agent template for agents that use Agent Script.
+
+# warn.copied-asset-directories
+
+The following directories have been copied to the target path. Review their contents and remove any unnecessary assets:
+%s.

@@ -1,0 +1,15 @@
+{
+  "required": ["emailAddress"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "emailAddress": {
+      "title": "Email Address",
+      "description": "Stores the email address provided by the customer.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": true,
+      "copilotAction:isUserInput": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

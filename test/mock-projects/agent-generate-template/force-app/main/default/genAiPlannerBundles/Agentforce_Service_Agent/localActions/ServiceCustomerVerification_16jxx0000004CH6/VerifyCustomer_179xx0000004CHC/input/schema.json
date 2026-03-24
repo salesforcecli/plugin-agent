@@ -1,0 +1,36 @@
+{
+  "required": ["authenticationKey", "customerCode", "customerId", "customerType"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "authenticationKey": {
+      "title": "Authentication Key",
+      "description": "Stores the authentication key that’s used to generate the verification code.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "customerCode": {
+      "title": "Customer Code",
+      "description": "Stores the verification code entered by the user in the conversation, which they received by email.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": true
+    },
+    "customerId": {
+      "title": "Customer ID",
+      "description": "Stores the Salesforce user ID or contact ID.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    },
+    "customerType": {
+      "title": "Customer Type",
+      "description": "Stores the customer ID type, whether it’s a Salesforce user or a contact.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

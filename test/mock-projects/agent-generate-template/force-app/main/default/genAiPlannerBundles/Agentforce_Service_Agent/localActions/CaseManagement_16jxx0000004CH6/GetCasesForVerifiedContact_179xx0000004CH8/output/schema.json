@@ -1,0 +1,22 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "caseList": {
+      "title": "Case List",
+      "description": "Stores the ID, Subject, Description, Status, CreatedDate, CaseNumber, LastModifiedDate, and ClosedDate for case records related to a specified contact.",
+      "maxItems": 2000,
+      "items": {
+        "lightning:type": "lightning__recordInfoType",
+        "lightning:sObjectInfo": {
+          "apiName": "Case"
+        }
+      },
+      "lightning:type": "lightning__listType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

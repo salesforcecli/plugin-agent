@@ -1,0 +1,15 @@
+{
+  "required": ["verifiedContactID"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "verifiedContactID": {
+      "title": "Verified Contact record ID",
+      "description": "Stores the contact record ID to be updated.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}
