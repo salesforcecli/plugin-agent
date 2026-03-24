@@ -39,8 +39,8 @@ describe('agent test run-eval', function () {
   describe('run-eval with JSON file', () => {
     it('should run evaluation with JSON payload file', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail (business logic), unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
@@ -50,12 +50,14 @@ describe('agent test run-eval', function () {
       expect(output?.result.summary.failed).to.be.a('number');
       expect(output?.result.summary.scored).to.be.a('number');
       expect(output?.result.summary.errors).to.be.a('number');
+      // Verify no execution errors (only test failures are acceptable)
+      expect(output?.result.summary.errors).to.equal(0);
     });
 
     it('should run evaluation with normalized payload', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result.tests[0]).to.be.ok;
       expect(output?.result.tests[0].id).to.equal('test-topic-routing');
@@ -67,8 +69,8 @@ describe('agent test run-eval', function () {
   describe('run-eval with YAML file', () => {
     it('should run evaluation with YAML test spec file', async () => {
       const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
@@ -78,8 +80,8 @@ describe('agent test run-eval', function () {
 
     it('should auto-infer agent name from YAML subjectName', async () => {
       const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       // Should succeed without explicit --api-name flag
       expect(output?.result).to.be.ok;
@@ -88,8 +90,8 @@ describe('agent test run-eval', function () {
 
     it('should handle YAML spec with contextVariables', async () => {
       const command = `agent test run-eval --spec ${yamlWithContextPath} --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       // Verify the command succeeds with contextVariables
       expect(output?.result).to.be.ok;
@@ -102,8 +104,8 @@ describe('agent test run-eval', function () {
   describe('run-eval with flags', () => {
     it('should respect --no-normalize flag', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --no-normalize --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
@@ -111,30 +113,30 @@ describe('agent test run-eval', function () {
 
     it('should use custom batch size', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --batch-size 1 --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result).to.be.ok;
       expect(output?.result.tests).to.be.an('array');
     });
 
     it('should support different result formats', async () => {
-      // Test human format (default) - don't enforce exit code since tests may fail
+      // Test human format (default) - exit code 0 even if tests fail
       const humanCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format human --target-org ${getUsername()}`;
-      const humanOutput = execCmd(humanCommand).shellOutput.stdout;
+      const humanOutput = execCmd(humanCommand, { ensureExitCode: 0 }).shellOutput.stdout;
 
       expect(humanOutput).to.be.ok;
       expect(humanOutput).to.be.a('string');
 
-      // Test tap format - don't enforce exit code since tests may fail
+      // Test tap format - exit code 0 even if tests fail
       const tapCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format tap --target-org ${getUsername()}`;
-      const tapOutput = execCmd(tapCommand).shellOutput.stdout;
+      const tapOutput = execCmd(tapCommand, { ensureExitCode: 0 }).shellOutput.stdout;
 
       expect(tapOutput).to.include('TAP version');
 
-      // Test junit format - don't enforce exit code since tests may fail
+      // Test junit format - exit code 0 even if tests fail
       const junitCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --result-format junit --target-org ${getUsername()}`;
-      const junitOutput = execCmd(junitCommand).shellOutput.stdout;
+      const junitOutput = execCmd(junitCommand, { ensureExitCode: 0 }).shellOutput.stdout;
 
       expect(junitOutput).to.include('<?xml');
       expect(junitOutput).to.include('testsuite');
@@ -183,8 +185,8 @@ describe('agent test run-eval', function () {
   describe('run-eval output structure', () => {
     it('should include test summaries with correct structure', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       expect(output?.result.tests).to.be.an('array');
       const firstTest = output?.result.tests[0];
@@ -198,8 +200,8 @@ describe('agent test run-eval', function () {
 
     it('should include summary with all metrics', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      // Don't enforce exit code 0 since the command exits with 1 if tests fail
-      const output = execCmd<RunEvalResult>(command).jsonOutput;
+      // Exit code should be 0 even if tests fail, unless there are execution errors
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 }).jsonOutput;
 
       const summary = output?.result.summary;
       expect(summary).to.have.property('passed');

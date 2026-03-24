@@ -272,8 +272,9 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     // 10. Build structured result for --json
     const { summary, testSummaries } = buildResultSummary(mergedResponse);
 
-    // Set exit code to 1 if any tests failed
-    if (summary.failed > 0 || summary.errors > 0) {
+    // Set exit code to 1 only for execution errors (tests couldn't run)
+    // Test failures (assertions failed) are business logic and should not affect exit code
+    if (summary.errors > 0) {
       process.exitCode = 1;
     }
 

@@ -10,6 +10,17 @@ This command validates that the Agent Script file in the authoring bundle compil
 
 This command uses the API name of the authoring bundle. If you don't provide an API name with the --api-name flag, the command searches the current DX project and outputs a list of authoring bundles that it found for you to choose from.
 
+ERROR CODES
+
+  Succeeded (0)     Agent Script file compiled successfully without errors.
+  Failed (1)        Compilation errors found in the Agent Script file.
+  NotFound (2)      Validation/compilation API returned HTTP 404. The API endpoint may not be available in your org or region.
+  ServerError (3)   Validation/compilation API returned HTTP 500. A server error occurred during compilation.
+
+ENVIRONMENT VARIABLES
+
+  SF_TARGET_ORG  Username or alias of your default org. Overrides the target-org configuration variable.
+
 # examples
 
 - Validate an authoring bundle by being prompted for its API name; use your default org:

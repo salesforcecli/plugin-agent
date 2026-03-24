@@ -129,6 +129,12 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         verbose: flags.verbose,
       });
 
+      // Set exit code to 1 only for execution errors (tests couldn't run properly)
+      // Test assertion failures are business logic and should not affect exit code
+      if (detailsResponse?.testCases.some((tc) => tc.status === 'ERROR')) {
+        process.exitCode = 1;
+      }
+
       return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId };
     } else {
       this.mso.stop();

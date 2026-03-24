@@ -12,6 +12,15 @@ When you provide a JSON payload, it's sent directly to the API with optional nor
 
 Supports 8+ evaluator types, including topic routing assertions, action invocation checks, string/numeric assertions, semantic similarity scoring, and LLM-based quality ratings.
 
+ERROR CODES
+
+  Succeeded (0)  Tests completed successfully. Test results (passed/failed) are in the JSON output.
+  Failed (1)     Execution error occurred. Tests couldn't run due to API errors, network issues, invalid parameters, or system errors.
+
+ENVIRONMENT VARIABLES
+
+  SF_TARGET_ORG  Username or alias of your default org. Overrides the target-org configuration variable.
+
 # flags.spec.summary
 
 Path to test spec file (YAML or JSON). Supports reading from stdin when piping content.
