@@ -15,7 +15,7 @@
  */
 
 import { join } from 'node:path';
-import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
+import { Duration, TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
 import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
@@ -113,8 +113,9 @@ export async function getTestSession(): Promise<TestSession> {
 
           // Create agent user using the new CLI command
           console.log('Creating agent user...');
-          const agentUserResult = await session.exec<{ username: string }>(
-            `org create agent-user --target-org ${defaultOrg.username} --json`
+          const agentUserResult = execCmd<{ username: string }>(
+            `org create agent-user --target-org ${defaultOrg.username} --json`,
+            { ensureExitCode: 0 }
           );
 
           if (!agentUserResult.jsonOutput?.result?.username) {

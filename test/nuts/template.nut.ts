@@ -18,11 +18,8 @@ import { readFileSync } from 'node:fs';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { XMLParser } from 'fast-xml-parser';
 import { expect } from 'chai';
-import {
-  AgentGenerateTemplateResult,
-  BotTemplateExt,
-  GenAiPlannerBundleExt,
-} from '../../src/commands/agent/generate/template.js';
+import { GenAiPlannerBundle } from '@salesforce/types/metadata';
+import { AgentGenerateTemplateResult, BotTemplateExt } from '../../src/commands/agent/generate/template.js';
 import { getTestSession } from './shared-setup.js';
 
 describe('agent generate template NUTs', function () {
@@ -123,10 +120,10 @@ describe('agent generate template NUTs', function () {
 
     const generatedGenAiPlannerBundleFile = parser.parse(
       readFileSync(generatedGenAiPlannerBundleFilePath, 'utf-8')
-    ) as GenAiPlannerBundleExt;
+    ) as GenAiPlannerBundle;
     const mockGenAiPlannerBundleFile = parser.parse(
       readFileSync(mockGenAiPlannerBundleFilePath, 'utf-8')
-    ) as GenAiPlannerBundleExt;
+    ) as GenAiPlannerBundle;
     expect(generatedGenAiPlannerBundleFile).to.deep.equal(mockGenAiPlannerBundleFile);
   });
 });
