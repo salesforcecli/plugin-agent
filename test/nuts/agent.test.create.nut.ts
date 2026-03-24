@@ -24,22 +24,20 @@ import { getTestSession, getUsername } from './shared-setup.js';
 
 describe('agent test create', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
-  this.timeout(30 * 60 * 1000); // 30 minutes
+  this.timeout(5 * 60 * 1000); // 5 minutes (using --preview, no deployment needed)
 
   let session: TestSession;
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
   });
-  it('should create test from test spec file', async function () {
-    // Increase timeout to 30 minutes since deployment can take a long time
-    this.timeout(30 * 60 * 1000);
+  it('should create test from test spec file', () => {
     const testApiName = genUniqueString('Test_Agent_%s');
     // Use the existing test spec file from the mock project
     const specPath = join(session.project.dir, 'specs', 'testSpec.yaml');
 
     const commandResult = execCmd<AgentTestCreateResult>(
-      `agent test create --api-name "${testApiName}" --spec "${specPath}" --target-org ${getUsername()} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${specPath}" --target-org ${getUsername()} --preview --json`,
       { ensureExitCode: 0 }
     );
 
@@ -64,7 +62,7 @@ describe('agent test create', function () {
 
     const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
-      `agent test create --api-name "${testApiName}" --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --json`,
+      `agent test create --api-name "${testApiName}" --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --preview --json`,
       { ensureExitCode: 1 }
     );
   });
