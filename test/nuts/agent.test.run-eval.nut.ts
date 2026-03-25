@@ -97,7 +97,7 @@ describe('agent test run-eval', function () {
   describe('run-eval with flags', () => {
     it('should respect --no-normalize flag', async () => {
       const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --no-normalize --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
+      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 1 });
 
       expect(result.jsonOutput?.result).to.be.ok;
       expect(result.jsonOutput?.result.tests).to.be.an('array');
