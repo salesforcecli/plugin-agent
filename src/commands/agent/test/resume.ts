@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
@@ -29,6 +29,17 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Test completed successfully. Test results (passed/failed) are in the JSON output.',
+    'Failed (1)':
+      "Command couldn't execute due to invalid job ID, API errors, network issues, or system errors. Exit code 1 also indicates tests encountered execution errors.",
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

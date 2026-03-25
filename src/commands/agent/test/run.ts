@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTester, AgentTestStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
@@ -61,6 +61,17 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Test started successfully (without --wait), or test completed successfully (with --wait).',
+    'Failed (1)':
+      "Command couldn't execute due to API errors, network issues, invalid test name, or system errors. When using --wait, exit code 1 also indicates tests encountered execution errors.",
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

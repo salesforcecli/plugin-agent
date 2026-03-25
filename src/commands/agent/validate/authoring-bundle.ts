@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages } from '@salesforce/core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Agent } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
@@ -34,6 +34,19 @@ export default class AgentValidateAuthoringBundle extends SfCommand<AgentValidat
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Agent Script file compiled successfully without errors.',
+    'Failed (1)': 'Compilation errors found in the Agent Script file.',
+    'NotFound (2)':
+      'Validation/compilation API returned HTTP 404. The API endpoint may not be available in your org or region.',
+    'ServerError (3)': 'Validation/compilation API returned HTTP 500. A server error occurred during compilation.',
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

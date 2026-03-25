@@ -8,15 +8,6 @@ This command requires a job ID, which the original "agent test run" command disp
 
 By default, this command outputs test results in human-readable tables for each test case. The tables show whether the test case passed, the expected and actual values, the test score, how long the test took, and more. Use the --result-format to display the test results in JSON or Junit format. Use the --output-dir flag to write the results to a file rather than to the terminal.
 
-ERROR CODES
-
-  Succeeded (0)  Results retrieved successfully. Test results (passed/failed) are in the output.
-  Failed (1)     Command couldn't execute due to invalid job ID, API errors, network issues, or system errors.
-
-ENVIRONMENT VARIABLES
-
-  SF_TARGET_ORG  Username or alias of your default org. Overrides the target-org configuration variable.
-
 # flags.job-id.summary
 
 Job ID of the completed agent test run.

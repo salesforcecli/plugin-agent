@@ -15,8 +15,8 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages, Org } from '@salesforce/core';
+import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages, Org } from '@salesforce/core';
 import { type EvalPayload, normalizePayload, splitIntoBatches } from '../../../evalNormalizer.js';
 import { type EvalApiResponse, formatResults, type ResultFormat } from '../../../evalFormatter.js';
 import { resultFormatFlag } from '../../../flags.js';
@@ -156,6 +156,17 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly examples = messages.getMessages('examples');
   public static state = 'beta';
   public static readonly hidden = true;
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Tests completed successfully. Test results (passed/failed) are in the JSON output.',
+    'Failed (1)':
+      "Execution error occurred. Tests couldn't run due to API errors, network issues, invalid parameters, or system errors.",
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

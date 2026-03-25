@@ -10,15 +10,6 @@ By default, this command starts the agent test in your org, but it doesn't wait 
 
 By default, this command outputs test results in human-readable tables for each test case, if the test completes in time. The tables show whether the test case passed, the expected and actual values, the test score, how long the test took, and more. Use the --result-format to display the test results in JSON or Junit format. Use the --output-dir flag to write the results to a file rather than to the terminal.
 
-ERROR CODES
-
-  Succeeded (0)  Test started successfully (without --wait), or test completed successfully (with --wait).
-  Failed (1)     Command couldn't execute due to API errors, network issues, invalid test name, or system errors. When using --wait, exit code 1 also indicates tests encountered execution errors.
-
-ENVIRONMENT VARIABLES
-
-  SF_TARGET_ORG  Username or alias of your default org. Overrides the target-org configuration variable.
-
 # flags.api-name.summary
 
 API name of the agent test to run; corresponds to the name of the AiEvaluationDefinition metadata component that implements the agent test.
