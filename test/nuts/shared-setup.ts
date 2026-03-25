@@ -15,7 +15,7 @@
  */
 
 import { join } from 'node:path';
-import { Duration, TestSession } from '@salesforce/cli-plugins-testkit';
+import { Duration, TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
 import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
@@ -110,52 +110,20 @@ export async function getTestSession(): Promise<TestSession> {
           const user = await User.create({ org });
           await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
           console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
-          // Create a new agent user with required permission sets
-          console.log('Creating agent user...');
 
-          // Get the 'Einstein Agent User' profile
-          const profileResult = await connection.singleRecordQuery<{ Id: string }>(
-            "SELECT Id FROM Profile WHERE Name='Einstein Agent User'"
+          // Create agent user using the new CLI command
+          console.log('Creating agent user...');
+          const agentUserResult = execCmd<{ username: string }>(
+            `org create agent-user --target-org ${defaultOrg.username} --json`,
+            { ensureExitCode: 0, cli: 'sf' }
           );
 
-          // Generate a unique username using timestamp to avoid duplicates
-          const timestamp = Date.now();
-          const domain = defaultOrg.username.split('@')[1];
-          agentUsername = `agent.user.${timestamp}@${domain}`;
-          const agentUserRecord = await connection.sobject('User').create({
-            FirstName: 'Agent',
-            LastName: 'User',
-            Alias: 'agentusr',
-            Email: agentUsername,
-            Username: agentUsername,
-            ProfileId: profileResult.Id,
-            TimeZoneSidKey: 'America/Los_Angeles',
-            LocaleSidKey: 'en_US',
-            EmailEncodingKey: 'UTF-8',
-            LanguageLocaleKey: 'en_US',
-          });
-
-          if (!agentUserRecord.success || !agentUserRecord.id) {
-            throw new Error(`Failed to create agent user: ${agentUserRecord.errors?.join(', ')}`);
+          if (!agentUserResult.jsonOutput?.result?.username) {
+            throw new Error('Failed to create agent user: no username returned');
           }
 
-          const agentUserId = agentUserRecord.id;
-          console.log(`Agent user created: ${agentUsername} (${agentUserId})`);
-
-          // Assign permission sets to the agent user individually to identify any failures
-          const permissionSets = [
-            'AgentforceServiceAgentBase',
-            'AgentforceServiceAgentUser',
-            'EinsteinGPTPromptTemplateUser',
-          ];
-
-          // I had issues assigning all permission sets in one pass, assign individually for now
-          for (const permissionSet of permissionSets) {
-            // eslint-disable-next-line no-await-in-loop
-            await user.assignPermissionSets(agentUserId, [permissionSet]);
-            console.log(`Permission set assigned: ${permissionSet}`);
-          }
-          console.log('Permission set assignment completed');
+          agentUsername = agentUserResult.jsonOutput.result.username;
+          console.log(`Agent user created: ${agentUsername}`);
 
           // Wait for Einstein AI services to be ready
           console.log('Waiting for Einstein AI services to be ready...');
