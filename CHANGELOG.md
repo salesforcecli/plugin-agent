@@ -1,3 +1,13 @@
+## [1.32.11](https://github.com/salesforcecli/plugin-agent/compare/1.32.10...1.32.11) (2026-03-24)
+
+## [1.32.2-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.32.6...1.32.2-dev.0) (2026-03-20)
+
+### Bug Fixes
+
+- localActions are not converted to genAiFunctions ([9f87799](https://github.com/salesforcecli/plugin-agent/commit/9f87799c6ff46d1558d5805e6683ff30e009b0bf))
+- small tweak to "agent generate template" help ([29949a3](https://github.com/salesforcecli/plugin-agent/commit/29949a38c156784fbd17642fadd6af4f8095827f))
+- update local asset references to global assets ([77cd590](https://github.com/salesforcecli/plugin-agent/commit/77cd59097110f8d51ddb919df7ee7d993b0b7174))
+
 ## [1.32.10](https://github.com/salesforcecli/plugin-agent/compare/1.32.9...1.32.10) (2026-03-22)
 
 ### Bug Fixes
@@ -16,11 +26,43 @@
 
 - **deps:** bump yaml from 2.8.2 to 2.8.3 ([57ff69d](https://github.com/salesforcecli/plugin-agent/commit/57ff69de477df20b51032f3f00d1c3bf1ebc38db))
 
-## [1.32.7](https://github.com/salesforcecli/plugin-agent/compare/1.32.6...1.32.7) (2026-03-20)
+## [1.32.7](https://github.com/salesforcecli/plugin-agent/compare/1.32.2-dev.0...1.32.7) (2026-03-20)
+
+## [1.32.6](https://github.com/salesforcecli/plugin-agent/compare/1.32.5...1.32.6) (2026-03-20)
 
 ### Bug Fixes
 
+- **deps:** bump flatted from 3.3.3 to 3.4.2 ([9d592ab](https://github.com/salesforcecli/plugin-agent/commit/9d592ab6bc39ab7cdf987d27411a0398ddf7242c))
+
+## [1.32.5](https://github.com/salesforcecli/plugin-agent/compare/1.32.4...1.32.5) (2026-03-20)
+
+### Bug Fixes
+
+- **deps:** bump fast-xml-parser from 5.5.6 to 5.5.7 ([5eea084](https://github.com/salesforcecli/plugin-agent/commit/5eea0843554b6df143d5a9c63096874afcda7260))
 - make agent preview start/send/end/sessions GA ([20eb69d](https://github.com/salesforcecli/plugin-agent/commit/20eb69dc898b53099ab07482fcaef87dc803b612))
+
+## [1.32.4](https://github.com/salesforcecli/plugin-agent/compare/1.32.3...1.32.4) (2026-03-18)
+
+### Bug Fixes
+
+- **deps:** bump fast-xml-parser from 5.5.5 to 5.5.6 ([62f31f0](https://github.com/salesforcecli/plugin-agent/commit/62f31f0035b63ed4a73b78d031e536ef8785b810))
+
+## [1.32.3](https://github.com/salesforcecli/plugin-agent/compare/1.32.2...1.32.3) (2026-03-15)
+
+## [1.32.2](https://github.com/salesforcecli/plugin-agent/compare/1.32.1...1.32.2) (2026-03-15)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 8.26.3 to 8.27.0 ([53c3248](https://github.com/salesforcecli/plugin-agent/commit/53c32487a0f280e60b184e22dca5250c3916fcbe))
+- **deps:** bump fast-xml-parser from 5.4.2 to 5.5.5 ([3aa48be](https://github.com/salesforcecli/plugin-agent/commit/3aa48be407c603305776847db439568604b54be4))
+
+## [1.32.2-dev.0](https://github.com/salesforcecli/plugin-agent/compare/1.32.6...1.32.2-dev.0) (2026-03-20)
+
+### Bug Fixes
+
+- localActions are not converted to genAiFunctions ([9f87799](https://github.com/salesforcecli/plugin-agent/commit/9f87799c6ff46d1558d5805e6683ff30e009b0bf))
+- small tweak to "agent generate template" help ([29949a3](https://github.com/salesforcecli/plugin-agent/commit/29949a38c156784fbd17642fadd6af4f8095827f))
+- update local asset references to global assets ([77cd590](https://github.com/salesforcecli/plugin-agent/commit/77cd59097110f8d51ddb919df7ee7d993b0b7174))
 
 ## [1.32.6](https://github.com/salesforcecli/plugin-agent/compare/1.32.5...1.32.6) (2026-03-20)
 

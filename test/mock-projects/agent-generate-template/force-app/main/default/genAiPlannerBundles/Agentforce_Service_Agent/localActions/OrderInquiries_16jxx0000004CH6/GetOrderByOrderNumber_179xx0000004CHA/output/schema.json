@@ -1,0 +1,15 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "orderDetails": {
+      "title": "orderDetails",
+      "description": "Stores the information about the order number, status, and delivery date for the identified order.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

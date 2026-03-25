@@ -1,0 +1,18 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "contactRecord": {
+      "title": "Contact record",
+      "description": "Stores the contact record to be updated.",
+      "lightning:type": "lightning__recordInfoType",
+      "lightning:sObjectInfo": {
+        "apiName": "Contact"
+      },
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}

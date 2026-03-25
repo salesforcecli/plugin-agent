@@ -1,0 +1,15 @@
+{
+  "unevaluatedProperties": false,
+  "properties": {
+    "outcomeMessage": {
+      "title": "Outcome message",
+      "description": "Stores the message that lets the customer know whether the reservation was successfully finalized.",
+      "lightning:type": "lightning__textType",
+      "lightning:isPII": false,
+      "copilotAction:isDisplayable": true,
+      "copilotAction:isUsedByPlanner": true
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}
