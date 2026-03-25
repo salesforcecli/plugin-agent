@@ -1,0 +1,15 @@
+{
+  "required": ["date"],
+  "unevaluatedProperties": false,
+  "properties": {
+    "date": {
+      "title": "Date",
+      "description": "Stores the date identified by the customer to look up available time slots for.",
+      "lightning:type": "lightning__dateType",
+      "lightning:isPII": false,
+      "copilotAction:isUserInput": false
+    }
+  },
+  "lightning:type": "lightning__objectType",
+  "lightning:textIndexed": true
+}
