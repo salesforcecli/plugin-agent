@@ -31,3 +31,11 @@ Version number of the agent to activate; if not specified, the command provides 
 # error.missingRequiredFlags
 
 Missing required flags: %s.
+
+# error.agentNotFound
+
+Agent '%s' not found in the org. Check that the API name is correct and that the agent exists.
+
+# error.activationFailed
+
+Failed to activate agent: %s

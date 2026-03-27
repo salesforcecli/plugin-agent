@@ -15,8 +15,9 @@
  */
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
-import { EnvironmentVariable, Messages } from '@salesforce/core';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTester } from '@salesforce/agents';
+import { CLIError } from '@oclif/core/errors';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
 import { AgentTestRunResult, resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
@@ -36,9 +37,10 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
   );
 
   public static readonly errorCodes = toHelpSection('ERROR CODES', {
-    'Succeeded (0)': 'Test completed successfully. Test results (passed/failed) are in the JSON output.',
-    'Failed (1)':
-      "Command couldn't execute due to invalid job ID, API errors, network issues, or system errors. Exit code 1 also indicates tests encountered execution errors.",
+    'Succeeded (0)': 'Test completed successfully (with test results in the output).',
+    'Failed (1)': 'Tests encountered execution errors (test cases with ERROR status).',
+    'NotFound (2)': 'Job ID not found or invalid.',
+    'OperationFailed (4)': 'Failed to poll test due to API or network errors.',
   });
 
   public static readonly flags = {
@@ -66,26 +68,65 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     verbose: verboseFlag,
   };
 
+  private mso: TestStages | undefined;
+
   public async run(): Promise<AgentTestRunResult> {
     const { flags } = await this.parse(AgentTestResume);
 
     const agentTestCache = await AgentTestCache.create();
-    const { name, runId, outputDir, resultFormat } = agentTestCache.useIdOrMostRecent(
-      flags['job-id'],
-      flags['use-most-recent']
-    );
+    let name;
+    let runId;
+    let outputDir;
+    let resultFormat;
 
-    const mso = new TestStages({
+    try {
+      const cacheEntry = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+      name = cacheEntry.name;
+      runId = cacheEntry.runId;
+      outputDir = cacheEntry.outputDir;
+      resultFormat = cacheEntry.resultFormat;
+    } catch (e) {
+      const wrapped = SfError.wrap(e);
+
+      // Check for job not found
+      if (
+        wrapped.message.toLowerCase().includes('not found') ||
+        wrapped.message.toLowerCase().includes('no test') ||
+        wrapped.message.toLowerCase().includes('invalid')
+      ) {
+        throw new SfError(`Job ID '${flags['job-id'] ?? 'most recent'}' not found.`, 'JobNotFound', [], 2, wrapped);
+      }
+
+      throw wrapped;
+    }
+
+    this.mso = new TestStages({
       title: `Agent Test Run: ${name ?? runId}`,
       jsonEnabled: this.jsonEnabled(),
     });
-    mso.start({ id: runId });
+    this.mso.start({ id: runId });
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
 
-    const { completed, response } = await mso.poll(agentTester, runId, flags.wait);
+    let completed;
+    let response;
+    try {
+      const pollResult = await this.mso.poll(agentTester, runId, flags.wait);
+      completed = pollResult.completed;
+      response = pollResult.response;
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+      throw new SfError(
+        `Failed to poll test results: ${wrapped.message}`,
+        'TestPollFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
+
     if (completed) await agentTestCache.removeCacheEntry(runId);
 
-    mso.stop();
+    this.mso.stop();
 
     await handleTestResults({
       id: runId,
@@ -102,6 +143,12 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       process.exitCode = 1;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return { ...response!, runId, status: 'COMPLETED' };
+  }
+
+  protected catch(error: Error | SfError | CLIError): Promise<never> {
+    this.mso?.error();
+    return super.catch(error);
   }
 }

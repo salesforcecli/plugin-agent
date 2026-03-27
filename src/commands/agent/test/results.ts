@@ -15,7 +15,7 @@
  */
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
-import { EnvironmentVariable, Messages } from '@salesforce/core';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
 import { resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
@@ -37,7 +37,8 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
 
   public static readonly errorCodes = toHelpSection('ERROR CODES', {
     'Succeeded (0)': 'Results retrieved successfully. Test results (passed/failed) are in the output.',
-    'Failed (1)': "Command couldn't execute due to invalid job ID, API errors, network issues, or system errors.",
+    'NotFound (2)': 'Job ID not found or invalid.',
+    'Failed (4)': 'Failed to retrieve results due to API or network errors.',
   });
 
   public static readonly flags = {
@@ -57,7 +58,32 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     const { flags } = await this.parse(AgentTestResults);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.results(flags['job-id']);
+
+    let response;
+    try {
+      response = await agentTester.results(flags['job-id']);
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+
+      // Check for job not found errors
+      if (
+        wrapped.message.toLowerCase().includes('not found') ||
+        wrapped.message.toLowerCase().includes('invalid') ||
+        wrapped.code === 'ENOENT'
+      ) {
+        throw new SfError(`Job ID '${flags['job-id']}' not found or invalid.`, 'JobNotFound', [], 2, wrapped);
+      }
+
+      // API/network failures
+      throw new SfError(
+        `Failed to retrieve results: ${wrapped.message}`,
+        'ResultsRetrievalFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
+
     await handleTestResults({
       id: flags['job-id'],
       format: flags['result-format'],
