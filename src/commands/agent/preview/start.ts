@@ -46,7 +46,11 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }),
     'use-live-actions': Flags.boolean({
       summary: messages.getMessage('flags.use-live-actions.summary'),
-      default: false,
+      exactlyOne: ['use-live-actions', 'simulate-actions'],
+    }),
+    'simulate-actions': Flags.boolean({
+      summary: messages.getMessage('flags.simulate-actions.summary'),
+      exactlyOne: ['use-live-actions', 'simulate-actions'],
     }),
   };
 
@@ -58,13 +62,15 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+
+    // Set mode based on which flag was specified
     if (agent instanceof ScriptAgent) {
       agent.preview.setMockMode(useLiveActions ? 'Live Test' : 'Mock');
     }
 
-    if (useLiveActions && agent instanceof ProductionAgent) {
+    if (flags['simulate-actions'] && agent instanceof ProductionAgent) {
       void Lifecycle.getInstance().emitWarning(
-        'Published agents always use real actions; --use-live-actions has no effect for published agents.'
+        'Published agents always use real actions; --simulate-actions has no effect for published agents.'
       );
     }
 

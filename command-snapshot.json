@@ -141,7 +141,16 @@
     "command": "agent:preview:start",
     "flagAliases": [],
     "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "authoring-bundle", "flags-dir", "json", "target-org", "use-live-actions"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "simulate-actions",
+      "target-org",
+      "use-live-actions"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {

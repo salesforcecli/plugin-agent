@@ -77,8 +77,14 @@ describe('agent preview start', () => {
   });
 
   describe('setMockMode', () => {
-    it('should call setMockMode with "Mock" when --use-live-actions is not set', async () => {
-      await AgentPreviewStart.run(['--authoring-bundle', 'MyAgent', '--target-org', 'test@org.com']);
+    it('should call setMockMode with "Mock" when --simulate-actions is set', async () => {
+      await AgentPreviewStart.run([
+        '--authoring-bundle',
+        'MyAgent',
+        '--simulate-actions',
+        '--target-org',
+        'test@org.com',
+      ]);
 
       expect(setMockModeStub.calledOnce).to.be.true;
       expect(setMockModeStub.firstCall.args[0]).to.equal('Mock');
