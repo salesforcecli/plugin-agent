@@ -38,19 +38,21 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
-      exactlyOne: ['api-name', 'authoring-bundle'],
+      exclusive: ['authoring-bundle'],
     }),
     'authoring-bundle': Flags.string({
       summary: messages.getMessage('flags.authoring-bundle.summary'),
-      exactlyOne: ['api-name', 'authoring-bundle'],
+      exclusive: ['api-name'],
     }),
     'use-live-actions': Flags.boolean({
       summary: messages.getMessage('flags.use-live-actions.summary'),
-      exactlyOne: ['use-live-actions', 'simulate-actions'],
+      exclusive: ['simulate-actions'],
+      dependsOn: ['authoring-bundle'],
     }),
     'simulate-actions': Flags.boolean({
       summary: messages.getMessage('flags.simulate-actions.summary'),
-      exactlyOne: ['use-live-actions', 'simulate-actions'],
+      exclusive: ['use-live-actions'],
+      dependsOn: ['authoring-bundle'],
     }),
   };
 
@@ -58,19 +60,21 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const { flags } = await this.parse(AgentPreviewStart);
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const useLiveActions = flags['use-live-actions'];
+    const simulateActions = flags['simulate-actions'];
 
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
 
-    // Set mode based on which flag was specified
+    // Set mode for authoring bundles based on which flag was specified
     if (agent instanceof ScriptAgent) {
       agent.preview.setMockMode(useLiveActions ? 'Live Test' : 'Mock');
     }
 
-    if (flags['simulate-actions'] && agent instanceof ProductionAgent) {
+    // Warn if mode flags are used with published agents (they have no effect)
+    if (agent instanceof ProductionAgent && (useLiveActions || simulateActions)) {
       void Lifecycle.getInstance().emitWarning(
-        'Published agents always use real actions; --simulate-actions has no effect for published agents.'
+        'Published agents always use real actions; --use-live-actions and --simulate-actions have no effect for published agents.'
       );
     }
 

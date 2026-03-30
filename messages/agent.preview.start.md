@@ -8,9 +8,12 @@ This command outputs a session ID that you then use with the "agent preview send
 
 Identify the agent you want to start previewing with either the --authoring-bundle flag to specify a local authoring bundle's API name or --api-name to specify an activated published agent's API name. To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory. Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory.
 
-You must explicitly specify the preview execution mode using one of these flags: --use-live-actions: Executes real Apex classes, flows, and other actions in the org. --simulate-actions: Uses AI to simulate action execution without calling real implementations.
+When starting a preview session with --authoring-bundle, you must explicitly specify the execution mode using one of these flags:
 
-Published agents always use live actions regardless of which flag is specified.
+- --use-live-actions: Executes real Apex classes, flows, and other actions in the org. This surfaces compile and validation errors during preview.
+- --simulate-actions: Uses AI to simulate action execution without calling real implementations.
+
+Published agents, which you specify with the --api-name, always use live actions.
 
 # flags.api-name.summary
 
@@ -22,11 +25,11 @@ API name of the authoring bundle metadata component that contains the agent's Ag
 
 # flags.use-live-actions.summary
 
-Execute real actions in the org (Apex classes, flows, etc.).
+Execute real actions in the org, such as Apex classes and flows. When previewing using an authoring bundle, you must specify either this flag or --simulate-actions.
 
 # flags.simulate-actions.summary
 
-Use AI to simulate action execution instead of calling real actions.
+Use AI to simulate action execution instead of calling real actions. When previewing using an authoring bundle, you must specify either this flag or --use-live-actions.
 
 # output.sessionId
 
@@ -34,7 +37,7 @@ Session ID: %s
 
 # examples
 
-- Start a programmatic agent preview session by specifying an authoring bundle. Use the org with alias "my-dev-org":
+- Start a programmatic agent preview session by specifying an authoring bundle; use simulated actions. Use the org with alias "my-dev-org":
 
   <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --target-org my-dev-org --simulate-actions
 
@@ -42,6 +45,6 @@ Session ID: %s
 
   <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --use-live-actions
 
-- Start a preview session with an activated published agent:
+- Start a preview session with an activated published agent in your default org (always uses live actions):
 
   <%= config.bin %> <%= command.id %> --api-name My_Published_Agent
