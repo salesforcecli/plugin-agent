@@ -1,3 +1,15 @@
+## [1.32.14](https://github.com/salesforcecli/plugin-agent/compare/1.32.13...1.32.14) (2026-03-29)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 4.10.2 to 4.10.3 ([d33c355](https://github.com/salesforcecli/plugin-agent/commit/d33c355bb8547f839f5d83e0b88744a1927f00f8))
+
+## [1.32.13](https://github.com/salesforcecli/plugin-agent/compare/1.32.12...1.32.13) (2026-03-29)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/source-deploy-retrieve ([c00e3b9](https://github.com/salesforcecli/plugin-agent/commit/c00e3b948d5d123a5a785dca51f056a943414114))
+
 ## [1.32.12](https://github.com/salesforcecli/plugin-agent/compare/1.32.11...1.32.12) (2026-03-27)
 
 ### Bug Fixes
