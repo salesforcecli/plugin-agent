@@ -45,7 +45,7 @@ describe('agent preview', function () {
 
   it('should fail when api-name does not exist in org', async () => {
     const invalidApiName = 'NonExistent_Agent_12345';
-    execCmd(`agent preview start --api-name ${invalidApiName} --use-live-actions --target-org ${getUsername()}`, {
+    execCmd(`agent preview start --api-name ${invalidApiName} --target-org ${getUsername()}`, {
       ensureExitCode: 1,
     });
   });
@@ -127,9 +127,7 @@ describe('agent preview', function () {
       const targetOrg = getUsername();
 
       const startResult = execCmd<AgentPreviewStartResult>(
-        `agent preview start --api-name ${
-          publishedAgent!.DeveloperName
-        } --use-live-actions --target-org ${targetOrg} --json`
+        `agent preview start --api-name ${publishedAgent!.DeveloperName} --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
       const sessionId = startResult!.sessionId;
