@@ -102,14 +102,5 @@ describe('agent preview start', () => {
       expect(setMockModeStub.calledOnce).to.be.true;
       expect(setMockModeStub.firstCall.args[0]).to.equal('Live Test');
     });
-
-    it('should throw error when using --authoring-bundle without mode flag', async () => {
-      try {
-        await AgentPreviewStart.run(['--authoring-bundle', 'MyAgent', '--target-org', 'test@org.com']);
-        expect.fail('Should have thrown an error');
-      } catch (error: unknown) {
-        expect((error as Error).message).to.include('must specify either --use-live-actions or --simulate-actions');
-      }
-    });
   });
 });

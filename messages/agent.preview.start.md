@@ -35,14 +35,6 @@ Use AI to simulate action execution instead of calling real actions. You must sp
 
 Session ID: %s
 
-# output.mode.script
-
-Preview mode: %s actions (authoring bundle)
-
-# output.mode.production
-
-Preview mode: %s actions (published agent always uses live actions)
-
 # examples
 
 - Start a programmatic agent preview session by specifying an authoring bundle; use simulated actions. Use the org with alias "my-dev-org":

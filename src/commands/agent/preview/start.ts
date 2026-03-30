@@ -15,7 +15,7 @@
  */
 
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages, SfError } from '@salesforce/core';
+import { Lifecycle, Messages } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache } from '../../../previewSessionStore.js';
 
@@ -38,17 +38,21 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
-      exactlyOne: ['api-name', 'authoring-bundle'],
+      exclusive: ['authoring-bundle'],
     }),
     'authoring-bundle': Flags.string({
       summary: messages.getMessage('flags.authoring-bundle.summary'),
-      exactlyOne: ['api-name', 'authoring-bundle'],
+      exclusive: ['api-name'],
     }),
     'use-live-actions': Flags.boolean({
       summary: messages.getMessage('flags.use-live-actions.summary'),
+      exclusive: ['simulate-actions'],
+      dependsOn: ['authoring-bundle'],
     }),
     'simulate-actions': Flags.boolean({
       summary: messages.getMessage('flags.simulate-actions.summary'),
+      exclusive: ['use-live-actions'],
+      dependsOn: ['authoring-bundle'],
     }),
   };
 
@@ -58,19 +62,6 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const useLiveActions = flags['use-live-actions'];
     const simulateActions = flags['simulate-actions'];
 
-    // Validate mode flags for authoring bundles
-    if (flags['authoring-bundle']) {
-      if (!useLiveActions && !simulateActions) {
-        throw new SfError(
-          'When using --authoring-bundle, you must specify either --use-live-actions or --simulate-actions.',
-          'MissingModeFlag'
-        );
-      }
-      if (useLiveActions && simulateActions) {
-        throw new SfError('Cannot specify both --use-live-actions and --simulate-actions.', 'ConflictingModeFlags');
-      }
-    }
-
     const agent = flags['authoring-bundle']
       ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
       : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
@@ -78,8 +69,6 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     // Set mode for authoring bundles based on which flag was specified
     if (agent instanceof ScriptAgent) {
       agent.preview.setMockMode(useLiveActions ? 'Live Test' : 'Mock');
-      const mode = useLiveActions ? 'live' : 'simulated';
-      this.log(messages.getMessage('output.mode.script', [mode]));
     }
 
     // Warn if mode flags are used with published agents (they have no effect)
@@ -87,7 +76,6 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       void Lifecycle.getInstance().emitWarning(
         'Published agents always use real actions; --use-live-actions and --simulate-actions have no effect for published agents.'
       );
-      this.log(messages.getMessage('output.mode.production', ['live']));
     }
 
     const session = await agent.preview.start();
