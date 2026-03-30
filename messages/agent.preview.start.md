@@ -25,7 +25,7 @@ API name of the authoring bundle metadata component that contains the agent's Ag
 
 # flags.use-live-actions.summary
 
-Execute real actions in the org, such as Apex classes and flows. You must specify either this flag or --simulate-actions
+Execute real actions in the org, such as Apex classes and flows. You must specify either this flag or --simulate-actions.
 
 # flags.simulate-actions.summary
 
