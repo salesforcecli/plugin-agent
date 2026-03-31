@@ -37,12 +37,17 @@ describe('agent preview', function () {
 
   it('should fail when authoring bundle does not exist', async () => {
     const invalidBundle = 'NonExistent_Bundle';
-    execCmd(`agent preview --authoring-bundle ${invalidBundle} --target-org ${getUsername()}`, { ensureExitCode: 1 });
+    execCmd(
+      `agent preview start --authoring-bundle ${invalidBundle} --simulate-actions --target-org ${getUsername()}`,
+      { ensureExitCode: 1 }
+    );
   });
 
   it('should fail when api-name does not exist in org', async () => {
     const invalidApiName = 'NonExistent_Agent_12345';
-    execCmd(`agent preview --api-name ${invalidApiName} --target-org ${getUsername()}`, { ensureExitCode: 1 });
+    execCmd(`agent preview start --api-name ${invalidApiName} --target-org ${getUsername()}`, {
+      ensureExitCode: 1,
+    });
   });
 
   describe('using preview start/send/end commands', () => {
@@ -53,7 +58,7 @@ describe('agent preview', function () {
       const targetOrg = getUsername();
 
       const startResult = execCmd<AgentPreviewStartResult>(
-        `agent preview start --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
+        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
       const sessionId = startResult!.sessionId;

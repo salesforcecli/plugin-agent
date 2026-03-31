@@ -77,8 +77,14 @@ describe('agent preview start', () => {
   });
 
   describe('setMockMode', () => {
-    it('should call setMockMode with "Mock" when --use-live-actions is not set', async () => {
-      await AgentPreviewStart.run(['--authoring-bundle', 'MyAgent', '--target-org', 'test@org.com']);
+    it('should call setMockMode with "Mock" when --simulate-actions is set', async () => {
+      await AgentPreviewStart.run([
+        '--authoring-bundle',
+        'MyAgent',
+        '--simulate-actions',
+        '--target-org',
+        'test@org.com',
+      ]);
 
       expect(setMockModeStub.calledOnce).to.be.true;
       expect(setMockModeStub.firstCall.args[0]).to.equal('Mock');
@@ -95,6 +101,40 @@ describe('agent preview start', () => {
 
       expect(setMockModeStub.calledOnce).to.be.true;
       expect(setMockModeStub.firstCall.args[0]).to.equal('Live Test');
+    });
+
+    it('should throw error when using --authoring-bundle without mode flag', async () => {
+      try {
+        await AgentPreviewStart.run(['--authoring-bundle', 'MyAgent', '--target-org', 'test@org.com']);
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        expect((error as Error).message).to.include('must specify either --use-live-actions or --simulate-actions');
+      }
+    });
+
+    it('should throw error when using both mode flags together', async () => {
+      try {
+        await AgentPreviewStart.run([
+          '--authoring-bundle',
+          'MyAgent',
+          '--use-live-actions',
+          '--simulate-actions',
+          '--target-org',
+          'test@org.com',
+        ]);
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        expect((error as Error).message).to.match(/cannot also be provided when using/i);
+      }
+    });
+
+    it('should throw error when neither --api-name nor --authoring-bundle is provided', async () => {
+      try {
+        await AgentPreviewStart.run(['--use-live-actions', '--target-org', 'test@org.com']);
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        expect((error as Error).message).to.match(/exactly one|api-name|authoring-bundle/i);
+      }
     });
   });
 });
