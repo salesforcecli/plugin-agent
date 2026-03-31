@@ -15,7 +15,7 @@
  */
 
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages } from '@salesforce/core';
+import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache } from '../../../previewSessionStore.js';
 
@@ -38,26 +38,34 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     'api-name': Flags.string({
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
-      exclusive: ['authoring-bundle'],
+      exactlyOne: ['api-name', 'authoring-bundle'],
     }),
     'authoring-bundle': Flags.string({
       summary: messages.getMessage('flags.authoring-bundle.summary'),
-      exclusive: ['api-name'],
+      exactlyOne: ['api-name', 'authoring-bundle'],
     }),
     'use-live-actions': Flags.boolean({
       summary: messages.getMessage('flags.use-live-actions.summary'),
       exclusive: ['simulate-actions'],
-      dependsOn: ['authoring-bundle'],
     }),
     'simulate-actions': Flags.boolean({
       summary: messages.getMessage('flags.simulate-actions.summary'),
       exclusive: ['use-live-actions'],
-      dependsOn: ['authoring-bundle'],
     }),
   };
 
   public async run(): Promise<AgentPreviewStartResult> {
     const { flags } = await this.parse(AgentPreviewStart);
+
+    // Validate: authoring-bundle requires exactly one mode flag
+    // (mutual exclusion of mode flags handled by 'exclusive' in flag definitions)
+    if (flags['authoring-bundle'] && !flags['use-live-actions'] && !flags['simulate-actions']) {
+      throw new SfError(
+        'When using --authoring-bundle, you must specify either --use-live-actions or --simulate-actions.',
+        'MissingModeFlag'
+      );
+    }
+
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const useLiveActions = flags['use-live-actions'];
     const simulateActions = flags['simulate-actions'];
@@ -68,7 +76,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
 
     // Set mode for authoring bundles based on which flag was specified
     if (agent instanceof ScriptAgent) {
-      agent.preview.setMockMode(useLiveActions ? 'Live Test' : 'Mock');
+      agent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
     }
 
     // Warn if mode flags are used with published agents (they have no effect)
