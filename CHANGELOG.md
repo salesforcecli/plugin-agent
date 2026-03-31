@@ -1,3 +1,12 @@
+## [1.32.16](https://github.com/salesforcecli/plugin-agent/compare/1.32.15...1.32.16) (2026-03-31)
+
+### Bug Fixes
+
+- correct no flag behavior ([d8cb6a6](https://github.com/salesforcecli/plugin-agent/commit/d8cb6a67bf73b3ac0ffcb9a32b89d1b42f094b66))
+- edit help ([ca5364b](https://github.com/salesforcecli/plugin-agent/commit/ca5364bf333ee9e19814b3905d0d666c486f1fde))
+- make agent preview start require preview mode flag ([095e81c](https://github.com/salesforcecli/plugin-agent/commit/095e81c1cb211886d58a5c04c2f26916adbcbe1e))
+- tweak help after Willie changed functionality a bit ([c941d5e](https://github.com/salesforcecli/plugin-agent/commit/c941d5e76793b08575b145fca6647696a5bb5837))
+
 ## [1.32.15](https://github.com/salesforcecli/plugin-agent/compare/1.32.14...1.32.15) (2026-03-31)
 
 ### Bug Fixes
