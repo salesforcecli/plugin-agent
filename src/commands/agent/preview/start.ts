@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Lifecycle, Messages, SfError } from '@salesforce/core';
+import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache } from '../../../previewSessionStore.js';
+import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.start');
@@ -31,6 +32,20 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Preview session started successfully.',
+    'Failed (1)': 'Agent Script compilation failed (syntax errors in the script).',
+    'NotFound (2)':
+      'Agent not found, or compilation API returned HTTP 404 (endpoint may not be available in your org or region).',
+    'ServerError (3)': 'Compilation API returned HTTP 500 (server error during compilation).',
+    'PreviewStartFailed (4)': 'Preview session failed to start due to API or network errors.',
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -69,12 +84,51 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const conn = flags['target-org'].getConnection(flags['api-version']);
     const useLiveActions = flags['use-live-actions'];
     const simulateActions = flags['simulate-actions'];
+    const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
 
-    const agent = flags['authoring-bundle']
-      ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
-      : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+    // Track telemetry for agent initialization
+    let agent;
+    try {
+      agent = flags['authoring-bundle']
+        ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
+        : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+
+      // Check for agent not found errors
+      if (wrapped.message.toLowerCase().includes('not found') || wrapped.code === 'ENOENT') {
+        const notFoundError = new SfError(
+          messages.getMessage('error.agentNotFound', [agentIdentifier]),
+          'AgentNotFound',
+          [],
+          2
+        );
+        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_agent_not_found' });
+        throw notFoundError;
+      }
+
+      // Check for compilation API errors (404/500 handled by @salesforce/agents)
+      if (wrapped.exitCode === COMPILATION_API_EXIT_CODES.NOT_FOUND) {
+        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_compilation_not_found' });
+        throw wrapped;
+      }
+      if (wrapped.exitCode === COMPILATION_API_EXIT_CODES.SERVER_ERROR) {
+        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_compilation_server_error' });
+        throw wrapped;
+      }
+
+      // Check for compilation failure (exit code 1)
+      if (wrapped.exitCode === 1 && wrapped.name === 'CompileAgentScriptError') {
+        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_compilation_failed' });
+        throw wrapped;
+      }
+
+      await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_agent_init_failed' });
+      throw wrapped;
+    }
 
     // Set mode for authoring bundles based on which flag was specified
+    // (mutual exclusion enforced by flag definitions - can't have both)
     if (agent instanceof ScriptAgent) {
       agent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
     }
@@ -86,10 +140,26 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       );
     }
 
-    const session = await agent.preview.start();
+    // Track telemetry for preview start
+    let session;
+    try {
+      session = await agent.preview.start();
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+      await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_failed' });
+      throw new SfError(
+        messages.getMessage('error.previewStartFailed', [wrapped.message]),
+        'PreviewStartFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
+
     const displayName = flags['authoring-bundle'] ?? flags['api-name'];
     await createCache(agent, { displayName });
 
+    await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_success' });
     const result: AgentPreviewStartResult = { sessionId: session.sessionId };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));
     return result;

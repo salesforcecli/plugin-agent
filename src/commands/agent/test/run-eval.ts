@@ -15,8 +15,8 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Messages, Org } from '@salesforce/core';
+import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages, Org, SfError } from '@salesforce/core';
 import { type EvalPayload, normalizePayload, splitIntoBatches } from '../../../evalNormalizer.js';
 import { type EvalApiResponse, formatResults, type ResultFormat } from '../../../evalFormatter.js';
 import { resultFormatFlag } from '../../../flags.js';
@@ -157,6 +157,18 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static state = 'beta';
   public static readonly hidden = true;
 
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Tests completed successfully. Test results (passed/failed) are in the JSON output.',
+    'Failed (1)': "Tests encountered execution errors (tests couldn't run properly).",
+    'NotFound (2)': 'Agent not found, spec file not found, or invalid agent name.',
+    'OperationFailed (4)': 'Failed to execute tests due to API or network errors.',
+  });
+
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
@@ -203,7 +215,12 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       // If we got here, it's valid content
     } catch {
       // Not valid content, must be a file path - read it
-      rawContent = await readFile(flags.spec, 'utf-8');
+      try {
+        rawContent = await readFile(flags.spec, 'utf-8');
+      } catch (e) {
+        const wrapped = SfError.wrap(e);
+        throw new SfError(`Spec file not found: ${flags.spec}`, 'SpecFileNotFound', [], 2, wrapped);
+      }
     }
 
     // 2. Detect format and parse
@@ -235,7 +252,17 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     // 3. If --api-name (or auto-inferred from YAML), resolve IDs and inject
     if (agentApiName) {
-      const { agentId, versionId } = await resolveAgent(org, agentApiName);
+      let agentId;
+      let versionId;
+      try {
+        const resolved = await resolveAgent(org, agentApiName);
+        agentId = resolved.agentId;
+        versionId = resolved.versionId;
+      } catch (e) {
+        const wrapped = SfError.wrap(e);
+        throw new SfError(`Agent '${agentApiName}' not found.`, 'AgentNotFound', [], 2, wrapped);
+      }
+
       for (const test of payload.tests) {
         for (const step of test.steps) {
           if (step.type === 'agent.create_session') {
@@ -260,7 +287,19 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     const batches = splitIntoBatches(payload.tests, batchSize);
 
     // 7. Execute batches
-    const allResults = await executeBatches(org, batches, (msg) => this.log(msg));
+    let allResults;
+    try {
+      allResults = await executeBatches(org, batches, (msg) => this.log(msg));
+    } catch (e) {
+      const wrapped = SfError.wrap(e);
+      throw new SfError(
+        `Failed to execute tests: ${wrapped.message}`,
+        'TestExecutionFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
 
     const mergedResponse: EvalApiResponse = { results: allResults as EvalApiResponse['results'] };
 
@@ -272,8 +311,9 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     // 10. Build structured result for --json
     const { summary, testSummaries } = buildResultSummary(mergedResponse);
 
-    // Set exit code to 1 if any tests failed
-    if (summary.failed > 0 || summary.errors > 0) {
+    // Set exit code to 1 only for execution errors (tests couldn't run)
+    // Test failures (assertions failed) are business logic and should not affect exit code
+    if (summary.errors > 0) {
       process.exitCode = 1;
     }
 

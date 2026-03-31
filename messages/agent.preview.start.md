@@ -13,7 +13,7 @@ When starting a preview session with --authoring-bundle, you must explicitly spe
 - --use-live-actions: Executes real Apex classes, flows, and other actions in the org. This surfaces compile and validation errors during preview.
 - --simulate-actions: Uses AI to simulate action execution without calling real implementations.
 
-Published agents, which you specify with the --api-name, always use live actions.
+Published agents (--api-name) always use live actions. The mode flags are optional and have no effect for published agents.
 
 # flags.api-name.summary
 
@@ -25,15 +25,27 @@ API name of the authoring bundle metadata component that contains the agent's Ag
 
 # flags.use-live-actions.summary
 
-Execute real actions in the org, such as Apex classes and flows. When previewing using an authoring bundle, you must specify either this flag or --simulate-actions.
+Execute real actions in the org (Apex classes, flows, etc.). Required with --authoring-bundle.
 
 # flags.simulate-actions.summary
 
-Use AI to simulate action execution instead of calling real actions. When previewing using an authoring bundle, you must specify either this flag or --use-live-actions.
+Use AI to simulate action execution instead of calling real actions. Required with --authoring-bundle.
 
 # output.sessionId
 
 Session ID: %s
+
+# error.agentNotFound
+
+Agent '%s' not found. Check that the API name is correct and that the agent exists in your org or project.
+
+# error.compilationFailed
+
+Agent Script compilation failed. See errors above for details.
+
+# error.previewStartFailed
+
+Failed to start preview session: %s
 
 # examples
 
@@ -45,6 +57,6 @@ Session ID: %s
 
   <%= config.bin %> <%= command.id %> --authoring-bundle My_Agent_Bundle --use-live-actions
 
-- Start a preview session with an activated published agent in your default org (always uses live actions):
+- Start a preview session with an activated published agent (always uses live actions):
 
   <%= config.bin %> <%= command.id %> --api-name My_Published_Agent

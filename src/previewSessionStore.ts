@@ -33,10 +33,8 @@ export async function createCache(
   agent: ScriptAgent | ProductionAgent,
   options?: { displayName?: string }
 ): Promise<void> {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const meta: SessionMeta = { displayName: options?.displayName };
   await writeFile(metaPath, JSON.stringify(meta), 'utf-8');
 }
@@ -47,10 +45,8 @@ export async function createCache(
  * Throws SfError if the session marker is not found.
  */
 export async function validatePreviewSession(agent: ScriptAgent | ProductionAgent): Promise<void> {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   try {
     await readFile(metaPath, 'utf-8');
   } catch {
@@ -66,10 +62,8 @@ export async function validatePreviewSession(agent: ScriptAgent | ProductionAgen
  * Call after ending the session. Caller must set sessionId on the agent before calling.
  */
 export async function removeCache(agent: ScriptAgent | ProductionAgent): Promise<void> {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
   try {
     await unlink(metaPath);
   } catch {

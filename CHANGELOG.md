@@ -1,3 +1,10 @@
+## [1.32.15](https://github.com/salesforcecli/plugin-agent/compare/1.32.14...1.32.15) (2026-03-31)
+
+### Bug Fixes
+
+- expand error codes to other commands ([85b249d](https://github.com/salesforcecli/plugin-agent/commit/85b249d2dfca15a674cc5293754d6b7c0c17a0e9))
+- first pass at exit codes ([a49a606](https://github.com/salesforcecli/plugin-agent/commit/a49a606ac33344ac38e133d1a9a5ba57cd85b3f0))
+
 ## [1.32.14](https://github.com/salesforcecli/plugin-agent/compare/1.32.13...1.32.14) (2026-03-29)
 
 ### Bug Fixes

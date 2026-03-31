@@ -15,8 +15,8 @@
  */
 import { join, resolve } from 'node:path';
 import { existsSync } from 'node:fs';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Connection, Lifecycle, Messages, SfError } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { Connection, Lifecycle, Messages, SfError, EnvironmentVariable } from '@salesforce/core';
 import { AgentTest, AgentTestCreateLifecycleStages } from '@salesforce/agents';
 import { DeployResult } from '@salesforce/source-deploy-retrieve';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
@@ -87,6 +87,18 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Test created and deployed successfully.',
+    'Failed (1)': 'Test validation errors or metadata format issues.',
+    'NotFound (2)': 'Test spec file not found or org connection failed.',
+    'DeploymentFailed (4)': 'Deployment failed due to API or network errors.',
+  });
 
   public static readonly flags = {
     ...makeFlags(FLAGGABLE_PROMPTS),
@@ -163,10 +175,35 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       return Promise.resolve();
     });
 
-    const { path, contents } = await AgentTest.create(connection, apiName, spec, {
-      outputDir: join('force-app', 'main', 'default', 'aiEvaluationDefinitions'),
-      preview: flags.preview,
-    });
+    let path;
+    let contents;
+    try {
+      const result = await AgentTest.create(connection, apiName, spec, {
+        outputDir: join('force-app', 'main', 'default', 'aiEvaluationDefinitions'),
+        preview: flags.preview,
+      });
+      path = result.path;
+      contents = result.contents;
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+
+      // Check for file not found errors
+      if (
+        wrapped.message.toLowerCase().includes('not found') ||
+        wrapped.message.toLowerCase().includes('enoent') ||
+        wrapped.code === 'ENOENT'
+      ) {
+        throw new SfError(`Test spec file not found: ${spec}`, 'SpecFileNotFound', [], 2, wrapped);
+      }
+
+      // Check for deployment failures (API/network)
+      if (wrapped.message.toLowerCase().includes('deploy') || wrapped.message.toLowerCase().includes('api')) {
+        throw new SfError(`Deployment failed: ${wrapped.message}`, 'DeploymentFailed', [wrapped.message], 4, wrapped);
+      }
+
+      // Other errors (validation, format issues) use exit 1
+      throw wrapped;
+    }
 
     if (flags.preview) {
       this.mso?.skipTo(AgentTestCreateLifecycleStages.Done);

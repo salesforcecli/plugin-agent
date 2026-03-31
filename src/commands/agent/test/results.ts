@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
 import { resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
@@ -29,6 +29,17 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
+
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Results retrieved successfully. Test results (passed/failed) are in the output.',
+    'NotFound (2)': 'Job ID not found or invalid.',
+    'Failed (4)': 'Failed to retrieve results due to API or network errors.',
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -47,7 +58,32 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     const { flags } = await this.parse(AgentTestResults);
 
     const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
-    const response = await agentTester.results(flags['job-id']);
+
+    let response;
+    try {
+      response = await agentTester.results(flags['job-id']);
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+
+      // Check for job not found errors
+      if (
+        wrapped.message.toLowerCase().includes('not found') ||
+        wrapped.message.toLowerCase().includes('invalid') ||
+        wrapped.code === 'ENOENT'
+      ) {
+        throw new SfError(`Job ID '${flags['job-id']}' not found or invalid.`, 'JobNotFound', [], 2, wrapped);
+      }
+
+      // API/network failures
+      throw new SfError(
+        `Failed to retrieve results: ${wrapped.message}`,
+        'ResultsRetrievalFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
+
     await handleTestResults({
       id: flags['job-id'],
       format: flags['result-format'],
