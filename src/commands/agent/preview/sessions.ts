@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SfCommand } from '@salesforce/sf-plugins-core';
+import { SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
 import { listCachedSessions } from '../../../previewSessionStore.js';
 
@@ -28,6 +28,10 @@ export default class AgentPreviewSessions extends SfCommand<AgentPreviewSessions
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Sessions listed successfully (or empty list if no active sessions).',
+  });
 
   public async run(): Promise<AgentPreviewSessionsResult> {
     const entries = await listCachedSessions(this.project!);

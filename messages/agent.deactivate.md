@@ -25,3 +25,11 @@ API name of the agent to deactivate; if not specified, the command provides a li
 # error.missingRequiredFlags
 
 Missing required flags: %s.
+
+# error.agentNotFound
+
+Agent '%s' not found in the org. Check that the API name is correct and that the agent exists.
+
+# error.deactivationFailed
+
+Failed to deactivate agent: %s

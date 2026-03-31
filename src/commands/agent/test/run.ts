@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTester, AgentTestStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
@@ -62,6 +62,18 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
 
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Test started successfully (without --wait), or test completed successfully (with --wait).',
+    'Failed (1)': 'Tests encountered execution errors (test cases with ERROR status when using --wait).',
+    'NotFound (2)': 'Test definition not found or invalid test name.',
+    'OperationFailed (4)': 'Failed to start or poll test due to API or network errors.',
+  });
+
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
@@ -101,12 +113,23 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       response = await agentTester.start(apiName);
     } catch (e) {
       const wrapped = SfError.wrap(e);
-      if (wrapped.message.includes('Invalid AiEvalDefinitionVersion identifier')) {
-        wrapped.actions = [
-          `Try running "sf agent test list -o ${flags['target-org'].getUsername() ?? ''}" to see available options`,
-        ];
+
+      // Check for test definition not found
+      if (
+        wrapped.message.includes('Invalid AiEvalDefinitionVersion identifier') ||
+        wrapped.message.toLowerCase().includes('not found')
+      ) {
+        throw new SfError(
+          `Test definition '${apiName}' not found.`,
+          'TestNotFound',
+          [`Try running "sf agent test list -o ${flags['target-org'].getUsername() ?? ''}" to see available options`],
+          2,
+          wrapped
+        );
       }
-      throw wrapped;
+
+      // API/network failures
+      throw new SfError(`Failed to start test: ${wrapped.message}`, 'TestStartFailed', [wrapped.message], 4, wrapped);
     }
 
     this.mso.update({ id: response.runId });
@@ -115,7 +138,23 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     await agentTestCache.createCacheEntry(response.runId, apiName, flags['output-dir'], flags['result-format']);
 
     if (flags.wait?.minutes) {
-      const { completed, response: detailsResponse } = await this.mso.poll(agentTester, response.runId, flags.wait);
+      let completed;
+      let detailsResponse;
+      try {
+        const pollResult = await this.mso.poll(agentTester, response.runId, flags.wait);
+        completed = pollResult.completed;
+        detailsResponse = pollResult.response;
+      } catch (error) {
+        const wrapped = SfError.wrap(error);
+        throw new SfError(
+          `Failed to poll test results: ${wrapped.message}`,
+          'TestPollFailed',
+          [wrapped.message],
+          4,
+          wrapped
+        );
+      }
+
       if (completed) await agentTestCache.removeCacheEntry(response.runId);
 
       this.mso.stop();
@@ -129,6 +168,13 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         verbose: flags.verbose,
       });
 
+      // Set exit code to 1 only for execution errors (tests couldn't run properly)
+      // Test assertion failures are business logic and should not affect exit code
+      if (detailsResponse?.testCases.some((tc) => tc.status === 'ERROR')) {
+        process.exitCode = 1;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId };
     } else {
       this.mso.stop();

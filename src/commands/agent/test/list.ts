@@ -15,8 +15,8 @@
  */
 
 import { AgentTest, type AvailableDefinition } from '@salesforce/agents';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages } from '@salesforce/core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
+import { Messages, EnvironmentVariable, SfError } from '@salesforce/core';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.list');
@@ -28,6 +28,16 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
 
+  public static readonly envVariablesSection = toHelpSection(
+    'ENVIRONMENT VARIABLES',
+    EnvironmentVariable.SF_TARGET_ORG
+  );
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Agent tests listed successfully.',
+    'Failed (4)': 'Failed to retrieve agent tests due to API or network errors.',
+  });
+
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
@@ -36,7 +46,20 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
   public async run(): Promise<AgentTestListResult> {
     const { flags } = await this.parse(AgentTestList);
 
-    const results = await AgentTest.list(flags['target-org'].getConnection(flags['api-version']));
+    let results;
+    try {
+      results = await AgentTest.list(flags['target-org'].getConnection(flags['api-version']));
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+      throw new SfError(
+        `Failed to retrieve agent tests: ${wrapped.message}`,
+        'ListRetrievalFailed',
+        [wrapped.message],
+        4,
+        wrapped
+      );
+    }
+
     this.table({
       data: results,
       columns: [
