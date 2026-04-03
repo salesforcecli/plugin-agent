@@ -7,7 +7,8 @@ description: Review pull requests in plugin-agent using GitHub CLI. Use for "rev
 
 ## Required
 
-- `gh` CLI required (no git-only fallback)
+- `gh` CLI
+- `git` (PR branch must be checked out locally for authoritative diff)
 
 ## Working directory
 
@@ -15,8 +16,17 @@ description: Review pull requests in plugin-agent using GitHub CLI. Use for "rev
 
 ## Commands
 
+Run all three together:
+
 - `gh pr view <PR_NUMBER> --json title,number,body,files,commits,additions,deletions,changedFiles,baseRefName,headRefName,author,labels`
-- `gh pr diff <PR_NUMBER>`
+- `gh pr diff <PR_NUMBER>` — GitHub API diff (may be stale)
+- `git diff $(gh pr view <PR_NUMBER> --json baseRefName --jq '.baseRefName') -- $(gh pr view <PR_NUMBER> --json files --jq '[.files[].path] | join(" ")')` — authoritative local diff
+
+## Diff precedence
+
+- `gh pr diff` can be stale after a recent push
+- cross-check with local `git diff <base>` and `Read` tool on changed files
+- local git diff + file contents win any disagreement
 
 ## Review checklist
 
