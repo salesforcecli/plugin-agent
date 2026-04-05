@@ -1,3 +1,9 @@
+## [1.32.18](https://github.com/salesforcecli/plugin-agent/compare/1.32.17...1.32.18) (2026-04-05)
+
+### Bug Fixes
+
+- **deps:** bump lodash from 4.17.23 to 4.18.1 ([e66f32f](https://github.com/salesforcecli/plugin-agent/commit/e66f32f013d63ee6292d3c384b38f41b4de28ed6))
+
 ## [1.32.17](https://github.com/salesforcecli/plugin-agent/compare/1.32.16...1.32.17) (2026-04-05)
 
 ### Bug Fixes
