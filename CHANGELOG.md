@@ -1,3 +1,9 @@
+## [1.32.19](https://github.com/salesforcecli/plugin-agent/compare/1.32.18...1.32.19) (2026-04-09)
+
+### Bug Fixes
+
+- **deps:** bump basic-ftp from 5.2.0 to 5.2.1 ([2c6b47c](https://github.com/salesforcecli/plugin-agent/commit/2c6b47c5efbbe01198dfe6c4b8ab05e663966408))
+
 ## [1.32.18](https://github.com/salesforcecli/plugin-agent/compare/1.32.17...1.32.18) (2026-04-05)
 
 ### Bug Fixes
