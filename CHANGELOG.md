@@ -1,3 +1,10 @@
+## [1.32.20](https://github.com/salesforcecli/plugin-agent/compare/1.32.19...1.32.20) (2026-04-20)
+
+### Bug Fixes
+
+- bump versions for library renames and v2 compiler update ([34f50cf](https://github.com/salesforcecli/plugin-agent/commit/34f50cfbe9ee57237e1b8c049c35580b4c974d30))
+- update topic->subagent ([aadb4d6](https://github.com/salesforcecli/plugin-agent/commit/aadb4d601f735d8476a55a218b5fa8cb3a15bd28))
+
 ## [1.32.19](https://github.com/salesforcecli/plugin-agent/compare/1.32.18...1.32.19) (2026-04-09)
 
 ### Bug Fixes
