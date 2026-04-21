@@ -95,89 +95,73 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         },
       ],
     });
-    try {
-      mso.goto('Validate Bundle');
-      const targetOrg = flags['target-org'];
-      const conn = targetOrg.getConnection(flags['api-version']);
-      const agent = await Agent.init({
-        connection: conn,
-        project: this.project!,
-        aabName,
-      });
 
-      // First compile the .agent file to get the Agent JSON
-      const compileResponse = await agent.compile();
-      if (compileResponse.status === 'success') {
-        mso.skipTo('Publish Agent');
-      } else {
-        throwAgentCompilationError(compileResponse.errors);
+    mso.goto('Validate Bundle');
+    const targetOrg = flags['target-org'];
+    const conn = targetOrg.getConnection(flags['api-version']);
+    const agent = await Agent.init({
+      connection: conn,
+      project: this.project!,
+      aabName,
+    });
+
+    // First compile the .agent file to get the Agent JSON
+    const compileResponse = await agent.compile();
+    if (compileResponse.status === 'success') {
+      mso.skipTo('Publish Agent');
+    } else {
+      throwAgentCompilationError(compileResponse.errors);
+    }
+    // Then publish the Agent JSON to create the agent
+    // Set up lifecycle listeners for retrieve events
+    if (!flags['skip-retrieve']) {
+      Lifecycle.getInstance().on('scopedPreRetrieve', () => {
+        mso.skipTo('Retrieve Metadata');
+        return Promise.resolve();
+      });
+    }
+    // Set up lifecycle listeners for deploy events
+    Lifecycle.getInstance().on('scopedPreDeploy', () => {
+      mso.skipTo('Deploy Metadata');
+      return Promise.resolve();
+    });
+
+    Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
+      if (result.retrieveResult.response.status !== RequestStatus.Succeeded) {
+        const errorMessages = ensureArray(
+          // @ts-expect-error I saw errorMessages populated with useful information during testing
+          result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
+        );
+
+        const errorMessage = `Metadata retrieval failed: ${errorMessages.join(EOL)}`;
+        mso.error();
+        throw SfError.create({ name: 'Retrieve Failed', message: errorMessage });
       }
-      // Then publish the Agent JSON to create the agent
-      // Set up lifecycle listeners for retrieve events
-      if (!flags['skip-retrieve']) {
-        Lifecycle.getInstance().on('scopedPreRetrieve', () => {
-          mso.skipTo('Retrieve Metadata');
-          return Promise.resolve();
+      return Promise.resolve();
+    });
+
+    Lifecycle.getInstance().on('scopedPostDeploy', (result: ScopedPostDeploy) => {
+      if (result.deployResult.response.status === RequestStatus.Succeeded) {
+        mso.stop();
+      } else {
+        const deployResponse = result.deployResult.response;
+
+        // Check for component failures (most common source of detailed errors)
+        const failures = ensureArray(deployResponse.details.componentFailures);
+        throw SfError.create({
+          name: 'Deployment Failed',
+          message: failures.map((f) => `${f.problemType!}: ${f.problem!}`).join('\n'),
         });
       }
-      // Set up lifecycle listeners for deploy events
-      Lifecycle.getInstance().on('scopedPreDeploy', () => {
-        mso.skipTo('Deploy Metadata');
-        return Promise.resolve();
-      });
+      return Promise.resolve();
+    });
 
-      Lifecycle.getInstance().on('scopedPostRetrieve', (result: ScopedPostRetrieve) => {
-        if (result.retrieveResult.response.status !== RequestStatus.Succeeded) {
-          const errorMessages = ensureArray(
-            // @ts-expect-error I saw errorMessages populated with useful information during testing
-            result?.retrieveResult.response?.messages ?? result?.retrieveResult?.response?.errorMessage
-          );
+    const result = await agent.publish(flags['skip-retrieve']);
+    mso.stop();
 
-          const errorMessage = `Metadata retrieval failed: ${errorMessages.join(EOL)}`;
-          mso.error();
-          throw SfError.create({ name: 'Retrieve Failed', message: errorMessage });
-        }
-        return Promise.resolve();
-      });
-
-      Lifecycle.getInstance().on('scopedPostDeploy', (result: ScopedPostDeploy) => {
-        if (result.deployResult.response.status === RequestStatus.Succeeded) {
-          mso.stop();
-        } else {
-          const deployResponse = result.deployResult.response;
-
-          // Check for component failures (most common source of detailed errors)
-          const failures = ensureArray(deployResponse.details.componentFailures);
-          throw SfError.create({
-            name: 'Deployment Failed',
-            message: failures.map((f) => `${f.problemType!}: ${f.problem!}`).join('\n'),
-          });
-        }
-        return Promise.resolve();
-      });
-
-      const result = await agent.publish(flags['skip-retrieve']);
-      mso.stop();
-
-      return {
-        success: true,
-        botDeveloperName: result.developerName,
-      };
-    } catch (error) {
-      // Handle validation errors
-      const err = SfError.wrap(error);
-      const message = err.message ? err.message : err.name;
-      const errorMessage = messages.getMessage('error.publishFailed', [message]);
-
-      // Stop the multi-stage output on error
-      mso.error();
-
-      this.error(errorMessage);
-
-      return {
-        success: false,
-        errors: err.message.split('\n'),
-      };
-    }
+    return {
+      success: true,
+      botDeveloperName: result.developerName,
+    };
   }
 }
