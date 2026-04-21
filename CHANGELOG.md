@@ -1,3 +1,9 @@
+## [1.32.21](https://github.com/salesforcecli/plugin-agent/compare/1.32.20...1.32.21) (2026-04-21)
+
+### Bug Fixes
+
+- remove unnecessary try/catch ([b056041](https://github.com/salesforcecli/plugin-agent/commit/b0560414d54804047f75528157d9a69499d3fe1b))
+
 ## [1.32.20](https://github.com/salesforcecli/plugin-agent/compare/1.32.19...1.32.20) (2026-04-20)
 
 ### Bug Fixes
