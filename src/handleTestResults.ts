@@ -16,10 +16,22 @@
 import { join } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName, metric } from '@salesforce/agents';
+import {
+  AgentTestResultsResponse,
+  AgentTestNGTResultsResponse,
+  convertTestResultsToFormat,
+  humanFriendlyName,
+  metric,
+} from '@salesforce/agents';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import { ux as ocux } from '@oclif/core';
 import ansis from 'ansis';
+
+type TestResultsResponse = AgentTestResultsResponse | AgentTestNGTResultsResponse;
+
+function isLegacyResponse(response: TestResultsResponse): response is AgentTestResultsResponse {
+  return 'subjectName' in response;
+}
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
   // if directory doesn't exist, create it
@@ -227,7 +239,7 @@ export async function handleTestResults({
 }: {
   id: string;
   format: 'human' | 'json' | 'junit' | 'tap';
-  results: AgentTestResultsResponse | undefined;
+  results: TestResultsResponse | undefined;
   jsonEnabled: boolean;
   outputDir?: string;
   verbose?: boolean;
@@ -239,6 +251,25 @@ export async function handleTestResults({
 
   const ux = new Ux({ jsonEnabled });
 
+  // For NGT responses, we only support JSON format for now
+  if (!isLegacyResponse(results)) {
+    if (format !== 'json') {
+      ux.log(
+        ansis.yellow('Warning: NGT test results only support JSON format. Use --result-format json or omit the flag.')
+      );
+    }
+    const formatted = JSON.stringify(results, null, 2);
+    if (outputDir) {
+      const file = `test-result-${id}.json`;
+      await writeFileToDir(outputDir, file, formatted);
+      ux.log(`Created JSON file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
+    }
+    return;
+  }
+
+  // Legacy response formatting
   if (format === 'human') {
     const formatted = humanFormat(results, verbose);
     if (outputDir) {

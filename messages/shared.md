@@ -20,6 +20,14 @@ When enabled, includes detailed generated data (such as invoked actions) in the 
 
 The generated data is in JSON format and includes the Apex classes or Flows that were invoked, the Salesforce objects that were touched, and so on. Use the JSON structure of this information to build the test case JSONPath expression when using custom evaluations.
 
+# flags.test-runner-type.summary
+
+Explicitly specify which test runner to use (NGT or legacy).
+
+# flags.test-runner-type.description
+
+By default, the command automatically detects which test runner to use based on the test definition metadata type in your org. Use this flag to explicitly specify the runner type. 'ngt' uses AiTestSuiteDefinition metadata and the /einstein/ai-testing/runs endpoints. 'legacy' uses AiEvaluationDefinition metadata and the /einstein/ai-evaluations/runs endpoints.
+
 # error.invalidAgentType
 
 agentType must be either "customer" or "internal". Found: [%s]

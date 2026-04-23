@@ -16,10 +16,11 @@
 
 import { colorize } from '@oclif/core/ux';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { AgentTestResultsResponse, AgentTester } from '@salesforce/agents';
+import { AgentTestResultsResponse, AgentTestNGTResultsResponse } from '@salesforce/agents';
 import { Lifecycle } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Ux } from '@salesforce/sf-plugins-core';
+import type { TestRunnerInstance } from './testRunnerFactory.js';
 
 type Data = {
   id: string;
@@ -86,10 +87,10 @@ export class TestStages {
   }
 
   public async poll(
-    agentTester: AgentTester,
+    agentTester: TestRunnerInstance,
     id: string,
     wait: Duration
-  ): Promise<{ completed: boolean; response?: AgentTestResultsResponse }> {
+  ): Promise<{ completed: boolean; response?: AgentTestResultsResponse | AgentTestNGTResultsResponse }> {
     this.mso.skipTo('Polling for Test Results');
     const lifecycle = Lifecycle.getInstance();
     lifecycle.on(

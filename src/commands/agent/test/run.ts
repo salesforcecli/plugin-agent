@@ -16,7 +16,7 @@
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTester, AgentTestStartResponse } from '@salesforce/agents';
+import { AgentTestStartResponse, AgentTestNGTStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
 import {
@@ -26,11 +26,13 @@ import {
   promptForAiEvaluationDefinitionApiName,
   resultFormatFlag,
   testOutputDirFlag,
+  testRunnerTypeFlag,
   verboseFlag,
 } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
 import { handleTestResults } from '../../../handleTestResults.js';
+import { createTestRunner } from '../../../testRunnerFactory.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
@@ -88,6 +90,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    'test-runner-type': testRunnerTypeFlag,
     verbose: verboseFlag,
   };
 
@@ -107,8 +110,12 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso = new TestStages({ title: `Agent Test Run: ${apiName}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();
 
-    const agentTester = new AgentTester(connection);
-    let response: AgentTestStartResponse;
+    // Determine which test runner to use (NGT or legacy)
+    const result = await createTestRunner(connection, flags['test-runner-type'], apiName);
+    const agentTester = result.runner;
+    const runnerType = result.type;
+
+    let response: AgentTestStartResponse | AgentTestNGTStartResponse;
     try {
       response = await agentTester.start(apiName);
     } catch (e) {
@@ -135,7 +142,13 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso.update({ id: response.runId });
 
     const agentTestCache = await AgentTestCache.create();
-    await agentTestCache.createCacheEntry(response.runId, apiName, flags['output-dir'], flags['result-format']);
+    await agentTestCache.createCacheEntry(
+      response.runId,
+      apiName,
+      flags['output-dir'],
+      flags['result-format'],
+      runnerType
+    );
 
     if (flags.wait?.minutes) {
       let completed;
@@ -170,12 +183,17 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
       // Set exit code to 1 only for execution errors (tests couldn't run properly)
       // Test assertion failures are business logic and should not affect exit code
-      if (detailsResponse?.testCases.some((tc) => tc.status === 'ERROR')) {
+      // Only applicable to legacy responses (NGT doesn't have test case status)
+      if (
+        detailsResponse &&
+        'subjectName' in detailsResponse &&
+        detailsResponse.testCases.some((tc) => 'status' in tc && tc.status === 'ERROR')
+      ) {
         process.exitCode = 1;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId };
+      return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId } as AgentTestRunResult;
     } else {
       this.mso.stop();
       this.log(

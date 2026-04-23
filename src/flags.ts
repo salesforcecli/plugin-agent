@@ -68,6 +68,12 @@ export const verboseFlag = Flags.boolean({
   description: messages.getMessage('flags.verbose.description'),
 });
 
+export const testRunnerTypeFlag = Flags.custom<'ngt' | 'legacy'>({
+  options: ['ngt', 'legacy'],
+  summary: messages.getMessage('flags.test-runner-type.summary'),
+  description: messages.getMessage('flags.test-runner-type.description'),
+})();
+
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {
   const result = validate(input);
   if (typeof result === 'string') throw new Error(result);

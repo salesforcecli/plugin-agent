@@ -18,12 +18,14 @@ import { Global, SfError, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 
 type ResultFormat = 'json' | 'human' | 'junit' | 'tap';
+type TestRunnerType = 'ngt' | 'legacy';
 
 type CacheContents = {
   runId: string;
   name: string;
   outputDir?: string;
   resultFormat?: ResultFormat;
+  runnerType?: TestRunnerType;
 };
 
 export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> {
@@ -45,11 +47,12 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     runId: string,
     name: string,
     outputDir?: string,
-    resultFormat?: ResultFormat
+    resultFormat?: ResultFormat,
+    runnerType?: TestRunnerType
   ): Promise<void> {
     if (!runId) throw new SfError('runId is required to create a cache entry');
 
-    this.set(runId, { runId, name, outputDir, resultFormat });
+    this.set(runId, { runId, name, outputDir, resultFormat, runnerType });
     await this.write();
   }
 
@@ -70,7 +73,7 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
   public useIdOrMostRecent(
     runId: string | undefined,
     useMostRecent: boolean
-  ): { runId: string; name?: string; outputDir?: string; resultFormat?: ResultFormat } {
+  ): { runId: string; name?: string; outputDir?: string; resultFormat?: ResultFormat; runnerType?: TestRunnerType } {
     if (runId && useMostRecent) {
       throw new SfError('Cannot specify both a runId and use most recent flag');
     }
