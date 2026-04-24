@@ -157,11 +157,20 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     const displayName = flags['authoring-bundle'] ?? flags['api-name'];
-    await createCache(agent, { displayName });
+    const sessionType = resolveSessionType(agent, simulateActions);
+    await createCache(agent, { displayName, sessionType });
 
     await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_success' });
     const result: AgentPreviewStartResult = { sessionId: session.sessionId };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));
     return result;
   }
+}
+
+function resolveSessionType(
+  agent: ScriptAgent | ProductionAgent,
+  simulateActions: boolean | undefined
+): import('../../../previewSessionStore.js').SessionType {
+  if (agent instanceof ProductionAgent) return 'published';
+  return simulateActions ? 'simulated' : 'live';
 }

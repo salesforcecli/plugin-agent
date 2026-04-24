@@ -15,6 +15,12 @@
           },
           "sessionId": {
             "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "sessionType": {
+            "type": "string"
           }
         },
         "required": ["agentId", "sessionId"],

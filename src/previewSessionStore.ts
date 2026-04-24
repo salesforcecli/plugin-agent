@@ -15,14 +15,22 @@
  */
 
 import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { SfError } from '@salesforce/core';
 import type { SfProject } from '@salesforce/core';
 import type { ProductionAgent, ScriptAgent } from '@salesforce/agents';
 
 const SESSION_META_FILE = 'session-meta.json';
+const SESSION_INDEX_FILE = 'index.json';
 
-export type SessionMeta = { displayName?: string };
+export type SessionType = 'simulated' | 'live' | 'published';
+export type SessionMeta = { displayName?: string; timestamp?: string; sessionType?: SessionType };
+export type SessionIndex = Array<{
+  sessionId: string;
+  displayName?: string;
+  timestamp?: string;
+  sessionType?: SessionType;
+}>;
 
 /**
  * Save a marker so send/end can validate that the session was started for this agent.
@@ -31,12 +39,26 @@ export type SessionMeta = { displayName?: string };
  */
 export async function createCache(
   agent: ScriptAgent | ProductionAgent,
-  options?: { displayName?: string }
+  options?: { displayName?: string; sessionType?: SessionType }
 ): Promise<void> {
   const historyDir = await agent.getHistoryDir();
   const metaPath = join(historyDir, SESSION_META_FILE);
-  const meta: SessionMeta = { displayName: options?.displayName };
+  const meta: SessionMeta = {
+    displayName: options?.displayName,
+    timestamp: new Date().toISOString(),
+    sessionType: options?.sessionType,
+  };
   await writeFile(metaPath, JSON.stringify(meta), 'utf-8');
+
+  // Update the sessions index for ordered browsing
+  const sessionId = basename(historyDir);
+  const sessionsDir = dirname(historyDir);
+  const indexPath = join(sessionsDir, SESSION_INDEX_FILE);
+  const index = await readSessionIndex(indexPath);
+  if (!index.some((e) => e.sessionId === sessionId)) {
+    index.push({ sessionId, displayName: meta.displayName, timestamp: meta.timestamp, sessionType: meta.sessionType });
+    await writeFile(indexPath, JSON.stringify(index, null, 2), 'utf-8');
+  }
 }
 
 /**
@@ -68,6 +90,16 @@ export async function removeCache(agent: ScriptAgent | ProductionAgent): Promise
     await unlink(metaPath);
   } catch {
     // already removed or never created
+  }
+
+  // Remove entry from the sessions index
+  const sessionId = basename(historyDir);
+  const sessionsDir = dirname(historyDir);
+  const indexPath = join(sessionsDir, SESSION_INDEX_FILE);
+  const index = await readSessionIndex(indexPath);
+  const updated = index.filter((e) => e.sessionId !== sessionId);
+  if (updated.length !== index.length) {
+    await writeFile(indexPath, JSON.stringify(updated, null, 2), 'utf-8');
   }
 }
 
@@ -114,7 +146,20 @@ export async function getCurrentSessionId(
   return ids.length === 1 ? ids[0] : undefined;
 }
 
-export type CachedSessionEntry = { agentId: string; displayName?: string; sessionIds: string[] };
+export type CachedSessionInfo = { sessionId: string; timestamp?: string; sessionType?: SessionType };
+export type CachedSessionEntry = { agentId: string; displayName?: string; sessions: CachedSessionInfo[] };
+
+/**
+ * Read the sessions index file, returning an empty array if missing or unreadable.
+ */
+async function readSessionIndex(indexPath: string): Promise<SessionIndex> {
+  try {
+    const raw = await readFile(indexPath, 'utf-8');
+    return JSON.parse(raw) as SessionIndex;
+  } catch {
+    return [];
+  }
+}
 
 /**
  * List all cached preview sessions in the project, grouped by agent ID.
@@ -132,39 +177,61 @@ export async function listCachedSessions(project: SfProject): Promise<CachedSess
         .map(async (ent) => {
           const agentId = ent.name;
           const sessionsDir = join(base, agentId, 'sessions');
-          let sessionIds: string[] = [];
+          let sessions: CachedSessionInfo[] = [];
           let displayName: string | undefined;
           try {
-            const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
-            const withMarker = await Promise.all(
-              sessionDirs
-                .filter((s) => s.isDirectory())
-                .map(async (s) => {
+            // Prefer the index for ordered, metadata-rich results
+            const index = await readSessionIndex(join(sessionsDir, SESSION_INDEX_FILE));
+            if (index.length > 0) {
+              // Verify each indexed session still has its marker file (guard against manual cleanup)
+              const verified = await Promise.all(
+                index.map(async (entry) => {
                   try {
-                    await readFile(join(sessionsDir, s.name, SESSION_META_FILE), 'utf-8');
-                    return s.name;
+                    await readFile(join(sessionsDir, entry.sessionId, SESSION_META_FILE), 'utf-8');
+                    return entry;
                   } catch {
                     return null;
                   }
                 })
-            );
-            sessionIds = withMarker.filter((id): id is string => id !== null);
-            if (sessionIds.length > 0) {
-              try {
-                const raw = await readFile(join(sessionsDir, sessionIds[0], SESSION_META_FILE), 'utf-8');
-                const meta = JSON.parse(raw) as SessionMeta;
-                displayName = meta.displayName;
-              } catch {
-                // ignore
+              );
+              sessions = verified
+                .filter((e): e is SessionIndex[number] => e !== null)
+                .map(({ sessionId, timestamp, sessionType }) => ({ sessionId, timestamp, sessionType }));
+              displayName = index[0]?.displayName;
+            } else {
+              // Fallback: scan directories (no index yet, e.g. sessions started before this feature)
+              const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
+              const sessionInfos = await Promise.all(
+                sessionDirs
+                  .filter((s) => s.isDirectory())
+                  .map(async (s): Promise<CachedSessionInfo | null> => {
+                    try {
+                      const raw = await readFile(join(sessionsDir, s.name, SESSION_META_FILE), 'utf-8');
+                      const meta = JSON.parse(raw) as SessionMeta;
+                      return { sessionId: s.name, timestamp: meta.timestamp, sessionType: meta.sessionType };
+                    } catch {
+                      return null;
+                    }
+                  })
+              );
+              sessions = sessionInfos.filter((s): s is CachedSessionInfo => s !== null);
+              if (sessions.length > 0) {
+                try {
+                  const raw = await readFile(join(sessionsDir, sessions[0].sessionId, SESSION_META_FILE), 'utf-8');
+                  const meta = JSON.parse(raw) as SessionMeta;
+                  displayName = meta.displayName;
+                } catch {
+                  // ignore
+                }
               }
             }
           } catch {
             // no sessions dir or unreadable
           }
-          return { agentId, displayName, sessionIds };
+          return { agentId, displayName, sessions };
         })
     );
-    result.push(...entries.filter((e) => e.sessionIds.length > 0));
+    result.push(...entries.filter((e) => e.sessions.length > 0));
   } catch {
     // no agents dir or unreadable
   }

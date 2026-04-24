@@ -15,6 +15,7 @@
  */
 
 import { mkdtempSync, rmSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect } from 'chai';
@@ -205,7 +206,7 @@ describe('previewSessionStore', () => {
       await createCache(agent2);
       const list = await listCachedSessions(project);
       expect(list).to.have.lengthOf(2);
-      const byAgent = Object.fromEntries(list.map((e) => [e.agentId, e.sessionIds]));
+      const byAgent = Object.fromEntries(list.map((e) => [e.agentId, e.sessions.map((s) => s.sessionId)]));
       expect(byAgent['bundle-a']).to.have.members(['s1', 's2']);
       expect(byAgent['bundle-b']).to.deep.equal(['s3']);
     });
@@ -219,7 +220,78 @@ describe('previewSessionStore', () => {
       expect(list).to.have.lengthOf(1);
       expect(list[0].agentId).to.equal('some-id');
       expect(list[0].displayName).to.equal('My_Production_Agent');
-      expect(list[0].sessionIds).to.deep.equal(['s1']);
+      expect(list[0].sessions.map((s) => s.sessionId)).to.deep.equal(['s1']);
+    });
+
+    it('returns timestamp and sessionType for each session', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'some-id');
+      agent.setSessionId('s1');
+      await createCache(agent, { sessionType: 'simulated' });
+      const list = await listCachedSessions(project);
+      expect(list[0].sessions[0].sessionType).to.equal('simulated');
+      expect(list[0].sessions[0].timestamp)
+        .to.be.a('string')
+        .and.match(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('returns sessionType published for production agent sessions', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'prod-agent');
+      agent.setSessionId('s1');
+      await createCache(agent, { displayName: 'My_Production_Agent', sessionType: 'published' });
+      const list = await listCachedSessions(project);
+      expect(list[0].sessions[0].sessionType).to.equal('published');
+    });
+
+    it('returns sessions in creation order from index', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'bundle-a');
+      agent.setSessionId('s1');
+      await createCache(agent);
+      agent.setSessionId('s2');
+      await createCache(agent);
+      agent.setSessionId('s3');
+      await createCache(agent);
+      const list = await listCachedSessions(project);
+      expect(list[0].sessions.map((s) => s.sessionId)).to.deep.equal(['s1', 's2', 's3']);
+    });
+
+    it('index file is written to the sessions directory', async () => {
+      const agent = makeMockAgent(projectPath, 'bundle-a');
+      agent.setSessionId('s1');
+      await createCache(agent, { displayName: 'MyAgent', sessionType: 'live' });
+      const indexPath = join(projectPath, '.sfdx', 'agents', 'bundle-a', 'sessions', 'index.json');
+      const raw = await readFile(indexPath, 'utf-8');
+      const index = JSON.parse(raw) as Array<{ sessionId: string; sessionType: string }>;
+      expect(index).to.have.lengthOf(1);
+      expect(index[0].sessionId).to.equal('s1');
+      expect(index[0].sessionType).to.equal('live');
+    });
+
+    it('removes entry from index when session is ended', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'bundle-a');
+      agent.setSessionId('s1');
+      await createCache(agent);
+      agent.setSessionId('s2');
+      await createCache(agent);
+      agent.setSessionId('s1');
+      await removeCache(agent);
+      const list = await listCachedSessions(project);
+      expect(list[0].sessions.map((s) => s.sessionId)).to.deep.equal(['s2']);
+    });
+
+    it('falls back to directory scan when no index exists', async () => {
+      const project = makeMockProject(() => projectPath);
+      const agent = makeMockAgent(projectPath, 'bundle-a');
+      agent.setSessionId('s1');
+      await createCache(agent);
+      // Remove the index to simulate pre-index sessions
+      const { unlink: unlinkFn } = await import('node:fs/promises');
+      await unlinkFn(join(projectPath, '.sfdx', 'agents', 'bundle-a', 'sessions', 'index.json'));
+      const list = await listCachedSessions(project);
+      expect(list[0].sessions.map((s) => s.sessionId)).to.deep.equal(['s1']);
     });
   });
 
