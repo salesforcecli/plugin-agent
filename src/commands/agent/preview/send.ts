@@ -24,6 +24,8 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.previe
 
 export type AgentPreviewSendResult = {
   messages: Array<{ message?: string; role?: string }>;
+  agentApiName: string;
+  sessionId: string;
 };
 
 export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> {
@@ -139,6 +141,6 @@ export default class AgentPreviewSend extends SfCommand<AgentPreviewSendResult> 
 
     await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_send_success' });
     this.log(response.messages[0].message);
-    return { messages: response.messages ?? [] };
+    return { messages: response.messages ?? [], agentApiName: agentIdentifier, sessionId };
   }
 }
