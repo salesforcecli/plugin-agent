@@ -15,11 +15,21 @@
           },
           "sessionId": {
             "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "sessionType": {
+            "$ref": "#/definitions/SessionType"
           }
         },
         "required": ["agentId", "sessionId"],
         "additionalProperties": false
       }
+    },
+    "SessionType": {
+      "type": "string",
+      "enum": ["simulated", "live", "published"]
     }
   }
 }

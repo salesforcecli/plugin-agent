@@ -17,7 +17,7 @@
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
-import { createCache } from '../../../previewSessionStore.js';
+import { createCache, SessionType } from '../../../previewSessionStore.js';
 import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -158,11 +158,17 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     const displayName = flags['authoring-bundle'] ?? flags['api-name'];
-    await createCache(agent, { displayName });
+    const sessionType = resolveSessionType(agent, simulateActions);
+    await createCache(agent, { displayName, sessionType });
 
     await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_success' });
     const result: AgentPreviewStartResult = { sessionId: session.sessionId, agentApiName: agentIdentifier };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));
     return result;
   }
+}
+
+function resolveSessionType(agent: ScriptAgent | ProductionAgent, simulateActions: boolean | undefined): SessionType {
+  if (agent instanceof ProductionAgent) return 'published';
+  return simulateActions ? 'simulated' : 'live';
 }
