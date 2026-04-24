@@ -6,7 +6,7 @@ Send a message to an existing agent preview session.
 
 You must have previously started a programmatic agent preview session with the "agent preview start" command to then use this command to send the agent a message (utterance). This command then displays the agent's response.
 
-The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this command to send a message. You don't have to specify the --session-id flag if an agent has only one active preview session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respecitvely. To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory. Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory.
+Use the session ID from `agent preview start` with the `--session-id` flag to send a message. Omit `--session-id` if the agent has only one active preview session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring bundle or the published agent, respectively. To find either API name, navigate to your package directory in your DX project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata directory. Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata directory.
 
 # flags.session-id.summary
 
