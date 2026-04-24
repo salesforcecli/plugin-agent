@@ -1,3 +1,9 @@
+# [1.33.0](https://github.com/salesforcecli/plugin-agent/compare/1.32.22...1.33.0) (2026-04-24)
+
+### Features
+
+- add agentApiName to agent preview start and send JSON output ([941f329](https://github.com/salesforcecli/plugin-agent/commit/941f329d43134f6e5f239f5f546f2387efc11d17))
+
 ## [1.32.22](https://github.com/salesforcecli/plugin-agent/compare/1.32.21...1.32.22) (2026-04-21)
 
 ### Bug Fixes
