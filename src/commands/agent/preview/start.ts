@@ -25,6 +25,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.previe
 
 export type AgentPreviewStartResult = {
   sessionId: string;
+  agentApiName: string;
 };
 
 export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult> {
@@ -160,7 +161,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     await createCache(agent, { displayName });
 
     await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_success' });
-    const result: AgentPreviewStartResult = { sessionId: session.sessionId };
+    const result: AgentPreviewStartResult = { sessionId: session.sessionId, agentApiName: agentIdentifier };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));
     return result;
   }
