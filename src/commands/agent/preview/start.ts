@@ -17,7 +17,7 @@
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
-import { createCache } from '../../../previewSessionStore.js';
+import { createCache, SessionType } from '../../../previewSessionStore.js';
 import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -167,10 +167,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
   }
 }
 
-function resolveSessionType(
-  agent: ScriptAgent | ProductionAgent,
-  simulateActions: boolean | undefined
-): import('../../../previewSessionStore.js').SessionType {
+function resolveSessionType(agent: ScriptAgent | ProductionAgent, simulateActions: boolean | undefined): SessionType {
   if (agent instanceof ProductionAgent) return 'published';
   return simulateActions ? 'simulated' : 'live';
 }

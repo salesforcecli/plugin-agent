@@ -16,7 +16,7 @@
 
 import { SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages } from '@salesforce/core';
-import { listCachedSessions } from '../../../previewSessionStore.js';
+import { listCachedSessions, SessionType } from '../../../previewSessionStore.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.sessions');
@@ -26,7 +26,7 @@ export type AgentPreviewSessionsResult = Array<{
   displayName?: string;
   sessionId: string;
   timestamp?: string;
-  sessionType?: string;
+  sessionType?: SessionType;
 }>;
 
 export default class AgentPreviewSessions extends SfCommand<AgentPreviewSessionsResult> {
