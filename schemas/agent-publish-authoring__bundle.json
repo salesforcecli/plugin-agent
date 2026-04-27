@@ -16,6 +16,31 @@
           "items": {
             "type": "string"
           }
+        },
+        "retrievedComponents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deployedComponents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "retrieved": {
+              "type": "number"
+            },
+            "deployed": {
+              "type": "number"
+            }
+          },
+          "required": ["retrieved", "deployed"],
+          "additionalProperties": false
         }
       },
       "required": ["success"],
