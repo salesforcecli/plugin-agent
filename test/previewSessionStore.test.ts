@@ -19,7 +19,7 @@ import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect } from 'chai';
-import { SfError, SfProject } from '@salesforce/core';
+import { SfProject } from '@salesforce/core';
 import type { ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import {
   createCache,
@@ -94,9 +94,8 @@ describe('previewSessionStore', () => {
         await validatePreviewSession(agent);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionNotFound');
-        expect((e as SfError).message).to.include('No preview session found');
+        expect((e as Error).name).to.equal('PreviewSessionNotFound');
+        expect((e as Error).message).to.include('No preview session found');
       }
     });
 
@@ -110,8 +109,7 @@ describe('previewSessionStore', () => {
         await validatePreviewSession(agentB);
         expect.fail('Expected validatePreviewSession to throw');
       } catch (e) {
-        expect(e).to.be.instanceOf(SfError);
-        expect((e as SfError).name).to.equal('PreviewSessionNotFound');
+        expect((e as Error).name).to.equal('PreviewSessionNotFound');
       }
     });
 
