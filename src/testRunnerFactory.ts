@@ -15,27 +15,46 @@
  */
 
 import { Connection } from '@salesforce/core';
-import { AgentTester, AgentTesterNGT, determineTestRunner, TestRunnerType } from '@salesforce/agents';
+import {
+  AgentTester,
+  AgentTesterNGT,
+  detectTestRunnerFromId,
+  determineTestRunner,
+  TestRunnerType,
+} from '@salesforce/agents';
 
 export type TestRunnerInstance = AgentTester | AgentTesterNGT;
 
 /**
  * Creates the appropriate test runner (NGT or legacy) based on detection or explicit type.
  *
+ * Detection priority:
+ * 1. `explicitType` — user-supplied `--test-runner-type` flag, always wins
+ * 2. `runId` prefix — instant detection from the Salesforce ID prefix (`3A2` = NGT, `4KB` = legacy), no network call
+ * 3. `testDefinitionName` — org metadata query via `determineTestRunner` (network call, used as last resort)
+ *
  * @param connection - Salesforce connection
- * @param explicitType - Optional explicit runner type to use (bypasses detection)
- * @param testDefinitionName - Optional test name for conflict detection
+ * @param explicitType - Optional explicit runner type (bypasses all detection)
+ * @param testDefinitionName - Optional test name for org metadata detection
+ * @param runId - Optional existing run ID; prefix is used for instant detection
  * @returns Object containing the runner instance and its type
  */
 export async function createTestRunner(
   connection: Connection,
   explicitType?: TestRunnerType,
-  testDefinitionName?: string
+  testDefinitionName?: string,
+  runId?: string
 ): Promise<{ runner: TestRunnerInstance; type: TestRunnerType }> {
-  // Use explicit type if provided, otherwise detect
-  const runnerType = explicitType ?? (await determineTestRunner(connection, testDefinitionName));
+  let runnerType: TestRunnerType;
+
+  if (explicitType) {
+    runnerType = explicitType;
+  } else if (runId && detectTestRunnerFromId(runId)) {
+    runnerType = detectTestRunnerFromId(runId)!;
+  } else {
+    runnerType = await determineTestRunner(connection, testDefinitionName);
+  }
 
   const runner = runnerType === 'ngt' ? new AgentTesterNGT(connection) : new AgentTester(connection);
-
   return { runner, type: runnerType };
 }

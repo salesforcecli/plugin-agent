@@ -60,7 +60,12 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     const { flags } = await this.parse(AgentTestResults);
 
     const connection = flags['target-org'].getConnection(flags['api-version']);
-    const { runner: agentTester } = await createTestRunner(connection, flags['test-runner-type']);
+    const { runner: agentTester } = await createTestRunner(
+      connection,
+      flags['test-runner-type'],
+      undefined,
+      flags['job-id']
+    );
 
     let response;
     try {

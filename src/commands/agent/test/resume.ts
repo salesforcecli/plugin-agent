@@ -115,12 +115,13 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     });
     this.mso.start({ id: runId });
 
-    // Use cached runner type if available, otherwise use explicit flag or detect
+    // Use explicit flag > cached runner type > ID prefix detection > org metadata query
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const { runner: agentTester } = await createTestRunner(
       connection,
       flags['test-runner-type'] ?? cachedRunnerType,
-      name
+      name,
+      runId
     );
 
     let completed;
