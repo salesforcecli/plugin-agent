@@ -87,7 +87,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
 
     // Track telemetry for agent initialization
-    let agent;
+    let agent: ScriptAgent | ProductionAgent;
     try {
       agent = flags['authoring-bundle']
         ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
