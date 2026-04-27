@@ -1,3 +1,15 @@
+# [1.34.0](https://github.com/salesforcecli/plugin-agent/compare/1.33.0...1.34.0) (2026-04-27)
+
+### Bug Fixes
+
+- address PR review feedback on session index and type safety ([66a6d5e](https://github.com/salesforcecli/plugin-agent/commit/66a6d5e13d8a54e6d08a93b843a0c46ced00510e))
+- move preview session store I/O into @salesforce/agents library ([764cfa8](https://github.com/salesforcecli/plugin-agent/commit/764cfa896884ffc2012398df3d26ea827bcc1145))
+- revert to inline session store until agents library PR ships ([57fb5f7](https://github.com/salesforcecli/plugin-agent/commit/57fb5f7c5a7b0dd9b6f44bc2766d3ef05035083c)), closes [forcedotcom/agents#269](https://github.com/forcedotcom/agents/issues/269)
+
+### Features
+
+- add timestamp, session type, and index to agent preview sessions output ([5fc8f16](https://github.com/salesforcecli/plugin-agent/commit/5fc8f1679b9a3abd97547eeae883196c9ea9e084))
+
 # [1.33.0](https://github.com/salesforcecli/plugin-agent/compare/1.32.22...1.33.0) (2026-04-24)
 
 ### Features
