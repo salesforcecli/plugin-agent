@@ -23,7 +23,7 @@ import {
   AgentTestRunResult,
   FlaggablePrompt,
   makeFlags,
-  promptForAiEvaluationDefinitionApiName,
+  promptForTestDefinitionApiName,
   resultFormatFlag,
   testOutputDirFlag,
   testRunnerTypeFlag,
@@ -105,7 +105,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     }
 
     const apiName =
-      flags['api-name'] ?? (await promptForAiEvaluationDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection));
+      flags['api-name'] ?? (await promptForTestDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection));
 
     this.mso = new TestStages({ title: `Agent Test Run: ${apiName}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();

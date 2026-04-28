@@ -134,7 +134,7 @@ export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[
   return results;
 }
 
-export const promptForAiEvaluationDefinitionApiName = async (
+export const promptForTestDefinitionApiName = async (
   flagDef: FlaggablePrompt,
   connection: Connection
 ): Promise<string> => {
