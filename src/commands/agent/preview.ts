@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import React from 'react';
 import { render } from 'ink';
-import { Agent, AgentSource, PreviewableAgent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
+import { Agent, AgentSource, PreviewableAgent, ProductionAgent, ScriptAgent, type AgentJson } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
@@ -69,6 +70,12 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.use-live-actions.summary'),
       default: false,
     }),
+    'agent-json': Flags.file({
+      summary: messages.getMessage('flags.agent-json.summary'),
+      hidden: true,
+      exists: true,
+      dependsOn: ['authoring-bundle'],
+    }),
   };
 
   public async run(): Promise<AgentPreviewResult> {
@@ -81,11 +88,24 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const { 'api-name': apiNameOrId, 'use-live-actions': useLiveActions, 'authoring-bundle': aabName } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
+    let preloadedAgentJson: AgentJson | undefined;
+    if (flags['agent-json']) {
+      try {
+        preloadedAgentJson = JSON.parse(await readFile(flags['agent-json'], 'utf-8')) as AgentJson;
+      } catch (error) {
+        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_agent_json_read_failed' });
+        throw new SfError(
+          `Failed to read or parse --agent-json file '${flags['agent-json']}': ${SfError.wrap(error).message}`,
+          'AgentJsonReadError'
+        );
+      }
+    }
+
     let selectedAgent: ScriptAgent | ProductionAgent;
 
     if (aabName) {
       // user specified --authoring-bundle, use the API name directly
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabName });
+      selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabName, agentJson: preloadedAgentJson });
       selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
     } else if (apiNameOrId) {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });

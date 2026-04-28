@@ -73,6 +73,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       summary: messages.getMessage('flags.agent-json.summary'),
       hidden: true,
       exists: true,
+      dependsOn: ['authoring-bundle'],
     }),
   };
 
@@ -191,6 +192,7 @@ async function loadAgentJson(filePath: string | undefined): Promise<AgentJson | 
   try {
     return JSON.parse(await readFile(filePath, 'utf-8')) as AgentJson;
   } catch (error) {
+    await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_agent_json_read_failed' });
     throw new SfError(
       `Failed to read or parse --agent-json file '${filePath}': ${SfError.wrap(error).message}`,
       'AgentJsonReadError'

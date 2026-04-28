@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import { writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Agent } from '@salesforce/agents';
@@ -33,6 +37,77 @@ describe('agent preview', function () {
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
+  });
+
+  describe('--agent-json flag', () => {
+    let tmpDir: string;
+
+    before(() => {
+      tmpDir = mkdtempSync(join(tmpdir(), 'agent-json-nut-'));
+    });
+
+    after(() => {
+      rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('should start a preview session using a pre-compiled AgentJSON file', async function () {
+      this.timeout(5 * 60 * 1000);
+
+      const bundleApiName = 'Willie_Resort_Manager';
+      const targetOrg = getUsername();
+
+      // Compile agent JSON first via preview start (compile happens internally), then reuse it
+      // For the NUT we write a minimal valid agentJson extracted from a successful compile
+      const org = await Org.create({ aliasOrUsername: targetOrg });
+      const conn = org.getConnection();
+      const { ScriptAgent: ScriptAgentClass } = await import('@salesforce/agents');
+      const { SfProject } = await import('@salesforce/core');
+      const project = await SfProject.resolve(session.project.dir);
+      const scriptAgent = new ScriptAgentClass({ connection: conn, project, aabName: bundleApiName });
+      await scriptAgent.compile();
+
+      // @ts-expect-error accessing private field for NUT purposes
+      const agentJson = scriptAgent.agentJson as object;
+      expect(agentJson).to.not.be.undefined;
+
+      const agentJsonPath = join(tmpDir, 'compiled-agent.json');
+      writeFileSync(agentJsonPath, JSON.stringify(agentJson));
+
+      const startResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json ${agentJsonPath} --target-org ${targetOrg} --json`,
+        { cwd: session.project.dir }
+      ).jsonOutput?.result;
+
+      expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(bundleApiName);
+
+      // Clean up session
+      execCmd(
+        `agent preview end --session-id ${startResult!.sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
+        { cwd: session.project.dir }
+      );
+    });
+
+    it('should fail when --agent-json contains invalid JSON', () => {
+      const badJsonPath = join(tmpDir, 'bad.json');
+      writeFileSync(badJsonPath, 'not-valid{{{');
+
+      const result = execCmd(
+        `agent preview start --authoring-bundle Willie_Resort_Manager --simulate-actions --agent-json ${badJsonPath} --target-org ${getUsername()} --json`,
+        { ensureExitCode: 1, cwd: session.project.dir }
+      );
+      expect(JSON.stringify(result.shellOutput)).to.include('Failed to read or parse');
+    });
+
+    it('should fail when --agent-json is used without --authoring-bundle', () => {
+      const agentJsonPath = join(tmpDir, 'any.json');
+      writeFileSync(agentJsonPath, '{}');
+
+      execCmd(
+        `agent preview start --api-name Some_Agent --agent-json ${agentJsonPath} --target-org ${getUsername()} --json`,
+        { ensureExitCode: 2 }
+      );
+    });
   });
 
   it('should fail when authoring bundle does not exist', async () => {
