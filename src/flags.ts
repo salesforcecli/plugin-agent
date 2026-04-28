@@ -70,8 +70,8 @@ export const verboseFlag = Flags.boolean({
 
 export const testRunnerTypeFlag = Flags.custom<'agentforce-studio' | 'testing-center'>({
   options: ['agentforce-studio', 'testing-center'],
-  summary: messages.getMessage('flags.test-runner-type.summary'),
-  description: messages.getMessage('flags.test-runner-type.description'),
+  summary: messages.getMessage('flags.test-runner.summary'),
+  description: messages.getMessage('flags.test-runner.description'),
 })();
 
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {

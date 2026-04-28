@@ -57,7 +57,7 @@ describe('testRunnerFactory', () => {
   });
 
   describe('explicit type', () => {
-    it('should use ngt runner when explicitType is "ngt"', async () => {
+    it('should use agentforce-studio runner when explicitType is "agentforce-studio"', async () => {
       const connection = makeMockConnection() as Connection;
       const result = await createTestRunner(connection, 'agentforce-studio' as TestRunnerType);
 
@@ -68,7 +68,7 @@ describe('testRunnerFactory', () => {
       expect(determineTestRunnerStub.called).to.be.false;
     });
 
-    it('should use legacy runner when explicitType is "legacy"', async () => {
+    it('should use testing-center runner when explicitType is "testing-center"', async () => {
       const connection = makeMockConnection() as Connection;
       const result = await createTestRunner(connection, 'testing-center' as TestRunnerType);
 
@@ -81,7 +81,7 @@ describe('testRunnerFactory', () => {
   });
 
   describe('runId-based detection', () => {
-    it('should use ngt runner when runId detects ngt type', async () => {
+    it('should use agentforce-studio runner when runId detects agentforce-studio type', async () => {
       detectTestRunnerFromIdStub.returns('agentforce-studio');
       const connection = makeMockConnection() as Connection;
       const result = await createTestRunner(connection, undefined, undefined, '3A2xxxxxxxxxxxx');
@@ -91,7 +91,7 @@ describe('testRunnerFactory', () => {
       expect(determineTestRunnerStub.called).to.be.false;
     });
 
-    it('should use legacy runner when runId detects legacy type', async () => {
+    it('should use testing-center runner when runId detects testing-center type', async () => {
       detectTestRunnerFromIdStub.returns('testing-center');
       const connection = makeMockConnection() as Connection;
       const result = await createTestRunner(connection, undefined, undefined, '4KBxxxxxxxxxxxx');

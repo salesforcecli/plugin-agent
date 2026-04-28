@@ -68,11 +68,6 @@ export function readableTime(time: number, decimalPlaces = 2): string {
     return '< 1s';
   }
 
-  // if time < 1000ms, return time in ms
-  if (time < 1000) {
-    return `${time}ms`;
-  }
-
   // if time < 60s, return time in seconds
   if (time < 60_000) {
     return `${truncate(time / 1000, decimalPlaces)}s`;
@@ -99,6 +94,14 @@ type ParsedScorerResponse = {
   expectedValue?: string;
 };
 
+function parseScorerResponse(raw: string): ParsedScorerResponse {
+  try {
+    return JSON.parse(raw) as ParsedScorerResponse;
+  } catch {
+    return {};
+  }
+}
+
 function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
   const ux = new Ux();
   const tables: string[] = [];
@@ -113,12 +116,7 @@ function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
     }
 
     const scorerRows = testCase.testScorerResults.map((scorer) => {
-      let parsed: ParsedScorerResponse = {};
-      try {
-        parsed = JSON.parse(scorer.scorerResponse) as ParsedScorerResponse;
-      } catch {
-        // ignore
-      }
+      const parsed = parseScorerResponse(scorer.scorerResponse);
       return {
         scorer: scorer.scorerName,
         result: parsed.status === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
@@ -148,13 +146,7 @@ function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
 
   const totalCases = results.testCases.length;
   const passCases = results.testCases.filter((tc) =>
-    tc.testScorerResults.every((s) => {
-      try {
-        return (JSON.parse(s.scorerResponse) as ParsedScorerResponse).status === 'PASS';
-      } catch {
-        return false;
-      }
-    })
+    tc.testScorerResults.every((s) => parseScorerResponse(s.scorerResponse).status === 'PASS')
   ).length;
 
   const summary = makeSimpleTable(
@@ -174,13 +166,7 @@ function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
   const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
   const testCount = results.testCases.length;
   const failureCount = results.testCases.filter((tc) =>
-    tc.testScorerResults.some((s) => {
-      try {
-        return (JSON.parse(s.scorerResponse) as ParsedScorerResponse).status !== 'PASS';
-      } catch {
-        return true;
-      }
-    })
+    tc.testScorerResults.some((s) => parseScorerResponse(s.scorerResponse).status !== 'PASS')
   ).length;
 
   const suites = builder.build({
@@ -194,12 +180,7 @@ function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
         $assertions: tc.testScorerResults.length,
         failure: tc.testScorerResults
           .map((s) => {
-            let parsed: ParsedScorerResponse = {};
-            try {
-              parsed = JSON.parse(s.scorerResponse) as ParsedScorerResponse;
-            } catch {
-              // ignore
-            }
+            const parsed = parseScorerResponse(s.scorerResponse);
             if (parsed.status !== 'PASS') {
               return { $message: parsed.reasoning ?? 'Unknown error', $name: s.scorerName };
             }
@@ -218,12 +199,7 @@ function tapFormatNGT(results: AgentTestNGTResultsResponse): string {
 
   for (const tc of results.testCases) {
     for (const scorer of tc.testScorerResults) {
-      let parsed: ParsedScorerResponse = {};
-      try {
-        parsed = JSON.parse(scorer.scorerResponse) as ParsedScorerResponse;
-      } catch {
-        // ignore
-      }
+      const parsed = parseScorerResponse(scorer.scorerResponse);
       const pass = parsed.status === 'PASS';
       expectationCount++;
       lines.push(`${pass ? 'ok' : 'not ok'} ${expectationCount} ${tc.testNumber}.${scorer.scorerName}`);
@@ -238,7 +214,7 @@ function tapFormatNGT(results: AgentTestNGTResultsResponse): string {
     }
   }
 
-  return `Tap Version 14\n1..${expectationCount}\n${lines.join('\n')}`;
+  return `TAP version 13\n1..${expectationCount}\n${lines.join('\n')}`;
 }
 
 function convertNGTTestResultsToFormat(results: AgentTestNGTResultsResponse, format: 'json' | 'junit' | 'tap'): string {
@@ -414,52 +390,20 @@ export async function handleTestResults({
   const ux = new Ux({ jsonEnabled });
 
   if (!isLegacyResponse(results)) {
-    if (format === 'human') {
-      const formatted = humanFormatNGT(results);
-      if (outputDir) {
-        const file = `test-result-${id}.txt`;
-        await writeFileToDir(outputDir, file, stripVTControlCharacters(formatted));
-        ux.log(`Created human-readable file at ${join(outputDir, file)}`);
-      } else {
-        ux.log(formatted);
-      }
-      return;
-    }
-
-    if (format === 'json') {
-      const formatted = convertNGTTestResultsToFormat(results, 'json');
-      if (outputDir) {
-        const file = `test-result-${id}.json`;
-        await writeFileToDir(outputDir, file, formatted);
-        ux.log(`Created JSON file at ${join(outputDir, file)}`);
-      } else {
-        ux.log(formatted);
-      }
-      return;
-    }
-
-    if (format === 'junit') {
-      const formatted = convertNGTTestResultsToFormat(results, 'junit');
-      if (outputDir) {
-        const file = `test-result-${id}.xml`;
-        await writeFileToDir(outputDir, file, formatted);
-        ux.log(`Created JUnit file at ${join(outputDir, file)}`);
-      } else {
-        ux.log(formatted);
-      }
-      return;
-    }
-
-    if (format === 'tap') {
-      const formatted = convertNGTTestResultsToFormat(results, 'tap');
-      if (outputDir) {
-        const file = `test-result-${id}.txt`;
-        await writeFileToDir(outputDir, file, formatted);
-        ux.log(`Created TAP file at ${join(outputDir, file)}`);
-      } else {
-        ux.log(formatted);
-      }
-      return;
+    const ngtFormatConfig = {
+      human: { ext: 'txt', label: 'human-readable', get: () => humanFormatNGT(results), strip: true },
+      json: { ext: 'json', label: 'JSON', get: () => convertNGTTestResultsToFormat(results, 'json'), strip: false },
+      junit: { ext: 'xml', label: 'JUnit', get: () => convertNGTTestResultsToFormat(results, 'junit'), strip: false },
+      tap: { ext: 'txt', label: 'TAP', get: () => convertNGTTestResultsToFormat(results, 'tap'), strip: false },
+    } as const;
+    const cfg = ngtFormatConfig[format];
+    const formatted = cfg.get();
+    if (outputDir) {
+      const file = `test-result-${id}.${cfg.ext}`;
+      await writeFileToDir(outputDir, file, cfg.strip ? stripVTControlCharacters(formatted) : formatted);
+      ux.log(`Created ${cfg.label} file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
     }
     return;
   }

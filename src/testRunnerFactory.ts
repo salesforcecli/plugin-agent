@@ -45,15 +45,9 @@ export async function createTestRunner(
   testDefinitionName?: string,
   runId?: string
 ): Promise<{ runner: TestRunnerInstance; type: TestRunnerType }> {
-  let runnerType: TestRunnerType;
-
-  if (explicitType) {
-    runnerType = explicitType;
-  } else if (runId && detectTestRunnerFromId(runId)) {
-    runnerType = detectTestRunnerFromId(runId)!;
-  } else {
-    runnerType = await determineTestRunner(connection, testDefinitionName);
-  }
+  const detected = runId ? detectTestRunnerFromId(runId) : undefined;
+  const runnerType: TestRunnerType =
+    explicitType ?? detected ?? (await determineTestRunner(connection, testDefinitionName));
 
   const runner = runnerType === 'agentforce-studio' ? new AgentTesterNGT(connection) : new AgentTester(connection);
   return { runner, type: runnerType };

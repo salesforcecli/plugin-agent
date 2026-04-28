@@ -110,10 +110,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso = new TestStages({ title: `Agent Test Run: ${apiName}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();
 
-    // Determine which test runner to use (NGT or legacy)
-    const result = await createTestRunner(connection, flags['test-runner'], apiName);
-    const agentTester = result.runner;
-    const runnerType = result.type;
+    const { runner: agentTester, type: runnerType } = await createTestRunner(connection, flags['test-runner'], apiName);
 
     let response: AgentTestStartResponse | AgentTestNGTStartResponse;
     try {
