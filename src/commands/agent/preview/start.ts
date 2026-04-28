@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { readFile } from 'node:fs/promises';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
-import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
+import { Agent, ProductionAgent, ScriptAgent, type AgentJson } from '@salesforce/agents';
 import { createCache, SessionType } from '../../../previewSessionStore.js';
 import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
 
@@ -68,6 +69,11 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       summary: messages.getMessage('flags.simulate-actions.summary'),
       exclusive: ['use-live-actions'],
     }),
+    'agent-json': Flags.file({
+      summary: messages.getMessage('flags.agent-json.summary'),
+      hidden: true,
+      exists: true,
+    }),
   };
 
   public async run(): Promise<AgentPreviewStartResult> {
@@ -87,11 +93,18 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const simulateActions = flags['simulate-actions'];
     const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
 
+    const preloadedAgentJson = await loadAgentJson(flags['agent-json']);
+
     // Track telemetry for agent initialization
     let agent: ScriptAgent | ProductionAgent;
     try {
       agent = flags['authoring-bundle']
-        ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
+        ? await Agent.init({
+            connection: conn,
+            project: this.project!,
+            aabName: flags['authoring-bundle'],
+            agentJson: preloadedAgentJson,
+          })
         : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
     } catch (error) {
       const wrapped = SfError.wrap(error);
@@ -171,4 +184,16 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
 function resolveSessionType(agent: ScriptAgent | ProductionAgent, simulateActions: boolean | undefined): SessionType {
   if (agent instanceof ProductionAgent) return 'published';
   return simulateActions ? 'simulated' : 'live';
+}
+
+async function loadAgentJson(filePath: string | undefined): Promise<AgentJson | undefined> {
+  if (!filePath) return undefined;
+  try {
+    return JSON.parse(await readFile(filePath, 'utf-8')) as AgentJson;
+  } catch (error) {
+    throw new SfError(
+      `Failed to read or parse --agent-json file '${filePath}': ${SfError.wrap(error).message}`,
+      'AgentJsonReadError'
+    );
+  }
 }
