@@ -17,7 +17,7 @@
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
-import { createCache } from '../../../previewSessionStore.js';
+import { createCache, SessionType } from '../../../previewSessionStore.js';
 import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -25,6 +25,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.previe
 
 export type AgentPreviewStartResult = {
   sessionId: string;
+  agentApiName: string;
 };
 
 export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult> {
@@ -87,7 +88,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
 
     // Track telemetry for agent initialization
-    let agent;
+    let agent: ScriptAgent | ProductionAgent;
     try {
       agent = flags['authoring-bundle']
         ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
@@ -157,11 +158,17 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     const displayName = flags['authoring-bundle'] ?? flags['api-name'];
-    await createCache(agent, { displayName });
+    const sessionType = resolveSessionType(agent, simulateActions);
+    await createCache(agent, { displayName, sessionType });
 
     await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_success' });
-    const result: AgentPreviewStartResult = { sessionId: session.sessionId };
+    const result: AgentPreviewStartResult = { sessionId: session.sessionId, agentApiName: agentIdentifier };
     this.log(messages.getMessage('output.sessionId', [session.sessionId]));
     return result;
   }
+}
+
+function resolveSessionType(agent: ScriptAgent | ProductionAgent, simulateActions: boolean | undefined): SessionType {
+  if (agent instanceof ProductionAgent) return 'published';
+  return simulateActions ? 'simulated' : 'live';
 }

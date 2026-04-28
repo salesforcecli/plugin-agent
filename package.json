@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/plugin-agent",
   "description": "Commands to interact with Salesforce agents",
-  "version": "1.32.22",
+  "version": "1.34.0",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "enableO11y": true,
@@ -12,7 +12,7 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.36",
-    "@salesforce/agents": "file:../agents",
+    "@salesforce/agents": "^1.2.0",
     "@salesforce/core": "^8.28.3",
     "@salesforce/kit": "^3.2.6",
     "@salesforce/sf-plugins-core": "^12.2.6",

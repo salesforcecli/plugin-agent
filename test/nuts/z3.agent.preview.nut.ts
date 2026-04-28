@@ -61,17 +61,22 @@ describe('agent preview', function () {
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(bundleApiName);
       const sessionId = startResult!.sessionId;
 
       const sendResult1 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult1?.agentApiName).to.equal(bundleApiName);
+      expect(sendResult1?.sessionId).to.equal(sessionId);
 
       const sendResult2 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "Tell me more" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult2?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult2?.agentApiName).to.equal(bundleApiName);
+      expect(sendResult2?.sessionId).to.equal(sessionId);
 
       const endResult = execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
@@ -95,12 +100,15 @@ describe('agent preview', function () {
         `agent preview start --authoring-bundle ${publishedAgent?.DeveloperName} --use-live-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(publishedAgent?.DeveloperName);
       const sessionId = startResult!.sessionId;
 
       const sendResult1 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult1?.agentApiName).to.equal(publishedAgent?.DeveloperName);
+      expect(sendResult1?.sessionId).to.equal(sessionId);
 
       execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --target-org ${targetOrg} --json`
@@ -130,6 +138,7 @@ describe('agent preview', function () {
         `agent preview start --api-name ${publishedAgent!.DeveloperName} --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(publishedAgent!.DeveloperName);
       const sessionId = startResult!.sessionId;
 
       const sendResult = execCmd<AgentPreviewSendResult>(
@@ -138,6 +147,8 @@ describe('agent preview', function () {
         } --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult?.agentApiName).to.equal(publishedAgent!.DeveloperName);
+      expect(sendResult?.sessionId).to.equal(sessionId);
 
       const endResult = execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --api-name ${

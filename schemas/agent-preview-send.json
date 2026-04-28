@@ -19,9 +19,15 @@
             },
             "additionalProperties": false
           }
+        },
+        "agentApiName": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
         }
       },
-      "required": ["messages"],
+      "required": ["messages", "agentApiName", "sessionId"],
       "additionalProperties": false
     }
   }

@@ -7,9 +7,12 @@
       "properties": {
         "sessionId": {
           "type": "string"
+        },
+        "agentApiName": {
+          "type": "string"
         }
       },
-      "required": ["sessionId"],
+      "required": ["sessionId", "agentApiName"],
       "additionalProperties": false
     }
   }
