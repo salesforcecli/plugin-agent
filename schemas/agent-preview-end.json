@@ -3,6 +3,26 @@
   "$ref": "#/definitions/AgentPreviewEndResult",
   "definitions": {
     "AgentPreviewEndResult": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "ended": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EndedSession"
+              }
+            }
+          },
+          "required": ["ended"],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/definitions/EndedSession"
+        }
+      ]
+    },
+    "EndedSession": {
       "type": "object",
       "properties": {
         "sessionId": {

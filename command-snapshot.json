@@ -107,8 +107,18 @@
     "alias": [],
     "command": "agent:preview:end",
     "flagAliases": [],
-    "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "authoring-bundle", "flags-dir", "json", "session-id", "target-org"],
+    "flagChars": ["n", "o", "p"],
+    "flags": [
+      "all",
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "no-prompt",
+      "session-id",
+      "target-org"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {

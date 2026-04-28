@@ -626,13 +626,16 @@ End an existing programmatic agent preview session and get trace location.
 
 ```
 USAGE
-  $ sf agent preview end -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--session-id <value>] [-n
-    <value>] [--authoring-bundle <value>]
+  $ sf agent preview end [--json] [--flags-dir <value>] [--api-version <value>] [--session-id <value>] [-n <value>]
+    [--authoring-bundle <value>] [--all] [-p] [-o <value>]
 
 FLAGS
   -n, --api-name=<value>          API name of the activated published agent you want to preview.
-  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
-                                  configuration variable is already set.
+  -o, --target-org=<value>        Username or alias of the target org. Required with --api-name. Not required if the
+                                  `target-org` configuration variable is already set.
+  -p, --no-prompt                 Skip confirmation when using --all (no effect otherwise).
+      --all                       End every cached preview session for the agent given by --api-name or
+                                  --authoring-bundle.
       --api-version=<value>       Override the api version used for api requests made by this command
       --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
                                   Script file.
@@ -652,7 +655,7 @@ DESCRIPTION
   The original "agent preview start" command outputs a session ID which you then use with the --session-id flag of this
   command to end the session. You don't have to specify the --session-id flag if an agent has only one active preview
   session. You must also use either the --authoring-bundle or --api-name flag to specify the API name of the authoring
-  bundle or the published agent, respecitvely. To find either API name, navigate to your package directory in your DX
+  bundle or the published agent, respectively. To find either API name, navigate to your package directory in your DX
   project. The API name of an authoring bundle is the same as its directory name under the "aiAuthoringBundles" metadata
   directory. Similarly, the published agent's API name is the same as its directory name under the "Bots" metadata
   directory.
@@ -671,6 +674,10 @@ EXAMPLES
   one active session.
 
     $ sf agent preview end --authoring-bundle My_Local_Agent
+
+  End every cached preview session for that authoring bundle without a confirmation prompt:
+
+    $ sf agent preview end --all --authoring-bundle My_Local_Agent --no-prompt
 ```
 
 _See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.34.0/src/commands/agent/preview/end.ts)_
