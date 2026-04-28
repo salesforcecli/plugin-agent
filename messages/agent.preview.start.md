@@ -25,7 +25,7 @@ API name of the authoring bundle metadata component that contains the agent's Ag
 
 # flags.agent-json.summary
 
-Path to a pre-compiled AgentJSON file to use instead of compiling the agent script. Intended for internal use and testing.
+Path to a pre-compiled AgentJSON file to use instead of compiling the Agent Script file. Intended for internal use and testing.
 
 # flags.use-live-actions.summary
 
