@@ -26,7 +26,7 @@ import {
   promptForTestDefinitionApiName,
   resultFormatFlag,
   testOutputDirFlag,
-  testRunnerTypeFlag,
+  testRunnerFlag,
   verboseFlag,
 } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
@@ -90,7 +90,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
-    'test-runner': testRunnerTypeFlag,
+    'test-runner': testRunnerFlag,
     verbose: verboseFlag,
   };
 
@@ -189,8 +189,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         process.exitCode = 1;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      return { ...detailsResponse!, status: 'COMPLETED', runId: response.runId } as AgentTestRunResult;
+      return { ...detailsResponse, status: 'COMPLETED', runId: response.runId } as AgentTestRunResult;
     } else {
       this.mso.stop();
       this.log(

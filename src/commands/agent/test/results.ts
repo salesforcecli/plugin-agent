@@ -17,7 +17,7 @@
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
 import { AgentTestResultsResponse, AgentTestNGTResultsResponse } from '@salesforce/agents';
-import { resultFormatFlag, testOutputDirFlag, testRunnerTypeFlag, verboseFlag } from '../../../flags.js';
+import { resultFormatFlag, testOutputDirFlag, testRunnerFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 import { createTestRunner } from '../../../testRunnerFactory.js';
 
@@ -52,7 +52,7 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
-    'test-runner': testRunnerTypeFlag,
+    'test-runner': testRunnerFlag,
     verbose: verboseFlag,
   };
 

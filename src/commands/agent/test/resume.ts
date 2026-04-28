@@ -23,7 +23,7 @@ import {
   AgentTestRunResult,
   resultFormatFlag,
   testOutputDirFlag,
-  testRunnerTypeFlag,
+  testRunnerFlag,
   verboseFlag,
 } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
@@ -71,7 +71,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
-    'test-runner': testRunnerTypeFlag,
+    'test-runner': testRunnerFlag,
     verbose: verboseFlag,
   };
 

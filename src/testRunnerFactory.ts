@@ -29,7 +29,7 @@ export type TestRunnerInstance = AgentTester | AgentTesterNGT;
  * Creates the appropriate test runner (agentforce-studio or testing-center) based on detection or explicit type.
  *
  * Detection priority:
- * 1. `explicitType` — user-supplied `--test-runner-type` flag, always wins
+ * 1. `explicitType` — user-supplied `--test-runner` flag, always wins
  * 2. `runId` prefix — instant detection from the Salesforce ID prefix (`3A2` = agentforce-studio, `4KB` = testing-center), no network call
  * 3. `testDefinitionName` — org metadata query via `determineTestRunner` (network call, used as last resort)
  *

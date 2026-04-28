@@ -68,7 +68,7 @@ export const verboseFlag = Flags.boolean({
   description: messages.getMessage('flags.verbose.description'),
 });
 
-export const testRunnerTypeFlag = Flags.custom<'agentforce-studio' | 'testing-center'>({
+export const testRunnerFlag = Flags.custom<'agentforce-studio' | 'testing-center'>({
   options: ['agentforce-studio', 'testing-center'],
   summary: messages.getMessage('flags.test-runner.summary'),
   description: messages.getMessage('flags.test-runner.description'),
