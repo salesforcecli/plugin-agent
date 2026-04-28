@@ -23,6 +23,7 @@ import {
   humanFriendlyName,
   metric,
 } from '@salesforce/agents';
+import { XMLBuilder } from 'fast-xml-parser';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import { ux as ocux } from '@oclif/core';
 import ansis from 'ansis';
@@ -88,6 +89,167 @@ export function readableTime(time: number, decimalPlaces = 2): string {
   const hours = Math.floor(time / 3_600_000);
   const minutes = Math.floor((time % 3_600_000) / 60_000);
   return `${hours}h ${minutes}m`;
+}
+
+type ParsedScorerResponse = {
+  status?: string;
+  score?: number;
+  reasoning?: string;
+  actualValue?: string;
+  expectedValue?: string;
+};
+
+function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
+  const ux = new Ux();
+  const tables: string[] = [];
+
+  for (const testCase of results.testCases) {
+    let userInput = '';
+    try {
+      const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
+      userInput = parsed.userInput ?? '';
+    } catch {
+      // ignore
+    }
+
+    const scorerRows = testCase.testScorerResults.map((scorer) => {
+      let parsed: ParsedScorerResponse = {};
+      try {
+        parsed = JSON.parse(scorer.scorerResponse) as ParsedScorerResponse;
+      } catch {
+        // ignore
+      }
+      return {
+        scorer: scorer.scorerName,
+        result: parsed.status === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+        expected: parsed.expectedValue ?? '',
+        actual: parsed.actualValue ?? '',
+        reasoning: parsed.reasoning ?? '',
+      };
+    });
+
+    tables.push(
+      ux.makeTable({
+        title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('User Input')}: ${userInput}`,
+        overflow: 'wrap',
+        columns: [
+          { key: 'scorer', name: 'Scorer' },
+          { key: 'result', name: 'Result' },
+          { key: 'expected', name: 'Expected', width: '25%' },
+          { key: 'actual', name: 'Actual', width: '25%' },
+          { key: 'reasoning', name: 'Reasoning', width: '35%' },
+        ],
+        data: scorerRows,
+        width: '100%',
+      })
+    );
+    tables.push('\n');
+  }
+
+  const totalCases = results.testCases.length;
+  const passCases = results.testCases.filter((tc) =>
+    tc.testScorerResults.every((s) => {
+      try {
+        return (JSON.parse(s.scorerResponse) as ParsedScorerResponse).status === 'PASS';
+      } catch {
+        return false;
+      }
+    })
+  ).length;
+
+  const summary = makeSimpleTable(
+    {
+      Status: results.status,
+      'Total Test Cases': String(totalCases),
+      'Passing Test Cases': String(passCases),
+      'Failing Test Cases': String(totalCases - passCases),
+    },
+    ansis.bold.blue('Test Results')
+  );
+
+  return tables.join('') + `\n${summary}\n`;
+}
+
+function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
+  const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
+  const testCount = results.testCases.length;
+  const failureCount = results.testCases.filter((tc) =>
+    tc.testScorerResults.some((s) => {
+      try {
+        return (JSON.parse(s.scorerResponse) as ParsedScorerResponse).status !== 'PASS';
+      } catch {
+        return true;
+      }
+    })
+  ).length;
+
+  const suites = builder.build({
+    testsuites: {
+      $name: 'AgentTestNGT',
+      $tests: testCount,
+      $failures: failureCount,
+      property: [{ $name: 'status', $value: results.status }],
+      testsuite: results.testCases.map((tc) => ({
+        $name: tc.testNumber,
+        $assertions: tc.testScorerResults.length,
+        failure: tc.testScorerResults
+          .map((s) => {
+            let parsed: ParsedScorerResponse = {};
+            try {
+              parsed = JSON.parse(s.scorerResponse) as ParsedScorerResponse;
+            } catch {
+              // ignore
+            }
+            if (parsed.status !== 'PASS') {
+              return { $message: parsed.reasoning ?? 'Unknown error', $name: s.scorerName };
+            }
+          })
+          .filter(Boolean),
+      })),
+    },
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${suites}`.trim();
+}
+
+function tapFormatNGT(results: AgentTestNGTResultsResponse): string {
+  const lines: string[] = [];
+  let expectationCount = 0;
+
+  for (const tc of results.testCases) {
+    for (const scorer of tc.testScorerResults) {
+      let parsed: ParsedScorerResponse = {};
+      try {
+        parsed = JSON.parse(scorer.scorerResponse) as ParsedScorerResponse;
+      } catch {
+        // ignore
+      }
+      const pass = parsed.status === 'PASS';
+      expectationCount++;
+      lines.push(`${pass ? 'ok' : 'not ok'} ${expectationCount} ${tc.testNumber}.${scorer.scorerName}`);
+      if (!pass) {
+        lines.push('  ---');
+        lines.push(`  message: ${parsed.reasoning ?? 'Unknown error'}`);
+        lines.push(`  scorer: ${scorer.scorerName}`);
+        lines.push(`  actual: ${parsed.actualValue ?? ''}`);
+        lines.push(`  expected: ${parsed.expectedValue ?? ''}`);
+        lines.push('  ...');
+      }
+    }
+  }
+
+  return `Tap Version 14\n1..${expectationCount}\n${lines.join('\n')}`;
+}
+
+function convertNGTTestResultsToFormat(results: AgentTestNGTResultsResponse, format: 'json' | 'junit' | 'tap'): string {
+  switch (format) {
+    case 'json':
+      return JSON.stringify(results, null, 2);
+    case 'junit':
+      return junitFormatNGT(results);
+    case 'tap':
+      return tapFormatNGT(results);
+  }
 }
 
 export function humanFormat(results: AgentTestResultsResponse, verbose = false): string {
@@ -251,20 +413,53 @@ export async function handleTestResults({
 
   const ux = new Ux({ jsonEnabled });
 
-  // For NGT responses, we only support JSON format for now
   if (!isLegacyResponse(results)) {
-    if (format !== 'json') {
-      ux.log(
-        ansis.yellow('Warning: NGT test results only support JSON format. Use --result-format json or omit the flag.')
-      );
+    if (format === 'human') {
+      const formatted = humanFormatNGT(results);
+      if (outputDir) {
+        const file = `test-result-${id}.txt`;
+        await writeFileToDir(outputDir, file, stripVTControlCharacters(formatted));
+        ux.log(`Created human-readable file at ${join(outputDir, file)}`);
+      } else {
+        ux.log(formatted);
+      }
+      return;
     }
-    const formatted = JSON.stringify(results, null, 2);
-    if (outputDir) {
-      const file = `test-result-${id}.json`;
-      await writeFileToDir(outputDir, file, formatted);
-      ux.log(`Created JSON file at ${join(outputDir, file)}`);
-    } else {
-      ux.log(formatted);
+
+    if (format === 'json') {
+      const formatted = convertNGTTestResultsToFormat(results, 'json');
+      if (outputDir) {
+        const file = `test-result-${id}.json`;
+        await writeFileToDir(outputDir, file, formatted);
+        ux.log(`Created JSON file at ${join(outputDir, file)}`);
+      } else {
+        ux.log(formatted);
+      }
+      return;
+    }
+
+    if (format === 'junit') {
+      const formatted = convertNGTTestResultsToFormat(results, 'junit');
+      if (outputDir) {
+        const file = `test-result-${id}.xml`;
+        await writeFileToDir(outputDir, file, formatted);
+        ux.log(`Created JUnit file at ${join(outputDir, file)}`);
+      } else {
+        ux.log(formatted);
+      }
+      return;
+    }
+
+    if (format === 'tap') {
+      const formatted = convertNGTTestResultsToFormat(results, 'tap');
+      if (outputDir) {
+        const file = `test-result-${id}.txt`;
+        await writeFileToDir(outputDir, file, formatted);
+        ux.log(`Created TAP file at ${join(outputDir, file)}`);
+      } else {
+        ux.log(formatted);
+      }
+      return;
     }
     return;
   }
