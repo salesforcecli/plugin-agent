@@ -15,40 +15,18 @@
  */
 
 import { Connection, SfError } from '@salesforce/core';
-import {
-  AgentTester,
-  AgentTesterNGT,
-  detectTestRunnerFromId,
-  determineTestRunner,
-  TestRunnerType,
-} from '@salesforce/agents';
+import { createAgentTester, AgentTester, AgentTesterNGT, type TestRunnerType } from '@salesforce/agents';
 
 export type TestRunnerInstance = AgentTester | AgentTesterNGT;
 
-/**
- * Creates the appropriate test runner (agentforce-studio or testing-center) based on detection or explicit type.
- *
- * Detection priority:
- * 1. `explicitType` — user-supplied `--test-runner` flag, always wins
- * 2. `runId` prefix — instant detection from the Salesforce ID prefix (`3A2` = agentforce-studio, `4KB` = testing-center), no network call
- * 3. `testDefinitionName` — org metadata query via `determineTestRunner` (network call, used as last resort)
- *
- * @param connection - Salesforce connection
- * @param explicitType - Optional explicit runner type (bypasses all detection)
- * @param testDefinitionName - Optional test name for org metadata detection
- * @param runId - Optional existing run ID; prefix is used for instant detection
- * @returns Object containing the runner instance and its type
- */
 export async function createTestRunner(
   connection: Connection,
   explicitType?: TestRunnerType,
   testDefinitionName?: string,
   runId?: string
 ): Promise<{ runner: TestRunnerInstance; type: TestRunnerType }> {
-  const detected = runId ? detectTestRunnerFromId(runId) : undefined;
-  let runnerType: TestRunnerType;
   try {
-    runnerType = explicitType ?? detected ?? (await determineTestRunner(connection, testDefinitionName));
+    return await createAgentTester(connection, { explicitType, runId, testDefinitionName });
   } catch (e) {
     const wrapped = SfError.wrap(e);
     if (wrapped.name === 'AmbiguousTestDefinition') {
@@ -62,7 +40,4 @@ export async function createTestRunner(
     }
     throw wrapped;
   }
-
-  const runner = runnerType === 'agentforce-studio' ? new AgentTesterNGT(connection) : new AgentTester(connection);
-  return { runner, type: runnerType };
 }
