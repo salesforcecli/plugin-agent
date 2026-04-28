@@ -90,7 +90,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
-    'test-runner-type': testRunnerTypeFlag,
+    'test-runner': testRunnerTypeFlag,
     verbose: verboseFlag,
   };
 
@@ -111,7 +111,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     this.mso.start();
 
     // Determine which test runner to use (NGT or legacy)
-    const result = await createTestRunner(connection, flags['test-runner-type'], apiName);
+    const result = await createTestRunner(connection, flags['test-runner'], apiName);
     const agentTester = result.runner;
     const runnerType = result.type;
 

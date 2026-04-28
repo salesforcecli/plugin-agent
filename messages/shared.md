@@ -22,11 +22,11 @@ The generated data is in JSON format and includes the Apex classes or Flows that
 
 # flags.test-runner-type.summary
 
-Explicitly specify which test runner to use (NGT or legacy).
+Explicitly specify which test runner to use (agentforce-studio or testing-center).
 
 # flags.test-runner-type.description
 
-By default, the command automatically detects which test runner to use based on the test definition metadata type in your org. Use this flag to explicitly specify the runner type. 'ngt' uses AiTestSuiteDefinition metadata and the /einstein/ai-testing/runs endpoints. 'legacy' uses AiEvaluationDefinition metadata and the /einstein/ai-evaluations/runs endpoints.
+By default, the command automatically detects which test runner to use based on the test definition metadata type in your org. Use this flag to explicitly specify the runner type. 'agentforce-studio' uses AiTestSuiteDefinition metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 
 # error.invalidAgentType
 

@@ -68,8 +68,8 @@ export const verboseFlag = Flags.boolean({
   description: messages.getMessage('flags.verbose.description'),
 });
 
-export const testRunnerTypeFlag = Flags.custom<'ngt' | 'legacy'>({
-  options: ['ngt', 'legacy'],
+export const testRunnerTypeFlag = Flags.custom<'agentforce-studio' | 'testing-center'>({
+  options: ['agentforce-studio', 'testing-center'],
   summary: messages.getMessage('flags.test-runner-type.summary'),
   description: messages.getMessage('flags.test-runner-type.description'),
 })();

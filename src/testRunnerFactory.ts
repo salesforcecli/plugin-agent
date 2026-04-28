@@ -26,11 +26,11 @@ import {
 export type TestRunnerInstance = AgentTester | AgentTesterNGT;
 
 /**
- * Creates the appropriate test runner (NGT or legacy) based on detection or explicit type.
+ * Creates the appropriate test runner (agentforce-studio or testing-center) based on detection or explicit type.
  *
  * Detection priority:
  * 1. `explicitType` — user-supplied `--test-runner-type` flag, always wins
- * 2. `runId` prefix — instant detection from the Salesforce ID prefix (`3A2` = NGT, `4KB` = legacy), no network call
+ * 2. `runId` prefix — instant detection from the Salesforce ID prefix (`3A2` = agentforce-studio, `4KB` = testing-center), no network call
  * 3. `testDefinitionName` — org metadata query via `determineTestRunner` (network call, used as last resort)
  *
  * @param connection - Salesforce connection
@@ -55,6 +55,6 @@ export async function createTestRunner(
     runnerType = await determineTestRunner(connection, testDefinitionName);
   }
 
-  const runner = runnerType === 'ngt' ? new AgentTesterNGT(connection) : new AgentTester(connection);
+  const runner = runnerType === 'agentforce-studio' ? new AgentTesterNGT(connection) : new AgentTester(connection);
   return { runner, type: runnerType };
 }

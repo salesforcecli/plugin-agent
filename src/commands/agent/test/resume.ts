@@ -71,7 +71,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
-    'test-runner-type': testRunnerTypeFlag,
+    'test-runner': testRunnerTypeFlag,
     verbose: verboseFlag,
   };
 
@@ -119,7 +119,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const { runner: agentTester } = await createTestRunner(
       connection,
-      flags['test-runner-type'] ?? cachedRunnerType,
+      flags['test-runner'] ?? cachedRunnerType,
       name,
       runId
     );

@@ -18,7 +18,7 @@ import { Global, SfError, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 
 type ResultFormat = 'json' | 'human' | 'junit' | 'tap';
-type TestRunnerType = 'ngt' | 'legacy';
+type TestRunnerType = 'agentforce-studio' | 'testing-center';
 
 type CacheContents = {
   runId: string;
