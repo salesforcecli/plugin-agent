@@ -182,7 +182,17 @@
     "command": "agent:test:results",
     "flagAliases": [],
     "flagChars": ["d", "i", "o"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org", "verbose"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "job-id",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "test-runner",
+      "verbose"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -198,6 +208,7 @@
       "output-dir",
       "result-format",
       "target-org",
+      "test-runner",
       "use-most-recent",
       "verbose",
       "wait"
@@ -217,6 +228,7 @@
       "output-dir",
       "result-format",
       "target-org",
+      "test-runner",
       "verbose",
       "wait"
     ],

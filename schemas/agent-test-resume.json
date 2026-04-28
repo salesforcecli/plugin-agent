@@ -65,6 +65,26 @@
             }
           },
           "required": ["runId", "startTime", "status", "subjectName", "testCases"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "type": "string",
+              "const": "COMPLETED"
+            },
+            "runId": {
+              "type": "string"
+            },
+            "testCases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NGTTestCaseResult"
+              }
+            }
+          },
+          "required": ["runId", "status", "testCases"]
         }
       ]
     },
@@ -182,6 +202,38 @@
         }
       },
       "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
+      "additionalProperties": false
+    },
+    "NGTTestCaseResult": {
+      "type": "object",
+      "properties": {
+        "subjectResponse": {
+          "type": "string"
+        },
+        "testNumber": {
+          "type": "number"
+        },
+        "testScorerResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestScorerResult"
+          }
+        }
+      },
+      "required": ["subjectResponse", "testNumber", "testScorerResults"],
+      "additionalProperties": false
+    },
+    "TestScorerResult": {
+      "type": "object",
+      "properties": {
+        "scorerName": {
+          "type": "string"
+        },
+        "scorerResponse": {
+          "type": "string"
+        }
+      },
+      "required": ["scorerName", "scorerResponse"],
       "additionalProperties": false
     }
   }

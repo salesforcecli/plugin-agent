@@ -3,7 +3,14 @@
   "$ref": "#/definitions/AgentTestResultsResult",
   "definitions": {
     "AgentTestResultsResult": {
-      "$ref": "#/definitions/AgentTestResultsResponse"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/AgentTestResultsResponse"
+        },
+        {
+          "$ref": "#/definitions/AgentTestNGTResultsResponse"
+        }
+      ]
     },
     "AgentTestResultsResponse": {
       "type": "object",
@@ -147,6 +154,54 @@
         }
       },
       "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
+      "additionalProperties": false
+    },
+    "AgentTestNGTResultsResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NGTTestCaseResult"
+          }
+        }
+      },
+      "required": ["status", "testCases"],
+      "additionalProperties": false
+    },
+    "NGTTestCaseResult": {
+      "type": "object",
+      "properties": {
+        "subjectResponse": {
+          "type": "string"
+        },
+        "testNumber": {
+          "type": "number"
+        },
+        "testScorerResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TestScorerResult"
+          }
+        }
+      },
+      "required": ["subjectResponse", "testNumber", "testScorerResults"],
+      "additionalProperties": false
+    },
+    "TestScorerResult": {
+      "type": "object",
+      "properties": {
+        "scorerName": {
+          "type": "string"
+        },
+        "scorerResponse": {
+          "type": "string"
+        }
+      },
+      "required": ["scorerName", "scorerResponse"],
       "additionalProperties": false
     }
   }
