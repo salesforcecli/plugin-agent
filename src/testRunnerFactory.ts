@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Connection } from '@salesforce/core';
+import { Connection, SfError } from '@salesforce/core';
 import {
   AgentTester,
   AgentTesterNGT,
@@ -46,8 +46,22 @@ export async function createTestRunner(
   runId?: string
 ): Promise<{ runner: TestRunnerInstance; type: TestRunnerType }> {
   const detected = runId ? detectTestRunnerFromId(runId) : undefined;
-  const runnerType: TestRunnerType =
-    explicitType ?? detected ?? (await determineTestRunner(connection, testDefinitionName));
+  let runnerType: TestRunnerType;
+  try {
+    runnerType = explicitType ?? detected ?? (await determineTestRunner(connection, testDefinitionName));
+  } catch (e) {
+    const wrapped = SfError.wrap(e);
+    if (wrapped.name === 'AmbiguousTestDefinition') {
+      throw new SfError(
+        wrapped.message,
+        wrapped.name,
+        ['Use --test-runner to explicitly specify the runner type (agentforce-studio or testing-center)'],
+        undefined,
+        wrapped
+      );
+    }
+    throw wrapped;
+  }
 
   const runner = runnerType === 'agentforce-studio' ? new AgentTesterNGT(connection) : new AgentTester(connection);
   return { runner, type: runnerType };
