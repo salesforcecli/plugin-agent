@@ -152,7 +152,17 @@ export const promptForTestDefinitionApiName = async (
       message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
-        const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
+        const duplicateNames = new Set(
+          aiDefFiles
+            .filter((o, i) => aiDefFiles.some((other, j) => i !== j && o.fullName === other.fullName))
+            .map((o) => o.fullName)
+        );
+        const arr = aiDefFiles.map((o) => ({
+          name: duplicateNames.has(o.fullName)
+            ? `${o.fullName} (${o.type === 'AiEvaluationDefinition' ? 'testing-center' : 'agentforce-studio'})`
+            : o.fullName,
+          value: o.fullName,
+        }));
 
         if (!input) return arr;
         return arr.filter((o) => o.name.includes(input));
