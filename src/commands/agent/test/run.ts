@@ -28,6 +28,7 @@ import {
   testOutputDirFlag,
   testRunnerFlag,
   verboseFlag,
+  type TestDefinitionSelection,
 } from '../../../flags.js';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
@@ -104,13 +105,24 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
     }
 
-    const apiName =
-      flags['api-name'] ?? (await promptForTestDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection));
+    let apiName: string;
+    let promptedTestRunner: TestDefinitionSelection['testRunner'];
+    if (flags['api-name']) {
+      apiName = flags['api-name'];
+    } else {
+      const selection = await promptForTestDefinitionApiName(FLAGGABLE_PROMPTS['api-name'], connection);
+      apiName = selection.apiName;
+      promptedTestRunner = selection.testRunner;
+    }
 
     this.mso = new TestStages({ title: `Agent Test Run: ${apiName}`, jsonEnabled: this.jsonEnabled() });
     this.mso.start();
 
-    const { runner: agentTester, type: runnerType } = await createTestRunner(connection, flags['test-runner'], apiName);
+    const { runner: agentTester, type: runnerType } = await createTestRunner(
+      connection,
+      flags['test-runner'] ?? promptedTestRunner,
+      apiName
+    );
 
     let response: AgentTestStartResponse | AgentTestNGTStartResponse;
     try {

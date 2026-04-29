@@ -134,11 +134,32 @@ export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[
   return results;
 }
 
+export type TestDefinitionSelection = {
+  apiName: string;
+  testRunner?: 'agentforce-studio' | 'testing-center';
+};
+
 export const promptForTestDefinitionApiName = async (
   flagDef: FlaggablePrompt,
   connection: Connection
-): Promise<string> => {
+): Promise<TestDefinitionSelection> => {
   const aiDefFiles = await AgentTest.list(connection);
+
+  const duplicateNames = new Set(
+    aiDefFiles
+      .filter((o, i) => aiDefFiles.some((other, j) => i !== j && o.fullName === other.fullName))
+      .map((o) => o.fullName)
+  );
+
+  // Map each entry to a value that encodes the runner type for duplicates
+  const choicesByValue = new Map(
+    aiDefFiles.map((o) => {
+      const runner: 'agentforce-studio' | 'testing-center' =
+        o.type === 'AiEvaluationDefinition' ? 'testing-center' : 'agentforce-studio';
+      const valueKey = duplicateNames.has(o.fullName) ? `${o.fullName}::${runner}` : o.fullName;
+      return [valueKey, { apiName: o.fullName, testRunner: duplicateNames.has(o.fullName) ? runner : undefined }];
+    })
+  );
 
   let id: NodeJS.Timeout;
   const timeout = new Promise((_, reject) => {
@@ -152,16 +173,9 @@ export const promptForTestDefinitionApiName = async (
       message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
-        const duplicateNames = new Set(
-          aiDefFiles
-            .filter((o, i) => aiDefFiles.some((other, j) => i !== j && o.fullName === other.fullName))
-            .map((o) => o.fullName)
-        );
-        const arr = aiDefFiles.map((o) => ({
-          name: duplicateNames.has(o.fullName)
-            ? `${o.fullName} (${o.type === 'AiEvaluationDefinition' ? 'testing-center' : 'agentforce-studio'})`
-            : o.fullName,
-          value: o.fullName,
+        const arr = [...choicesByValue.entries()].map(([valueKey, { apiName, testRunner }]) => ({
+          name: testRunner ? `${apiName} (${testRunner})` : apiName,
+          value: valueKey,
         }));
 
         if (!input) return arr;
@@ -169,9 +183,9 @@ export const promptForTestDefinitionApiName = async (
       },
     }),
     timeout,
-  ]).then((result) => {
+  ]).then((valueKey) => {
     clearTimeout(id);
-    return result as string;
+    return choicesByValue.get(valueKey as string) ?? { apiName: valueKey as string };
   });
 };
 
