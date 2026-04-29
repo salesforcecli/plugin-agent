@@ -60,11 +60,17 @@ export default class AgentTestList extends SfCommand<AgentTestListResult> {
       );
     }
 
+    const rows = results.map((r) => ({
+      ...r,
+      type: r.type === 'AiEvaluationDefinition' ? 'testing-center' : 'agentforce-studio',
+    }));
+
     this.table({
-      data: results,
+      data: rows,
       columns: [
         { key: 'fullName', name: 'API Name' },
         { key: 'id', name: 'Id' },
+        { key: 'type', name: 'Type' },
         { key: 'createdDate', name: 'Created Date' },
       ],
       sort: { fullName: 'asc' },
