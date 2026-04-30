@@ -1,28 +1,32 @@
 # summary
 
-List trace files across all agent preview sessions.
+List the trace files that were recorded during all agent preview sessions.
 
 # description
 
-Lists trace files recorded during agent preview sessions. By default, lists all traces for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--api-name or --authoring-bundle), by session (--session-id), or by date (--since).
+By default, this command lists all traces for all agents and all of their sessions. Use flags to narrow the results: filter by agent name (--api-name or --authoring-bundle), by session (--session-id), or by date (--since).
 
-Each row in the output corresponds to one trace file (one agent turn). The Agent column shows the authoring bundle or API name used when starting the session.
+Each row in the output corresponds to one trace file, which in turn corresponds to one agent session. The Agent column shows the authoring bundle or API name used when starting the session.
 
 # flags.session-id.summary
 
-Only show traces from this session ID.
+Session ID used to filter the list of trace files.
 
 # flags.api-name.summary
 
-Only show traces for this published agent API name.
+API name of the published agent used to filter the list of trace files.
 
 # flags.authoring-bundle.summary
 
-Only show traces for this authoring bundle API name.
+API name of the authoring bundle used to filter the list of trace files.
 
 # flags.since.summary
 
-Only show traces recorded on or after this date. Accepts ISO 8601 format: date-only (2026-04-20), date-time (2026-04-20T14:00:00Z), or date-time with milliseconds (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
+Date used to filter the list of trace files; only those recorded on or after the date are listed.
+
+# flags.since.description
+
+Accepts ISO 8601 format: date-only (2026-04-20), date-time (2026-04-20T14:00:00Z), or date-time with milliseconds (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
 
 # error.invalidSince
 
@@ -62,7 +66,7 @@ Path
 
   <%= config.bin %> <%= command.id %>
 
-- List all traces for a specific published agent (all its sessions):
+- List all traces for a specific published agent (all its sessions) using the agent's API name:
 
   <%= config.bin %> <%= command.id %> --api-name My_Published_Agent
 
@@ -78,7 +82,7 @@ Path
 
   <%= config.bin %> <%= command.id %> --since 2026-04-20T14:00:00Z
 
-- Filter by authoring bundle and date together:
+- Filter by authoring bundle API name and date together:
 
   <%= config.bin %> <%= command.id %> --authoring-bundle My_Local_Agent --since 2026-04-20
 

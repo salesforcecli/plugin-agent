@@ -55,6 +55,7 @@ export default class AgentPreviewTraceList extends SfCommand<AgentPreviewTraceLi
     }),
     since: Flags.custom<Date>({
       summary: messages.getMessage('flags.since.summary'),
+      description: messages.getMessage('flags.since.description'),
       // eslint-disable-next-line @typescript-eslint/require-await
       parse: async (raw): Promise<Date> => {
         if (!ISO_8601.test(raw)) {
