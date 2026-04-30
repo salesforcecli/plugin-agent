@@ -105,8 +105,14 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     if (aabName) {
       // user specified --authoring-bundle, use the API name directly
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabName, agentJson: preloadedAgentJson });
-      selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+      const scriptAgent = await Agent.init({
+        connection: conn,
+        project: this.project!,
+        aabName,
+        agentJson: preloadedAgentJson,
+      });
+      scriptAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+      selectedAgent = scriptAgent;
     } else if (apiNameOrId) {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });
     } else {

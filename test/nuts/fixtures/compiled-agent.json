@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "globalConfiguration": {
+    "developerName": "Willie_Resort_Manager",
+    "label": "Willie Resort Manager",
+    "description": "A resort manager agent for NUT testing",
+    "enableEnhancedEventLogs": false,
+    "agentType": "AgentforceAgent",
+    "templateName": "",
+    "defaultAgentUser": "",
+    "defaultOutboundRouting": "",
+    "contextVariables": []
+  },
+  "agentVersion": {
+    "developerName": null,
+    "plannerType": "ReAct",
+    "systemMessages": [],
+    "modalityParameters": {
+      "voice": {
+        "inboundModel": null,
+        "inboundFillerWordsDetection": null,
+        "outboundVoice": null,
+        "outboundModel": null,
+        "outboundSpeed": null,
+        "outboundStyleExaggeration": null
+      },
+      "language": {
+        "defaultLocale": "en_US",
+        "additionalLocales": [],
+        "allAdditionalLocales": false
+      }
+    },
+    "additionalParameters": false,
+    "company": "Willie Resort",
+    "role": "A helpful resort management assistant",
+    "stateVariables": [],
+    "initialNode": "MainNode",
+    "nodes": [
+      {
+        "type": "Reasoning",
+        "reasoningType": "ReAct",
+        "description": "Main reasoning node",
+        "beforeReasoning": "",
+        "instructions": "Help users manage resort bookings and inquiries.",
+        "focusPrompt": "",
+        "tools": [],
+        "preToolCall": null,
+        "postToolCall": null,
+        "afterReasoning": null,
+        "developerName": "MainNode",
+        "label": "Main Node",
+        "onInit": null,
+        "transitions": null,
+        "onExit": null,
+        "actionDefinitions": []
+      }
+    ],
+    "knowledgeDefinitions": null
+  }
+}

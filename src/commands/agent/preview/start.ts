@@ -99,14 +99,16 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     // Track telemetry for agent initialization
     let agent: ScriptAgent | ProductionAgent;
     try {
-      agent = flags['authoring-bundle']
-        ? await Agent.init({
-            connection: conn,
-            project: this.project!,
-            aabName: flags['authoring-bundle'],
-            agentJson: preloadedAgentJson,
-          })
-        : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+      if (flags['authoring-bundle']) {
+        agent = await Agent.init({
+          connection: conn,
+          project: this.project!,
+          aabName: flags['authoring-bundle'],
+          agentJson: preloadedAgentJson,
+        });
+      } else {
+        agent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+      }
     } catch (error) {
       const wrapped = SfError.wrap(error);
 
@@ -145,7 +147,8 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     // Set mode for authoring bundles based on which flag was specified
     // (mutual exclusion enforced by flag definitions - can't have both)
     if (agent instanceof ScriptAgent) {
-      agent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
+      const scriptAgent: ScriptAgent = agent;
+      scriptAgent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
     }
 
     // Warn if mode flags are used with published agents (they have no effect)

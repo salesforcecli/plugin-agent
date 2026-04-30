@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { writeFileSync, rmSync } from 'node:fs';
+import { writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Agent } from '@salesforce/agents';
@@ -56,22 +57,11 @@ describe('agent preview', function () {
       const bundleApiName = 'Willie_Resort_Manager';
       const targetOrg = getUsername();
 
-      // Compile agent JSON first via preview start (compile happens internally), then reuse it
-      // For the NUT we write a minimal valid agentJson extracted from a successful compile
-      const org = await Org.create({ aliasOrUsername: targetOrg });
-      const conn = org.getConnection();
-      const { ScriptAgent: ScriptAgentClass } = await import('@salesforce/agents');
-      const { SfProject } = await import('@salesforce/core');
-      const project = await SfProject.resolve(session.project.dir);
-      const scriptAgent = new ScriptAgentClass({ connection: conn, project, aabName: bundleApiName });
-      await scriptAgent.compile();
-
-      // @ts-expect-error accessing private field for NUT purposes
-      const agentJson = scriptAgent.agentJson as object;
-      expect(agentJson).to.not.be.undefined;
-
+      // Use a static fixture instead of hitting the compile API, which avoids a
+      // live network call that can fail independently of the feature under test.
+      const fixtureDir = join(fileURLToPath(import.meta.url), '..', 'fixtures');
       const agentJsonPath = join(tmpDir, 'compiled-agent.json');
-      writeFileSync(agentJsonPath, JSON.stringify(agentJson));
+      writeFileSync(agentJsonPath, readFileSync(join(fixtureDir, 'compiled-agent.json')));
 
       const startResult = execCmd<AgentPreviewStartResult>(
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json ${agentJsonPath} --target-org ${targetOrg} --json`,
@@ -83,7 +73,9 @@ describe('agent preview', function () {
 
       // Clean up session
       execCmd(
-        `agent preview end --session-id ${startResult!.sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
+        `agent preview end --session-id ${
+          startResult!.sessionId
+        } --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
         { cwd: session.project.dir }
       );
     });
