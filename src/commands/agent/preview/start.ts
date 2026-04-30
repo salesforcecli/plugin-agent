@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { readFile } from 'node:fs/promises';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
-import { Agent, ProductionAgent, ScriptAgent, type AgentJson } from '@salesforce/agents';
+import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache, SessionType } from '../../../previewSessionStore.js';
-import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
+import { COMPILATION_API_EXIT_CODES, loadAgentJson } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.start');
@@ -147,8 +146,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     // Set mode for authoring bundles based on which flag was specified
     // (mutual exclusion enforced by flag definitions - can't have both)
     if (agent instanceof ScriptAgent) {
-      const scriptAgent: ScriptAgent = agent;
-      scriptAgent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
+      agent.preview.setMockMode(simulateActions ? 'Mock' : 'Live Test');
     }
 
     // Warn if mode flags are used with published agents (they have no effect)
@@ -188,17 +186,4 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
 function resolveSessionType(agent: ScriptAgent | ProductionAgent, simulateActions: boolean | undefined): SessionType {
   if (agent instanceof ProductionAgent) return 'published';
   return simulateActions ? 'simulated' : 'live';
-}
-
-async function loadAgentJson(filePath: string | undefined): Promise<AgentJson | undefined> {
-  if (!filePath) return undefined;
-  try {
-    return JSON.parse(await readFile(filePath, 'utf-8')) as AgentJson;
-  } catch (error) {
-    await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_start_agent_json_read_failed' });
-    throw new SfError(
-      `Failed to read or parse --agent-json file '${filePath}': ${SfError.wrap(error).message}`,
-      'AgentJsonReadError'
-    );
-  }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFileSync, rmSync, readFileSync } from 'node:fs';
+import { writeFileSync, rmSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -59,9 +59,7 @@ describe('agent preview', function () {
 
       // Use a static fixture instead of hitting the compile API, which avoids a
       // live network call that can fail independently of the feature under test.
-      const fixtureDir = join(fileURLToPath(import.meta.url), '..', 'fixtures');
-      const agentJsonPath = join(tmpDir, 'compiled-agent.json');
-      writeFileSync(agentJsonPath, readFileSync(join(fixtureDir, 'compiled-agent.json')));
+      const agentJsonPath = join(fileURLToPath(import.meta.url), '..', 'fixtures', 'compiled-agent.json');
 
       const startResult = execCmd<AgentPreviewStartResult>(
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json ${agentJsonPath} --target-org ${targetOrg} --json`,

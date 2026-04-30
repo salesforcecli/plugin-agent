@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import React from 'react';
 import { render } from 'ink';
-import { Agent, AgentSource, PreviewableAgent, ProductionAgent, ScriptAgent, type AgentJson } from '@salesforce/agents';
+import { Agent, AgentSource, PreviewableAgent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { select } from '@inquirer/prompts';
 import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
+import { loadAgentJson } from '../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview');
@@ -88,18 +88,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const { 'api-name': apiNameOrId, 'use-live-actions': useLiveActions, 'authoring-bundle': aabName } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
-    let preloadedAgentJson: AgentJson | undefined;
-    if (flags['agent-json']) {
-      try {
-        preloadedAgentJson = JSON.parse(await readFile(flags['agent-json'], 'utf-8')) as AgentJson;
-      } catch (error) {
-        await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_agent_json_read_failed' });
-        throw new SfError(
-          `Failed to read or parse --agent-json file '${flags['agent-json']}': ${SfError.wrap(error).message}`,
-          'AgentJsonReadError'
-        );
-      }
-    }
+    const preloadedAgentJson = await loadAgentJson(flags['agent-json']);
 
     let selectedAgent: ScriptAgent | ProductionAgent;
 
