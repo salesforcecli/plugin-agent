@@ -155,14 +155,6 @@
   },
   {
     "alias": [],
-    "command": "agent:preview:trace:list",
-    "flagAliases": [],
-    "flagChars": ["n"],
-    "flags": ["api-name", "authoring-bundle", "flags-dir", "json", "session-id", "since"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],
@@ -255,6 +247,12 @@
     "flagAliases": [],
     "flagChars": ["a"],
     "flags": ["agent", "flags-dir", "json", "no-prompt", "older-than", "session-id"],
+  },
+  {
+    "command": "agent:trace:list",
+    "flagAliases": [],
+    "flagChars": ["a"],
+    "flags": ["agent", "flags-dir", "json", "session-id", "since"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
