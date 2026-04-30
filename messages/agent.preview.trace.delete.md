@@ -14,11 +14,11 @@ Only delete traces from this session ID.
 
 # flags.api-name.summary
 
-Only delete traces for this published agent API name (substring match).
+Only delete traces for this published agent API name.
 
 # flags.authoring-bundle.summary
 
-Only delete traces for this authoring bundle API name (substring match).
+Only delete traces for this authoring bundle API name.
 
 # flags.older-than.summary
 

@@ -83,7 +83,6 @@ export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTrace
     })(),
     'no-prompt': Flags.boolean({
       summary: messages.getMessage('flags.no-prompt.summary'),
-      default: false,
     }),
   };
 
@@ -91,8 +90,6 @@ export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTrace
     const { flags } = await this.parse(AgentPreviewTraceDelete);
 
     const agentNameFilter = (flags['authoring-bundle'] ?? flags['api-name'])?.toLowerCase();
-    const sessionIdFilter = flags['session-id'];
-    const olderThan: Date | undefined = flags['older-than'];
 
     const cachedAgents = await listCachedPreviewSessions(this.project!);
 
@@ -102,13 +99,13 @@ export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTrace
       if (agentNameFilter && !displayName?.toLowerCase().includes(agentNameFilter)) continue;
 
       for (const { sessionId } of sessions) {
-        if (sessionIdFilter && sessionId !== sessionIdFilter) continue;
+        if (flags['session-id'] && sessionId !== flags['session-id']) continue;
 
         // eslint-disable-next-line no-await-in-loop
         let traces: TraceFileInfo[] = await listSessionTraces(agentId, sessionId);
 
-        if (olderThan) {
-          traces = traces.filter((t) => t.mtime < olderThan);
+        if (flags['older-than']) {
+          traces = traces.filter((t) => t.mtime < flags['older-than']!);
         }
 
         for (const t of traces) {
