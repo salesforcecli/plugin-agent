@@ -156,7 +156,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
 
     // Set exit code to 1 only for execution errors (tests couldn't run properly)
     // Test assertion failures are business logic and should not affect exit code
-    // Only applicable to legacy responses (NGT doesn't have test case status)
+    // Only applicable to legacy responses (Agentforce Studio doesn't have test case status)
     if (
       response &&
       'subjectName' in response &&

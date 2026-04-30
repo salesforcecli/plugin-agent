@@ -15,9 +15,9 @@
  */
 
 import { Connection, SfError } from '@salesforce/core';
-import { createAgentTester, AgentTester, AgentTesterNGT, type TestRunnerType } from '@salesforce/agents';
+import { createAgentTester, AgentTester, AgentforceStudioTester, type TestRunnerType } from '@salesforce/agents';
 
-export type TestRunnerInstance = AgentTester | AgentTesterNGT;
+export type TestRunnerInstance = AgentTester | AgentforceStudioTester;
 
 export async function createTestRunner(
   connection: Connection,

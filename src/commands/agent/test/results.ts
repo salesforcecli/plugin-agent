@@ -16,7 +16,7 @@
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTestResultsResponse, AgentTestNGTResultsResponse } from '@salesforce/agents';
+import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
 import { resultFormatFlag, testOutputDirFlag, testRunnerFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 import { createTestRunner } from '../../../testRunnerFactory.js';
@@ -24,7 +24,7 @@ import { createTestRunner } from '../../../testRunnerFactory.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.results');
 
-export type AgentTestResultsResult = AgentTestResultsResponse | AgentTestNGTResultsResponse;
+export type AgentTestResultsResult = AgentTestResultsResponse | AgentforceStudioTestResultsResponse;
 
 export default class AgentTestResults extends SfCommand<AgentTestResultsResult> {
   public static readonly summary = messages.getMessage('summary');

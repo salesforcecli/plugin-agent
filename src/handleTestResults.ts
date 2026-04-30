@@ -18,7 +18,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
 import {
   AgentTestResultsResponse,
-  AgentTestNGTResultsResponse,
+  AgentforceStudioTestResultsResponse,
   convertTestResultsToFormat,
   humanFriendlyName,
   metric,
@@ -28,7 +28,7 @@ import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import { ux as ocux } from '@oclif/core';
 import ansis from 'ansis';
 
-type TestResultsResponse = AgentTestResultsResponse | AgentTestNGTResultsResponse;
+type TestResultsResponse = AgentTestResultsResponse | AgentforceStudioTestResultsResponse;
 
 function isLegacyResponse(response: TestResultsResponse): response is AgentTestResultsResponse {
   return 'subjectName' in response;
@@ -102,7 +102,7 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
-function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
+function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const ux = new Ux();
   const tables: string[] = [];
 
@@ -162,7 +162,7 @@ function humanFormatNGT(results: AgentTestNGTResultsResponse): string {
   return tables.join('') + `\n${summary}\n`;
 }
 
-function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
+function junitFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
   const testCount = results.testCases.length;
   const failureCount = results.testCases.filter((tc) =>
@@ -171,7 +171,7 @@ function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
 
   const suites = builder.build({
     testsuites: {
-      $name: 'AgentTestNGT',
+      $name: 'AgentforceStudioTest',
       $tests: testCount,
       $failures: failureCount,
       property: [{ $name: 'status', $value: results.status }],
@@ -193,7 +193,7 @@ function junitFormatNGT(results: AgentTestNGTResultsResponse): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${suites}`.trim();
 }
 
-function tapFormatNGT(results: AgentTestNGTResultsResponse): string {
+function tapFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const lines: string[] = [];
   let expectationCount = 0;
 
@@ -217,14 +217,14 @@ function tapFormatNGT(results: AgentTestNGTResultsResponse): string {
   return `TAP version 13\n1..${expectationCount}\n${lines.join('\n')}`;
 }
 
-function convertNGTTestResultsToFormat(results: AgentTestNGTResultsResponse, format: 'json' | 'junit' | 'tap'): string {
+function convertAgentforceStudioTestResultsToFormat(results: AgentforceStudioTestResultsResponse, format: 'json' | 'junit' | 'tap'): string {
   switch (format) {
     case 'json':
       return JSON.stringify(results, null, 2);
     case 'junit':
-      return junitFormatNGT(results);
+      return junitFormatAgentforceStudio(results);
     case 'tap':
-      return tapFormatNGT(results);
+      return tapFormatAgentforceStudio(results);
   }
 }
 
@@ -391,10 +391,10 @@ export async function handleTestResults({
 
   if (!isLegacyResponse(results)) {
     const ngtFormatConfig = {
-      human: { ext: 'txt', label: 'human-readable', get: () => humanFormatNGT(results), strip: true },
-      json: { ext: 'json', label: 'JSON', get: () => convertNGTTestResultsToFormat(results, 'json'), strip: false },
-      junit: { ext: 'xml', label: 'JUnit', get: () => convertNGTTestResultsToFormat(results, 'junit'), strip: false },
-      tap: { ext: 'txt', label: 'TAP', get: () => convertNGTTestResultsToFormat(results, 'tap'), strip: false },
+      human: { ext: 'txt', label: 'human-readable', get: () => humanFormatAgentforceStudio(results), strip: true },
+      json: { ext: 'json', label: 'JSON', get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'), strip: false },
+      junit: { ext: 'xml', label: 'JUnit', get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'), strip: false },
+      tap: { ext: 'txt', label: 'TAP', get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'), strip: false },
     } as const;
     const cfg = ngtFormatConfig[format];
     const formatted = cfg.get();

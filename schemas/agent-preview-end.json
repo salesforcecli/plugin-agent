@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["sessionId", "tracesPath"],
+      "required": [
+        "sessionId",
+        "tracesPath"
+      ],
       "additionalProperties": false
     }
   }

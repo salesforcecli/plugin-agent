@@ -16,7 +16,7 @@
 
 import { colorize } from '@oclif/core/ux';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
-import { AgentTestResultsResponse, AgentTestNGTResultsResponse } from '@salesforce/agents';
+import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
 import { Lifecycle } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Ux } from '@salesforce/sf-plugins-core';
@@ -90,7 +90,7 @@ export class TestStages {
     agentTester: TestRunnerInstance,
     id: string,
     wait: Duration
-  ): Promise<{ completed: boolean; response?: AgentTestResultsResponse | AgentTestNGTResultsResponse }> {
+  ): Promise<{ completed: boolean; response?: AgentTestResultsResponse | AgentforceStudioTestResultsResponse }> {
     this.mso.skipTo('Polling for Test Results');
     const lifecycle = Lifecycle.getInstance();
     lifecycle.on(

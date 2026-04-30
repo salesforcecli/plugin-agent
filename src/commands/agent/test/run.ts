@@ -16,7 +16,7 @@
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTestStartResponse, AgentTestNGTStartResponse } from '@salesforce/agents';
+import { AgentTestStartResponse, AgentforceStudioTestStartResponse } from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
 import {
@@ -124,7 +124,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       apiName
     );
 
-    let response: AgentTestStartResponse | AgentTestNGTStartResponse;
+    let response: AgentTestStartResponse | AgentforceStudioTestStartResponse;
     try {
       response = await agentTester.start(apiName);
     } catch (e) {
@@ -192,7 +192,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
       // Set exit code to 1 only for execution errors (tests couldn't run properly)
       // Test assertion failures are business logic and should not affect exit code
-      // Only applicable to legacy responses (NGT doesn't have test case status)
+      // Only applicable to legacy responses (Agentforce Studio doesn't have test case status)
       if (
         detailsResponse &&
         'subjectName' in detailsResponse &&

@@ -33,7 +33,10 @@
               }
             }
           },
-          "required": ["runId", "status"]
+          "required": [
+            "runId",
+            "status"
+          ]
         },
         {
           "type": "object",
@@ -64,7 +67,13 @@
               }
             }
           },
-          "required": ["runId", "startTime", "status", "subjectName", "testCases"]
+          "required": [
+            "runId",
+            "startTime",
+            "status",
+            "subjectName",
+            "testCases"
+          ]
         },
         {
           "type": "object",
@@ -80,17 +89,27 @@
             "testCases": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/NGTTestCaseResult"
+                "$ref": "#/definitions/AgentforceStudioTestCaseResult"
               }
             }
           },
-          "required": ["runId", "status", "testCases"]
+          "required": [
+            "runId",
+            "status",
+            "testCases"
+          ]
         }
       ]
     },
     "TestStatus": {
       "type": "string",
-      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR", "TERMINATED"]
+      "enum": [
+        "NEW",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "ERROR",
+        "TERMINATED"
+      ]
     },
     "TestCaseResult": {
       "type": "object",
@@ -111,7 +130,9 @@
               "type": "string"
             }
           },
-          "required": ["utterance"],
+          "required": [
+            "utterance"
+          ],
           "additionalProperties": false
         },
         "generatedData": {
@@ -136,7 +157,13 @@
               "type": "string"
             }
           },
-          "required": ["actionsSequence", "invokedActions", "sessionId", "outcome", "topic"],
+          "required": [
+            "actionsSequence",
+            "invokedActions",
+            "sessionId",
+            "outcome",
+            "topic"
+          ],
           "additionalProperties": false
         },
         "testResults": {
@@ -157,12 +184,22 @@
                 "type": "number"
               },
               "result": {
-                "type": ["null", "string"],
-                "enum": [null, "PASS", "FAILURE"]
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "enum": [
+                  null,
+                  "PASS",
+                  "FAILURE"
+                ]
               },
               "metricLabel": {
                 "type": "string",
-                "enum": ["Accuracy", "Precision"]
+                "enum": [
+                  "Accuracy",
+                  "Precision"
+                ]
               },
               "metricExplainability": {
                 "type": "string"
@@ -201,10 +238,17 @@
           "type": "number"
         }
       },
-      "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
+      "required": [
+        "status",
+        "startTime",
+        "inputs",
+        "generatedData",
+        "testResults",
+        "testNumber"
+      ],
       "additionalProperties": false
     },
-    "NGTTestCaseResult": {
+    "AgentforceStudioTestCaseResult": {
       "type": "object",
       "properties": {
         "subjectResponse": {
@@ -220,7 +264,11 @@
           }
         }
       },
-      "required": ["subjectResponse", "testNumber", "testScorerResults"],
+      "required": [
+        "subjectResponse",
+        "testNumber",
+        "testScorerResults"
+      ],
       "additionalProperties": false
     },
     "TestScorerResult": {
@@ -233,7 +281,10 @@
           "type": "string"
         }
       },
-      "required": ["scorerName", "scorerResponse"],
+      "required": [
+        "scorerName",
+        "scorerResponse"
+      ],
       "additionalProperties": false
     }
   }

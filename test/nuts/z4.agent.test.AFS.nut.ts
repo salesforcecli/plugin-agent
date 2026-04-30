@@ -32,11 +32,11 @@ import { getTestSession, getUsername } from './shared-setup.js';
 // Agentforce Studio (AiTestingDefinition) NUTs.
 // Depends on z2 having published a Test_Agent_* agent. The before() hook discovers that
 // agent, writes an AiTestingDefinition with the correct subjectName, and deploys it.
-describe('agent test (agentforce-studio / NGT)', function () {
+describe('agent test (agentforce-studio)', function () {
   this.timeout(30 * 60 * 1000);
 
   let session: TestSession;
-  let ngtTestName: string;
+  let afsTestName: string;
 
   before(async function () {
     this.timeout(30 * 60 * 1000);
@@ -52,8 +52,8 @@ describe('agent test (agentforce-studio / NGT)', function () {
     }
 
     const agentName = publishedAgent.DeveloperName;
-    ngtTestName = `${agentName}_NGT_Test`;
-    console.log(`Using agent '${agentName}', test definition '${ngtTestName}'`);
+    afsTestName = `${agentName}_AFS_Test`;
+    console.log(`Using agent '${agentName}', test definition '${afsTestName}'`);
 
     // Write AiTestingDefinition metadata file
     const metaDir = join(session.project.dir, 'force-app', 'main', 'default', 'aiTestingDefinitions');
@@ -61,8 +61,8 @@ describe('agent test (agentforce-studio / NGT)', function () {
 
     const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
 <AiTestingDefinition xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>NGT NUT test for ${agentName}</description>
-    <name>${ngtTestName}</name>
+    <description>AFS NUT test for ${agentName}</description>
+    <name>${afsTestName}</name>
     <subjectName>${agentName}</subjectName>
     <subjectType>AGENT</subjectType>
     <subjectVersion>v1</subjectVersion>
@@ -124,7 +124,7 @@ describe('agent test (agentforce-studio / NGT)', function () {
     </testCase>
 </AiTestingDefinition>
 `;
-    writeFileSync(join(metaDir, `${ngtTestName}.aiTestingDefinition-meta.xml`), metaXml, 'utf8');
+    writeFileSync(join(metaDir, `${afsTestName}.aiTestingDefinition-meta.xml`), metaXml, 'utf8');
     console.log(`Wrote AiTestingDefinition metadata to ${metaDir}`);
 
     // Deploy the definition
@@ -133,29 +133,29 @@ describe('agent test (agentforce-studio / NGT)', function () {
     });
     const deploy = await cs.deploy({ usernameOrConnection: getUsername() });
     await deploy.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(10) });
-    console.log(`Deployed AiTestingDefinition '${ngtTestName}'`);
+    console.log(`Deployed AiTestingDefinition '${afsTestName}'`);
   });
 
   // Set by the run test, consumed by the results tests (Mocha runs describes sequentially)
   let completedRunId: string;
 
   describe('agent test list', () => {
-    it('should include the NGT test definition in list', async () => {
+    it('should include the AFS test definition in list', async () => {
       const result = execCmd<AgentTestListResult>(`agent test list --target-org ${getUsername()} --json`, {
         ensureExitCode: 0,
       }).jsonOutput?.result;
       expect(result).to.be.ok;
-      const ngtDefs = result?.filter((r) => r.type?.includes('AiTestingDefinition'));
-      expect(ngtDefs?.length).to.be.greaterThanOrEqual(1);
-      expect(ngtDefs?.some((r) => r.fullName === ngtTestName)).to.be.true;
+      const afsDefs = result?.filter((r) => r.type?.includes('AiTestingDefinition'));
+      expect(afsDefs?.length).to.be.greaterThanOrEqual(1);
+      expect(afsDefs?.some((r) => r.fullName === afsTestName)).to.be.true;
     });
   });
 
   describe('agent test run', () => {
-    it('should run with --wait, auto-detect agentforce-studio, and return NGT result shape', function () {
+    it('should run with --wait, auto-detect agentforce-studio, and return AFS result shape', function () {
       this.timeout(30 * 60 * 1000);
       const output = execCmd<AgentTestRunResult>(
-        `agent test run --api-name ${ngtTestName} --target-org ${getUsername()} --wait 10 --json`,
+        `agent test run --api-name ${afsTestName} --target-org ${getUsername()} --wait 10 --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
 
@@ -170,7 +170,7 @@ describe('agent test (agentforce-studio / NGT)', function () {
   });
 
   describe('agent test results', () => {
-    it('should fetch NGT results by job ID (json)', async () => {
+    it('should fetch AFS results by job ID (json)', async () => {
       const output = execCmd<AgentTestResultsResult>(
         `agent test results --job-id ${completedRunId} --target-org ${getUsername()} --json`,
         { ensureExitCode: 0 }
@@ -215,7 +215,7 @@ describe('agent test (agentforce-studio / NGT)', function () {
 
       // One async start covers both resume paths
       const runResult = execCmd<AgentTestRunResult>(
-        `agent test run --api-name ${ngtTestName} --target-org ${getUsername()} --json`,
+        `agent test run --api-name ${afsTestName} --target-org ${getUsername()} --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
 
@@ -235,9 +235,9 @@ describe('agent test (agentforce-studio / NGT)', function () {
   });
 
   describe('error handling', () => {
-    it('should return exit code 2 for a non-existent NGT test definition', () => {
+    it('should return exit code 2 for a non-existent AFS test definition', () => {
       execCmd(
-        `agent test run --api-name NonExistent_NGT_Test_XYZ --test-runner agentforce-studio --target-org ${getUsername()} --json`,
+        `agent test run --api-name NonExistent_AFS_Test_XYZ --test-runner agentforce-studio --target-org ${getUsername()} --json`,
         { ensureExitCode: 2 }
       );
     });
