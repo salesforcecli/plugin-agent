@@ -52,13 +52,13 @@ const MOCK_CACHED_SESSIONS = [
   },
 ];
 
-describe('agent preview trace delete', () => {
+describe('agent trace delete', () => {
   const $$ = new TestContext();
   let unlinkStub: sinon.SinonStub;
   let listCachedPreviewSessionsStub: sinon.SinonStub;
   let listSessionTracesStub: sinon.SinonStub;
   let yesNoOrCancelStub: sinon.SinonStub;
-  let AgentPreviewTraceDelete: any;
+  let AgentTraceDelete: any;
 
   beforeEach(async () => {
     unlinkStub = $$.SANDBOX.stub().resolves();
@@ -68,16 +68,16 @@ describe('agent preview trace delete', () => {
     listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves(MOCK_TRACES_AGENT_B);
     yesNoOrCancelStub = $$.SANDBOX.stub().resolves(true);
 
-    const mod = await esmock('../../../../../src/commands/agent/preview/trace/delete.js', {
+    const mod = await esmock('../../../../src/commands/agent/trace/delete.js', {
       'node:fs/promises': { unlink: unlinkStub },
       '@salesforce/agents': {
         listCachedPreviewSessions: listCachedPreviewSessionsStub,
         listSessionTraces: listSessionTracesStub,
       },
-      '../../../../../src/yes-no-cancel.js': { default: yesNoOrCancelStub },
+      '../../../../src/yes-no-cancel.js': { default: yesNoOrCancelStub },
     });
 
-    AgentPreviewTraceDelete = mod.default;
+    AgentTraceDelete = mod.default;
 
     $$.inProject(true);
     const mockProject = { getPath: () => MOCK_PROJECT_DIR } as unknown as SfProject;
@@ -91,26 +91,26 @@ describe('agent preview trace delete', () => {
 
   describe('with no filters', () => {
     it('deletes all traces across all agents when --no-prompt is set', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--no-prompt']);
+      const result = await AgentTraceDelete.run(['--no-prompt']);
       expect(result).to.have.length(3);
       expect(unlinkStub.callCount).to.equal(3);
     });
 
     it('prompts for confirmation by default', async () => {
-      await AgentPreviewTraceDelete.run([]);
+      await AgentTraceDelete.run([]);
       expect(yesNoOrCancelStub.calledOnce).to.be.true;
     });
 
     it('does not delete when user declines confirmation', async () => {
       yesNoOrCancelStub.resolves(false);
-      const result = await AgentPreviewTraceDelete.run([]);
+      const result = await AgentTraceDelete.run([]);
       expect(result).to.deep.equal([]);
       expect(unlinkStub.called).to.be.false;
     });
 
     it('does not delete when user cancels confirmation', async () => {
       yesNoOrCancelStub.resolves('cancel');
-      const result = await AgentPreviewTraceDelete.run([]);
+      const result = await AgentTraceDelete.run([]);
       expect(result).to.deep.equal([]);
       expect(unlinkStub.called).to.be.false;
     });
@@ -118,7 +118,7 @@ describe('agent preview trace delete', () => {
     it('returns empty and does not prompt when no traces exist', async () => {
       listSessionTracesStub.withArgs('AgentA', 'sess-1').resolves([]);
       listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves([]);
-      const result = await AgentPreviewTraceDelete.run([]);
+      const result = await AgentTraceDelete.run([]);
       expect(result).to.deep.equal([]);
       expect(yesNoOrCancelStub.called).to.be.false;
       expect(unlinkStub.called).to.be.false;
@@ -127,64 +127,54 @@ describe('agent preview trace delete', () => {
 
   describe('--no-prompt', () => {
     it('skips the confirmation prompt', async () => {
-      await AgentPreviewTraceDelete.run(['--no-prompt']);
+      await AgentTraceDelete.run(['--no-prompt']);
       expect(yesNoOrCancelStub.called).to.be.false;
     });
   });
 
-  describe('--api-name filter', () => {
+  describe('--agent filter', () => {
     it('deletes only traces for the matching agent', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--api-name', 'My_Agent_A', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--agent', 'My_Agent_A', '--no-prompt']);
       expect(result).to.have.length(2);
       expect(result.every((r: any) => r.agent === 'My_Agent_A')).to.be.true;
       expect(unlinkStub.callCount).to.equal(2);
     });
 
     it('uses case-insensitive substring match', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--api-name', 'agent_a', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--agent', 'agent_a', '--no-prompt']);
       expect(result).to.have.length(2);
     });
 
     it('returns empty when no agents match', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--api-name', 'NonExistent', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--agent', 'NonExistent', '--no-prompt']);
       expect(result).to.deep.equal([]);
       expect(unlinkStub.called).to.be.false;
     });
   });
 
-  describe('--authoring-bundle filter', () => {
-    it('deletes only traces for the matching bundle', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--authoring-bundle', 'My_Agent_B', '--no-prompt']);
-      expect(result).to.have.length(1);
-      expect(result[0].agent).to.equal('My_Agent_B');
-    });
-  });
-
   describe('--session-id filter', () => {
     it('deletes only traces for the specified session', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--session-id', 'sess-2', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--session-id', 'sess-2', '--no-prompt']);
       expect(result).to.have.length(1);
       expect(result[0].sessionId).to.equal('sess-2');
     });
 
     it('returns empty when session ID does not match', async () => {
-      const result = await AgentPreviewTraceDelete.run(['--session-id', 'no-such-session', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--session-id', 'no-such-session', '--no-prompt']);
       expect(result).to.deep.equal([]);
     });
   });
 
   describe('--older-than filter', () => {
     it('deletes only traces older than the duration (days)', async () => {
-      // OLD_MTIME is ~60 days ago — caught by 30d. RECENT_MTIME is ~23 days ago — not caught.
-      const result = await AgentPreviewTraceDelete.run(['--older-than', '30d', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--older-than', '30d', '--no-prompt']);
       const planIds = result.map((r: any) => r.planId);
-      expect(planIds).to.include('plan-2'); // OLD, AgentA
-      expect(planIds).to.include('plan-3'); // OLD, AgentB
-      expect(planIds).to.not.include('plan-1'); // RECENT, not deleted
+      expect(planIds).to.include('plan-2');
+      expect(planIds).to.include('plan-3');
+      expect(planIds).to.not.include('plan-1');
     });
 
     it('deletes nothing when all traces are newer than the duration', async () => {
-      // Override traces with mtimes in the future so nothing is "older than 1 day"
       const futureMtime = new Date(Date.now() + 86_400_000);
       listSessionTracesStub
         .withArgs('AgentA', 'sess-1')
@@ -197,20 +187,17 @@ describe('agent preview trace delete', () => {
           },
         ]);
       listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves([]);
-      const result = await AgentPreviewTraceDelete.run(['--older-than', '1d', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--older-than', '1d', '--no-prompt']);
       expect(result).to.deep.equal([]);
     });
 
     it('accepts hours unit', async () => {
-      // OLD_MTIME is weeks old, caught by 1h. RECENT_MTIME is ~23 days old, also caught.
-      // Use a very large hours value to catch everything.
-      const result = await AgentPreviewTraceDelete.run(['--older-than', '1h', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--older-than', '1h', '--no-prompt']);
       expect(result).to.have.length(3);
     });
 
     it('accepts weeks unit', async () => {
-      // OLD_MTIME is ~8-9 weeks ago — caught by 4w. RECENT_MTIME is ~3 weeks ago — not caught.
-      const result = await AgentPreviewTraceDelete.run(['--older-than', '4w', '--no-prompt']);
+      const result = await AgentTraceDelete.run(['--older-than', '4w', '--no-prompt']);
       const planIds = result.map((r: any) => r.planId);
       expect(planIds).to.include('plan-2');
       expect(planIds).to.include('plan-3');
@@ -219,7 +206,7 @@ describe('agent preview trace delete', () => {
 
     it('rejects a value without a unit', async () => {
       try {
-        await AgentPreviewTraceDelete.run(['--older-than', '7', '--no-prompt']);
+        await AgentTraceDelete.run(['--older-than', '7', '--no-prompt']);
         expect.fail('Should have thrown');
       } catch (err: unknown) {
         expect((err as Error).message).to.match(/invalid.*older-than|InvalidDuration/i);
@@ -228,7 +215,7 @@ describe('agent preview trace delete', () => {
 
     it('rejects a non-numeric value', async () => {
       try {
-        await AgentPreviewTraceDelete.run(['--older-than', 'lastweek', '--no-prompt']);
+        await AgentTraceDelete.run(['--older-than', 'lastweek', '--no-prompt']);
         expect.fail('Should have thrown');
       } catch (err: unknown) {
         expect((err as Error).message).to.match(/invalid.*older-than|InvalidDuration/i);
@@ -237,27 +224,14 @@ describe('agent preview trace delete', () => {
   });
 
   describe('combined filters', () => {
-    it('applies agent and older-than filters together', async () => {
-      // Only plan-2 (AgentA + OLD) — plan-1 is recent, AgentB is excluded by name filter
-      const result = await AgentPreviewTraceDelete.run([
-        '--api-name',
-        'My_Agent_A',
-        '--older-than',
-        '30d',
-        '--no-prompt',
-      ]);
+    it('applies --agent and --older-than together', async () => {
+      const result = await AgentTraceDelete.run(['--agent', 'My_Agent_A', '--older-than', '30d', '--no-prompt']);
       expect(result).to.have.length(1);
       expect(result[0].planId).to.equal('plan-2');
     });
 
-    it('applies session-id and agent filters together', async () => {
-      const result = await AgentPreviewTraceDelete.run([
-        '--api-name',
-        'My_Agent_A',
-        '--session-id',
-        'sess-1',
-        '--no-prompt',
-      ]);
+    it('applies --session-id and --agent together', async () => {
+      const result = await AgentTraceDelete.run(['--agent', 'My_Agent_A', '--session-id', 'sess-1', '--no-prompt']);
       expect(result).to.have.length(2);
       expect(result.every((r: any) => r.sessionId === 'sess-1')).to.be.true;
     });

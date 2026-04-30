@@ -18,13 +18,11 @@ import { unlink } from 'node:fs/promises';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { listCachedPreviewSessions, listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
-import yesNoOrCancel from '../../../../yes-no-cancel.js';
+import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.trace.delete');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.trace.delete');
 
-// Parses "<number><unit>" where unit is d/days, h/hours, m/minutes, w/weeks.
-// Returns the cutoff Date (now minus the duration), or undefined on invalid input.
 const DURATION_RE = /^(\d+)(d|h|m|w|days?|hours?|minutes?|weeks?)$/i;
 const UNIT_MS: Record<string, number> = {
   m: 60_000,
@@ -41,14 +39,14 @@ const UNIT_MS: Record<string, number> = {
   weeks: 604_800_000,
 };
 
-export type AgentPreviewTraceDeleteResult = Array<{
+export type AgentTraceDeleteResult = Array<{
   agent: string;
   sessionId: string;
   planId: string;
   path: string;
 }>;
 
-export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTraceDeleteResult> {
+export default class AgentTraceDelete extends SfCommand<AgentTraceDeleteResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -59,15 +57,12 @@ export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTrace
   });
 
   public static readonly flags = {
+    agent: Flags.string({
+      summary: messages.getMessage('flags.agent.summary'),
+      char: 'a',
+    }),
     'session-id': Flags.string({
       summary: messages.getMessage('flags.session-id.summary'),
-    }),
-    'api-name': Flags.string({
-      summary: messages.getMessage('flags.api-name.summary'),
-      char: 'n',
-    }),
-    'authoring-bundle': Flags.string({
-      summary: messages.getMessage('flags.authoring-bundle.summary'),
     }),
     'older-than': Flags.custom<Date>({
       summary: messages.getMessage('flags.older-than.summary'),
@@ -86,17 +81,15 @@ export default class AgentPreviewTraceDelete extends SfCommand<AgentPreviewTrace
     }),
   };
 
-  public async run(): Promise<AgentPreviewTraceDeleteResult> {
-    const { flags } = await this.parse(AgentPreviewTraceDelete);
+  public async run(): Promise<AgentTraceDeleteResult> {
+    const { flags } = await this.parse(AgentTraceDelete);
 
-    const agentNameFilter = (flags['authoring-bundle'] ?? flags['api-name'])?.toLowerCase();
-
+    const agentFilter = flags.agent?.toLowerCase();
     const cachedAgents = await listCachedPreviewSessions(this.project!);
 
-    // Collect all matching traces
-    const candidates: AgentPreviewTraceDeleteResult = [];
+    const candidates: AgentTraceDeleteResult = [];
     for (const { agentId, displayName, sessions } of cachedAgents) {
-      if (agentNameFilter && !displayName?.toLowerCase().includes(agentNameFilter)) continue;
+      if (agentFilter && !displayName?.toLowerCase().includes(agentFilter)) continue;
 
       for (const { sessionId } of sessions) {
         if (flags['session-id'] && sessionId !== flags['session-id']) continue;

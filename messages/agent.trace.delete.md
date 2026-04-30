@@ -6,19 +6,15 @@ Delete agent preview trace files.
 
 Deletes trace files recorded during agent preview sessions. By default, shows a preview of what will be deleted and prompts for confirmation. Use --no-prompt to skip confirmation.
 
-Without filters, deletes all traces for all agents and sessions. Use flags to narrow the scope: filter by agent name (--api-name or --authoring-bundle), by session (--session-id), or by age (--older-than).
+Without filters, deletes all traces for all agents and sessions. Use flags to narrow the scope: filter by agent name (--agent), by session (--session-id), or by age (--older-than).
+
+# flags.agent.summary
+
+Only delete traces for this agent name (substring match). Matches against the name used when starting the session, whether that's an authoring bundle or a published agent API name.
 
 # flags.session-id.summary
 
 Only delete traces from this session ID.
-
-# flags.api-name.summary
-
-Only delete traces for this published agent API name.
-
-# flags.authoring-bundle.summary
-
-Only delete traces for this authoring bundle API name.
 
 # flags.older-than.summary
 
@@ -70,9 +66,9 @@ Plan ID
 
   <%= config.bin %> <%= command.id %>
 
-- Delete all traces for a specific published agent:
+- Delete all traces for a specific agent:
 
-  <%= config.bin %> <%= command.id %> --api-name My_Published_Agent
+  <%= config.bin %> <%= command.id %> --agent My_Agent
 
 - Delete traces from a specific session:
 
@@ -84,8 +80,8 @@ Plan ID
 
 - Delete traces older than 24 hours for a specific agent, no prompt:
 
-  <%= config.bin %> <%= command.id %> --authoring-bundle My_Local_Agent --older-than 24h --no-prompt
+  <%= config.bin %> <%= command.id %> --agent My_Agent --older-than 24h --no-prompt
 
-- Delete all traces for an authoring bundle without confirmation:
+- Delete all traces without confirmation:
 
-  <%= config.bin %> <%= command.id %> --authoring-bundle My_Local_Agent --no-prompt
+  <%= config.bin %> <%= command.id %> --no-prompt

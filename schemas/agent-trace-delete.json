@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentPreviewTraceDeleteResult",
+  "$ref": "#/definitions/AgentTraceDeleteResult",
   "definitions": {
-    "AgentPreviewTraceDeleteResult": {
+    "AgentTraceDeleteResult": {
       "type": "array",
       "items": {
         "type": "object",

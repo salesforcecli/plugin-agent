@@ -155,14 +155,6 @@
   },
   {
     "alias": [],
-    "command": "agent:preview:trace:delete",
-    "flagAliases": [],
-    "flagChars": ["n"],
-    "flags": ["api-name", "authoring-bundle", "flags-dir", "json", "no-prompt", "older-than", "session-id"],
-    "plugin": "@salesforce/plugin-agent"
-  },
-  {
-    "alias": [],
     "command": "agent:preview:trace:list",
     "flagAliases": [],
     "flagChars": ["n"],
@@ -255,6 +247,14 @@
       "target-org",
       "wait"
     ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:trace:delete",
+    "flagAliases": [],
+    "flagChars": ["a"],
+    "flags": ["agent", "flags-dir", "json", "no-prompt", "older-than", "session-id"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
