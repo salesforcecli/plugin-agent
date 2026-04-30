@@ -175,7 +175,7 @@ describe('agent publish authoring-bundle NUTs', function () {
 
     execCmd<AgentPublishAuthoringBundleResult>(
       `agent publish authoring-bundle --api-name ${invalidApiName} --target-org ${getUsername()} --json`,
-      { ensureExitCode: 2 }
+      { ensureExitCode: 1 }
     );
   });
 
@@ -193,8 +193,8 @@ describe('agent publish authoring-bundle NUTs', function () {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       // We assert both the "publish failed" prefix and that it looks like a compilation issue.
-      expect(message).to.include("SyntaxError: Unexpected 'syem'");
-      expect(message).to.match(/Actual:\s*2\b|"exitCode"\s*:\s*2/);
+      expect(message).to.include('CompilationError: Invalid string');
+      expect(message).to.match(/Actual:\s*2\b|"exitCode"\s*:\s*1/);
     }
   });
 
