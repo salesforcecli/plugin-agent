@@ -4,21 +4,17 @@ List the trace files that were recorded during all agent preview sessions.
 
 # description
 
-By default, this command lists all traces for all agents and all of their sessions. Use flags to narrow the results: filter by agent name (--api-name or --authoring-bundle), by session (--session-id), or by date (--since).
+Lists trace files recorded during agent preview sessions. By default, lists all traces for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date (--since).
 
 Each row in the output corresponds to one trace file, which in turn corresponds to one agent session. The Agent column shows the authoring bundle or API name used when starting the session.
+
+# flags.agent.summary
+
+Only show traces for this agent name (substring match). Matches against the name used when starting the session, whether that's an authoring bundle or a published agent API name.
 
 # flags.session-id.summary
 
 Session ID used to filter the list of trace files.
-
-# flags.api-name.summary
-
-API name of the published agent used to filter the list of trace files.
-
-# flags.authoring-bundle.summary
-
-API name of the authoring bundle used to filter the list of trace files.
 
 # flags.since.summary
 
@@ -66,9 +62,9 @@ Path
 
   <%= config.bin %> <%= command.id %>
 
-- List all traces for a specific published agent (all its sessions) using the agent's API name:
+- List all traces for a specific agent:
 
-  <%= config.bin %> <%= command.id %> --api-name My_Published_Agent
+  <%= config.bin %> <%= command.id %> --agent My_Agent
 
 - List traces for a specific session:
 
@@ -82,9 +78,9 @@ Path
 
   <%= config.bin %> <%= command.id %> --since 2026-04-20T14:00:00Z
 
-- Filter by authoring bundle API name and date together:
+- Filter by agent and date together:
 
-  <%= config.bin %> <%= command.id %> --authoring-bundle My_Local_Agent --since 2026-04-20
+  <%= config.bin %> <%= command.id %> --agent My_Agent --since 2026-04-20
 
 - Return results as JSON:
 
