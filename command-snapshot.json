@@ -247,8 +247,10 @@
     "flagAliases": [],
     "flagChars": ["a"],
     "flags": ["agent", "flags-dir", "json", "no-prompt", "older-than", "session-id"],
+    "plugin": "@salesforce/plugin-agent"
   },
   {
+    "alias": [],
     "command": "agent:trace:list",
     "flagAliases": [],
     "flagChars": ["a"],
