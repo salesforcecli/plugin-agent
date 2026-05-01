@@ -5,7 +5,7 @@
     "label": "Willie Resort Manager",
     "description": "A resort manager agent for NUT testing",
     "enableEnhancedEventLogs": false,
-    "agentType": "AgentforceAgent",
+    "agentType": "customer",
     "templateName": "",
     "defaultAgentUser": "",
     "defaultOutboundRouting": "",
