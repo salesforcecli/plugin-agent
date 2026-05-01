@@ -68,10 +68,11 @@ describe('agent preview', function () {
       const agentJsonPath = join(tmpDir, 'compiled-agent.json');
       writeFileSync(agentJsonPath, JSON.stringify(fixtureJson));
 
-      const startResult = execCmd<AgentPreviewStartResult>(
-        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json ${agentJsonPath} --target-org ${targetOrg} --json`,
-        { cwd: session.project.dir }
-      ).jsonOutput?.result;
+      const startCmdResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json "${agentJsonPath}" --target-org ${targetOrg} --json`,
+        { ensureExitCode: 0 }
+      );
+      const startResult = startCmdResult.jsonOutput?.result;
 
       expect(startResult?.sessionId).to.be.a('string');
       expect(startResult?.agentApiName).to.equal(bundleApiName);
