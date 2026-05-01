@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { writeFileSync, rmSync } from 'node:fs';
+import { writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -26,7 +26,7 @@ import { Org } from '@salesforce/core';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
-import { getTestSession, getUsername } from './shared-setup.js';
+import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 /* eslint-disable no-console */
 
 describe('agent preview', function () {
@@ -59,7 +59,14 @@ describe('agent preview', function () {
 
       // Use a static fixture instead of hitting the compile API, which avoids a
       // live network call that can fail independently of the feature under test.
-      const agentJsonPath = join(fileURLToPath(import.meta.url), '..', 'fixtures', 'compiled-agent.json');
+      // Patch defaultAgentUser so bypassUser resolves correctly in the org.
+      const fixtureSource = join(fileURLToPath(import.meta.url), '..', 'fixtures', 'compiled-agent.json');
+      const fixtureJson = JSON.parse(readFileSync(fixtureSource, 'utf-8')) as {
+        globalConfiguration: { defaultAgentUser: string };
+      };
+      fixtureJson.globalConfiguration.defaultAgentUser = getAgentUsername() ?? '';
+      const agentJsonPath = join(tmpDir, 'compiled-agent.json');
+      writeFileSync(agentJsonPath, JSON.stringify(fixtureJson));
 
       const startResult = execCmd<AgentPreviewStartResult>(
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json ${agentJsonPath} --target-org ${targetOrg} --json`,
