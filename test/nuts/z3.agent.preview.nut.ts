@@ -26,7 +26,7 @@ import { Org } from '@salesforce/core';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
-import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
+import { getTestSession, getUsername } from './shared-setup.js';
 /* eslint-disable no-console */
 
 describe('agent preview', function () {
@@ -59,14 +59,11 @@ describe('agent preview', function () {
 
       // Use a static fixture instead of hitting the compile API, which avoids a
       // live network call that can fail independently of the feature under test.
-      // Patch defaultAgentUser so bypassUser resolves correctly in the org.
+      // Leave defaultAgentUser empty so the library sends bypassUser=false,
+      // which skips the permission-set validation that causes a 500.
       const fixtureSource = join(fileURLToPath(import.meta.url), '..', 'fixtures', 'compiled-agent.json');
-      const fixtureJson = JSON.parse(readFileSync(fixtureSource, 'utf-8')) as {
-        globalConfiguration: { defaultAgentUser: string };
-      };
-      fixtureJson.globalConfiguration.defaultAgentUser = getAgentUsername() ?? '';
       const agentJsonPath = join(tmpDir, 'compiled-agent.json');
-      writeFileSync(agentJsonPath, JSON.stringify(fixtureJson));
+      writeFileSync(agentJsonPath, readFileSync(fixtureSource));
 
       const startCmdResult = execCmd<AgentPreviewStartResult>(
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json "${agentJsonPath}" --target-org ${targetOrg} --json`,
