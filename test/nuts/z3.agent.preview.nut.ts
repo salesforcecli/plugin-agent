@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { writeFileSync, rmSync, readFileSync } from 'node:fs';
+import { writeFileSync, rmSync } from 'node:fs';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Agent } from '@salesforce/agents';
-import { Org } from '@salesforce/core';
+import { Org, SfProject } from '@salesforce/core';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
@@ -57,13 +56,20 @@ describe('agent preview', function () {
       const bundleApiName = 'Willie_Resort_Manager';
       const targetOrg = getUsername();
 
-      // Use a static fixture instead of hitting the compile API, which avoids a
-      // live network call that can fail independently of the feature under test.
-      // Leave defaultAgentUser empty so the library sends bypassUser=false,
-      // which skips the permission-set validation that causes a 500.
-      const fixtureSource = join(fileURLToPath(import.meta.url), '..', 'fixtures', 'compiled-agent.json');
+      // Compile the agent once to get a valid agentJson, write it to a temp file,
+      // then pass it back via --agent-json. This tests the flag plumbing (the
+      // command must accept a pre-compiled file and skip recompilation) while
+      // ensuring the fixture matches what the preview sessions API actually accepts.
+      const org = await Org.create({ aliasOrUsername: targetOrg });
+      const conn = org.getConnection();
+      const project = await SfProject.resolve(session.project.dir);
+      const agent = await Agent.init({ connection: conn, project, aabName: bundleApiName });
+      const compileResult = await agent.compile();
+      if (compileResult.status !== 'success' || !compileResult.compiledArtifact) {
+        throw new Error(`Compile failed: ${JSON.stringify(compileResult)}`);
+      }
       const agentJsonPath = join(tmpDir, 'compiled-agent.json');
-      writeFileSync(agentJsonPath, readFileSync(fixtureSource));
+      writeFileSync(agentJsonPath, JSON.stringify(compileResult.compiledArtifact));
 
       const startCmdResult = execCmd<AgentPreviewStartResult>(
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json "${agentJsonPath}" --target-org ${targetOrg} --json`,
