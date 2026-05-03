@@ -1,3 +1,9 @@
+## [1.34.1](https://github.com/salesforcecli/plugin-agent/compare/1.34.0...1.34.1) (2026-05-03)
+
+### Bug Fixes
+
+- **deps:** bump yaml from 2.8.3 to 2.8.4 ([29d59f9](https://github.com/salesforcecli/plugin-agent/commit/29d59f9163e3ef5b36ef6b262f2fbd5ea9fd48f8))
+
 # [1.34.0](https://github.com/salesforcecli/plugin-agent/compare/1.33.0...1.34.0) (2026-04-27)
 
 ### Bug Fixes
