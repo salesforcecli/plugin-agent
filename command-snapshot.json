@@ -92,6 +92,7 @@
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "x"],
     "flags": [
+      "agent-json",
       "apex-debug",
       "api-name",
       "api-version",
@@ -142,6 +143,7 @@
     "flagAliases": [],
     "flagChars": ["n", "o"],
     "flags": [
+      "agent-json",
       "api-name",
       "api-version",
       "authoring-bundle",

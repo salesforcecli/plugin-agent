@@ -39,6 +39,10 @@ Use real actions in the org; if not specified, preview uses AI to simulate (mock
 
 Enable Apex debug logging during the agent preview conversation.
 
+# flags.agent-json.summary
+
+Path to a pre-compiled AgentJSON file to use instead of compiling the Agent Script file. Intended for internal use and testing.
+
 # examples
 
 - Preview an agent by choosing from the list of available local Agent Script or published agents. If previewing a local Agent Script agent, use simulated mode. Use the org with alias "my-dev-org".
