@@ -30,6 +30,12 @@ export type AgentPublishAuthoringBundleResult = {
   success: boolean;
   botDeveloperName?: string;
   errors?: string[];
+  retrievedComponents?: string[];
+  deployedComponents?: string[];
+  summary?: {
+    retrieved: number;
+    deployed: number;
+  };
 };
 
 export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishAuthoringBundleResult> {
@@ -52,6 +58,15 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     }),
     'skip-retrieve': Flags.boolean({
       summary: messages.getMessage('flags.skip-retrieve.summary'),
+    }),
+    verbose: Flags.boolean({
+      summary: messages.getMessage('flags.verbose.summary'),
+      char: 'v',
+      exclusive: ['concise'],
+    }),
+    concise: Flags.boolean({
+      summary: messages.getMessage('flags.concise.summary'),
+      exclusive: ['verbose'],
     }),
   };
 
@@ -83,6 +98,11 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     const aabName =
       flags['api-name'] ??
       (await promptForAgentFiles(this.project!, AgentPublishAuthoringBundle.FLAGGABLE_PROMPTS['api-name']));
+
+    // Track retrieved and deployed components
+    const retrievedComponents: string[] = [];
+    const deployedComponents: string[] = [];
+    const outputMode = flags.verbose ? 'verbose' : flags.concise ? 'concise' : 'normal';
 
     // Create multi-stage output
     const mso = new MultiStageOutput<{ agentName: string }>({
@@ -142,11 +162,42 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         mso.error();
         throw SfError.create({ name: 'Retrieve Failed', message: errorMessage });
       }
+
+      // Capture retrieved components
+      const fileProperties = ensureArray(result.retrieveResult.response.fileProperties ?? []);
+      fileProperties.forEach((fp) => {
+        const componentName = `${fp.type}${fp.fullName ? `:${fp.fullName}` : ''}`;
+        retrievedComponents.push(componentName);
+      });
+
+      // Display retrieved components based on output mode
+      if (outputMode === 'verbose' && !this.jsonEnabled()) {
+        this.log(`${EOL}Retrieved metadata components:`);
+        retrievedComponents.forEach((comp) => this.log(`  • ${comp}`));
+      } else if (outputMode === 'normal' && !this.jsonEnabled()) {
+        this.log(`${EOL}Retrieved ${retrievedComponents.length} metadata component(s)`);
+      }
+
       return Promise.resolve();
     });
 
     Lifecycle.getInstance().on('scopedPostDeploy', (result: ScopedPostDeploy) => {
       if (result.deployResult.response.status === RequestStatus.Succeeded) {
+        // Capture deployed components
+        const deployedFiles = ensureArray(result.deployResult.response.details?.componentSuccesses ?? []);
+        deployedFiles.forEach((comp) => {
+          const componentName = `${String(comp.componentType)}${comp.fullName ? `:${String(comp.fullName)}` : ''}`;
+          deployedComponents.push(componentName);
+        });
+
+        // Display deployed components based on output mode
+        if (outputMode === 'verbose' && !this.jsonEnabled()) {
+          this.log(`${EOL}Deployed metadata components:`);
+          deployedComponents.forEach((comp) => this.log(`  • ${comp}`));
+        } else if (outputMode === 'normal' && !this.jsonEnabled()) {
+          this.log(`${EOL}Deployed ${deployedComponents.length} metadata component(s)`);
+        }
+
         mso.stop();
       } else {
         const deployResponse = result.deployResult.response;
@@ -164,9 +215,20 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     const result = await agent.publish(flags['skip-retrieve']);
     mso.stop();
 
+    // Display final summary for normal mode
+    if (outputMode === 'normal' && !this.jsonEnabled() && !flags.concise) {
+      this.log(`${EOL}✓ Agent '${result.developerName}' published successfully`);
+    }
+
     return {
       success: true,
       botDeveloperName: result.developerName,
+      retrievedComponents: flags.verbose ? retrievedComponents : undefined,
+      deployedComponents: flags.verbose ? deployedComponents : undefined,
+      summary: {
+        retrieved: retrievedComponents.length,
+        deployed: deployedComponents.length,
+      },
     };
   }
 }

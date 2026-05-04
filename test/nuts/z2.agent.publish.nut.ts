@@ -218,4 +218,51 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(output).to.include('Deploy Metadata');
     expect(output).to.include(`Agent Name: ${bundleApiName}`);
   });
+
+  it('should display detailed component listing with --verbose flag', async function () {
+    this.timeout(30 * 60 * 1000);
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --verbose`,
+      { ensureExitCode: 0 }
+    );
+
+    const output = result.shellOutput.stdout;
+    expect(output).to.include('Retrieved metadata components:');
+    expect(output).to.include('Deployed metadata components:');
+    expect(output).to.match(/•\s+\w/);
+  });
+
+  it('should include retrievedComponents and deployedComponents in JSON output with --verbose flag', async function () {
+    this.timeout(30 * 60 * 1000);
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --verbose --json`,
+      { ensureExitCode: 0 }
+    ).jsonOutput?.result;
+
+    expect(result).to.be.ok;
+    expect(result?.success).to.be.true;
+    expect(result?.retrievedComponents).to.be.an('array');
+    expect(result?.deployedComponents).to.be.an('array');
+    expect(result?.retrievedComponents?.length).to.be.greaterThan(0);
+    expect(result?.deployedComponents?.length).to.be.greaterThan(0);
+  });
+
+  it('should suppress component counts and success message with --concise flag', async function () {
+    this.timeout(30 * 60 * 1000);
+    this.retries(1);
+
+    const result = execCmd<AgentPublishAuthoringBundleResult>(
+      `agent publish authoring-bundle --api-name ${bundleApiName} --target-org ${getUsername()} --concise`,
+      { ensureExitCode: 0 }
+    );
+
+    const output = result.shellOutput.stdout;
+    expect(output).to.not.match(/Retrieved \d+ metadata component/);
+    expect(output).to.not.match(/Deployed \d+ metadata component/);
+    expect(output).to.not.include('published successfully');
+  });
 });

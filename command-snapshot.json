@@ -159,8 +159,8 @@
     "alias": [],
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
-    "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "skip-retrieve", "target-org"],
+    "flagChars": ["n", "o", "v"],
+    "flags": ["api-name", "api-version", "concise", "flags-dir", "json", "skip-retrieve", "target-org", "verbose"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
