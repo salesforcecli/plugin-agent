@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { EOL } from 'node:os';
-import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { Messages, Lifecycle, SfError } from '@salesforce/core';
 import { Agent } from '@salesforce/agents';
@@ -43,6 +43,11 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly requiresProject = true;
+
+  public static readonly errorCodes = toHelpSection('ERROR CODES', {
+    'Succeeded (0)': 'Agent published successfully without errors.',
+    'Failed (1)': 'Compilation errors found in the Agent Script file.',
+  });
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),

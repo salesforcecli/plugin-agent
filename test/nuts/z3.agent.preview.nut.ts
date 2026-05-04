@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import { writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { expect } from 'chai';
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { Agent } from '@salesforce/agents';
-import { Org } from '@salesforce/core';
+import { Org, SfProject } from '@salesforce/core';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
@@ -33,6 +37,78 @@ describe('agent preview', function () {
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     session = await getTestSession();
+  });
+
+  describe('--agent-json flag', () => {
+    let tmpDir: string;
+
+    before(() => {
+      tmpDir = mkdtempSync(join(tmpdir(), 'agent-json-nut-'));
+    });
+
+    after(() => {
+      rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('should start a preview session using a pre-compiled AgentJSON file', async function () {
+      this.timeout(5 * 60 * 1000);
+
+      const bundleApiName = 'Willie_Resort_Manager';
+      const targetOrg = getUsername();
+
+      // Compile the agent once to get a valid agentJson, write it to a temp file,
+      // then pass it back via --agent-json. This tests the flag plumbing (the
+      // command must accept a pre-compiled file and skip recompilation) while
+      // ensuring the fixture matches what the preview sessions API actually accepts.
+      const org = await Org.create({ aliasOrUsername: targetOrg });
+      const conn = org.getConnection();
+      const project = await SfProject.resolve(session.project.dir);
+      const agent = await Agent.init({ connection: conn, project, aabName: bundleApiName });
+      const compileResult = await agent.compile();
+      if (compileResult.status !== 'success' || !compileResult.compiledArtifact) {
+        throw new Error(`Compile failed: ${JSON.stringify(compileResult)}`);
+      }
+      const agentJsonPath = join(tmpDir, 'compiled-agent.json');
+      writeFileSync(agentJsonPath, JSON.stringify(compileResult.compiledArtifact));
+
+      const startCmdResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --agent-json "${agentJsonPath}" --target-org ${targetOrg} --json`,
+        { ensureExitCode: 0 }
+      );
+      const startResult = startCmdResult.jsonOutput?.result;
+
+      expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(bundleApiName);
+
+      // Clean up session
+      execCmd(
+        `agent preview end --session-id ${
+          startResult!.sessionId
+        } --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
+        { cwd: session.project.dir }
+      );
+    });
+
+    it('should fail when --agent-json contains invalid JSON', () => {
+      const badJsonPath = join(tmpDir, 'bad.json');
+      writeFileSync(badJsonPath, 'not-valid{{{');
+
+      const result = execCmd(
+        `agent preview start --authoring-bundle Willie_Resort_Manager --simulate-actions --agent-json ${badJsonPath} --target-org ${getUsername()} --json`,
+        { ensureExitCode: 1, cwd: session.project.dir }
+      );
+      expect(JSON.stringify(result.shellOutput)).to.include('Failed to read or parse');
+    });
+
+    it('should fail when --agent-json is used without --authoring-bundle', () => {
+      const agentJsonPath = join(tmpDir, 'any.json');
+      writeFileSync(agentJsonPath, '{}');
+
+      execCmd(
+        `agent preview start --api-name Some_Agent --agent-json ${agentJsonPath} --target-org ${getUsername()} --json`,
+        { ensureExitCode: 2 }
+      );
+    });
   });
 
   it('should fail when authoring bundle does not exist', async () => {
@@ -61,17 +137,22 @@ describe('agent preview', function () {
         `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(bundleApiName);
       const sessionId = startResult!.sessionId;
 
       const sendResult1 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult1?.agentApiName).to.equal(bundleApiName);
+      expect(sendResult1?.sessionId).to.equal(sessionId);
 
       const sendResult2 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "Tell me more" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult2?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult2?.agentApiName).to.equal(bundleApiName);
+      expect(sendResult2?.sessionId).to.equal(sessionId);
 
       const endResult = execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
@@ -95,12 +176,15 @@ describe('agent preview', function () {
         `agent preview start --authoring-bundle ${publishedAgent?.DeveloperName} --use-live-actions --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(publishedAgent?.DeveloperName);
       const sessionId = startResult!.sessionId;
 
       const sendResult1 = execCmd<AgentPreviewSendResult>(
         `agent preview send --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult1?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult1?.agentApiName).to.equal(publishedAgent?.DeveloperName);
+      expect(sendResult1?.sessionId).to.equal(sessionId);
 
       execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --authoring-bundle ${publishedAgent?.DeveloperName} --target-org ${targetOrg} --json`
@@ -130,6 +214,7 @@ describe('agent preview', function () {
         `agent preview start --api-name ${publishedAgent!.DeveloperName} --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(startResult?.sessionId).to.be.a('string');
+      expect(startResult?.agentApiName).to.equal(publishedAgent!.DeveloperName);
       const sessionId = startResult!.sessionId;
 
       const sendResult = execCmd<AgentPreviewSendResult>(
@@ -138,6 +223,8 @@ describe('agent preview', function () {
         } --utterance "What can you help me with?" --target-org ${targetOrg} --json`
       ).jsonOutput?.result;
       expect(sendResult?.messages).to.be.an('array').with.length.greaterThan(0);
+      expect(sendResult?.agentApiName).to.equal(publishedAgent!.DeveloperName);
+      expect(sendResult?.sessionId).to.equal(sessionId);
 
       const endResult = execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --api-name ${
