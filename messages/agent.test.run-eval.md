@@ -20,10 +20,6 @@ Path to test spec file (YAML or JSON). Supports reading from stdin when piping c
 
 Agent DeveloperName (also called API name) to resolve agent_id and agent_version_id. Auto-inferred from the YAML spec's subjectName.
 
-# flags.wait.summary
-
-Number of minutes to wait for results.
-
 # flags.result-format.summary
 
 Format of the agent test results.

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access,
-   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, camelcase */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, camelcase */
 
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -75,7 +74,7 @@ const MOCK_API_RESULTS = [
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
-describe('agent test run-eval command', () => {
+describe('agent test run-eval', () => {
   const $$ = new TestContext();
   let testOrg: MockTestOrgData;
   let tmpDir: string;
@@ -100,22 +99,22 @@ describe('agent test run-eval command', () => {
     tmpDir = mkdtempSync(join(tmpdir(), 'run-eval-test-'));
 
     // Default stub implementations
-    isYamlTestSpecStub = sinon.stub().returns(false);
-    parseTestSpecStub = sinon.stub().returns({
+    isYamlTestSpecStub = $$.SANDBOX.stub().returns(false);
+    parseTestSpecStub = $$.SANDBOX.stub().returns({
       name: 'Weather_Test',
       subjectName: 'Local_Info_Agent',
       testCases: [{ utterance: 'What is the weather?' }],
     });
-    translateTestSpecStub = sinon.stub().returns(JSON.parse(EVAL_PAYLOAD));
-    normalizePayloadStub = sinon.stub().callsFake((p: unknown) => p);
-    splitIntoBatchesStub = sinon.stub().callsFake((tests: unknown[]) => [tests]);
-    resolveAgentStub = sinon.stub().resolves({ agentId: 'bot-001', versionId: 'ver-001' });
-    executeBatchesStub = sinon.stub().resolves(MOCK_API_RESULTS);
-    buildResultSummaryStub = sinon.stub().returns({
+    translateTestSpecStub = $$.SANDBOX.stub().returns(JSON.parse(EVAL_PAYLOAD));
+    normalizePayloadStub = $$.SANDBOX.stub().callsFake((p: unknown) => p);
+    splitIntoBatchesStub = $$.SANDBOX.stub().callsFake((tests: unknown[]) => [tests]);
+    resolveAgentStub = $$.SANDBOX.stub().resolves({ agentId: 'bot-001', versionId: 'ver-001' });
+    executeBatchesStub = $$.SANDBOX.stub().resolves(MOCK_API_RESULTS);
+    buildResultSummaryStub = $$.SANDBOX.stub().returns({
       summary: { passed: 1, failed: 0, scored: 0, errors: 0 },
       testSummaries: [{ id: 'test-topic-routing', status: 'passed', evaluations: [], outputs: [] }],
     });
-    formatResultsStub = sinon.stub().returns('# Agent Evaluation Results');
+    formatResultsStub = $$.SANDBOX.stub().returns('# Agent Evaluation Results');
 
     const mod = await esmock('../../../../src/commands/agent/test/run-eval.js', {
       '@salesforce/agents': {
@@ -135,7 +134,6 @@ describe('agent test run-eval command', () => {
   });
 
   afterEach(() => {
-    sinon.restore();
     $$.restore();
     rmSync(tmpDir, { recursive: true, force: true });
   });
@@ -143,11 +141,8 @@ describe('agent test run-eval command', () => {
   // ─── State ─────────────────────────────────────────────────────────────────
 
   describe('command metadata', () => {
-    it('is marked as GA state', () => {
-      expect(AgentTestRunEval.state).to.equal('ga');
-    });
-
-    it('is not hidden', () => {
+    it('is not in beta or hidden state', () => {
+      expect(AgentTestRunEval.state).to.not.equal('beta');
       expect(AgentTestRunEval.hidden).to.not.equal(true);
     });
   });

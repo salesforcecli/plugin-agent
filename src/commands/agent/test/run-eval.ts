@@ -41,11 +41,35 @@ export type RunEvalResult = {
   summary: { passed: number; failed: number; scored: number; errors: number };
 };
 
+async function resolveAndInjectAgent(
+  org: Parameters<typeof resolveAgent>[0],
+  agentApiName: string,
+  payload: EvalPayload
+): Promise<void> {
+  let agentId: string;
+  let versionId: string;
+  try {
+    ({ agentId, versionId } = await resolveAgent(org, agentApiName));
+  } catch (e) {
+    const wrapped = SfError.wrap(e);
+    throw new SfError(`Agent '${agentApiName}' not found.`, 'AgentNotFound', [], 2, wrapped);
+  }
+  for (const test of payload.tests) {
+    for (const step of test.steps) {
+      if (step.type === 'agent.create_session') {
+        // eslint-disable-next-line camelcase
+        step.agent_id = agentId;
+        // eslint-disable-next-line camelcase
+        step.agent_version_id = versionId;
+      }
+    }
+  }
+}
+
 export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static state = 'ga';
 
   public static readonly envVariablesSection = toHelpSection(
     'ENVIRONMENT VARIABLES',
@@ -72,11 +96,6 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       char: 'n',
       summary: messages.getMessage('flags.api-name.summary'),
     }),
-    wait: Flags.integer({
-      char: 'w',
-      default: 10,
-      summary: messages.getMessage('flags.wait.summary'),
-    }),
     'result-format': resultFormatFlag(),
     'batch-size': Flags.integer({
       default: 5,
@@ -94,32 +113,37 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     // 1. Get spec content (from file or stdin via allowStdin)
     let rawContent = flags.spec;
+    let isYaml = isYamlTestSpec(rawContent);
 
-    // If spec looks like it might be a file path (not parseable content), read the file
-    try {
-      if (!isYamlTestSpec(rawContent)) {
-        JSON.parse(rawContent);
-      }
-    } catch {
+    if (!isYaml) {
       try {
-        rawContent = await readFile(flags.spec, 'utf-8');
-      } catch (e) {
-        const wrapped = SfError.wrap(e);
-        throw new SfError(`Spec file not found: ${flags.spec}`, 'SpecFileNotFound', [], 2, wrapped);
+        JSON.parse(rawContent);
+      } catch {
+        try {
+          rawContent = await readFile(flags.spec, 'utf-8');
+        } catch (e) {
+          const wrapped = SfError.wrap(e);
+          throw new SfError(`Spec file not found: ${flags.spec}`, 'SpecFileNotFound', [], 2, wrapped);
+        }
+        isYaml = isYamlTestSpec(rawContent);
       }
     }
 
     // 2. Detect format and parse
-    let payload: EvalPayload;
+    let payload!: EvalPayload;
     let agentApiName = flags['api-name'];
 
-    if (isYamlTestSpec(rawContent)) {
-      const spec = parseTestSpec(rawContent);
-      payload = translateTestSpec(spec);
+    if (isYaml) {
+      try {
+        const spec = parseTestSpec(rawContent);
+        payload = translateTestSpec(spec);
 
-      if (!agentApiName) {
-        agentApiName = spec.subjectName;
-        this.log(messages.getMessage('info.yamlDetected', [spec.subjectName, spec.testCases.length.toString()]));
+        if (!agentApiName) {
+          agentApiName = spec.subjectName;
+          this.log(messages.getMessage('info.yamlDetected', [spec.subjectName, spec.testCases.length.toString()]));
+        }
+      } catch (e) {
+        throw messages.createError('error.invalidPayload', [(e as Error).message]);
       }
     } else {
       try {
@@ -133,29 +157,15 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       throw messages.createError('error.invalidPayload', ['missing or empty "tests" array']);
     }
 
+    for (const test of payload.tests) {
+      if (!Array.isArray(test.steps)) {
+        throw messages.createError('error.invalidPayload', [`test '${test.id}' has missing or invalid 'steps' array`]);
+      }
+    }
+
     // 3. If --api-name (or auto-inferred from YAML), resolve IDs and inject
     if (agentApiName) {
-      let agentId;
-      let versionId;
-      try {
-        const resolved = await resolveAgent(org, agentApiName);
-        agentId = resolved.agentId;
-        versionId = resolved.versionId;
-      } catch (e) {
-        const wrapped = SfError.wrap(e);
-        throw new SfError(`Agent '${agentApiName}' not found.`, 'AgentNotFound', [], 2, wrapped);
-      }
-
-      for (const test of payload.tests) {
-        for (const step of test.steps) {
-          if (step.type === 'agent.create_session') {
-            // eslint-disable-next-line camelcase
-            step.agent_id = agentId;
-            // eslint-disable-next-line camelcase
-            step.agent_version_id = versionId;
-          }
-        }
-      }
+      await resolveAndInjectAgent(org, agentApiName, payload);
     }
 
     // 4. Normalize payload unless --no-normalize
@@ -163,17 +173,12 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       payload = normalizePayload(payload);
     }
 
-    // 5. Clamp batch size
+    // 5. Clamp batch size and split into batches
     const batchSize = Math.min(Math.max(flags['batch-size'], 1), 5);
-
-    // 6. Split into batches
     const batches = splitIntoBatches(payload.tests, batchSize);
 
-    // 7. Execute batches
-    let allResults;
-    try {
-      allResults = await executeBatches(org, batches, (msg) => this.log(msg));
-    } catch (e) {
+    // 6. Execute batches
+    const allResults = await executeBatches(org, batches, (msg) => this.log(msg)).catch((e) => {
       const wrapped = SfError.wrap(e);
       throw new SfError(
         `Failed to execute tests: ${wrapped.message}`,
@@ -182,16 +187,14 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
         4,
         wrapped
       );
-    }
+    });
 
     const mergedResponse: EvalApiResponse = { results: allResults as EvalApiResponse['results'] };
 
-    // 8. Format output
-    const resultFormat = (flags['result-format'] ?? 'human') as ResultFormat;
-    const formatted = formatResults(mergedResponse, resultFormat);
-    this.log(formatted);
+    // 7. Format output
+    this.log(formatResults(mergedResponse, (flags['result-format'] ?? 'human') as ResultFormat));
 
-    // 9. Build structured result for --json
+    // 8. Build structured result for --json
     const { summary, testSummaries } = buildResultSummary(mergedResponse);
 
     if (summary.errors > 0) {
