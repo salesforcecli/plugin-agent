@@ -16,11 +16,22 @@
 
 import { readFile } from 'node:fs/promises';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
-import { EnvironmentVariable, Messages, Org, SfError } from '@salesforce/core';
-import { type EvalPayload, normalizePayload, splitIntoBatches } from '../../../evalNormalizer.js';
-import { type EvalApiResponse, formatResults, type ResultFormat } from '../../../evalFormatter.js';
+import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
+import {
+  type EvalPayload,
+  normalizePayload,
+  splitIntoBatches,
+  type EvalApiResponse,
+  formatResults,
+  type ResultFormat,
+  isYamlTestSpec,
+  parseTestSpec,
+  translateTestSpec,
+  resolveAgent,
+  executeBatches,
+  buildResultSummary,
+} from '@salesforce/agents';
 import { resultFormatFlag } from '../../../flags.js';
-import { isYamlTestSpec, parseTestSpec, translateTestSpec } from '../../../yamlSpecTranslator.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run-eval');
@@ -30,132 +41,11 @@ export type RunEvalResult = {
   summary: { passed: number; failed: number; scored: number; errors: number };
 };
 
-// --- Standalone helper functions ---
-
-type ApiHeaders = {
-  orgId: string;
-  userId: string;
-  instanceUrl: string;
-};
-
-async function getApiHeaders(org: Org): Promise<ApiHeaders> {
-  const conn = org.getConnection();
-  const userInfo = await conn.request<{ user_id: string }>(`${conn.instanceUrl}/services/oauth2/userinfo`);
-
-  return {
-    orgId: org.getOrgId(),
-    userId: userInfo.user_id,
-    instanceUrl: conn.instanceUrl,
-  };
-}
-
-async function callEvalApi(org: Org, payload: EvalPayload, headers: ApiHeaders): Promise<{ results?: unknown[] }> {
-  const conn = org.getConnection();
-
-  return conn.request<{ results?: unknown[] }>({
-    url: 'https://api.salesforce.com/einstein/evaluation/v1/tests',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-sfdc-core-tenant-id': `core/prod/${headers.orgId}`,
-      'x-org-id': headers.orgId,
-      'x-sfdc-core-instance-url': headers.instanceUrl,
-      'x-sfdc-user-id': headers.userId,
-      'x-client-feature-id': 'AIPlatformEvaluation',
-      'x-sfdc-app-context': 'EinsteinGPT',
-    },
-    body: JSON.stringify(payload),
-  });
-}
-
-async function resolveAgent(org: Org, apiName: string): Promise<{ agentId: string; versionId: string }> {
-  const conn = org.getConnection();
-
-  // Escape single quotes to prevent SOQL injection
-  const escapedApiName = apiName.replace(/'/g, "\\'");
-
-  const botResult = await conn.query<{ Id: string }>(
-    `SELECT Id FROM BotDefinition WHERE DeveloperName = '${escapedApiName}'`
-  );
-  if (!botResult.records.length) {
-    throw messages.createError('error.agentNotFound', [apiName]);
-  }
-  const agentId = botResult.records[0].Id;
-
-  // Filter to published/active versions only
-  const versionResult = await conn.query<{ Id: string }>(
-    `SELECT Id FROM BotVersion WHERE BotDefinitionId = '${agentId}'  ORDER BY VersionNumber DESC LIMIT 1`
-  );
-  if (!versionResult.records.length) {
-    throw messages.createError('error.agentVersionNotFound', [apiName]);
-  }
-  const versionId = versionResult.records[0].Id;
-
-  return { agentId, versionId };
-}
-
-async function executeBatches(
-  org: Org,
-  batches: Array<EvalPayload['tests']>,
-  log: (msg: string) => void
-): Promise<unknown[]> {
-  // Pre-calculate headers once to avoid redundant API calls
-  const headers = await getApiHeaders(org);
-
-  // Execute all batches in parallel for better performance
-  if (batches.length > 1) {
-    log(messages.getMessage('info.batchProgress', [batches.length, batches.length, 'total']));
-  }
-
-  const batchPromises = batches.map(async (batch) => {
-    const batchPayload: EvalPayload = { tests: batch };
-    const resultObj = await callEvalApi(org, batchPayload, headers);
-    return resultObj.results ?? [];
-  });
-
-  const batchResults = await Promise.all(batchPromises);
-  return batchResults.flat();
-}
-
-function buildResultSummary(mergedResponse: EvalApiResponse): {
-  summary: RunEvalResult['summary'];
-  testSummaries: RunEvalResult['tests'];
-} {
-  const summary = { passed: 0, failed: 0, scored: 0, errors: 0 };
-  const testSummaries: Array<{ id: string; status: string; evaluations: unknown[]; outputs: unknown[] }> = [];
-
-  for (const testResult of mergedResponse.results ?? []) {
-    const tr = testResult as Record<string, unknown>;
-    const testId = (tr.id as string) ?? 'unknown';
-    const evalResults = (tr.evaluation_results as Array<Record<string, unknown>>) ?? [];
-    const testErrors = (tr.errors as unknown[]) ?? [];
-
-    const passed = evalResults.filter((e) => e.is_pass === true).length;
-    const failed = evalResults.filter((e) => e.is_pass === false).length;
-    const scored = evalResults.filter((e) => e.score != null && e.is_pass == null).length;
-
-    summary.passed += passed;
-    summary.failed += failed;
-    summary.scored += scored;
-    summary.errors += testErrors.length;
-
-    testSummaries.push({
-      id: testId,
-      status: failed > 0 || testErrors.length > 0 ? 'failed' : 'passed',
-      evaluations: evalResults,
-      outputs: (tr.outputs as unknown[]) ?? [],
-    });
-  }
-
-  return { summary, testSummaries };
-}
-
 export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static state = 'beta';
-  public static readonly hidden = true;
+  public static state = 'ga';
 
   public static readonly envVariablesSection = toHelpSection(
     'ENVIRONMENT VARIABLES',
@@ -207,14 +97,10 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     // If spec looks like it might be a file path (not parseable content), read the file
     try {
-      // Try to detect if it's actual content vs a file path
-      // If it's a valid YAML/JSON, it's content; otherwise treat as file path
       if (!isYamlTestSpec(rawContent)) {
         JSON.parse(rawContent);
       }
-      // If we got here, it's valid content
     } catch {
-      // Not valid content, must be a file path - read it
       try {
         rawContent = await readFile(flags.spec, 'utf-8');
       } catch (e) {
@@ -228,17 +114,14 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
     let agentApiName = flags['api-name'];
 
     if (isYamlTestSpec(rawContent)) {
-      // YAML TestSpec detected — translate to EvalPayload
       const spec = parseTestSpec(rawContent);
       payload = translateTestSpec(spec);
 
-      // Auto-infer api-name from subjectName if not explicitly provided
       if (!agentApiName) {
         agentApiName = spec.subjectName;
         this.log(messages.getMessage('info.yamlDetected', [spec.subjectName, spec.testCases.length.toString()]));
       }
     } else {
-      // JSON EvalPayload (original behavior)
       try {
         payload = JSON.parse(rawContent) as EvalPayload;
       } catch (e) {
@@ -303,16 +186,14 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
 
     const mergedResponse: EvalApiResponse = { results: allResults as EvalApiResponse['results'] };
 
-    // 9. Format output
+    // 8. Format output
     const resultFormat = (flags['result-format'] ?? 'human') as ResultFormat;
     const formatted = formatResults(mergedResponse, resultFormat);
     this.log(formatted);
 
-    // 10. Build structured result for --json
+    // 9. Build structured result for --json
     const { summary, testSummaries } = buildResultSummary(mergedResponse);
 
-    // Set exit code to 1 only for execution errors (tests couldn't run)
-    // Test failures (assertions failed) are business logic and should not affect exit code
     if (summary.errors > 0) {
       process.exitCode = 1;
     }
