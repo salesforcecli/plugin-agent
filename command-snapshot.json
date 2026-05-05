@@ -228,7 +228,7 @@
     "alias": [],
     "command": "agent:test:run-eval",
     "flagAliases": [],
-    "flagChars": ["n", "o", "s", "w"],
+    "flagChars": ["n", "o", "s"],
     "flags": [
       "api-name",
       "api-version",
@@ -238,8 +238,7 @@
       "no-normalize",
       "result-format",
       "spec",
-      "target-org",
-      "wait"
+      "target-org"
     ],
     "plugin": "@salesforce/plugin-agent"
   },
