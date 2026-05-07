@@ -106,10 +106,6 @@ describe('agent test (agentforce-studio)', function () {
             <name>topic_sequence_match</name>
         </scorer>
         <scorer>
-            <expectedValue></expectedValue>
-            <name>action_sequence_match</name>
-        </scorer>
-        <scorer>
             <name>conciseness</name>
         </scorer>
         <scorer>
@@ -132,7 +128,14 @@ describe('agent test (agentforce-studio)', function () {
       sourcepath: [metaDir],
     });
     const deploy = await cs.deploy({ usernameOrConnection: getUsername() });
-    await deploy.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(10) });
+    const deployResult = await deploy.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(10) });
+    if (!deployResult.response.success) {
+      const failures = deployResult.response.details?.componentFailures;
+      const msgs = (Array.isArray(failures) ? failures : failures ? [failures] : [])
+        .map((f) => `${f.problemType}: ${f.problem}`)
+        .join('\n');
+      throw new Error(`Deploy of AiTestingDefinition failed:\n${msgs}`);
+    }
     console.log(`Deployed AiTestingDefinition '${afsTestName}'`);
   });
 

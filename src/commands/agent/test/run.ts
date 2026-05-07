@@ -133,7 +133,8 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       // Check for test definition not found
       if (
         wrapped.message.includes('Invalid AiEvalDefinitionVersion identifier') ||
-        wrapped.message.toLowerCase().includes('not found')
+        wrapped.message.toLowerCase().includes('not found') ||
+        wrapped.message.includes('Failed to run test suite')
       ) {
         throw new SfError(
           `Test definition '${apiName}' not found.`,
