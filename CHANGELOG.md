@@ -1,3 +1,25 @@
+# [1.35.0](https://github.com/salesforcecli/plugin-agent/compare/1.34.1...1.35.0) (2026-05-04)
+
+### Bug Fixes
+
+- address PR review comments on --agent-json flag ([a955e42](https://github.com/salesforcecli/plugin-agent/commit/a955e42d08630756461ccb4af073bcd84ff1a104))
+- compile agent in NUT instead of using static fixture ([833fbec](https://github.com/salesforcecli/plugin-agent/commit/833fbecc9c9ce14160ffafb21041be6b34028ed1))
+- patch fixture defaultAgentUser so preview sessions API accepts it ([090e128](https://github.com/salesforcecli/plugin-agent/commit/090e128af75722d9f7f6ce89c9c082ae995b7865))
+- set agentType to AgentforceServiceAgent in compiled-agent fixture ([39e157f](https://github.com/salesforcecli/plugin-agent/commit/39e157f4ada11489c3366bbefc08cfef466df7ce))
+- stop patching defaultAgentUser in agent-json NUT ([3d0ba3d](https://github.com/salesforcecli/plugin-agent/commit/3d0ba3dbfa9037bddc05587a60ccf3763d8d073a))
+- use EinsteinServiceAgent agentType in fixture; bump @salesforce/agents to 1.4.0 ([94952aa](https://github.com/salesforcecli/plugin-agent/commit/94952aab888578de6f1c6d46a69dd325d5874a65))
+- use valid agentType value in compiled-agent.json fixture ([39b92a7](https://github.com/salesforcecli/plugin-agent/commit/39b92a792e4a7577161432e0373487162d79fe8c))
+
+### Features
+
+- add hidden --agent-json flag to agent preview start ([64f5452](https://github.com/salesforcecli/plugin-agent/commit/64f5452c351afae4f007046160181d75d3df5a60))
+
+## [1.34.1](https://github.com/salesforcecli/plugin-agent/compare/1.34.0...1.34.1) (2026-05-03)
+
+### Bug Fixes
+
+- **deps:** bump yaml from 2.8.3 to 2.8.4 ([29d59f9](https://github.com/salesforcecli/plugin-agent/commit/29d59f9163e3ef5b36ef6b262f2fbd5ea9fd48f8))
+
 # [1.34.0](https://github.com/salesforcecli/plugin-agent/compare/1.33.0...1.34.0) (2026-04-27)
 
 ### Bug Fixes

@@ -1,405 +1,266 @@
 [
-    {
-        "alias": [],
-        "command": "agent:activate",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "target-org",
-            "version"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:create",
-        "flagAliases": [],
-        "flagChars": [
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "name",
-            "planner-id",
-            "preview",
-            "spec",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:deactivate",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:generate:agent-spec",
-        "flagAliases": [],
-        "flagChars": [
-            "o"
-        ],
-        "flags": [
-            "agent-user",
-            "api-version",
-            "company-description",
-            "company-name",
-            "company-website",
-            "enrich-logs",
-            "flags-dir",
-            "force-overwrite",
-            "full-interview",
-            "grounding-context",
-            "json",
-            "max-topics",
-            "output-file",
-            "prompt-template",
-            "role",
-            "spec",
-            "target-org",
-            "tone",
-            "type"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:generate:authoring-bundle",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "f",
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "force-overwrite",
-            "json",
-            "name",
-            "no-spec",
-            "output-dir",
-            "spec",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:generate:template",
-        "flagAliases": [],
-        "flagChars": [
-            "f",
-            "r",
-            "s"
-        ],
-        "flags": [
-            "agent-file",
-            "agent-version",
-            "api-version",
-            "flags-dir",
-            "json",
-            "output-dir",
-            "source-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:generate:test-spec",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "f"
-        ],
-        "flags": [
-            "flags-dir",
-            "force-overwrite",
-            "from-definition",
-            "output-file"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:preview",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "n",
-            "o",
-            "x"
-        ],
-        "flags": [
-            "apex-debug",
-            "api-name",
-            "api-version",
-            "authoring-bundle",
-            "flags-dir",
-            "output-dir",
-            "target-org",
-            "use-live-actions"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:preview:end",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "authoring-bundle",
-            "flags-dir",
-            "json",
-            "session-id",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:preview:send",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o",
-            "u"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "authoring-bundle",
-            "flags-dir",
-            "json",
-            "session-id",
-            "target-org",
-            "utterance"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:preview:sessions",
-        "flagAliases": [],
-        "flagChars": [],
-        "flags": [
-            "flags-dir",
-            "json"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:preview:start",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "authoring-bundle",
-            "flags-dir",
-            "json",
-            "simulate-actions",
-            "target-org",
-            "use-live-actions"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:publish:authoring-bundle",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "skip-retrieve",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:create",
-        "flagAliases": [],
-        "flagChars": [
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "force-overwrite",
-            "json",
-            "preview",
-            "spec",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:list",
-        "flagAliases": [],
-        "flagChars": [
-            "o"
-        ],
-        "flags": [
-            "api-version",
-            "flags-dir",
-            "json",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:results",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "i",
-            "o"
-        ],
-        "flags": [
-            "api-version",
-            "flags-dir",
-            "job-id",
-            "json",
-            "output-dir",
-            "result-format",
-            "target-org",
-            "test-runner",
-            "verbose"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:resume",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "i",
-            "o",
-            "r",
-            "w"
-        ],
-        "flags": [
-            "api-version",
-            "flags-dir",
-            "job-id",
-            "json",
-            "output-dir",
-            "result-format",
-            "target-org",
-            "test-runner",
-            "use-most-recent",
-            "verbose",
-            "wait"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:run",
-        "flagAliases": [],
-        "flagChars": [
-            "d",
-            "n",
-            "o",
-            "w"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "output-dir",
-            "result-format",
-            "target-org",
-            "test-runner",
-            "verbose",
-            "wait"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:test:run-eval",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o",
-            "s",
-            "w"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "batch-size",
-            "flags-dir",
-            "json",
-            "no-normalize",
-            "result-format",
-            "spec",
-            "target-org",
-            "wait"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    },
-    {
-        "alias": [],
-        "command": "agent:validate:authoring-bundle",
-        "flagAliases": [],
-        "flagChars": [
-            "n",
-            "o"
-        ],
-        "flags": [
-            "api-name",
-            "api-version",
-            "flags-dir",
-            "json",
-            "target-org"
-        ],
-        "plugin": "@salesforce/plugin-agent"
-    }
+  {
+    "alias": [],
+    "command": "agent:activate",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org", "version"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:create",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "name", "planner-id", "preview", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:deactivate",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:agent-spec",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": [
+      "agent-user",
+      "api-version",
+      "company-description",
+      "company-name",
+      "company-website",
+      "enrich-logs",
+      "flags-dir",
+      "force-overwrite",
+      "full-interview",
+      "grounding-context",
+      "json",
+      "max-topics",
+      "output-file",
+      "prompt-template",
+      "role",
+      "spec",
+      "target-org",
+      "tone",
+      "type"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:authoring-bundle",
+    "flagAliases": [],
+    "flagChars": ["d", "f", "n", "o"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "flags-dir",
+      "force-overwrite",
+      "json",
+      "name",
+      "no-spec",
+      "output-dir",
+      "spec",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:template",
+    "flagAliases": [],
+    "flagChars": ["f", "r", "s"],
+    "flags": ["agent-file", "agent-version", "api-version", "flags-dir", "json", "output-dir", "source-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:generate:test-spec",
+    "flagAliases": [],
+    "flagChars": ["d", "f"],
+    "flags": ["flags-dir", "force-overwrite", "from-definition", "output-file"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o", "x"],
+    "flags": [
+      "agent-json",
+      "apex-debug",
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "output-dir",
+      "target-org",
+      "use-live-actions"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:end",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "authoring-bundle", "flags-dir", "json", "session-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:send",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "u"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "session-id",
+      "target-org",
+      "utterance"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:sessions",
+    "flagAliases": [],
+    "flagChars": [],
+    "flags": ["flags-dir", "json"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:preview:start",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": [
+      "agent-json",
+      "api-name",
+      "api-version",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "simulate-actions",
+      "target-org",
+      "use-live-actions"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:publish:authoring-bundle",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "v"],
+    "flags": ["api-name", "api-version", "concise", "flags-dir", "json", "skip-retrieve", "target-org", "verbose"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:create",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-name", "api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:results",
+    "flagAliases": [],
+    "flagChars": ["d", "i", "o"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "job-id",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "test-runner",
+      "verbose"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:resume",
+    "flagAliases": [],
+    "flagChars": ["d", "i", "o", "r", "w"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "job-id",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "test-runner",
+      "use-most-recent",
+      "verbose",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:run",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o", "w"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "flags-dir",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "test-runner",
+      "verbose",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:test:run-eval",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "s", "w"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "batch-size",
+      "flags-dir",
+      "json",
+      "no-normalize",
+      "result-format",
+      "spec",
+      "target-org",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:validate:authoring-bundle",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-name", "api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  }
 ]
