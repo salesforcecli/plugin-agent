@@ -92,7 +92,7 @@ describe('agent generate template NUTs', function () {
 
     execCmd<AgentGenerateTemplateResult>(
       `agent generate template --agent-file ${invalidAgentFile} --agent-version ${agentVersion} --output-dir ${outputDir} --json`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 'nonZero' }
     );
   });
 
