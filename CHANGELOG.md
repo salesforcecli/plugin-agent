@@ -1,3 +1,14 @@
+# [1.37.0](https://github.com/salesforcecli/plugin-agent/compare/1.36.1...1.37.0) (2026-05-07)
+
+### Bug Fixes
+
+- **agent/test/run-eval:** address pre-PR review findings ([f48d2b0](https://github.com/salesforcecli/plugin-agent/commit/f48d2b0d064cdc2c778e97be66f4edf7cf78738d))
+- **agent/test/run-eval:** update command snapshot to reflect --wait removal ([7f9c353](https://github.com/salesforcecli/plugin-agent/commit/7f9c3533bbb497ff1847c048a47fb8641f0b2519))
+
+### Features
+
+- **agent/test/run-eval:** promote command to GA and delegate logic to @salesforce/agents ([e2670cf](https://github.com/salesforcecli/plugin-agent/commit/e2670cf7449b835c852c4985df2b236e05707fd6))
+
 ## [1.36.1](https://github.com/salesforcecli/plugin-agent/compare/1.36.0...1.36.1) (2026-05-07)
 
 ### Bug Fixes
