@@ -213,8 +213,10 @@ describe('agent test (agentforce-studio)', function () {
 
   describe('agent test resume', () => {
     it('should start async then resume by job ID, and support --use-most-recent', async () => {
-      const cache = await AgentTestCache.create();
-      cache.clear();
+      // Clear any stale entries before the run
+      const cacheBefore = await AgentTestCache.create();
+      cacheBefore.clear();
+      await cacheBefore.write();
 
       // One async start covers both resume paths
       const runResult = execCmd<AgentTestRunResult>(
@@ -224,6 +226,9 @@ describe('agent test (agentforce-studio)', function () {
 
       expect(runResult?.result.runId.startsWith('3A2')).to.be.true;
       expect(runResult?.result.status).to.equal('NEW');
+
+      // Re-read from disk — the run command wrote the cache entry in a subprocess
+      const cache = await AgentTestCache.create();
       expect(cache.resolveFromCache().runnerType).to.equal('agentforce-studio');
 
       const output = execCmd<AgentTestRunResult>(
