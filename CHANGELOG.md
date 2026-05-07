@@ -1,3 +1,15 @@
+## [1.36.1](https://github.com/salesforcecli/plugin-agent/compare/1.36.0...1.36.1) (2026-05-07)
+
+### Bug Fixes
+
+- use nonZero ensureExitCode for invalid-input NUTs ([9ea48ee](https://github.com/salesforcecli/plugin-agent/commit/9ea48eeae8e324ac4280a92cc53fad2d3ffaf8ff))
+
+# [1.36.0](https://github.com/salesforcecli/plugin-agent/compare/1.35.0...1.36.0) (2026-05-07)
+
+### Features
+
+- add --verbose and --concise flags to agent publish authoring-bundle ([065ed7d](https://github.com/salesforcecli/plugin-agent/commit/065ed7d3d12f3e20bc79b7e8fc07ec637f1aace4))
+
 # [1.35.0](https://github.com/salesforcecli/plugin-agent/compare/1.34.1...1.35.0) (2026-05-04)
 
 ### Bug Fixes
