@@ -1,3 +1,9 @@
+## [1.36.1](https://github.com/salesforcecli/plugin-agent/compare/1.36.0...1.36.1) (2026-05-07)
+
+### Bug Fixes
+
+- use nonZero ensureExitCode for invalid-input NUTs ([9ea48ee](https://github.com/salesforcecli/plugin-agent/commit/9ea48eeae8e324ac4280a92cc53fad2d3ffaf8ff))
+
 # [1.36.0](https://github.com/salesforcecli/plugin-agent/compare/1.35.0...1.36.0) (2026-05-07)
 
 ### Features
