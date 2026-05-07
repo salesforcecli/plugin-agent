@@ -1642,17 +1642,17 @@
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
 "@salesforce/agents@^1.4.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.5.0.tgz#4d2a17b880f4f42b2a03b75fd4627697d2097029"
-  integrity sha512-qNN85QZO/rhUWYzQUy5HG4c18NUcyAVbFaKteIUPRjaUW8l8gyBYCTmZ7T2NMWRCeDggdZHIOupMxnhfuu7djA==
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.4.0.tgz#69c3e3e9d29b9596aadf99f94774c9c8713e34ca"
+  integrity sha512-NaiGUSjcyK0Wsy0n5pFuouHqOYH1KJEpgm605NqCaiOMAA3zn0pWZDHE9I75ymGqpvOXSHGDFNrUhKYPain9ZA==
   dependencies:
-    "@salesforce/core" "^8.29.0"
+    "@salesforce/core" "^8.28.3"
     "@salesforce/kit" "^3.2.6"
-    "@salesforce/source-deploy-retrieve" "^12.35.1"
+    "@salesforce/source-deploy-retrieve" "^12.32.7"
     "@salesforce/types" "^1.7.1"
-    fast-xml-parser "^5.7.2"
+    fast-xml-parser "^5.6.0"
     nock "^13.5.6"
-    yaml "^2.8.4"
+    yaml "^2.8.3"
 
 "@salesforce/cli-plugins-testkit@^5.3.41":
   version "5.3.55"
