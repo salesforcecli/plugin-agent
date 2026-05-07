@@ -47,7 +47,14 @@
           "type": "string"
         }
       },
-      "required": ["agentType", "companyDescription", "companyName", "isSuccess", "role", "topics"]
+      "required": [
+        "agentType",
+        "companyDescription",
+        "companyName",
+        "isSuccess",
+        "role",
+        "topics"
+      ]
     },
     "DraftAgentTopics": {
       "type": "array",
@@ -61,7 +68,10 @@
             "type": "string"
           }
         },
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "additionalProperties": false
       },
       "minItems": 1,
@@ -69,7 +79,11 @@
     },
     "AgentType": {
       "type": "string",
-      "enum": ["customer", "internal", "AGENT"]
+      "enum": [
+        "customer",
+        "internal",
+        "AGENT"
+      ]
     }
   }
 }
