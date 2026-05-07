@@ -17,7 +17,7 @@
 /* eslint-disable camelcase */
 
 import { expect } from 'chai';
-import { formatResults, type EvalApiResponse } from '../src/evalFormatter.js';
+import { formatResults, type EvalApiResponse } from '@salesforce/agents';
 
 const MOCK_RESPONSE: EvalApiResponse = {
   results: [
