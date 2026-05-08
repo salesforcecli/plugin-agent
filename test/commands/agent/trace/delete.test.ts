@@ -52,17 +52,21 @@ const MOCK_CACHED_SESSIONS = [
   },
 ];
 
+const MOCK_ALL_SESSIONS = MOCK_CACHED_SESSIONS.flatMap(({ agentId, displayName, sessions }) =>
+  sessions.map(({ sessionId }) => ({ agentId, displayName, sessionId }))
+);
+
 describe('agent trace delete', () => {
   const $$ = new TestContext();
   let unlinkStub: sinon.SinonStub;
-  let listCachedPreviewSessionsStub: sinon.SinonStub;
+  let listAllAgentSessionsStub: sinon.SinonStub;
   let listSessionTracesStub: sinon.SinonStub;
   let yesNoOrCancelStub: sinon.SinonStub;
   let AgentTraceDelete: any;
 
   beforeEach(async () => {
     unlinkStub = $$.SANDBOX.stub().resolves();
-    listCachedPreviewSessionsStub = $$.SANDBOX.stub().resolves(MOCK_CACHED_SESSIONS);
+    listAllAgentSessionsStub = $$.SANDBOX.stub().resolves(MOCK_ALL_SESSIONS);
     listSessionTracesStub = $$.SANDBOX.stub();
     listSessionTracesStub.withArgs('AgentA', 'sess-1').resolves(MOCK_TRACES_AGENT_A);
     listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves(MOCK_TRACES_AGENT_B);
@@ -70,8 +74,10 @@ describe('agent trace delete', () => {
 
     const mod = await esmock('../../../../src/commands/agent/trace/delete.js', {
       'node:fs/promises': { unlink: unlinkStub },
+      '../../../../src/agentSessionScanner.js': {
+        listAllAgentSessions: listAllAgentSessionsStub,
+      },
       '@salesforce/agents': {
-        listCachedPreviewSessions: listCachedPreviewSessionsStub,
         listSessionTraces: listSessionTracesStub,
       },
       '../../../../src/yes-no-cancel.js': { default: yesNoOrCancelStub },

@@ -16,7 +16,8 @@
 
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
-import { listCachedPreviewSessions, listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
+import { listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
+import { listAllAgentSessions } from '../../../agentSessionScanner.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.trace.list');
@@ -71,34 +72,30 @@ export default class AgentTraceList extends SfCommand<AgentTraceListResult> {
     const { flags } = await this.parse(AgentTraceList);
 
     const agentNameFilter = flags.agent?.toLowerCase();
-
-    const cachedAgents = await listCachedPreviewSessions(this.project!);
+    const allSessions = await listAllAgentSessions(this.project!);
 
     const result: AgentTraceListResult = [];
 
-    for (const { agentId, displayName, sessions } of cachedAgents) {
-      if (agentNameFilter && !displayName?.toLowerCase().includes(agentNameFilter)) continue;
+    for (const { agentId, displayName, sessionId } of allSessions) {
+      if (agentNameFilter && !displayName.toLowerCase().includes(agentNameFilter)) continue;
+      if (flags['session-id'] && sessionId !== flags['session-id']) continue;
 
-      for (const { sessionId } of sessions) {
-        if (flags['session-id'] && sessionId !== flags['session-id']) continue;
+      // eslint-disable-next-line no-await-in-loop
+      let traces: TraceFileInfo[] = await listSessionTraces(agentId, sessionId);
 
-        // eslint-disable-next-line no-await-in-loop
-        let traces: TraceFileInfo[] = await listSessionTraces(agentId, sessionId);
+      if (flags.since) {
+        traces = traces.filter((t) => t.mtime >= flags.since!);
+      }
 
-        if (flags.since) {
-          traces = traces.filter((t) => t.mtime >= flags.since!);
-        }
-
-        for (const t of traces) {
-          result.push({
-            agent: displayName ?? agentId,
-            sessionId,
-            planId: t.planId,
-            path: t.path,
-            size: t.size,
-            mtime: t.mtime.toISOString(),
-          });
-        }
+      for (const t of traces) {
+        result.push({
+          agent: displayName,
+          sessionId,
+          planId: t.planId,
+          path: t.path,
+          size: t.size,
+          mtime: t.mtime.toISOString(),
+        });
       }
     }
 

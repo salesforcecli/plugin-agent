@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { unlink, readdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { unlink } from 'node:fs/promises';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
-import { Messages, SfError, type SfProject } from '@salesforce/core';
-import { listCachedPreviewSessions, listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
+import { Messages, SfError } from '@salesforce/core';
+import { listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
+import { listAllAgentSessions } from '../../../agentSessionScanner.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.trace.delete');
@@ -39,45 +39,6 @@ const UNIT_MS: Record<string, number> = {
   week: 604_800_000,
   weeks: 604_800_000,
 };
-
-type AgentSession = { agentId: string; displayName: string; sessionId: string };
-
-async function listAllAgentSessions(project: SfProject): Promise<AgentSession[]> {
-  // Active sessions (have session-meta.json marker)
-  const cached = await listCachedPreviewSessions(project);
-  const active: AgentSession[] = cached.flatMap(({ agentId, displayName, sessions }) =>
-    sessions.map(({ sessionId }) => ({ agentId, displayName: displayName ?? agentId, sessionId }))
-  );
-
-  // Build a set of already-known sessionIds so we don't double-count
-  const seen = new Set(active.map((s) => s.sessionId));
-
-  // Ended sessions: trace dirs still exist on disk but are removed from the index
-  const agentsDir = join(project.getPath(), '.sfdx', 'agents');
-  const ended: AgentSession[] = [];
-  try {
-    const agentDirs = await readdir(agentsDir, { withFileTypes: true });
-    for (const agentEnt of agentDirs) {
-      if (!agentEnt.isDirectory()) continue;
-      const sessionsDir = join(agentsDir, agentEnt.name, 'sessions');
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
-        for (const sessEnt of sessionDirs) {
-          if (!sessEnt.isDirectory() || seen.has(sessEnt.name)) continue;
-          ended.push({ agentId: agentEnt.name, displayName: agentEnt.name, sessionId: sessEnt.name });
-          seen.add(sessEnt.name);
-        }
-      } catch {
-        // no sessions dir
-      }
-    }
-  } catch {
-    // no .sfdx/agents dir yet
-  }
-
-  return [...active, ...ended];
-}
 
 export type AgentTraceDeleteResult = Array<{
   agent: string;

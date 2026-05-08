@@ -25,10 +25,8 @@ import { SfProject } from '@salesforce/core';
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
-// RECENT_MTIME: ~23 days ago from 2026-04-30
-// OLD_MTIME:    ~60 days ago from 2026-04-30
-const RECENT_MTIME = new Date('2026-04-07T17:00:00.000Z');
-const OLD_MTIME = new Date('2026-03-01T00:00:00.000Z');
+const RECENT_MTIME = new Date(Date.now() - 7 * 86_400_000);
+const OLD_MTIME = new Date(Date.now() - 60 * 86_400_000);
 
 const MOCK_TRACES_AGENT_A = [
   { planId: 'plan-1', path: '/sfdx/agents/AgentA/sessions/sess-1/traces/plan-1.json', size: 1000, mtime: RECENT_MTIME },
@@ -51,21 +49,27 @@ const MOCK_CACHED_SESSIONS = [
   },
 ];
 
+const MOCK_ALL_SESSIONS = MOCK_CACHED_SESSIONS.flatMap(({ agentId, displayName, sessions }) =>
+  sessions.map(({ sessionId }) => ({ agentId, displayName, sessionId }))
+);
+
 describe('agent trace list', () => {
   const $$ = new TestContext();
-  let listCachedPreviewSessionsStub: sinon.SinonStub;
+  let listAllAgentSessionsStub: sinon.SinonStub;
   let listSessionTracesStub: sinon.SinonStub;
   let AgentTraceList: any;
 
   beforeEach(async () => {
-    listCachedPreviewSessionsStub = $$.SANDBOX.stub().resolves(MOCK_CACHED_SESSIONS);
+    listAllAgentSessionsStub = $$.SANDBOX.stub().resolves(MOCK_ALL_SESSIONS);
     listSessionTracesStub = $$.SANDBOX.stub();
     listSessionTracesStub.withArgs('AgentA', 'sess-1').resolves(MOCK_TRACES_AGENT_A);
     listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves(MOCK_TRACES_AGENT_B);
 
     const mod = await esmock('../../../../src/commands/agent/trace/list.js', {
+      '../../../../src/agentSessionScanner.js': {
+        listAllAgentSessions: listAllAgentSessionsStub,
+      },
       '@salesforce/agents': {
-        listCachedPreviewSessions: listCachedPreviewSessionsStub,
         listSessionTraces: listSessionTracesStub,
       },
     });
@@ -102,7 +106,7 @@ describe('agent trace list', () => {
     });
 
     it('returns empty when no sessions exist', async () => {
-      listCachedPreviewSessionsStub.resolves([]);
+      listAllAgentSessionsStub.resolves([]);
       const result = await AgentTraceList.run([]);
       expect(result).to.deep.equal([]);
     });

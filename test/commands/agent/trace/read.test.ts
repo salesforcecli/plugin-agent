@@ -38,6 +38,10 @@ const MOCK_CACHED_SESSIONS = [
   },
 ];
 
+const MOCK_ALL_SESSIONS = MOCK_CACHED_SESSIONS.flatMap(({ agentId, displayName, sessions }) =>
+  sessions.map(({ sessionId }) => ({ agentId, displayName, sessionId }))
+);
+
 const MOCK_TURN_INDEX = {
   version: '1',
   sessionId: SESSION_ID,
@@ -176,14 +180,14 @@ const MOCK_TRACE_2 = {
 
 describe('agent trace read', () => {
   const $$ = new TestContext();
-  let listCachedPreviewSessionsStub: sinon.SinonStub;
+  let listAllAgentSessionsStub: sinon.SinonStub;
   let listSessionTracesStub: sinon.SinonStub;
   let readSessionTraceStub: sinon.SinonStub;
   let readTurnIndexStub: sinon.SinonStub;
   let AgentTraceRead: any;
 
   beforeEach(async () => {
-    listCachedPreviewSessionsStub = $$.SANDBOX.stub().resolves(MOCK_CACHED_SESSIONS);
+    listAllAgentSessionsStub = $$.SANDBOX.stub().resolves(MOCK_ALL_SESSIONS);
     listSessionTracesStub = $$.SANDBOX.stub().resolves([]);
     readTurnIndexStub = $$.SANDBOX.stub().resolves(MOCK_TURN_INDEX);
     readSessionTraceStub = $$.SANDBOX.stub();
@@ -191,8 +195,10 @@ describe('agent trace read', () => {
     readSessionTraceStub.withArgs(AGENT_ID, SESSION_ID, PLAN_ID_2).resolves(MOCK_TRACE_2);
 
     const mod = await esmock('../../../../src/commands/agent/trace/read.js', {
+      '../../../../src/agentSessionScanner.js': {
+        listAllAgentSessions: listAllAgentSessionsStub,
+      },
       '@salesforce/agents': {
-        listCachedPreviewSessions: listCachedPreviewSessionsStub,
         listSessionTraces: listSessionTracesStub,
         readSessionTrace: readSessionTraceStub,
         readTurnIndex: readTurnIndexStub,
@@ -405,7 +411,7 @@ describe('agent trace read', () => {
 
   describe('validation and error handling', () => {
     it('throws when session is not found', async () => {
-      listCachedPreviewSessionsStub.resolves([]);
+      listAllAgentSessionsStub.resolves([]);
       try {
         await AgentTraceRead.run(['--session-id', 'no-such-session']);
         expect.fail('Should have thrown');

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import { readdir, access } from 'node:fs/promises';
-import { join } from 'node:path';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import {
-  listCachedPreviewSessions,
   listSessionTraces,
   readSessionTrace,
   readTurnIndex,
@@ -27,6 +24,7 @@ import {
   type PlanStep,
   type FunctionStep,
 } from '@salesforce/agents';
+import { listAllAgentSessions } from '../../../agentSessionScanner.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.trace.read');
@@ -311,32 +309,12 @@ export default class AgentTraceRead extends SfCommand<AgentTraceReadResult> {
   }
 
   private async resolveAgentId(sessionId: string): Promise<string> {
-    // First check the active-session cache (fast path)
-    const cachedAgents = await listCachedPreviewSessions(this.project!);
-    const entry = cachedAgents.find((a) => a.sessions.some((s) => s.sessionId === sessionId));
-    if (entry) return entry.agentId;
-
-    // Sessions are removed from the cache when ended via `agent preview end`, but their
-    // trace files remain on disk. Scan .sfdx/agents/<agentId>/sessions/<sessionId>/ directly.
-    const agentsDir = join(this.project!.getPath(), '.sfdx', 'agents');
-    try {
-      const agentDirs = await readdir(agentsDir, { withFileTypes: true });
-      for (const ent of agentDirs) {
-        if (!ent.isDirectory()) continue;
-        const sessionPath = join(agentsDir, ent.name, 'sessions', sessionId);
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          await access(sessionPath);
-          return ent.name;
-        } catch {
-          // not found under this agent
-        }
-      }
-    } catch {
-      // .sfdx/agents doesn't exist yet
+    const allSessions = await listAllAgentSessions(this.project!);
+    const entry = allSessions.find((s) => s.sessionId === sessionId);
+    if (!entry) {
+      throw new SfError(messages.getMessage('error.sessionNotFound', [sessionId]), 'SessionNotFound');
     }
-
-    throw new SfError(messages.getMessage('error.sessionNotFound', [sessionId]), 'SessionNotFound');
+    return entry.agentId;
   }
 
   private formatOutput(
