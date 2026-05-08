@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/plugin-agent",
   "description": "Commands to interact with Salesforce agents",
-  "version": "1.34.0",
+  "version": "1.37.0",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "enableO11y": true,
@@ -12,11 +12,11 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.36",
-    "@salesforce/agents": "^1.2.0",
+    "@salesforce/agents": "^1.6.0",
     "@salesforce/core": "^8.28.3",
     "@salesforce/kit": "^3.2.6",
     "@salesforce/sf-plugins-core": "^12.2.6",
-    "@salesforce/source-deploy-retrieve": "^12.32.8",
+    "@salesforce/source-deploy-retrieve": "^12.35.3",
     "@salesforce/types": "^1.7.1",
     "ansis": "^3.3.2",
     "fast-xml-parser": "^5.7.1",
@@ -25,7 +25,7 @@
     "ink-text-input": "^6.0.0",
     "inquirer-autocomplete-standalone": "^0.8.1",
     "react": "^18.3.1",
-    "yaml": "^2.8.3"
+    "yaml": "^2.8.4"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.3.13",

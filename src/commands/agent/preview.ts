@@ -22,6 +22,7 @@ import { Agent, AgentSource, PreviewableAgent, ProductionAgent, ScriptAgent } fr
 import { select } from '@inquirer/prompts';
 import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
+import { loadAgentJson } from '../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview');
@@ -69,6 +70,12 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.use-live-actions.summary'),
       default: false,
     }),
+    'agent-json': Flags.file({
+      summary: messages.getMessage('flags.agent-json.summary'),
+      hidden: true,
+      exists: true,
+      dependsOn: ['authoring-bundle'],
+    }),
   };
 
   public async run(): Promise<AgentPreviewResult> {
@@ -81,12 +88,20 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
     const { 'api-name': apiNameOrId, 'use-live-actions': useLiveActions, 'authoring-bundle': aabName } = flags;
     const conn = flags['target-org'].getConnection(flags['api-version']);
 
+    const preloadedAgentJson = await loadAgentJson(flags['agent-json']);
+
     let selectedAgent: ScriptAgent | ProductionAgent;
 
     if (aabName) {
       // user specified --authoring-bundle, use the API name directly
-      selectedAgent = await Agent.init({ connection: conn, project: this.project!, aabName });
-      selectedAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+      const scriptAgent = await Agent.init({
+        connection: conn,
+        project: this.project!,
+        aabName,
+        agentJson: preloadedAgentJson,
+      });
+      scriptAgent.preview.setMockMode(flags['use-live-actions'] ? 'Live Test' : 'Mock');
+      selectedAgent = scriptAgent;
     } else if (apiNameOrId) {
       selectedAgent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId });
     } else {

@@ -16,6 +16,8 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
 
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -74,6 +76,109 @@ describe('agent preview start', () => {
 
   afterEach(() => {
     $$.restore();
+  });
+
+  describe('--agent-json flag', () => {
+    const mockAgentJson = {
+      schemaVersion: '1.0',
+      globalConfiguration: {
+        developerName: 'TestAgent',
+        label: 'Test Agent',
+        description: '',
+        enableEnhancedEventLogs: false,
+        agentType: 'AgentforceServiceAgent',
+        templateName: '',
+        defaultAgentUser: 'test@user.com',
+        defaultOutboundRouting: '',
+        contextVariables: [],
+      },
+      agentVersion: {
+        developerName: null,
+        plannerType: 'ReAct',
+        systemMessages: [],
+        modalityParameters: { voice: {}, language: {} },
+        additionalParameters: false,
+        company: 'Test',
+        role: 'Assistant',
+        stateVariables: [],
+        initialNode: 'start',
+        nodes: [],
+        knowledgeDefinitions: null,
+      },
+    };
+    let agentJsonInitStub: sinon.SinonStub;
+    let AgentPreviewStartWithFileFlag: any;
+    let tmpDir: string;
+
+    beforeEach(async () => {
+      tmpDir = mkdtempSync(join(tmpdir(), 'agent-json-test-'));
+
+      const mockPreview = {
+        setMockMode: $$.SANDBOX.stub(),
+        start: $$.SANDBOX.stub().resolves({ sessionId: 'test-session-id' }),
+      };
+      class MockScriptAgent {
+        public preview = mockPreview;
+        public name = 'TestAgent';
+      }
+      agentJsonInitStub = $$.SANDBOX.stub().resolves(new MockScriptAgent());
+
+      const mod = await esmock('../../../../src/commands/agent/preview/start.js', {
+        '@salesforce/agents': {
+          Agent: { init: agentJsonInitStub },
+          ScriptAgent: MockScriptAgent,
+          ProductionAgent: class ProductionAgent {},
+        },
+        '../../../../src/previewSessionStore.js': {
+          createCache: $$.SANDBOX.stub().resolves(),
+        },
+      });
+      AgentPreviewStartWithFileFlag = mod.default;
+    });
+
+    afterEach(() => {
+      rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('reads the file and passes parsed agentJson to Agent.init', async () => {
+      const agentJsonPath = join(tmpDir, 'agent.json');
+      writeFileSync(agentJsonPath, JSON.stringify(mockAgentJson));
+
+      await AgentPreviewStartWithFileFlag.run([
+        '--authoring-bundle',
+        'MyAgent',
+        '--simulate-actions',
+        '--target-org',
+        'test@org.com',
+        '--agent-json',
+        agentJsonPath,
+      ]);
+
+      expect(agentJsonInitStub.calledOnce).to.be.true;
+      const initArg = agentJsonInitStub.firstCall.args[0];
+      expect(initArg).to.have.property('agentJson');
+      expect(initArg.agentJson).to.deep.equal(mockAgentJson);
+    });
+
+    it('throws AgentJsonReadError when file contains invalid JSON', async () => {
+      const badJsonPath = join(tmpDir, 'bad.json');
+      writeFileSync(badJsonPath, 'not-valid-json{{{');
+
+      try {
+        await AgentPreviewStartWithFileFlag.run([
+          '--authoring-bundle',
+          'MyAgent',
+          '--simulate-actions',
+          '--target-org',
+          'test@org.com',
+          '--agent-json',
+          badJsonPath,
+        ]);
+        expect.fail('Should have thrown');
+      } catch (error: unknown) {
+        expect((error as Error).message).to.include('Failed to read or parse --agent-json file');
+      }
+    });
   });
 
   describe('setMockMode', () => {
