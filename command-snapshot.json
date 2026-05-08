@@ -272,6 +272,14 @@
   },
   {
     "alias": [],
+    "command": "agent:trace:read",
+    "flagAliases": [],
+    "flagChars": ["d", "f", "s", "t"],
+    "flags": ["dimension", "flags-dir", "format", "json", "session-id", "turn"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:validate:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o"],

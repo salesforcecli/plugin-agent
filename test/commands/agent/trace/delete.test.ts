@@ -25,11 +25,11 @@ import { SfProject } from '@salesforce/core';
 
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
-// Dates well in the past so --older-than arithmetic is predictable without fake timers.
-// RECENT_MTIME: ~23 days ago from 2026-04-30 — caught by 30d but not 7d
-// OLD_MTIME:    ~60 days ago from 2026-04-30 — caught by both 7d and 30d
-const RECENT_MTIME = new Date('2026-04-07T17:00:00.000Z');
-const OLD_MTIME = new Date('2026-03-01T00:00:00.000Z');
+// Dates relative to now so --older-than arithmetic stays correct over time.
+// RECENT_MTIME: 7 days ago — older than 1h but newer than 28d/30d
+// OLD_MTIME:    60 days ago — older than all thresholds used in tests
+const RECENT_MTIME = new Date(Date.now() - 7 * 86_400_000);
+const OLD_MTIME = new Date(Date.now() - 60 * 86_400_000);
 
 const MOCK_TRACES_AGENT_A = [
   { planId: 'plan-1', path: '/sfdx/agents/AgentA/sessions/sess-1/traces/plan-1.json', size: 1000, mtime: RECENT_MTIME },
@@ -176,16 +176,14 @@ describe('agent trace delete', () => {
 
     it('deletes nothing when all traces are newer than the duration', async () => {
       const futureMtime = new Date(Date.now() + 86_400_000);
-      listSessionTracesStub
-        .withArgs('AgentA', 'sess-1')
-        .resolves([
-          {
-            planId: 'plan-1',
-            path: '/sfdx/agents/AgentA/sessions/sess-1/traces/plan-1.json',
-            size: 1000,
-            mtime: futureMtime,
-          },
-        ]);
+      listSessionTracesStub.withArgs('AgentA', 'sess-1').resolves([
+        {
+          planId: 'plan-1',
+          path: '/sfdx/agents/AgentA/sessions/sess-1/traces/plan-1.json',
+          size: 1000,
+          mtime: futureMtime,
+        },
+      ]);
       listSessionTracesStub.withArgs('AgentB', 'sess-2').resolves([]);
       const result = await AgentTraceDelete.run(['--older-than', '1d', '--no-prompt']);
       expect(result).to.deep.equal([]);

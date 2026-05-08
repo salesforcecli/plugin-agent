@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { unlink } from 'node:fs/promises';
+import { unlink, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { Messages, SfError, type SfProject } from '@salesforce/core';
 import { listCachedPreviewSessions, listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
 
@@ -38,6 +39,45 @@ const UNIT_MS: Record<string, number> = {
   week: 604_800_000,
   weeks: 604_800_000,
 };
+
+type AgentSession = { agentId: string; displayName: string; sessionId: string };
+
+async function listAllAgentSessions(project: SfProject): Promise<AgentSession[]> {
+  // Active sessions (have session-meta.json marker)
+  const cached = await listCachedPreviewSessions(project);
+  const active: AgentSession[] = cached.flatMap(({ agentId, displayName, sessions }) =>
+    sessions.map(({ sessionId }) => ({ agentId, displayName: displayName ?? agentId, sessionId }))
+  );
+
+  // Build a set of already-known sessionIds so we don't double-count
+  const seen = new Set(active.map((s) => s.sessionId));
+
+  // Ended sessions: trace dirs still exist on disk but are removed from the index
+  const agentsDir = join(project.getPath(), '.sfdx', 'agents');
+  const ended: AgentSession[] = [];
+  try {
+    const agentDirs = await readdir(agentsDir, { withFileTypes: true });
+    for (const agentEnt of agentDirs) {
+      if (!agentEnt.isDirectory()) continue;
+      const sessionsDir = join(agentsDir, agentEnt.name, 'sessions');
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const sessionDirs = await readdir(sessionsDir, { withFileTypes: true });
+        for (const sessEnt of sessionDirs) {
+          if (!sessEnt.isDirectory() || seen.has(sessEnt.name)) continue;
+          ended.push({ agentId: agentEnt.name, displayName: agentEnt.name, sessionId: sessEnt.name });
+          seen.add(sessEnt.name);
+        }
+      } catch {
+        // no sessions dir
+      }
+    }
+  } catch {
+    // no .sfdx/agents dir yet
+  }
+
+  return [...active, ...ended];
+}
 
 export type AgentTraceDeleteResult = Array<{
   agent: string;
@@ -85,25 +125,22 @@ export default class AgentTraceDelete extends SfCommand<AgentTraceDeleteResult> 
     const { flags } = await this.parse(AgentTraceDelete);
 
     const agentFilter = flags.agent?.toLowerCase();
-    const cachedAgents = await listCachedPreviewSessions(this.project!);
+    const allSessions = await listAllAgentSessions(this.project!);
 
     const candidates: AgentTraceDeleteResult = [];
-    for (const { agentId, displayName, sessions } of cachedAgents) {
-      if (agentFilter && !displayName?.toLowerCase().includes(agentFilter)) continue;
+    for (const { agentId, displayName, sessionId } of allSessions) {
+      if (agentFilter && !displayName.toLowerCase().includes(agentFilter)) continue;
+      if (flags['session-id'] && sessionId !== flags['session-id']) continue;
 
-      for (const { sessionId } of sessions) {
-        if (flags['session-id'] && sessionId !== flags['session-id']) continue;
+      // eslint-disable-next-line no-await-in-loop
+      let traces: TraceFileInfo[] = await listSessionTraces(agentId, sessionId);
 
-        // eslint-disable-next-line no-await-in-loop
-        let traces: TraceFileInfo[] = await listSessionTraces(agentId, sessionId);
+      if (flags['older-than']) {
+        traces = traces.filter((t) => t.mtime < flags['older-than']!);
+      }
 
-        if (flags['older-than']) {
-          traces = traces.filter((t) => t.mtime < flags['older-than']!);
-        }
-
-        for (const t of traces) {
-          candidates.push({ agent: displayName ?? agentId, sessionId, planId: t.planId, path: t.path });
-        }
+      for (const t of traces) {
+        candidates.push({ agent: displayName, sessionId, planId: t.planId, path: t.path });
       }
     }
 
