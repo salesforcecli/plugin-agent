@@ -30,6 +30,10 @@ End all active preview sessions. Combine with --api-name or --authoring-bundle t
 
 Don't prompt for confirmation before ending sessions. Has an effect only when used with --all.
 
+# error.exactlyOneRequired
+
+Exactly one of the following must be provided: --api-name, --authoring-bundle
+
 # error.noSession
 
 No agent preview session found. Run "sf agent preview start" to start a new agent preview session.

@@ -106,12 +106,7 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
 
     // Without --all, exactly one of --api-name or --authoring-bundle is required.
     if (!flags['api-name'] && !flags['authoring-bundle']) {
-      throw new SfError(
-        'Exactly one of the following must be provided: --api-name, --authoring-bundle',
-        'ExactlyOneRequired',
-        [],
-        2
-      );
+      throw new SfError(messages.getMessage('error.exactlyOneRequired'), 'ExactlyOneRequired', [], 2);
     }
 
     const agent = await this.initAgent(flags, conn);
@@ -341,6 +336,8 @@ async function endSessionsForAgent(
   const ended: EndedSession[] = [];
   const failed: Array<{ task: SessionTask; error: string }> = [];
 
+  // Sessions are ended serially because setSessionId mutates shared state on the agent object.
+  // Parallelising would introduce a race condition where concurrent calls overwrite each other's sessionId.
   for (const task of sessionsToEnd) {
     const { sessionId } = task;
     try {
