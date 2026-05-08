@@ -37,24 +37,24 @@ describe('agent trace read', function () {
     const targetOrg = getUsername();
     const startResult = execCmd<AgentPreviewStartResult>(
       `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`,
-      { ensureExitCode: 0 }
+      { ensureExitCode: 0, cwd: session.project.dir }
     ).jsonOutput?.result;
     expect(startResult?.sessionId).to.be.a('string');
     sessionId = startResult!.sessionId;
 
     execCmd<AgentPreviewSendResult>(
       `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "What can you help me with?" --target-org ${targetOrg} --json`,
-      { ensureExitCode: 0 }
+      { ensureExitCode: 0, cwd: session.project.dir }
     );
 
     execCmd<AgentPreviewSendResult>(
       `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "Tell me more" --target-org ${targetOrg} --json`,
-      { ensureExitCode: 0 }
+      { ensureExitCode: 0, cwd: session.project.dir }
     );
 
     execCmd<AgentPreviewEndResult>(
       `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
-      { ensureExitCode: 0 }
+      { ensureExitCode: 0, cwd: session.project.dir }
     );
   });
 
