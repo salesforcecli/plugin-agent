@@ -20,6 +20,14 @@ When enabled, includes detailed generated data (such as invoked actions) in the 
 
 The generated data is in JSON format and includes the Apex classes or Flows that were invoked, the Salesforce objects that were touched, and so on. Use the JSON structure of this information to build the test case JSONPath expression when using custom evaluations.
 
+# flags.test-runner.summary
+
+Explicitly specify which test runner to use (agentforce-studio or testing-center).
+
+# flags.test-runner.description
+
+By default, the command automatically detects which test runner to use based on the test definition metadata type in your org. Use this flag to explicitly specify the runner type. 'agentforce-studio' uses AiTestingDefinition metadata. 'testing-center' uses AiEvaluationDefinition metadata.
+
 # error.invalidAgentType
 
 agentType must be either "customer" or "internal". Found: [%s]

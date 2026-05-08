@@ -92,6 +92,7 @@
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "x"],
     "flags": [
+      "agent-json",
       "apex-debug",
       "api-name",
       "api-version",
@@ -142,6 +143,7 @@
     "flagAliases": [],
     "flagChars": ["n", "o"],
     "flags": [
+      "agent-json",
       "api-name",
       "api-version",
       "authoring-bundle",
@@ -157,8 +159,8 @@
     "alias": [],
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
-    "flagChars": ["n", "o"],
-    "flags": ["api-name", "api-version", "flags-dir", "json", "skip-retrieve", "target-org"],
+    "flagChars": ["n", "o", "v"],
+    "flags": ["api-name", "api-version", "concise", "flags-dir", "json", "skip-retrieve", "target-org", "verbose"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -182,7 +184,17 @@
     "command": "agent:test:results",
     "flagAliases": [],
     "flagChars": ["d", "i", "o"],
-    "flags": ["api-version", "flags-dir", "job-id", "json", "output-dir", "result-format", "target-org", "verbose"],
+    "flags": [
+      "api-version",
+      "flags-dir",
+      "job-id",
+      "json",
+      "output-dir",
+      "result-format",
+      "target-org",
+      "test-runner",
+      "verbose"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -198,6 +210,7 @@
       "output-dir",
       "result-format",
       "target-org",
+      "test-runner",
       "use-most-recent",
       "verbose",
       "wait"
@@ -217,6 +230,7 @@
       "output-dir",
       "result-format",
       "target-org",
+      "test-runner",
       "verbose",
       "wait"
     ],
@@ -226,7 +240,7 @@
     "alias": [],
     "command": "agent:test:run-eval",
     "flagAliases": [],
-    "flagChars": ["n", "o", "s", "w"],
+    "flagChars": ["n", "o", "s"],
     "flags": [
       "api-name",
       "api-version",
@@ -236,8 +250,7 @@
       "no-normalize",
       "result-format",
       "spec",
-      "target-org",
-      "wait"
+      "target-org"
     ],
     "plugin": "@salesforce/plugin-agent"
   },

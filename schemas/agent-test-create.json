@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["path", "contents"],
+      "required": [
+        "path",
+        "contents"
+      ],
       "additionalProperties": false
     }
   }

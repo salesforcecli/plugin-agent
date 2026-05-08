@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["genAiPlannerBundlePath", "botTemplatePath"],
+      "required": [
+        "genAiPlannerBundlePath",
+        "botTemplatePath"
+      ],
       "additionalProperties": false
     }
   }

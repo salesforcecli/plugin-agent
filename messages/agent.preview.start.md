@@ -23,6 +23,10 @@ API name of the activated published agent you want to preview.
 
 API name of the authoring bundle metadata component that contains the agent's Agent Script file.
 
+# flags.agent-json.summary
+
+Path to a pre-compiled AgentJSON file to use instead of compiling the Agent Script file. Intended for internal use and testing.
+
 # flags.use-live-actions.summary
 
 Execute real actions in the org (Apex classes, flows, etc.). Required with --authoring-bundle.
