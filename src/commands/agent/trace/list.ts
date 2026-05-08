@@ -19,11 +19,11 @@ import { Messages, SfError } from '@salesforce/core';
 import { listCachedPreviewSessions, listSessionTraces, type TraceFileInfo } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.trace.list');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.trace.list');
 
 const ISO_8601 = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z)?$/;
 
-export type AgentPreviewTraceListResult = Array<{
+export type AgentTraceListResult = Array<{
   agent: string;
   sessionId: string;
   planId: string;
@@ -32,7 +32,7 @@ export type AgentPreviewTraceListResult = Array<{
   mtime: string;
 }>;
 
-export default class AgentPreviewTraceList extends SfCommand<AgentPreviewTraceListResult> {
+export default class AgentTraceList extends SfCommand<AgentTraceListResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -46,15 +46,13 @@ export default class AgentPreviewTraceList extends SfCommand<AgentPreviewTraceLi
     'session-id': Flags.string({
       summary: messages.getMessage('flags.session-id.summary'),
     }),
-    'api-name': Flags.string({
-      summary: messages.getMessage('flags.api-name.summary'),
-      char: 'n',
-    }),
-    'authoring-bundle': Flags.string({
-      summary: messages.getMessage('flags.authoring-bundle.summary'),
+    agent: Flags.string({
+      summary: messages.getMessage('flags.agent.summary'),
+      char: 'a',
     }),
     since: Flags.custom<Date>({
       summary: messages.getMessage('flags.since.summary'),
+      description: messages.getMessage('flags.since.description'),
       // eslint-disable-next-line @typescript-eslint/require-await
       parse: async (raw): Promise<Date> => {
         if (!ISO_8601.test(raw)) {
@@ -69,14 +67,14 @@ export default class AgentPreviewTraceList extends SfCommand<AgentPreviewTraceLi
     })(),
   };
 
-  public async run(): Promise<AgentPreviewTraceListResult> {
-    const { flags } = await this.parse(AgentPreviewTraceList);
+  public async run(): Promise<AgentTraceListResult> {
+    const { flags } = await this.parse(AgentTraceList);
 
-    const agentNameFilter = (flags['authoring-bundle'] ?? flags['api-name'])?.toLowerCase();
+    const agentNameFilter = flags.agent?.toLowerCase();
 
     const cachedAgents = await listCachedPreviewSessions(this.project!);
 
-    const result: AgentPreviewTraceListResult = [];
+    const result: AgentTraceListResult = [];
 
     for (const { agentId, displayName, sessions } of cachedAgents) {
       if (agentNameFilter && !displayName?.toLowerCase().includes(agentNameFilter)) continue;
