@@ -16,10 +16,23 @@
 import { join } from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { AgentTestResultsResponse, convertTestResultsToFormat, humanFriendlyName, metric } from '@salesforce/agents';
+import {
+  AgentTestResultsResponse,
+  AgentforceStudioTestResultsResponse,
+  convertTestResultsToFormat,
+  humanFriendlyName,
+  metric,
+} from '@salesforce/agents';
+import { XMLBuilder } from 'fast-xml-parser';
 import { Ux } from '@salesforce/sf-plugins-core/Ux';
 import { ux as ocux } from '@oclif/core';
 import ansis from 'ansis';
+
+type TestResultsResponse = AgentTestResultsResponse | AgentforceStudioTestResultsResponse;
+
+function isLegacyResponse(response: TestResultsResponse): response is AgentTestResultsResponse {
+  return 'subjectName' in response;
+}
 
 async function writeFileToDir(outputDir: string, fileName: string, content: string): Promise<void> {
   // if directory doesn't exist, create it
@@ -55,11 +68,6 @@ export function readableTime(time: number, decimalPlaces = 2): string {
     return '< 1s';
   }
 
-  // if time < 1000ms, return time in ms
-  if (time < 1000) {
-    return `${time}ms`;
-  }
-
   // if time < 60s, return time in seconds
   if (time < 60_000) {
     return `${truncate(time / 1000, decimalPlaces)}s`;
@@ -76,6 +84,148 @@ export function readableTime(time: number, decimalPlaces = 2): string {
   const hours = Math.floor(time / 3_600_000);
   const minutes = Math.floor((time % 3_600_000) / 60_000);
   return `${hours}h ${minutes}m`;
+}
+
+type ParsedScorerResponse = {
+  status?: string;
+  score?: number;
+  reasoning?: string;
+  actualValue?: string;
+  expectedValue?: string;
+};
+
+function parseScorerResponse(raw: string): ParsedScorerResponse {
+  try {
+    return JSON.parse(raw) as ParsedScorerResponse;
+  } catch {
+    return {};
+  }
+}
+
+function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
+  const ux = new Ux();
+  const tables: string[] = [];
+
+  for (const testCase of results.testCases) {
+    let userInput = '';
+    try {
+      const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
+      userInput = parsed.userInput ?? '';
+    } catch {
+      // ignore
+    }
+
+    const scorerRows = testCase.testScorerResults.map((scorer) => {
+      const parsed = parseScorerResponse(scorer.scorerResponse);
+      return {
+        scorer: scorer.scorerName,
+        result: parsed.status === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+        expected: parsed.expectedValue ?? '',
+        actual: parsed.actualValue ?? '',
+        reasoning: parsed.reasoning ?? '',
+      };
+    });
+
+    tables.push(
+      ux.makeTable({
+        title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('User Input')}: ${userInput}`,
+        overflow: 'wrap',
+        columns: [
+          { key: 'scorer', name: 'Scorer' },
+          { key: 'result', name: 'Result' },
+          { key: 'expected', name: 'Expected', width: '25%' },
+          { key: 'actual', name: 'Actual', width: '25%' },
+          { key: 'reasoning', name: 'Reasoning', width: '35%' },
+        ],
+        data: scorerRows,
+        width: '100%',
+      })
+    );
+    tables.push('\n');
+  }
+
+  const totalCases = results.testCases.length;
+  const passCases = results.testCases.filter((tc) =>
+    tc.testScorerResults.every((s) => parseScorerResponse(s.scorerResponse).status === 'PASS')
+  ).length;
+
+  const summary = makeSimpleTable(
+    {
+      Status: results.status,
+      'Total Test Cases': String(totalCases),
+      'Passing Test Cases': String(passCases),
+      'Failing Test Cases': String(totalCases - passCases),
+    },
+    ansis.bold.blue('Test Results')
+  );
+
+  return tables.join('') + `\n${summary}\n`;
+}
+
+function junitFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
+  const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
+  const testCount = results.testCases.length;
+  const failureCount = results.testCases.filter((tc) =>
+    tc.testScorerResults.some((s) => parseScorerResponse(s.scorerResponse).status !== 'PASS')
+  ).length;
+
+  const suites = builder.build({
+    testsuites: {
+      $name: 'AgentforceStudioTest',
+      $tests: testCount,
+      $failures: failureCount,
+      property: [{ $name: 'status', $value: results.status }],
+      testsuite: results.testCases.map((tc) => ({
+        $name: tc.testNumber,
+        $assertions: tc.testScorerResults.length,
+        failure: tc.testScorerResults
+          .map((s) => {
+            const parsed = parseScorerResponse(s.scorerResponse);
+            if (parsed.status !== 'PASS') {
+              return { $message: parsed.reasoning ?? 'Unknown error', $name: s.scorerName };
+            }
+          })
+          .filter(Boolean),
+      })),
+    },
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${suites}`.trim();
+}
+
+function tapFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
+  const lines: string[] = [];
+  let expectationCount = 0;
+
+  for (const tc of results.testCases) {
+    for (const scorer of tc.testScorerResults) {
+      const parsed = parseScorerResponse(scorer.scorerResponse);
+      const pass = parsed.status === 'PASS';
+      expectationCount++;
+      lines.push(`${pass ? 'ok' : 'not ok'} ${expectationCount} ${tc.testNumber}.${scorer.scorerName}`);
+      if (!pass) {
+        lines.push('  ---');
+        lines.push(`  message: ${parsed.reasoning ?? 'Unknown error'}`);
+        lines.push(`  scorer: ${scorer.scorerName}`);
+        lines.push(`  actual: ${parsed.actualValue ?? ''}`);
+        lines.push(`  expected: ${parsed.expectedValue ?? ''}`);
+        lines.push('  ...');
+      }
+    }
+  }
+
+  return `TAP version 13\n1..${expectationCount}\n${lines.join('\n')}`;
+}
+
+function convertAgentforceStudioTestResultsToFormat(results: AgentforceStudioTestResultsResponse, format: 'json' | 'junit' | 'tap'): string {
+  switch (format) {
+    case 'json':
+      return JSON.stringify(results, null, 2);
+    case 'junit':
+      return junitFormatAgentforceStudio(results);
+    case 'tap':
+      return tapFormatAgentforceStudio(results);
+  }
 }
 
 export function humanFormat(results: AgentTestResultsResponse, verbose = false): string {
@@ -227,7 +377,7 @@ export async function handleTestResults({
 }: {
   id: string;
   format: 'human' | 'json' | 'junit' | 'tap';
-  results: AgentTestResultsResponse | undefined;
+  results: TestResultsResponse | undefined;
   jsonEnabled: boolean;
   outputDir?: string;
   verbose?: boolean;
@@ -239,6 +389,26 @@ export async function handleTestResults({
 
   const ux = new Ux({ jsonEnabled });
 
+  if (!isLegacyResponse(results)) {
+    const ngtFormatConfig = {
+      human: { ext: 'txt', label: 'human-readable', get: () => humanFormatAgentforceStudio(results), strip: true },
+      json: { ext: 'json', label: 'JSON', get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'), strip: false },
+      junit: { ext: 'xml', label: 'JUnit', get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'), strip: false },
+      tap: { ext: 'txt', label: 'TAP', get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'), strip: false },
+    } as const;
+    const cfg = ngtFormatConfig[format];
+    const formatted = cfg.get();
+    if (outputDir) {
+      const file = `test-result-${id}.${cfg.ext}`;
+      await writeFileToDir(outputDir, file, cfg.strip ? stripVTControlCharacters(formatted) : formatted);
+      ux.log(`Created ${cfg.label} file at ${join(outputDir, file)}`);
+    } else {
+      ux.log(formatted);
+    }
+    return;
+  }
+
+  // Legacy response formatting
   if (format === 'human') {
     const formatted = humanFormat(results, verbose);
     if (outputDir) {

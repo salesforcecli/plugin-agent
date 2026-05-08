@@ -18,7 +18,7 @@
 
 import { expect } from 'chai';
 import type { TestCase } from '@salesforce/agents';
-import { isYamlTestSpec, parseTestSpec, translateTestCase, translateTestSpec } from '../src/yamlSpecTranslator.js';
+import { isYamlTestSpec, parseTestSpec, translateTestCase, translateTestSpec } from '@salesforce/agents';
 
 describe('yamlSpecTranslator', () => {
   describe('isYamlTestSpec', () => {

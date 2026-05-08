@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["sessionId", "agentApiName"],
+      "required": [
+        "sessionId",
+        "agentApiName"
+      ],
       "additionalProperties": false
     }
   }
