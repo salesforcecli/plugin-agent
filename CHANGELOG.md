@@ -1,3 +1,26 @@
+# [1.38.0](https://github.com/salesforcecli/plugin-agent/compare/1.37.0...1.38.0) (2026-05-08)
+
+### Bug Fixes
+
+- edit the --help ([019d3e2](https://github.com/salesforcecli/plugin-agent/commit/019d3e2b88a627aa21728eb24c83581508054cf6))
+- **nuts:** pass cwd to all preview execCmd calls so session cache is written to the project dir ([1e32f60](https://github.com/salesforcecli/plugin-agent/commit/1e32f6077bce78e11ab7575e68ae0e8b9215a580))
+- regenerate command snapshot after rebase ([2a5a62f](https://github.com/salesforcecli/plugin-agent/commit/2a5a62f623bbafa7eda4778ef5b33afaa34432de))
+- **trace:** extract shared session scanner and fix trace list NUT cwd ([47c3097](https://github.com/salesforcecli/plugin-agent/commit/47c3097c7b27063311c8b3fb8335f419725767ab))
+- **trace:** fall back to trace file order when turn index has no planId ([eb464aa](https://github.com/salesforcecli/plugin-agent/commit/eb464aa9baa6c3cf61542dca7cc18ddb6dd4b9aa))
+- **trace:** scan .sfdx/agents on disk to find ended sessions ([e9c21f9](https://github.com/salesforcecli/plugin-agent/commit/e9c21f9a7a46884218a962c9770996068cf0acb4))
+
+### Features
+
+- add agent preview trace delete command ([bf88cf2](https://github.com/salesforcecli/plugin-agent/commit/bf88cf25446f91c07790ea5134088cccd7845112))
+- add agent preview trace list command ([bc6e507](https://github.com/salesforcecli/plugin-agent/commit/bc6e507a033467056ed42c7e88facbebe15c0262))
+- add agent trace read command ([d14d199](https://github.com/salesforcecli/plugin-agent/commit/d14d199125cb923e2b0208f619c76e74e2b6e5d4))
+- add NUTs for agent trace delete ([64eb2dd](https://github.com/salesforcecli/plugin-agent/commit/64eb2dd4222bbf6bbd769073892a173dbe45eeb3))
+- add NUTs for agent trace list ([a7cccd4](https://github.com/salesforcecli/plugin-agent/commit/a7cccd43da3d80c325e0b19bfd60b9605118b937))
+- add NUTs for agent trace read ([4eca978](https://github.com/salesforcecli/plugin-agent/commit/4eca9784720573f2246098caf0ce53d55cf7924f))
+- add unit tests for agent preview trace list ([f48f0dc](https://github.com/salesforcecli/plugin-agent/commit/f48f0dc3d0b1162a28d03b9149411e4442cb6dda))
+- rename to agent trace delete, replace --api-name/--authoring-bundle with --agent ([dae86e0](https://github.com/salesforcecli/plugin-agent/commit/dae86e0172125499a9e01295a6f8e57b95ef645d))
+- rename to agent trace list, replace --api-name/--authoring-bundle with --agent ([2cfa22f](https://github.com/salesforcecli/plugin-agent/commit/2cfa22fb38c51e2de64ddfd57c813079052a001b))
+
 # [1.37.0](https://github.com/salesforcecli/plugin-agent/compare/1.36.1...1.37.0) (2026-05-07)
 
 ### Bug Fixes

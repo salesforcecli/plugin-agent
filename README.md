@@ -78,6 +78,9 @@ sf plugins
 - [`sf agent test resume`](#sf-agent-test-resume)
 - [`sf agent test run`](#sf-agent-test-run)
 - [`sf agent test run-eval`](#sf-agent-test-run-eval)
+- [`sf agent trace delete`](#sf-agent-trace-delete)
+- [`sf agent trace list`](#sf-agent-trace-list)
+- [`sf agent trace read`](#sf-agent-trace-read)
 - [`sf agent validate authoring-bundle`](#sf-agent-validate-authoring-bundle)
 
 ## `sf agent activate`
@@ -127,7 +130,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --version 2 --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -194,7 +197,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -235,7 +238,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -342,7 +345,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -419,7 +422,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -481,7 +484,7 @@ EXAMPLES
       my-package --source-org my-scratch-org
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -546,7 +549,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -619,7 +622,7 @@ EXAMPLES
     $ sf agent preview --use-live-actions --apex-debug --output-dir transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/preview.ts)_
 
 ## `sf agent preview end`
 
@@ -674,7 +677,7 @@ EXAMPLES
     $ sf agent preview end --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/preview/end.ts)_
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/preview/end.ts)_
 
 ## `sf agent preview send`
 
@@ -732,7 +735,7 @@ EXAMPLES
     $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/preview/send.ts)_
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/preview/send.ts)_
 
 ## `sf agent preview sessions`
 
@@ -765,7 +768,7 @@ EXAMPLES
     $ sf agent preview sessions
 ```
 
-_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/preview/sessions.ts)_
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/preview/sessions.ts)_
 
 ## `sf agent preview start`
 
@@ -830,7 +833,7 @@ EXAMPLES
     $ sf agent preview start --api-name My_Published_Agent
 ```
 
-_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/preview/start.ts)_
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -890,7 +893,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --concise
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -945,7 +948,7 @@ EXAMPLES
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -980,7 +983,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -1056,7 +1059,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -1140,7 +1143,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -1224,7 +1227,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/run.ts)_
 
 ## `sf agent test run-eval`
 
@@ -1297,7 +1300,205 @@ EXAMPLES
   $ echo '{"tests":[...]}' | sf agent test run-eval --spec --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/test/run-eval.ts)_
+_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/test/run-eval.ts)_
+
+## `sf agent trace delete`
+
+Delete agent preview trace files.
+
+```
+USAGE
+  $ sf agent trace delete [--json] [--flags-dir <value>] [-a <value>] [--session-id <value>] [--older-than <value>]
+    [--no-prompt]
+
+FLAGS
+  -a, --agent=<value>       Only delete traces for this agent name (substring match). Matches against the name used when
+                            starting the session, whether that's an authoring bundle or a published agent API name.
+      --no-prompt           Skip the confirmation prompt and delete immediately.
+      --older-than=<value>  Only delete traces older than this duration. Accepts a number followed by a unit: m/minutes,
+                            h/hours, d/days, w/weeks (e.g. 7d, 24h, 2w).
+      --session-id=<value>  Only delete traces from this session ID.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Delete agent preview trace files.
+
+  Deletes trace files recorded during agent preview sessions. By default, shows a preview of what will be deleted and
+  prompts for confirmation. Use --no-prompt to skip confirmation.
+
+  Without filters, deletes all traces for all agents and sessions. Use flags to narrow the scope: filter by agent name
+  (--agent), by session (--session-id), or by age (--older-than).
+
+EXAMPLES
+  Delete all traces for all agents and sessions (with confirmation prompt):
+
+    $ sf agent trace delete
+
+  Delete all traces for a specific agent:
+
+    $ sf agent trace delete --agent My_Agent
+
+  Delete traces from a specific session:
+
+    $ sf agent trace delete --session-id <SESSION_ID>
+
+  Delete traces older than 7 days:
+
+    $ sf agent trace delete --older-than 7d
+
+  Delete traces older than 24 hours for a specific agent, no prompt:
+
+    $ sf agent trace delete --agent My_Agent --older-than 24h --no-prompt
+
+  Delete all traces without confirmation:
+
+    $ sf agent trace delete --no-prompt
+```
+
+_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/trace/delete.ts)_
+
+## `sf agent trace list`
+
+List the trace files that were recorded during all agent preview sessions.
+
+```
+USAGE
+  $ sf agent trace list [--json] [--flags-dir <value>] [--session-id <value>] [-a <value>] [--since <value>]
+
+FLAGS
+  -a, --agent=<value>       Only show traces for this agent name (substring match). Matches against the name used when
+                            starting the session, whether that's an authoring bundle or a published agent API name.
+      --session-id=<value>  Session ID used to filter the list of trace files.
+      --since=<value>       Date used to filter the list of trace files; only those recorded on or after the date are
+                            listed.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List the trace files that were recorded during all agent preview sessions.
+
+  Lists trace files recorded during agent preview sessions. By default, lists all traces for all agents and all of their
+  sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date
+  (--since).
+
+  Each row in the output corresponds to one trace file, which in turn corresponds to one agent session. The Agent column
+  shows the authoring bundle or API name used when starting the session.
+
+EXAMPLES
+  List all traces for all agents and sessions:
+
+    $ sf agent trace list
+
+  List all traces for a specific agent:
+
+    $ sf agent trace list --agent My_Agent
+
+  List traces for a specific session:
+
+    $ sf agent trace list --session-id <SESSION_ID>
+
+  List traces recorded on or after April 20, 2026 (date-only, interpreted as UTC midnight):
+
+    $ sf agent trace list --since 2026-04-20
+
+  List traces recorded on or after a specific UTC time:
+
+    $ sf agent trace list --since 2026-04-20T14:00:00Z
+
+  Filter by agent and date together:
+
+    $ sf agent trace list --agent My_Agent --since 2026-04-20
+
+  Return results as JSON:
+
+    $ sf agent trace list --json
+
+FLAG DESCRIPTIONS
+  --since=<value>  Date used to filter the list of trace files; only those recorded on or after the date are listed.
+
+    Accepts ISO 8601 format: date-only (2026-04-20), date-time (2026-04-20T14:00:00Z), or date-time with milliseconds
+    (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
+```
+
+_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/trace/list.ts)_
+
+## `sf agent trace read`
+
+Read and analyze trace files from an agent preview session.
+
+```
+USAGE
+  $ sf agent trace read -s <value> [--json] [--flags-dir <value>] [-f summary|detail|raw] [-d
+    actions|grounding|routing|errors] [-t <value>]
+
+FLAGS
+  -d, --dimension=<option>  Dimension to drill into when using --format detail. One of: actions, grounding, routing,
+                            errors. Required when --format is detail.
+                            <options: actions|grounding|routing|errors>
+  -f, --format=<option>     [default: summary] Output format: summary (default), detail, or raw. Use detail with
+                            --dimension to drill into a specific aspect of the trace.
+                            <options: summary|detail|raw>
+  -s, --session-id=<value>  (required) Session ID to read traces for.
+  -t, --turn=<value>        Scope output to this conversation turn number.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Read and analyze trace files from an agent preview session.
+
+  Reads trace files recorded during an agent preview session and outputs them in one of three formats.
+
+  **--format summary** (default): A per-turn narrative showing topic routing, actions executed, and the agent's
+  response. Use this to quickly understand what happened in a session.
+
+  **--format detail**: Diagnostic drill-down into a specific dimension (--dimension required). Filters output to only
+  the trace steps relevant to that dimension, minimizing noise.
+
+  **--format raw**: Unprocessed trace JSON. Use this as a fallback when the trace schema has changed or you need to
+  perform custom analysis.
+
+  Available dimensions for --format detail: actions, grounding, routing, errors.
+
+  Use --turn N to scope output to a single conversation turn.
+
+EXAMPLES
+  Show a session summary (all turns):
+
+    $ sf agent trace read --session-id <SESSION_ID>
+
+  Show summary for a single turn:
+
+    $ sf agent trace read --session-id <SESSION_ID> --turn 2
+
+  Drill into action execution across all turns:
+
+    $ sf agent trace read --session-id <SESSION_ID> --format detail --dimension actions
+
+  Drill into routing decisions for a specific turn:
+
+    $ sf agent trace read --session-id <SESSION_ID> --format detail --dimension routing --turn 1
+
+  Show all errors across the session:
+
+    $ sf agent trace read --session-id <SESSION_ID> --format detail --dimension errors
+
+  Output raw trace JSON for custom parsing:
+
+    $ sf agent trace read --session-id <SESSION_ID> --format raw
+
+  Return results as JSON:
+
+    $ sf agent trace read --session-id <SESSION_ID> --json
+```
+
+_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/trace/read.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -1344,6 +1545,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.37.0/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.38.0/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
