@@ -198,14 +198,19 @@ async function resolvePlanIds(
   const turnIndex = await readTurnIndex(agentId, sessionId);
 
   if (turn !== undefined) {
-    if (!turnIndex) {
-      throw new SfError(messages.getMessage('error.turnIndexNotFound', [sessionId]), 'TurnIndexNotFound');
+    // Try the turn index first (planId may be null if trace wasn't correlated)
+    const entry = turnIndex?.turns.find((t) => t.turn === turn && t.planId);
+    if (entry?.planId) {
+      return [{ turn: entry.turn, planId: entry.planId }];
     }
-    const entry = turnIndex.turns.find((t) => t.turn === turn && t.planId);
-    if (!entry?.planId) {
+
+    // Fall back to positional order from trace files on disk
+    const traceFiles = await listSessionTraces(agentId, sessionId);
+    const byPosition = traceFiles[turn - 1];
+    if (!byPosition) {
       throw new SfError(messages.getMessage('error.turnNotFound', [turn, sessionId]), 'TurnNotFound');
     }
-    return [{ turn: entry.turn, planId: entry.planId }];
+    return [{ turn, planId: byPosition.planId }];
   }
 
   if (turnIndex) {

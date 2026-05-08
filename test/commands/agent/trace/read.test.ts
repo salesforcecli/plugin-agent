@@ -414,13 +414,13 @@ describe('agent trace read', () => {
       }
     });
 
-    it('throws when --turn is used but no turn index exists', async () => {
+    it('throws when --turn is out of range (no index, no trace files)', async () => {
       readTurnIndexStub.resolves(null);
       try {
         await AgentTraceRead.run(['--session-id', SESSION_ID, '--turn', '1']);
         expect.fail('Should have thrown');
       } catch (err: unknown) {
-        expect((err as Error).message).to.match(/turn index/i);
+        expect((err as Error).message).to.match(/turn 1|not found/i);
       }
     });
 
