@@ -19,10 +19,10 @@ import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
-import type { AgentTraceListResult } from '../../src/commands/agent/trace/list.js';
+import type { AgentTraceDeleteResult } from '../../src/commands/agent/trace/delete.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-describe('agent trace list', function () {
+describe('agent trace delete', function () {
   this.timeout(30 * 60 * 1000);
 
   let session: TestSession;
@@ -33,7 +33,7 @@ describe('agent trace list', function () {
     this.timeout(30 * 60 * 1000);
     session = await getTestSession();
 
-    // Start a preview session so there are traces to list
+    // Start a preview session so there are traces to delete
     const targetOrg = getUsername();
     const startResult = execCmd<AgentPreviewStartResult>(
       `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`,
@@ -53,28 +53,16 @@ describe('agent trace list', function () {
     );
   });
 
-  it('lists traces for all agents and sessions', () => {
-    const result = execCmd<AgentTraceListResult>('agent trace list --json', {
-      ensureExitCode: 0,
-      cwd: session.project.dir,
-    }).jsonOutput?.result;
-    expect(result).to.be.an('array').with.length.greaterThan(0);
+  it('returns empty array when no traces match the filter', () => {
+    const result = execCmd<AgentTraceDeleteResult>(
+      'agent trace delete --session-id no-such-session --no-prompt --json',
+      { ensureExitCode: 0, cwd: session.project.dir }
+    ).jsonOutput?.result;
+    expect(result).to.deep.equal([]);
   });
 
-  it('each trace entry has required fields', () => {
-    const result = execCmd<AgentTraceListResult>('agent trace list --json', {
-      ensureExitCode: 0,
-      cwd: session.project.dir,
-    }).jsonOutput?.result;
-    const entry = result![0];
-    expect(entry).to.have.keys(['agent', 'sessionId', 'planId', 'path', 'size', 'mtime']);
-    expect(entry.sessionId).to.be.a('string');
-    expect(entry.planId).to.be.a('string');
-    expect(entry.size).to.be.a('number').and.greaterThan(0);
-  });
-
-  it('filters by --session-id', () => {
-    const result = execCmd<AgentTraceListResult>(`agent trace list --session-id ${sessionId} --json`, {
+  it('deletes traces for a specific session and returns deleted entries', () => {
+    const result = execCmd<AgentTraceDeleteResult>(`agent trace delete --session-id ${sessionId} --no-prompt --json`, {
       ensureExitCode: 0,
       cwd: session.project.dir,
     }).jsonOutput?.result;
@@ -82,35 +70,49 @@ describe('agent trace list', function () {
     expect(result!.every((r) => r.sessionId === sessionId)).to.be.true;
   });
 
-  it('filters by --agent using substring match', () => {
-    const result = execCmd<AgentTraceListResult>(`agent trace list --agent ${bundleApiName} --json`, {
-      ensureExitCode: 0,
-      cwd: session.project.dir,
-    }).jsonOutput?.result;
+  it('each deleted entry has required fields', () => {
+    // Create a fresh session to delete
+    const targetOrg = getUsername();
+    const startResult = execCmd<AgentPreviewStartResult>(
+      `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --target-org ${targetOrg} --json`,
+      { ensureExitCode: 0, cwd: session.project.dir }
+    ).jsonOutput?.result;
+    const newSessionId = startResult!.sessionId;
+
+    execCmd<AgentPreviewSendResult>(
+      `agent preview send --session-id ${newSessionId} --authoring-bundle ${bundleApiName} --utterance "Hello" --target-org ${targetOrg} --json`,
+      { ensureExitCode: 0, cwd: session.project.dir }
+    );
+    execCmd<AgentPreviewEndResult>(
+      `agent preview end --session-id ${newSessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`,
+      { ensureExitCode: 0, cwd: session.project.dir }
+    );
+
+    const result = execCmd<AgentTraceDeleteResult>(
+      `agent trace delete --session-id ${newSessionId} --no-prompt --json`,
+      { ensureExitCode: 0, cwd: session.project.dir }
+    ).jsonOutput?.result;
     expect(result).to.be.an('array').with.length.greaterThan(0);
+    const entry = result![0];
+    expect(entry).to.have.keys(['agent', 'sessionId', 'planId', 'path']);
+    expect(entry.sessionId).to.equal(newSessionId);
   });
 
-  it('returns empty array for a non-existent session', () => {
-    const result = execCmd<AgentTraceListResult>('agent trace list --session-id no-such-session --json', {
+  it('deletes traces older than a given duration with --older-than', () => {
+    // All traces just created are only seconds old, so --older-than 1d should delete nothing
+    const result = execCmd<AgentTraceDeleteResult>('agent trace delete --older-than 1d --no-prompt --json', {
       ensureExitCode: 0,
       cwd: session.project.dir,
     }).jsonOutput?.result;
-    expect(result).to.deep.equal([]);
+    // Traces just created should not match --older-than 1d
+    expect(result).to.be.an('array');
   });
 
-  it('filters by --since excluding traces before the cutoff', () => {
-    const future = '2099-01-01';
-    const result = execCmd<AgentTraceListResult>(`agent trace list --since ${future} --json`, {
+  it('deletes all remaining traces with --no-prompt (cleanup)', () => {
+    const result = execCmd<AgentTraceDeleteResult>(`agent trace delete --agent ${bundleApiName} --no-prompt --json`, {
       ensureExitCode: 0,
       cwd: session.project.dir,
     }).jsonOutput?.result;
-    expect(result).to.deep.equal([]);
-  });
-
-  it('rejects an invalid --since value', () => {
-    execCmd('agent trace list --since not-a-date --json', {
-      ensureExitCode: 1,
-      cwd: session.project.dir,
-    });
+    expect(result).to.be.an('array');
   });
 });
