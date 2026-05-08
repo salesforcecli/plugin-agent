@@ -27,7 +27,11 @@
           "type": "string"
         }
       },
-      "required": ["messages", "agentApiName", "sessionId"],
+      "required": [
+        "messages",
+        "agentApiName",
+        "sessionId"
+      ],
       "additionalProperties": false
     }
   }

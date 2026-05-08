@@ -68,6 +68,12 @@ export const verboseFlag = Flags.boolean({
   description: messages.getMessage('flags.verbose.description'),
 });
 
+export const testRunnerFlag = Flags.custom<'agentforce-studio' | 'testing-center'>({
+  options: ['agentforce-studio', 'testing-center'],
+  summary: messages.getMessage('flags.test-runner.summary'),
+  description: messages.getMessage('flags.test-runner.description'),
+})();
+
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {
   const result = validate(input);
   if (typeof result === 'string') throw new Error(result);
@@ -128,11 +134,32 @@ export function traverseForFiles(dirOrDirs: string | string[], suffixes: string[
   return results;
 }
 
-export const promptForAiEvaluationDefinitionApiName = async (
+export type TestDefinitionSelection = {
+  apiName: string;
+  testRunner?: 'agentforce-studio' | 'testing-center';
+};
+
+export const promptForTestDefinitionApiName = async (
   flagDef: FlaggablePrompt,
   connection: Connection
-): Promise<string> => {
+): Promise<TestDefinitionSelection> => {
   const aiDefFiles = await AgentTest.list(connection);
+
+  const duplicateNames = new Set(
+    aiDefFiles
+      .filter((o, i) => aiDefFiles.some((other, j) => i !== j && o.fullName === other.fullName))
+      .map((o) => o.fullName)
+  );
+
+  // Map each entry to a value that encodes the runner type for duplicates
+  const choicesByValue = new Map(
+    aiDefFiles.map((o) => {
+      const runner: 'agentforce-studio' | 'testing-center' =
+        o.type === 'AiEvaluationDefinition' ? 'testing-center' : 'agentforce-studio';
+      const valueKey = duplicateNames.has(o.fullName) ? `${o.fullName}::${runner}` : o.fullName;
+      return [valueKey, { apiName: o.fullName, testRunner: duplicateNames.has(o.fullName) ? runner : undefined }];
+    })
+  );
 
   let id: NodeJS.Timeout;
   const timeout = new Promise((_, reject) => {
@@ -146,16 +173,19 @@ export const promptForAiEvaluationDefinitionApiName = async (
       message: flagDef.promptMessage ?? flagDef.message,
       // eslint-disable-next-line @typescript-eslint/require-await
       source: async (input) => {
-        const arr = aiDefFiles.map((o) => ({ name: o.fullName, value: o.fullName }));
+        const arr = [...choicesByValue.entries()].map(([valueKey, { apiName, testRunner }]) => ({
+          name: testRunner ? `${apiName} (${testRunner})` : apiName,
+          value: valueKey,
+        }));
 
         if (!input) return arr;
         return arr.filter((o) => o.name.includes(input));
       },
     }),
     timeout,
-  ]).then((result) => {
+  ]).then((valueKey) => {
     clearTimeout(id);
-    return result as string;
+    return choicesByValue.get(valueKey as string) ?? { apiName: valueKey as string };
   });
 };
 

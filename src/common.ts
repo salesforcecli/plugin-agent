@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { readFile } from 'node:fs/promises';
 import { EOL } from 'node:os';
-import { SfError } from '@salesforce/core';
-import { CompilationError, COMPILATION_API_EXIT_CODES } from '@salesforce/agents';
+import { Lifecycle, SfError } from '@salesforce/core';
+import { CompilationError, COMPILATION_API_EXIT_CODES, type AgentJson } from '@salesforce/agents';
 
 /** Re-export so consumers can use the library's exit code contract (404 → 2, 500 → 3). */
 export { COMPILATION_API_EXIT_CODES };
+
+export async function loadAgentJson(filePath: string | undefined): Promise<AgentJson | undefined> {
+  if (!filePath) return undefined;
+  try {
+    return JSON.parse(await readFile(filePath, 'utf-8')) as AgentJson;
+  } catch (error) {
+    await Lifecycle.getInstance().emitTelemetry({ eventName: 'agent_preview_agent_json_read_failed' });
+    throw new SfError(
+      `Failed to read or parse --agent-json file '${filePath}': ${SfError.wrap(error).message}`,
+      'AgentJsonReadError'
+    );
+  }
+}
 
 /**
  * Utility function to generate SfError when there are agent compilation errors.

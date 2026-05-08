@@ -15,7 +15,11 @@
           "type": "string"
         }
       },
-      "required": ["agentPath", "metaXmlPath", "outputDir"],
+      "required": [
+        "agentPath",
+        "metaXmlPath",
+        "outputDir"
+      ],
       "additionalProperties": false
     }
   }

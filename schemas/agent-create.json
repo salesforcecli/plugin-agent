@@ -28,7 +28,11 @@
               "type": "string"
             }
           },
-          "required": ["botId", "botVersionId", "plannerId"],
+          "required": [
+            "botId",
+            "botVersionId",
+            "plannerId"
+          ],
           "additionalProperties": false,
           "description": "If the agent was created with saveAgent=true, these are the IDs that make up an agent; Bot, BotVersion, and GenAiPlanner metadata."
         },
@@ -78,7 +82,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["inputName", "inputDataType", "inputDescription"],
+                            "required": [
+                              "inputName",
+                              "inputDataType",
+                              "inputDescription"
+                            ],
                             "additionalProperties": false
                           },
                           "minItems": 1,
@@ -99,14 +107,24 @@
                                 "type": "string"
                               }
                             },
-                            "required": ["outputName", "outputDataType", "outputDescription"],
+                            "required": [
+                              "outputName",
+                              "outputDataType",
+                              "outputDescription"
+                            ],
                             "additionalProperties": false
                           },
                           "minItems": 1,
                           "maxItems": 1
                         }
                       },
-                      "required": ["actionName", "exampleOutput", "actionDescription", "inputs", "outputs"],
+                      "required": [
+                        "actionName",
+                        "exampleOutput",
+                        "actionDescription",
+                        "inputs",
+                        "outputs"
+                      ],
                       "additionalProperties": false
                     },
                     "minItems": 1,
@@ -122,7 +140,13 @@
                     "type": "string"
                   }
                 },
-                "required": ["scope", "topic", "actions", "instructions", "classificationDescription"],
+                "required": [
+                  "scope",
+                  "topic",
+                  "actions",
+                  "instructions",
+                  "classificationDescription"
+                ],
                 "additionalProperties": false
               },
               "minItems": 1,
@@ -135,11 +159,18 @@
               }
             }
           },
-          "required": ["agentDescription", "topics", "sampleUtterances"],
+          "required": [
+            "agentDescription",
+            "topics",
+            "sampleUtterances"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["agentDefinition", "isSuccess"]
+      "required": [
+        "agentDefinition",
+        "isSuccess"
+      ]
     }
   }
 }

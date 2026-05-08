@@ -18,7 +18,7 @@ import { Flags, SfCommand, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/core';
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache, SessionType } from '../../../previewSessionStore.js';
-import { COMPILATION_API_EXIT_CODES } from '../../../common.js';
+import { COMPILATION_API_EXIT_CODES, loadAgentJson } from '../../../common.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.start');
@@ -68,6 +68,12 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       summary: messages.getMessage('flags.simulate-actions.summary'),
       exclusive: ['use-live-actions'],
     }),
+    'agent-json': Flags.file({
+      summary: messages.getMessage('flags.agent-json.summary'),
+      hidden: true,
+      exists: true,
+      dependsOn: ['authoring-bundle'],
+    }),
   };
 
   public async run(): Promise<AgentPreviewStartResult> {
@@ -87,12 +93,21 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     const simulateActions = flags['simulate-actions'];
     const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
 
+    const preloadedAgentJson = await loadAgentJson(flags['agent-json']);
+
     // Track telemetry for agent initialization
     let agent: ScriptAgent | ProductionAgent;
     try {
-      agent = flags['authoring-bundle']
-        ? await Agent.init({ connection: conn, project: this.project!, aabName: flags['authoring-bundle'] })
-        : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+      if (flags['authoring-bundle']) {
+        agent = await Agent.init({
+          connection: conn,
+          project: this.project!,
+          aabName: flags['authoring-bundle'],
+          agentJson: preloadedAgentJson,
+        });
+      } else {
+        agent = await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
+      }
     } catch (error) {
       const wrapped = SfError.wrap(error);
 

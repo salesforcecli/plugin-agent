@@ -16,12 +16,18 @@
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTester } from '@salesforce/agents';
 import { CLIError } from '@oclif/core/errors';
 import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
-import { AgentTestRunResult, resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
+import {
+  AgentTestRunResult,
+  resultFormatFlag,
+  testOutputDirFlag,
+  testRunnerFlag,
+  verboseFlag,
+} from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
+import { createTestRunner } from '../../../testRunnerFactory.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.resume');
@@ -65,6 +71,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    'test-runner': testRunnerFlag,
     verbose: verboseFlag,
   };
 
@@ -78,6 +85,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     let runId;
     let outputDir;
     let resultFormat;
+    let cachedRunnerType;
 
     try {
       const cacheEntry = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
@@ -85,6 +93,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       runId = cacheEntry.runId;
       outputDir = cacheEntry.outputDir;
       resultFormat = cacheEntry.resultFormat;
+      cachedRunnerType = cacheEntry.runnerType;
     } catch (e) {
       const wrapped = SfError.wrap(e);
 
@@ -105,7 +114,15 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       jsonEnabled: this.jsonEnabled(),
     });
     this.mso.start({ id: runId });
-    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
+
+    // Use explicit flag > cached runner type > ID prefix detection > org metadata query
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const { runner: agentTester } = await createTestRunner(
+      connection,
+      flags['test-runner'] ?? cachedRunnerType,
+      name,
+      runId
+    );
 
     let completed;
     let response;
@@ -139,12 +156,17 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
 
     // Set exit code to 1 only for execution errors (tests couldn't run properly)
     // Test assertion failures are business logic and should not affect exit code
-    if (response?.testCases.some((tc) => tc.status === 'ERROR')) {
+    // Only applicable to legacy responses (Agentforce Studio doesn't have test case status)
+    if (
+      response &&
+      'subjectName' in response &&
+      response.testCases.some((tc) => 'status' in tc && tc.status === 'ERROR')
+    ) {
       process.exitCode = 1;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return { ...response!, runId, status: 'COMPLETED' };
+    return { ...response!, runId, status: 'COMPLETED' } as AgentTestRunResult;
   }
 
   protected catch(error: Error | SfError | CLIError): Promise<never> {
