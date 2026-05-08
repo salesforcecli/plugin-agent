@@ -69,7 +69,7 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
   });
 
   public static readonly flags = {
-    'target-org': Flags.optionalOrg(),
+    'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     'session-id': Flags.string({
       summary: messages.getMessage('flags.session-id.summary'),
@@ -80,7 +80,6 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
       summary: messages.getMessage('flags.api-name.summary'),
       char: 'n',
       exclusive: ['authoring-bundle'],
-      dependsOn: ['target-org'],
     }),
     'authoring-bundle': Flags.string({
       summary: messages.getMessage('flags.authoring-bundle.summary'),
@@ -89,7 +88,6 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
     all: Flags.boolean({
       summary: messages.getMessage('flags.all.summary'),
       exclusive: ['session-id'],
-      dependsOn: ['target-org'],
     }),
     'no-prompt': Flags.boolean({
       summary: messages.getMessage('flags.no-prompt.summary'),
@@ -100,10 +98,9 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
   public async run(): Promise<AgentPreviewEndResult> {
     const { flags } = await this.parse(AgentPreviewEnd);
 
-    const conn = flags['target-org']?.getConnection(flags['api-version']);
+    const conn = flags['target-org'].getConnection(flags['api-version']);
 
     if (flags['all']) {
-      // --all requires --target-org (enforced via dependsOn), so conn is always defined here.
       return this.endAll(flags, conn);
     }
 
@@ -174,20 +171,17 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
 
   private async initAgent(
     flags: Pick<CommandFlags, 'api-name' | 'authoring-bundle'>,
-    conn: Connection | undefined
+    conn: Connection
   ): Promise<ScriptAgent | ProductionAgent> {
     const agentIdentifier = flags['authoring-bundle'] ?? flags['api-name']!;
     try {
-      // conn is always defined when --api-name is used (validated in run()); for --authoring-bundle
-      // ScriptAgent performs only local operations so it may not need a connection at runtime.
-      // We pass conn as-is and let the agents library throw if it actually requires a connection.
       return flags['authoring-bundle']
         ? await Agent.init({
-            connection: conn as Connection,
+            connection: conn,
             project: this.project!,
             aabName: flags['authoring-bundle'],
           })
-        : await Agent.init({ connection: conn as Connection, project: this.project!, apiNameOrId: flags['api-name']! });
+        : await Agent.init({ connection: conn, project: this.project!, apiNameOrId: flags['api-name']! });
     } catch (error) {
       const wrapped = SfError.wrap(error);
       throw new SfError(messages.getMessage('error.agentNotFound', [agentIdentifier]), 'AgentNotFound', [], 2, wrapped);
@@ -196,16 +190,14 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
 
   private async endAll(
     flags: Pick<CommandFlags, 'api-name' | 'authoring-bundle' | 'no-prompt'>,
-    conn: Connection | undefined
+    conn: Connection
   ): Promise<{ ended: EndedSession[] }> {
-    // conn is always defined because --all dependsOn --target-org; cast to Connection.
-    const connection = conn as Connection;
     const hasAgentIdentifier = flags['api-name'] !== undefined || flags['authoring-bundle'] !== undefined;
 
     if (hasAgentIdentifier) {
-      return this.endAllForAgent(flags, connection);
+      return this.endAllForAgent(flags, conn);
     }
-    return this.endAllAgents(connection, flags['no-prompt'] ?? false);
+    return this.endAllAgents(conn, flags['no-prompt'] ?? false);
   }
 
   /**

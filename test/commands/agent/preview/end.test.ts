@@ -98,7 +98,12 @@ describe('agent preview end', () => {
 
   describe('single-session end (default behaviour)', () => {
     it('ends a session for an authoring bundle using the cached session ID', async () => {
-      const result = await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent']);
+      const result = await AgentPreviewEnd.run([
+        '--authoring-bundle',
+        'My_Local_Agent',
+        '--target-org',
+        'test@org.com',
+      ]);
 
       expect(initStub.calledOnce).to.be.true;
       expect(validatePreviewSessionStub.calledOnce).to.be.true;
@@ -115,6 +120,8 @@ describe('agent preview end', () => {
         'My_Local_Agent',
         '--session-id',
         explicitSessionId,
+        '--target-org',
+        'test@org.com',
       ]);
 
       expect(getCachedSessionIdsStub.called).to.be.false;
@@ -125,7 +132,7 @@ describe('agent preview end', () => {
       getCachedSessionIdsStub.resolves([]);
 
       try {
-        await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent']);
+        await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent', '--target-org', 'test@org.com']);
         expect.fail('Expected an error to be thrown');
       } catch (error: unknown) {
         expect((error as Error).message).to.include('No agent preview session found');
@@ -136,25 +143,16 @@ describe('agent preview end', () => {
       getCachedSessionIdsStub.resolves(['session-1', 'session-2']);
 
       try {
-        await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent']);
+        await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent', '--target-org', 'test@org.com']);
         expect.fail('Expected an error to be thrown');
       } catch (error: unknown) {
         expect((error as Error).message).to.include('Multiple preview sessions found');
       }
     });
 
-    it('throws when --api-name is provided without --target-org', async () => {
-      try {
-        await AgentPreviewEnd.run(['--api-name', 'My_Published_Agent']);
-        expect.fail('Expected an error to be thrown');
-      } catch (error: unknown) {
-        expect((error as Error).message).to.include('--target-org');
-      }
-    });
-
     it('throws when neither --api-name, --authoring-bundle, nor --all is provided', async () => {
       try {
-        await AgentPreviewEnd.run([]);
+        await AgentPreviewEnd.run(['--target-org', 'test@org.com']);
         expect.fail('Expected an error to be thrown');
       } catch (error: unknown) {
         expect((error as Error).message).to.match(
@@ -165,7 +163,14 @@ describe('agent preview end', () => {
 
     it('throws when both --api-name and --authoring-bundle are provided at the same time', async () => {
       try {
-        await AgentPreviewEnd.run(['--api-name', 'My_Published_Agent', '--authoring-bundle', 'My_Local_Agent']);
+        await AgentPreviewEnd.run([
+          '--api-name',
+          'My_Published_Agent',
+          '--authoring-bundle',
+          'My_Local_Agent',
+          '--target-org',
+          'test@org.com',
+        ]);
         expect.fail('Expected an error to be thrown');
       } catch (error: unknown) {
         expect((error as Error).message).to.match(/--api-name.*cannot also be provided when using --authoring-bundle/i);
@@ -174,7 +179,15 @@ describe('agent preview end', () => {
 
     it('throws when --session-id and --all are both provided', async () => {
       try {
-        await AgentPreviewEnd.run(['--authoring-bundle', 'My_Local_Agent', '--session-id', 'sid', '--all']);
+        await AgentPreviewEnd.run([
+          '--authoring-bundle',
+          'My_Local_Agent',
+          '--session-id',
+          'sid',
+          '--all',
+          '--target-org',
+          'test@org.com',
+        ]);
         expect.fail('Expected an error to be thrown');
       } catch (error: unknown) {
         expect((error as Error).message).to.match(/cannot also be provided/i);
