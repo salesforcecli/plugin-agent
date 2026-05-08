@@ -23,13 +23,20 @@
             "$ref": "#/definitions/SessionType"
           }
         },
-        "required": ["agentId", "sessionId"],
+        "required": [
+          "agentId",
+          "sessionId"
+        ],
         "additionalProperties": false
       }
     },
     "SessionType": {
       "type": "string",
-      "enum": ["simulated", "live", "published"]
+      "enum": [
+        "simulated",
+        "live",
+        "published"
+      ]
     }
   }
 }

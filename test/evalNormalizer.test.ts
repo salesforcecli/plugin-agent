@@ -29,7 +29,7 @@ import {
   splitIntoBatches,
   type EvalStep,
   type EvalPayload,
-} from '../src/evalNormalizer.js';
+} from '@salesforce/agents';
 
 describe('evalNormalizer', () => {
   describe('normalizeMcpShorthand', () => {

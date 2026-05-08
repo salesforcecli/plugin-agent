@@ -1,0 +1,466 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentTraceReadResult",
+  "definitions": {
+    "AgentTraceReadResult": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["summary", "detail", "raw"]
+        },
+        "dimension": {
+          "$ref": "#/definitions/Dimension"
+        },
+        "turns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TurnSummary"
+          }
+        },
+        "detail": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DimensionRow"
+          }
+        },
+        "raw": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlannerResponse"
+          }
+        }
+      },
+      "required": ["sessionId", "format"],
+      "additionalProperties": false
+    },
+    "Dimension": {
+      "type": "string",
+      "enum": ["actions", "grounding", "routing", "errors"]
+    },
+    "TurnSummary": {
+      "type": "object",
+      "properties": {
+        "turn": {
+          "type": "number"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "userInput": {
+          "type": "string"
+        },
+        "agentResponse": {
+          "type": "string"
+        },
+        "actionsExecuted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "latencyMs": {
+          "type": "number"
+        },
+        "error": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["turn", "planId", "topic", "userInput", "agentResponse", "actionsExecuted", "latencyMs", "error"],
+      "additionalProperties": false
+    },
+    "DimensionRow": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ActionsRow"
+        },
+        {
+          "$ref": "#/definitions/GroundingRow"
+        },
+        {
+          "$ref": "#/definitions/RoutingRow"
+        },
+        {
+          "$ref": "#/definitions/ErrorsRow"
+        }
+      ]
+    },
+    "ActionsRow": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "const": "actions"
+        },
+        "turn": {
+          "type": "number"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "input": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "latencyMs": {
+          "type": "number"
+        },
+        "error": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["dimension", "turn", "planId", "action", "input", "output", "latencyMs", "error"],
+      "additionalProperties": false
+    },
+    "GroundingRow": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "const": "grounding"
+        },
+        "turn": {
+          "type": "number"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "response": {
+          "type": "string"
+        },
+        "latencyMs": {
+          "type": "number"
+        }
+      },
+      "required": ["dimension", "turn", "planId", "prompt", "response", "latencyMs"],
+      "additionalProperties": false
+    },
+    "RoutingRow": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "const": "routing"
+        },
+        "turn": {
+          "type": "number"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "fromTopic": {
+          "type": "string"
+        },
+        "toTopic": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        }
+      },
+      "required": ["dimension", "turn", "planId", "fromTopic", "toTopic", "intent"],
+      "additionalProperties": false
+    },
+    "ErrorsRow": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "const": "errors"
+        },
+        "turn": {
+          "type": "number"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "errorCode": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": ["dimension", "turn", "planId", "source", "errorCode", "message"],
+      "additionalProperties": false
+    },
+    "PlannerResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "PlanSuccessResponse"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "plan": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanStep"
+          }
+        }
+      },
+      "required": ["type", "planId", "sessionId", "intent", "topic", "plan"],
+      "additionalProperties": false
+    },
+    "PlanStep": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/UserInputStep"
+        },
+        {
+          "$ref": "#/definitions/LLMExecutionStep"
+        },
+        {
+          "$ref": "#/definitions/UpdateTopicStep"
+        },
+        {
+          "$ref": "#/definitions/EventStep"
+        },
+        {
+          "$ref": "#/definitions/FunctionStep"
+        },
+        {
+          "$ref": "#/definitions/PlannerResponseStep"
+        }
+      ]
+    },
+    "UserInputStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "UserInputStep"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": ["type", "message"],
+      "additionalProperties": false
+    },
+    "LLMExecutionStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "LLMExecutionStep"
+        },
+        "promptName": {
+          "type": "string"
+        },
+        "promptContent": {
+          "type": "string"
+        },
+        "promptResponse": {
+          "type": "string"
+        },
+        "executionLatency": {
+          "type": "number"
+        },
+        "startExecutionTime": {
+          "type": "number"
+        },
+        "endExecutionTime": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "promptName",
+        "promptContent",
+        "promptResponse",
+        "executionLatency",
+        "startExecutionTime",
+        "endExecutionTime"
+      ],
+      "additionalProperties": false
+    },
+    "UpdateTopicStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "UpdateTopicStep"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "job": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "availableFunctions": {
+          "type": "array",
+          "items": {}
+        }
+      },
+      "required": ["type", "topic", "description", "job", "instructions", "availableFunctions"],
+      "additionalProperties": false
+    },
+    "EventStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "EventStep"
+        },
+        "eventName": {
+          "type": "string"
+        },
+        "isError": {
+          "type": "boolean"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "oldTopic": {
+              "type": "string"
+            },
+            "newTopic": {
+              "type": "string"
+            }
+          },
+          "required": ["oldTopic", "newTopic"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["type", "eventName", "isError", "payload"],
+      "additionalProperties": false
+    },
+    "FunctionStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "FunctionStep"
+        },
+        "function": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "input": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "output": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          },
+          "required": ["name", "input", "output"],
+          "additionalProperties": false
+        },
+        "executionLatency": {
+          "type": "number"
+        },
+        "startExecutionTime": {
+          "type": "number"
+        },
+        "endExecutionTime": {
+          "type": "number"
+        }
+      },
+      "required": ["type", "function", "executionLatency", "startExecutionTime", "endExecutionTime"],
+      "additionalProperties": false
+    },
+    "PlannerResponseStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "PlannerResponseStep"
+        },
+        "message": {
+          "type": "string"
+        },
+        "responseType": {
+          "type": "string"
+        },
+        "isContentSafe": {
+          "type": "boolean"
+        },
+        "safetyScore": {
+          "type": "object",
+          "properties": {
+            "safety_score": {
+              "type": "number"
+            },
+            "category_scores": {
+              "type": "object",
+              "properties": {
+                "toxicity": {
+                  "type": "number"
+                },
+                "hate": {
+                  "type": "number"
+                },
+                "identity": {
+                  "type": "number"
+                },
+                "violence": {
+                  "type": "number"
+                },
+                "physical": {
+                  "type": "number"
+                },
+                "sexual": {
+                  "type": "number"
+                },
+                "profanity": {
+                  "type": "number"
+                },
+                "biased": {
+                  "type": "number"
+                }
+              },
+              "required": ["toxicity", "hate", "identity", "violence", "physical", "sexual", "profanity", "biased"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["safety_score", "category_scores"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["type", "message", "responseType", "isContentSafe", "safetyScore"],
+      "additionalProperties": false
+    }
+  }
+}

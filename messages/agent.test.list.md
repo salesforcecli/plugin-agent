@@ -4,7 +4,7 @@ List the available agent tests in your org.
 
 # description
 
-The command outputs a table with the name (API name) of each test along with its unique ID and the date it was created in the org.
+The command outputs a table with the name (API name) of each test along with its unique ID, type ('agentforce-studio' or 'testing-center'), and the date it was created in the org.
 
 # examples
 

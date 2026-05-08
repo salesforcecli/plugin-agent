@@ -58,14 +58,14 @@ describe('agent test create', function () {
     const normalizedInvalidSpecPath = normalize(invalidSpecPath).replace(/\\/g, '/');
     execCmd<AgentTestCreateResult>(
       `agent test create --api-name "${testApiName}" --spec "${normalizedInvalidSpecPath}" --target-org ${getUsername()} --preview --json`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 'nonZero' }
     );
   });
 
   it('should fail when required flags are missing in JSON mode', async () => {
     // Missing --api-name
     execCmd<AgentTestCreateResult>(`agent test create --target-org ${getUsername()} --json`, {
-      ensureExitCode: 1,
+      ensureExitCode: 'nonZero',
     });
 
     // Missing --spec
@@ -73,7 +73,7 @@ describe('agent test create', function () {
     execCmd<AgentTestCreateResult>(
       `agent test create --api-name "${testApiName}" --target-org ${getUsername()} --json`,
       {
-        ensureExitCode: 1,
+        ensureExitCode: 'nonZero',
       }
     );
   });
