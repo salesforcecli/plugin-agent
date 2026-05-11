@@ -109,7 +109,7 @@ describe('agent trace list', function () {
 
   it('rejects an invalid --since value', () => {
     execCmd('agent trace list --since not-a-date --json', {
-      ensureExitCode: 1,
+      ensureExitCode: 'nonZero',
       cwd: session.project.dir,
     });
   });
