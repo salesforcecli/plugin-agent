@@ -144,7 +144,6 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
     }
 
     const tracesPath = await agent.getHistoryDir();
-    await removeCache(agent);
 
     try {
       await callPreviewEnd(agent);
@@ -158,6 +157,11 @@ export default class AgentPreviewEnd extends SfCommand<AgentPreviewEndResult> {
         wrapped
       );
     }
+
+    // ProductionAgent.endSession() clears this.sessionId after the server call; re-set it so
+    // removeCache can call getHistoryDir() without throwing "No sessionId set on agent".
+    agent.setSessionId(sessionId);
+    await removeCache(agent);
 
     const result: EndedSession = { sessionId, tracesPath };
     this.log(messages.getMessage('output.tracesPath', [tracesPath]));

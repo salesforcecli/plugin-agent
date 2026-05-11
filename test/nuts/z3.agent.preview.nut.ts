@@ -24,7 +24,7 @@ import { Agent } from '@salesforce/agents';
 import { Org, SfProject } from '@salesforce/core';
 import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/start.js';
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
-import type { AgentPreviewEndResult } from '../../src/commands/agent/preview/end.js';
+import type { AgentPreviewEndResult, EndedSession } from '../../src/commands/agent/preview/end.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 /* eslint-disable no-console */
 
@@ -156,7 +156,7 @@ describe('agent preview', function () {
 
       const endResult = execCmd<AgentPreviewEndResult>(
         `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
-      ).jsonOutput?.result as import('../../src/commands/agent/preview/end.js').EndedSession | undefined;
+      ).jsonOutput?.result as EndedSession | undefined;
       expect(endResult?.sessionId).to.equal(sessionId);
       expect(endResult?.tracesPath).to.be.a('string').and.include('.sfdx').and.include('agents');
     });
@@ -230,7 +230,7 @@ describe('agent preview', function () {
         `agent preview end --session-id ${sessionId} --api-name ${
           publishedAgent!.DeveloperName
         } --target-org ${targetOrg} --json`
-      ).jsonOutput?.result as { sessionId?: string; tracesPath?: string } | undefined;
+      ).jsonOutput?.result as EndedSession | undefined;
       expect(endResult?.sessionId).to.equal(sessionId);
       expect(endResult?.tracesPath).to.be.a('string');
     });
