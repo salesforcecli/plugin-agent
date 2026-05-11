@@ -20,6 +20,14 @@ This command uses the API name of the authoring bundle.
 
   <%= config.bin %> <%= command.id %> --api-name MyAuthoringbundle --target-org my-dev-org
 
+- Publish with verbose output to see all retrieved and deployed metadata components:
+
+  <%= config.bin %> <%= command.id %> --api-name MyAuthoringbundle --verbose
+
+- Publish with concise output showing only essential information:
+
+  <%= config.bin %> <%= command.id %> --api-name MyAuthoringbundle --concise
+
 # flags.api-name.summary
 
 API name of the authoring bundle you want to publish; if not specified, the command provides a list that you can choose from.
@@ -31,6 +39,14 @@ API name of the authoring bundle to publish
 # flags.skip-retrieve.summary
 
 Don't retrieve the metadata associated with the agent to your DX project.
+
+# flags.verbose.summary
+
+Display detailed output showing all metadata components retrieved and deployed during the publish process.
+
+# flags.concise.summary
+
+Display minimal output with only essential information about the publish operation.
 
 # error.missingRequiredFlags
 

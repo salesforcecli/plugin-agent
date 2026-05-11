@@ -25,7 +25,12 @@
                 "items": {}
               }
             },
-            "required": ["id", "status", "evaluations", "outputs"],
+            "required": [
+              "id",
+              "status",
+              "evaluations",
+              "outputs"
+            ],
             "additionalProperties": false
           }
         },
@@ -45,11 +50,19 @@
               "type": "number"
             }
           },
-          "required": ["passed", "failed", "scored", "errors"],
+          "required": [
+            "passed",
+            "failed",
+            "scored",
+            "errors"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["tests", "summary"],
+      "required": [
+        "tests",
+        "summary"
+      ],
       "additionalProperties": false
     }
   }

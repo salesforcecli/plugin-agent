@@ -16,14 +16,15 @@
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTester, AgentTestResultsResponse } from '@salesforce/agents';
-import { resultFormatFlag, testOutputDirFlag, verboseFlag } from '../../../flags.js';
+import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
+import { resultFormatFlag, testOutputDirFlag, testRunnerFlag, verboseFlag } from '../../../flags.js';
 import { handleTestResults } from '../../../handleTestResults.js';
+import { createTestRunner } from '../../../testRunnerFactory.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.results');
 
-export type AgentTestResultsResult = AgentTestResultsResponse;
+export type AgentTestResultsResult = AgentTestResultsResponse | AgentforceStudioTestResultsResponse;
 
 export default class AgentTestResults extends SfCommand<AgentTestResultsResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -51,13 +52,20 @@ export default class AgentTestResults extends SfCommand<AgentTestResultsResult> 
     }),
     'result-format': resultFormatFlag(),
     'output-dir': testOutputDirFlag(),
+    'test-runner': testRunnerFlag,
     verbose: verboseFlag,
   };
 
   public async run(): Promise<AgentTestResultsResult> {
     const { flags } = await this.parse(AgentTestResults);
 
-    const agentTester = new AgentTester(flags['target-org'].getConnection(flags['api-version']));
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+    const { runner: agentTester } = await createTestRunner(
+      connection,
+      flags['test-runner'],
+      undefined,
+      flags['job-id']
+    );
 
     let response;
     try {
