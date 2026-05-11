@@ -1,3 +1,14 @@
+# [1.39.0](https://github.com/salesforcecli/plugin-agent/compare/1.38.1...1.39.0) (2026-05-11)
+
+### Bug Fixes
+
+- apply Willie's review — callPreviewEnd before removeCache in single-session path ([9b3b3cc](https://github.com/salesforcecli/plugin-agent/commit/9b3b3ccc4854bc8346d2470b4bc4bd1e27e41b0f))
+- move exactlyOneRequired error to messages file and document serial loop ([6d4e05b](https://github.com/salesforcecli/plugin-agent/commit/6d4e05bf6b56b8ae2ff8a6b55343e94841ac65c9))
+
+### Features
+
+- add --all flag to agent preview end (W-22203669) ([85bc9ee](https://github.com/salesforcecli/plugin-agent/commit/85bc9ee13a58490a3bd886837beecfc02e9e2619))
+
 ## [1.38.1](https://github.com/salesforcecli/plugin-agent/compare/1.38.0...1.38.1) (2026-05-10)
 
 ### Bug Fixes
