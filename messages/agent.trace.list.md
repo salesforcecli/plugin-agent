@@ -4,7 +4,7 @@ List the available trace files that were recorded during all agent preview sessi
 
 # description
 
-When you run an agent preview conversation (either interactive or programmatic), trace files are automatically recorded and saved in your local DX project. By default, this command lists all trace filess for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date (--since).
+When you run an agent preview conversation (either interactive or programmatic), trace files are automatically recorded and saved in your local DX project. By default, this command lists all trace files for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date (--since).
 
 Each row in the output corresponds to one trace file, which in turn corresponds to one agent session. The Agent column shows the authoring bundle or API name used when starting the session.
 
