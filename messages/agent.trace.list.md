@@ -1,20 +1,20 @@
 # summary
 
-List the trace files that were recorded during all agent preview sessions.
+List the available trace files that were recorded during all agent preview sessions.
 
 # description
 
-Lists trace files recorded during agent preview sessions. By default, lists all traces for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date (--since).
+When you run an agent preview conversation (either interactive or programmatic), trace files are automatically recorded and saved in your local DX project. By default, this command lists all trace filess for all agents and all of their sessions. Use flags to narrow results: filter by agent name (--agent), by session (--session-id), or by date (--since).
 
 Each row in the output corresponds to one trace file, which in turn corresponds to one agent session. The Agent column shows the authoring bundle or API name used when starting the session.
 
 # flags.agent.summary
 
-Only show traces for this agent name (substring match). Matches against the name used when starting the session, whether that's an authoring bundle or a published agent API name.
+API name of the agent used to filter the list of available trace files. Matches against the API name used when starting the session, either an authoring bundle or a published agent API name.
 
 # flags.session-id.summary
 
-Session ID used to filter the list of trace files.
+Session ID used to filter the list of trace files. Use the "agent preview sessions" CLI command to list all known agent preview sessions along with their session IDs.
 
 # flags.since.summary
 
@@ -58,23 +58,23 @@ Path
 
 # examples
 
-- List all traces for all agents and sessions:
+- List all trace files for all agents and sessions:
 
   <%= config.bin %> <%= command.id %>
 
-- List all traces for a specific agent:
+- List all trace files for a specific agent:
 
   <%= config.bin %> <%= command.id %> --agent My_Agent
 
-- List traces for a specific session:
+- List trace files for a specific session:
 
   <%= config.bin %> <%= command.id %> --session-id <SESSION_ID>
 
-- List traces recorded on or after April 20, 2026 (date-only, interpreted as UTC midnight):
+- List trace files recorded on or after April 20, 2026 (date-only, interpreted as UTC midnight):
 
   <%= config.bin %> <%= command.id %> --since 2026-04-20
 
-- List traces recorded on or after a specific UTC time:
+- List trace files recorded on or after a specific UTC time:
 
   <%= config.bin %> <%= command.id %> --since 2026-04-20T14:00:00Z
 
