@@ -1,3 +1,9 @@
+## [1.39.1](https://github.com/salesforcecli/plugin-agent/compare/1.39.0...1.39.1) (2026-05-12)
+
+### Bug Fixes
+
+- edit/embellish --help for new "agent trace X" commands ([a87de4c](https://github.com/salesforcecli/plugin-agent/commit/a87de4cba0481fd4d325b2ecd9035e5de0ec9a64))
+
 # [1.39.0](https://github.com/salesforcecli/plugin-agent/compare/1.38.1...1.39.0) (2026-05-11)
 
 ### Bug Fixes
