@@ -1,24 +1,26 @@
 # summary
 
-Delete agent preview trace files.
+Delete trace files from an agent preview session.
 
 # description
 
-Deletes trace files recorded during agent preview sessions. By default, shows a preview of what will be deleted and prompts for confirmation. Use --no-prompt to skip confirmation.
+When you run an agent preview conversation (either interactive or programmatic), trace files are automatically recorded and saved in your local DX project. Use this command to delete some or all of the trace files.
 
-Without filters, deletes all traces for all agents and sessions. Use flags to narrow the scope: filter by agent name (--agent), by session (--session-id), or by age (--older-than).
+By default, this command shows a preview of what will be deleted and prompts for confirmation. Use --no-prompt to skip confirmation.
+
+Without filters, this comamnd deletes all trace files for all agents and sessions. Use flags to narrow the scope: filter by agent API name (--agent), by session (--session-id), or by age (--older-than).
 
 # flags.agent.summary
 
-Only delete traces for this agent name (substring match). Matches against the name used when starting the session, whether that's an authoring bundle or a published agent API name.
+API name of the agent used to filter the list of trace files you want to delete. Matches against the API name used when starting the session, either an authoring bundle or a published agent API name.
 
 # flags.session-id.summary
 
-Only delete traces from this session ID.
+Session ID used to filter the list of trace files you want to delete. Use the "agent preview sessions" CLI command to list all known agent preview sessions along with their session IDs.
 
 # flags.older-than.summary
 
-Only delete traces older than this duration. Accepts a number followed by a unit: m/minutes, h/hours, d/days, w/weeks (e.g. 7d, 24h, 2w).
+Duration used to filter the list of trace files; only files older than the duration are deleted. Accepts a number followed by a unit: m/minutes, h/hours, d/days, w/weeks. Examples: 7d, 24h, 2w.
 
 # flags.no-prompt.summary
 
@@ -26,11 +28,11 @@ Skip the confirmation prompt and delete immediately.
 
 # error.invalidOlderThan
 
-Invalid --older-than value: '%s'. Use a number followed by a unit: m/minutes, h/hours, d/days, w/weeks (e.g. 7d, 24h, 30m, 2w).
+Invalid --older-than value: '%s'. Use a number followed by a unit: m/minutes, h/hours, d/days, w/weeks, Examples: 7d, 24h, 30m, 2w.
 
 # prompt.confirm
 
-Delete %s trace file(s)? This cannot be undone.
+Delete %s trace file(s)? This can't be undone.
 
 # output.noneFound
 
@@ -62,7 +64,7 @@ Plan ID
 
 # examples
 
-- Delete all traces for all agents and sessions (with confirmation prompt):
+- Delete all traces for all agents and sessions; prompt for confirmation:
 
   <%= config.bin %> <%= command.id %>
 
@@ -78,10 +80,10 @@ Plan ID
 
   <%= config.bin %> <%= command.id %> --older-than 7d
 
-- Delete traces older than 24 hours for a specific agent, no prompt:
+- Delete traces older than 24 hours for a specific agent; don't prompt for confirmation:
 
   <%= config.bin %> <%= command.id %> --agent My_Agent --older-than 24h --no-prompt
 
-- Delete all traces without confirmation:
+- Delete all traces for all agents and sessions; don't prompt for confirmation:
 
   <%= config.bin %> <%= command.id %> --no-prompt
