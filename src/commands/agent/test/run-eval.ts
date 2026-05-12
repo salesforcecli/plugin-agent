@@ -71,7 +71,6 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static state = 'beta';
-  public static readonly hidden = true;
 
   public static readonly envVariablesSection = toHelpSection(
     'ENVIRONMENT VARIABLES',

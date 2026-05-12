@@ -141,9 +141,8 @@ describe('agent test run-eval', () => {
   // ─── State ─────────────────────────────────────────────────────────────────
 
   describe('command metadata', () => {
-    it('is in beta and hidden state', () => {
+    it('is in beta state', () => {
       expect(AgentTestRunEval.state).to.equal('beta');
-      expect(AgentTestRunEval.hidden).to.equal(true);
     });
   });
 
