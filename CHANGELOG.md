@@ -1,3 +1,9 @@
+# [1.40.0](https://github.com/salesforcecli/plugin-agent/compare/1.39.1...1.40.0) (2026-05-12)
+
+### Features
+
+- revert run-eval command to beta state ([f0462c4](https://github.com/salesforcecli/plugin-agent/commit/f0462c4a6ff801ba1e825aaedd7d07102009fe8c)), closes [#413](https://github.com/salesforcecli/plugin-agent/issues/413)
+
 ## [1.39.1](https://github.com/salesforcecli/plugin-agent/compare/1.39.0...1.39.1) (2026-05-12)
 
 ### Bug Fixes
