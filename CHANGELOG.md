@@ -1,3 +1,9 @@
+## [1.40.1](https://github.com/salesforcecli/plugin-agent/compare/1.40.0...1.40.1) (2026-05-13)
+
+### Bug Fixes
+
+- quick edit of --help for "agent test run-eval" ([a6f0e80](https://github.com/salesforcecli/plugin-agent/commit/a6f0e8086bfeb7a3db4467764425993d0870e8ff))
+
 # [1.40.0](https://github.com/salesforcecli/plugin-agent/compare/1.39.1...1.40.0) (2026-05-12)
 
 ### Features
