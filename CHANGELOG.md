@@ -1,3 +1,9 @@
+## [1.40.2](https://github.com/salesforcecli/plugin-agent/compare/1.40.1...1.40.2) (2026-05-13)
+
+### Bug Fixes
+
+- bump to v1.6.6 of the agents library for ConnectionManager fix ([e7a07ed](https://github.com/salesforcecli/plugin-agent/commit/e7a07edf8bf882d0bdfe7e6b88c1676eb76703a1))
+
 ## [1.40.1](https://github.com/salesforcecli/plugin-agent/compare/1.40.0...1.40.1) (2026-05-13)
 
 ### Bug Fixes
