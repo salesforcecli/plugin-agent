@@ -1,3 +1,9 @@
+## [1.40.4](https://github.com/salesforcecli/plugin-agent/compare/1.40.3...1.40.4) (2026-05-24)
+
+### Bug Fixes
+
+- **deps:** bump ws from 8.20.0 to 8.21.0 ([f6d116e](https://github.com/salesforcecli/plugin-agent/commit/f6d116e2c3247a5873007f5426bc641a85da0235))
+
 ## [1.40.3](https://github.com/salesforcecli/plugin-agent/compare/1.40.2...1.40.3) (2026-05-17)
 
 ### Bug Fixes
