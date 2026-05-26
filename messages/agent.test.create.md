@@ -6,7 +6,7 @@ Create an agent test in your org using a local test spec YAML file.
 
 To run this command, you must have an agent test spec file, which is a YAML file that lists the test cases for testing a specific agent. Use the "agent generate test-spec" CLI command to generate a test spec file. Then specify the file to this command with the --spec flag, or run this command with no flags to be prompted.
 
-When this command completes, your org contains the new agent test, which you can view and edit using the Testing Center UI. This command also retrieves the metadata component (AiEvaluationDefinition) associated with the new test to your local Salesforce DX project and displays its filename.
+When this command completes, your org contains the new agent test, which you can view and edit using the Testing Center UI (legacy) or Agentforce Studio (NGT). This command also retrieves the metadata component associated with the new test to your local Salesforce DX project and displays its filename. By default, the legacy AiEvaluationDefinition is created; use --test-runner agentforce-studio to author an AiTestingDefinition (NGT) instead.
 
 After you've created the test in the org, use the "agent test run" command to run it.
 
@@ -16,7 +16,7 @@ Path to the test spec YAML file.
 
 # flags.preview.summary
 
-Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
+Preview the test metadata file without deploying to your org.
 
 # flags.force-overwrite.summary
 
@@ -40,13 +40,17 @@ API name of the new test; the API name must not exist in the org.
 
   <%= config.bin %> <%= command.id %> --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
 
+- Author an Agentforce Studio (NGT) test from an NGT-shaped YAML; writes an AiTestingDefinition metadata file:
+
+  <%= config.bin %> <%= command.id %> --spec specs/ReturnsCheckout.ngt.yaml --api-name Returns_Checkout --test-runner agentforce-studio --target-org my-org
+
 # prompt.confirm
 
 A test with the API name %s already exists in the org. Do you want to overwrite it?
 
 # info.success
 
-Local AiEvaluationDefinition metadata XML file created at %s and agent test deployed to %s.
+Local test metadata XML file created at %s and agent test deployed to %s.
 
 # info.preview-success
 

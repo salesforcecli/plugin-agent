@@ -21,7 +21,7 @@ import { AgentTest, AgentTestCreateLifecycleStages } from '@salesforce/agents';
 import { DeployResult } from '@salesforce/source-deploy-retrieve';
 import { MultiStageOutput } from '@oclif/multi-stage-output';
 import { CLIError } from '@oclif/core/errors';
-import { makeFlags, promptForFlag, promptForYamlFile } from '../../../flags.js';
+import { makeFlags, promptForFlag, promptForYamlFile, testRunnerFlag } from '../../../flags.js';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -110,6 +110,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
     'force-overwrite': Flags.boolean({
       summary: messages.getMessage('flags.force-overwrite.summary'),
     }),
+    'test-runner': testRunnerFlag,
   };
   private mso?: MultiStageOutput<{ path: string }>;
 
@@ -175,33 +176,37 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       return Promise.resolve();
     });
 
+    const testRunner = flags['test-runner'];
+    const outputDirName = testRunner === 'agentforce-studio' ? 'aiTestingDefinitions' : 'aiEvaluationDefinitions';
+
     let path;
     let contents;
     try {
       const result = await AgentTest.create(connection, apiName, spec, {
-        outputDir: join('force-app', 'main', 'default', 'aiEvaluationDefinitions'),
+        outputDir: join('force-app', 'main', 'default', outputDirName),
         preview: flags.preview,
+        testRunner,
       });
       path = result.path;
       contents = result.contents;
     } catch (error) {
       const wrapped = SfError.wrap(error);
 
-      // Check for file not found errors
-      if (
-        wrapped.message.toLowerCase().includes('not found') ||
-        wrapped.message.toLowerCase().includes('enoent') ||
-        wrapped.code === 'ENOENT'
-      ) {
+      if (wrapped.code === 'ENOENT' || wrapped.name === 'ENOENT') {
         throw new SfError(`Test spec file not found: ${spec}`, 'SpecFileNotFound', [], 2, wrapped);
       }
 
-      // Check for deployment failures (API/network)
+      // NGT validateNgtSpec errors are user-fixable spec issues — exit 1, not deploy/network.
+      if (wrapped.name?.startsWith('ngt')) {
+        throw wrapped;
+      }
+
+      // Deploy failures from the lib are bare SfErrors with the componentFailures text as message
+      // and no structured code, so message substring is the only available signal.
       if (wrapped.message.toLowerCase().includes('deploy') || wrapped.message.toLowerCase().includes('api')) {
         throw new SfError(`Deployment failed: ${wrapped.message}`, 'DeploymentFailed', [wrapped.message], 4, wrapped);
       }
 
-      // Other errors (validation, format issues) use exit 1
       throw wrapped;
     }
 

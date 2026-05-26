@@ -178,7 +178,17 @@
     "command": "agent:test:create",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": ["api-name", "api-version", "flags-dir", "force-overwrite", "json", "preview", "spec", "target-org"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "flags-dir",
+      "force-overwrite",
+      "json",
+      "preview",
+      "spec",
+      "target-org",
+      "test-runner"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {
