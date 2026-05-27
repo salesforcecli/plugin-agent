@@ -1,13 +1,3 @@
-# Literal transcription of spec doc §7 "ReturnsCheckoutSuite"
-# Source: NGT YAML Test-Spec Proposal [W-22513509]
-# https://docs.google.com/document/d/13tqS-2EwT-Aqy4bdqYc6wZfXUYLbBkNHYYxjwSn7ZnU
-#
-# Cleanup applied: spec §7 contains two "case 6" entries. The first is a
-# duplicate of case 5 (likely a typo). This fixture keeps only the second
-# (the handoff scorer example). The §7 numbering 1..7 is preserved with
-# the duplicate dropped — so this fixture has 6 cases, not 7.
-#
-# Bug to flag on W-22513509: duplicate "case 6" entries in the spec doc.
 name: ReturnsCheckoutSuite
 description: Validates the Returns / Checkout flow on agent v1.
 subjectType: AGENT
