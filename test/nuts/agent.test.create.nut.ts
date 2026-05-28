@@ -77,4 +77,41 @@ describe('agent test create', function () {
       }
     );
   });
+
+  it('should create NGT test from NGT-shaped spec file with --test-runner agentforce-studio', () => {
+    const testApiName = genUniqueString('Test_Agent_NGT_%s');
+    const specPath = join(session.project.dir, 'specs', 'ngtTestSpec.yaml');
+
+    const commandResult = execCmd<AgentTestCreateResult>(
+      `agent test create --api-name "${testApiName}" --spec "${specPath}" --test-runner agentforce-studio --target-org ${getUsername()} --preview --json`,
+      { ensureExitCode: 0 }
+    );
+
+    const result = commandResult.jsonOutput?.result;
+    if (!result || typeof result !== 'object' || !result.path || !result.contents) {
+      throw new Error(
+        `Command failed or returned invalid result. Result type: ${typeof result}, value: ${JSON.stringify(result)}`
+      );
+    }
+
+    expect(result.path).to.be.a('string').and.not.be.empty;
+    expect(result.contents).to.be.a('string').and.not.be.empty;
+    // preview mode writes <apiName>-preview-<ISO>.xml; non-preview would be .aiTestingDefinition-meta.xml.
+    expect(result.path).to.match(/-preview-.*\.xml$/);
+    expect(result.contents).to.include('<AiTestingDefinition');
+  });
+
+  it('should fail with NGT validation error when legacy YAML is passed with --test-runner agentforce-studio', () => {
+    const testApiName = genUniqueString('Test_Agent_Legacy_%s');
+    const legacySpecPath = join(session.project.dir, 'specs', 'testSpec.yaml');
+
+    const commandResult = execCmd<AgentTestCreateResult>(
+      `agent test create --api-name "${testApiName}" --spec "${legacySpecPath}" --test-runner agentforce-studio --target-org ${getUsername()} --preview --json`,
+      { ensureExitCode: 'nonZero' }
+    );
+
+    // Legacy YAML uses top-level utterance/expectedTopic per testCase, so NGT validation fails on
+    // the missing `inputs:` array. Asserts the NGT validator runs (rather than the legacy path).
+    expect(commandResult.jsonOutput?.message ?? '').to.match(/NGT test case|inputs/i);
+  });
 });
