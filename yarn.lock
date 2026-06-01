@@ -1422,16 +1422,16 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^1.6.6":
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.6.6.tgz#ef06c2af30eeada8fdee22354a451ba828e7eb54"
-  integrity sha512-YMYOPv45aSLjIARu+9vkHz5GWXGh0EMhiQw+oCBEwlxD55/O4Gm6Zb/HzLuOPKhXt5xn9TogG87vvHvCNgiUyA==
+"@salesforce/agents@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.npmjs.org/@salesforce/agents/-/agents-1.7.1.tgz#bddc330ee35a894d614a426544aa3bea5f043a8f"
+  integrity sha512-9bDOgahfl7u85NVHxkmC0hjiFWdbRpGrm6gQC0422led66UiLejUI9A0ET48+DgsEV/55iogn0i9IpiD5uB7mg==
   dependencies:
-    "@salesforce/core" "^8.29.1"
+    "@salesforce/core" "^8.31.0"
     "@salesforce/kit" "^3.2.6"
-    "@salesforce/source-deploy-retrieve" "^12.35.8"
+    "@salesforce/source-deploy-retrieve" "^12.36.0"
     "@salesforce/types" "^1.7.1"
-    fast-xml-parser "^5.7.3"
+    fast-xml-parser "^5.8.0"
     nock "^14.0.15"
     yaml "^2.8.4"
 
@@ -1451,9 +1451,9 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/core@^8.23.1", "@salesforce/core@^8.28.3", "@salesforce/core@^8.29.0", "@salesforce/core@^8.29.1", "@salesforce/core@^8.30.0", "@salesforce/core@^8.30.3":
+"@salesforce/core@^8.23.1", "@salesforce/core@^8.28.3", "@salesforce/core@^8.29.0", "@salesforce/core@^8.30.0", "@salesforce/core@^8.30.3", "@salesforce/core@^8.31.0":
   version "8.31.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.31.0.tgz#153beb193af8fce73d31cc39afee794c4c1ee1c0"
+  resolved "https://registry.npmjs.org/@salesforce/core/-/core-8.31.0.tgz#153beb193af8fce73d31cc39afee794c4c1ee1c0"
   integrity sha512-TXQoR7Bs0Dk5AuNY8eaNRhMeLDLcpJ8su7LVxn7VVfnRxITrRh4gkSuOAXdBKAqx0WcjRONDs1twedaOE7Xu4Q==
   dependencies:
     "@jsforce/jsforce-node" "^3.10.13"
@@ -1575,12 +1575,12 @@
     proxy-agent "^6.5.0"
     yaml "^2.8.3"
 
-"@salesforce/source-deploy-retrieve@^12.35.8":
-  version "12.35.9"
-  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.35.9.tgz#4de71e6e8df1e94c7b110e8a9f46d9d411824b00"
-  integrity sha512-Qud+1lHS0u+LM/AAHPN9Y/6W6hBZ8nvw6/TxJRzn/BuvRSz74YBwvmVhmn5pvpZdNrYmKRMPxsK47l2VmazSsw==
+"@salesforce/source-deploy-retrieve@^12.36.0":
+  version "12.36.1"
+  resolved "https://registry.npmjs.org/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.36.1.tgz#c054e6efc95fefc29179e6ee83b81ff145187a51"
+  integrity sha512-W+jVWAovoAfbtgCRzBKtVxKhQoBzFoEyAHLiCtT8U84/lBLIqeTCklYTA155GRSdC8DwQ26j0NKiDgpR79TqcQ==
   dependencies:
-    "@salesforce/core" "^8.29.0"
+    "@salesforce/core" "^8.31.0"
     "@salesforce/kit" "^3.2.4"
     "@salesforce/ts-types" "^2.0.12"
     "@salesforce/types" "^1.6.0"
@@ -1593,7 +1593,7 @@
     mime "2.6.0"
     minimatch "^9.0.9"
     proxy-agent "^6.5.0"
-    yaml "^2.8.3"
+    yaml "^2.9.0"
 
 "@salesforce/ts-types@^2.0.11", "@salesforce/ts-types@^2.0.12":
   version "2.0.12"
@@ -4028,9 +4028,9 @@ fast-xml-parser@5.7.3, fast-xml-parser@^5.7.1, fast-xml-parser@^5.7.2:
     path-expression-matcher "^1.5.0"
     strnum "^2.2.3"
 
-fast-xml-parser@^5.7.3:
+fast-xml-parser@^5.7.3, fast-xml-parser@^5.8.0:
   version "5.8.0"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.8.0.tgz#64d71f0f8d4bf23621dffd762aef7e98c1884fc1"
+  resolved "https://registry.npmjs.org/fast-xml-parser/-/fast-xml-parser-5.8.0.tgz#64d71f0f8d4bf23621dffd762aef7e98c1884fc1"
   integrity sha512-6bIM7fsJxeo3uXv7OncQYsBAMPJ7V16Slahl/6M98C/i2q+vB1+4a0MtrvYwDFEUrwDSbAmeLDRXsOBwrL7yAg==
   dependencies:
     "@nodable/entities" "^2.1.0"
