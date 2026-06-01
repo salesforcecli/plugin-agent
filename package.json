@@ -94,6 +94,16 @@
           "validate": {
             "description": "Command to validate an Agent Script file.",
             "external": true
+          },
+          "adl": {
+            "description": "Commands to manage Agentforce Data Libraries.",
+            "external": true,
+            "subtopics": {
+              "file": {
+                "description": "Commands to manage files in an SFDRIVE data library.",
+                "external": true
+              }
+            }
           }
         }
       }
