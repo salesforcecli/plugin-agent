@@ -26,6 +26,7 @@ import { SfProject } from '@salesforce/core';
 const MOCK_PROJECT_DIR = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template');
 
 const RECENT_MTIME = new Date(Date.now() - 7 * 86_400_000);
+const MIDDLE_MTIME = new Date(Date.now() - 30 * 86_400_000);
 const OLD_MTIME = new Date(Date.now() - 60 * 86_400_000);
 
 const MOCK_TRACES_AGENT_A = [
@@ -153,7 +154,8 @@ describe('agent trace list', () => {
   describe('--since filter', () => {
     it('returns only traces at or after the given date (date-only)', async () => {
       // RECENT_MTIME is 2026-04-07, OLD_MTIME is 2026-03-01
-      const result = await AgentTraceList.run(['--since', '2026-04-01']);
+      const dateString = MIDDLE_MTIME.toISOString().slice(0, 10).toString();
+      const result = await AgentTraceList.run(['--since', dateString]);
       const planIds = result.map((r: any) => r.planId);
       expect(planIds).to.include('plan-1');
       expect(planIds).to.not.include('plan-2');
@@ -205,7 +207,8 @@ describe('agent trace list', () => {
 
   describe('combined filters', () => {
     it('applies --agent and --since together', async () => {
-      const result = await AgentTraceList.run(['--agent', 'My_Agent_A', '--since', '2026-04-01']);
+      const dateString = MIDDLE_MTIME.toISOString().slice(0, 10).toString();
+      const result = await AgentTraceList.run(['--agent', 'My_Agent_A', '--since', dateString]);
       expect(result).to.have.length(1);
       expect(result[0].planId).to.equal('plan-1');
     });
