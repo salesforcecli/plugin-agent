@@ -4,7 +4,7 @@ List files in an Agentforce Data Library.
 
 # description
 
-Returns a paginated list of files in an SFDRIVE library with per-file indexing status.
+Returns the list of files in an SFDRIVE library including file name, size, and creation date.
 
 # examples
 

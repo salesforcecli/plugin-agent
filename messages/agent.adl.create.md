@@ -4,7 +4,7 @@ Create an Agentforce Data Library.
 
 # description
 
-Creates a new data library in the target org. The --source-type flag determines the type of library: SFDRIVE (file upload), KNOWLEDGE (Salesforce Knowledge articles), or RETRIEVER (existing retriever).
+Creates a new data library in the target org. The --source-type flag determines the type of library: SFDRIVE (file upload), KNOWLEDGE (Salesforce Knowledge articles), or RETRIEVER (existing active Custom Retriever).
 
 # examples
 
@@ -30,7 +30,7 @@ API name for the data library (max 80 characters, alphanumeric and underscores o
 
 # flags.source-type.summary
 
-Type of grounding source: sfdrive, knowledge, or retriever.
+Type of grounding source: sfdrive (file upload), knowledge (Salesforce Knowledge articles), or retriever (existing active Custom Retriever).
 
 # flags.description.summary
 
@@ -42,7 +42,7 @@ Index mode for SFDRIVE libraries: basic or enhanced.
 
 # flags.retriever-id.summary
 
-Retriever ID for RETRIEVER source type libraries.
+ID of an active Custom Retriever (required for RETRIEVER source type; retriever must be active).
 
 # flags.primary-index-field1.summary
 

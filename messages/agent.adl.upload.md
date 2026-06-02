@@ -6,7 +6,7 @@ Upload a file to an SFDRIVE Agentforce Data Library.
 
 Performs the multi-step upload workflow: checks upload readiness, obtains a pre-signed S3 URL, uploads the file, triggers indexing, and optionally polls until the library is ready (retrieverId is populated).
 
-This command only works with SFDRIVE libraries. For KNOWLEDGE libraries, indexing happens automatically after creation.
+This command only works with SFDRIVE libraries. KNOWLEDGE libraries index automatically after creation, and RETRIEVER libraries require no file upload.
 
 # examples
 
