@@ -185,8 +185,8 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       const result = await AgentTest.create(connection, apiName, spec, {
         outputDir: join('force-app', 'main', 'default', outputDirName),
         preview: flags.preview,
-        ...(testRunner ? { testRunner } : {}),
-      } as { outputDir: string; preview?: boolean });
+        testRunner,
+      });
       path = result.path;
       contents = result.contents;
     } catch (error) {

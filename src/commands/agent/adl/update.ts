@@ -65,17 +65,24 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       flags['content-fields'] !== undefined || flags['restrict-to-public-articles'] !== undefined;
 
     if (hasKnowledgeFlags) {
-      const knowledgeConfig: { contentFields?: string[]; isRestrictToPublicArticle?: boolean } = {};
-      if (flags['content-fields'] !== undefined) {
-        knowledgeConfig.contentFields = flags['content-fields'].split(',').map((f) => f.trim());
+      const detail = await AgentDataLibrary.get(connection, flags['library-id']);
+      if (detail.sourceType !== 'KNOWLEDGE') {
+        this.warn(
+          '--content-fields and --restrict-to-public-articles are only valid for KNOWLEDGE libraries. Ignoring.'
+        );
+      } else {
+        const knowledgeConfig: { contentFields?: string[]; isRestrictToPublicArticle?: boolean } = {};
+        if (flags['content-fields'] !== undefined) {
+          knowledgeConfig.contentFields = flags['content-fields'].split(',').map((f) => f.trim());
+        }
+        if (flags['restrict-to-public-articles'] !== undefined) {
+          knowledgeConfig.isRestrictToPublicArticle = flags['restrict-to-public-articles'];
+        }
+        input.groundingSource = {
+          sourceType: 'KNOWLEDGE',
+          knowledgeConfig,
+        };
       }
-      if (flags['restrict-to-public-articles'] !== undefined) {
-        knowledgeConfig.isRestrictToPublicArticle = flags['restrict-to-public-articles'];
-      }
-      input.groundingSource = {
-        sourceType: 'KNOWLEDGE',
-        knowledgeConfig,
-      };
     }
 
     let result: DataLibraryDetail;

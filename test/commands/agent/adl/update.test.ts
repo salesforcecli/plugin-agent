@@ -54,14 +54,22 @@ describe('agent adl update', () => {
   });
 
   it('should include knowledgeConfig when content-fields provided', async () => {
-    const mockResult = { libraryId: '1JD000001', masterLabel: 'KB', developerName: 'KB', status: 'READY' };
+    const getResult = {
+      libraryId: '1JD000001',
+      masterLabel: 'KB',
+      developerName: 'KB',
+      sourceType: 'KNOWLEDGE',
+      status: 'READY',
+    };
+    const patchResult = { libraryId: '1JD000001', masterLabel: 'KB', developerName: 'KB', status: 'READY' };
     let capturedBody: string | undefined;
 
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
-    $$.fakeConnectionRequest = (request: { body?: string }) => {
+    $$.fakeConnectionRequest = (request: { method?: string; body?: string }) => {
+      if (request.method === 'GET') return Promise.resolve(getResult);
       capturedBody = request.body;
-      return Promise.resolve(mockResult);
+      return Promise.resolve(patchResult);
     };
 
     await AgentAdlUpdate.run([
@@ -79,14 +87,22 @@ describe('agent adl update', () => {
   });
 
   it('should include restrict-to-public-articles flag', async () => {
-    const mockResult = { libraryId: '1JD000001', masterLabel: 'KB', developerName: 'KB', status: 'READY' };
+    const getResult = {
+      libraryId: '1JD000001',
+      masterLabel: 'KB',
+      developerName: 'KB',
+      sourceType: 'KNOWLEDGE',
+      status: 'READY',
+    };
+    const patchResult = { libraryId: '1JD000001', masterLabel: 'KB', developerName: 'KB', status: 'READY' };
     let capturedBody: string | undefined;
 
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
-    $$.fakeConnectionRequest = (request: { body?: string }) => {
+    $$.fakeConnectionRequest = (request: { method?: string; body?: string }) => {
+      if (request.method === 'GET') return Promise.resolve(getResult);
       capturedBody = request.body;
-      return Promise.resolve(mockResult);
+      return Promise.resolve(patchResult);
     };
 
     await AgentAdlUpdate.run([
