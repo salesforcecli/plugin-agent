@@ -144,6 +144,34 @@ describe('agent adl create', () => {
     expect(body.groundingSource.knowledgeConfig.primaryIndexField2).to.equal('Title');
   });
 
+  it('should pass index-mode for SFDRIVE', async () => {
+    const mockResult = { libraryId: '1JD000003', masterLabel: 'Test', developerName: 'Test', sourceType: 'SFDRIVE' };
+    let capturedBody: string | undefined;
+
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    $$.fakeConnectionRequest = (request: { body?: string }) => {
+      if (request.body) capturedBody = request.body;
+      return Promise.resolve(mockResult);
+    };
+
+    await AgentAdlCreate.run([
+      '--target-org',
+      testOrg.username,
+      '--name',
+      'Test',
+      '--developer-name',
+      'Test_Enhanced',
+      '--source-type',
+      'sfdrive',
+      '--index-mode',
+      'enhanced',
+    ]);
+
+    const body = JSON.parse(capturedBody!);
+    expect(body.groundingSource.indexMode).to.equal('ENHANCED');
+  });
+
   it('should throw CreateFailed on API error', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);

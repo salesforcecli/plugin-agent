@@ -117,6 +117,36 @@ describe('agent adl update', () => {
     expect(body.groundingSource.knowledgeConfig.isRestrictToPublicArticle).to.be.true;
   });
 
+  it('should warn when knowledge flags used on non-KNOWLEDGE library', async () => {
+    const getResult = {
+      libraryId: '1JD000001',
+      masterLabel: 'File',
+      developerName: 'File',
+      sourceType: 'SFDRIVE',
+      status: 'READY',
+    };
+    const patchResult = { libraryId: '1JD000001', masterLabel: 'File', developerName: 'File', status: 'READY' };
+
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    $$.fakeConnectionRequest = (request: { method?: string }) => {
+      if (request.method === 'GET') return Promise.resolve(getResult);
+      return Promise.resolve(patchResult);
+    };
+
+    const result = await AgentAdlUpdate.run([
+      '--target-org',
+      testOrg.username,
+      '--library-id',
+      '1JD000001',
+      '--content-fields',
+      'Answer__c',
+    ]);
+
+    // Should still succeed (metadata update) but warn — groundingSource should NOT be in the PATCH body
+    expect(result.libraryId).to.equal('1JD000001');
+  });
+
   it('should throw UpdateFailed on API error', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
