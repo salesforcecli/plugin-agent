@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlFileAddResult",
+  "definitions": {
+    "AgentAdlFileAddResult": {
+      "$ref": "#/definitions/FileAddResult"
+    },
+    "FileAddResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "libraryId": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "fileName", "libraryId"],
+      "additionalProperties": false
+    }
+  }
+}

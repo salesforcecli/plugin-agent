@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlGetResult",
+  "definitions": {
+    "AgentAdlGetResult": {
+      "$ref": "#/definitions/DataLibraryDetail"
+    },
+    "DataLibraryDetail": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "masterLabel": {
+          "type": "string"
+        },
+        "developerName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "retrieverId": {
+          "type": "string"
+        },
+        "retrieverLabel": {
+          "type": "string"
+        },
+        "dataSpaceScopeId": {
+          "type": "string"
+        },
+        "groundingSource": {
+          "type": "object",
+          "properties": {
+            "groundingSourceType": {
+              "type": "string"
+            },
+            "groundingFileRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GroundingFileRef"
+              }
+            }
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": ["libraryId", "masterLabel", "developerName", "sourceType"],
+      "additionalProperties": false
+    },
+    "GroundingFileRef": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        }
+      },
+      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "additionalProperties": false
+    }
+  }
+}
