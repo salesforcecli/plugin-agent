@@ -1,3 +1,13 @@
+# [1.41.0](https://github.com/salesforcecli/plugin-agent/compare/1.40.5...1.41.0) (2026-06-02)
+
+### Bug Fixes
+
+- bump agents lib W-22776265 ([#434](https://github.com/salesforcecli/plugin-agent/issues/434)) ([c129028](https://github.com/salesforcecli/plugin-agent/commit/c129028a1dd2f913789925081b1ad3798534f42a))
+
+### Features
+
+- wire --test-runner agentforce-studio into agent test create @W-22513740@ ([#430](https://github.com/salesforcecli/plugin-agent/issues/430)) ([33ddd42](https://github.com/salesforcecli/plugin-agent/commit/33ddd424cbb86207cfe0821e90ce12e7b9c95ef3))
+
 ## [1.40.5](https://github.com/salesforcecli/plugin-agent/compare/1.40.4...1.40.5) (2026-05-24)
 
 ### Bug Fixes

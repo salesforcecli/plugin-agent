@@ -130,7 +130,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --version 2 --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/activate.ts)_
 
 ## `sf agent create`
 
@@ -197,7 +197,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -238,7 +238,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -345,7 +345,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -422,7 +422,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -484,7 +484,7 @@ EXAMPLES
       my-package --source-org my-scratch-org
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -549,7 +549,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -622,7 +622,7 @@ EXAMPLES
     $ sf agent preview --use-live-actions --apex-debug --output-dir transcripts/my-preview
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/preview.ts)_
 
 ## `sf agent preview end`
 
@@ -694,7 +694,7 @@ EXAMPLES
     $ sf agent preview end --all --target-org <target_org>
 ```
 
-_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/preview/end.ts)_
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/preview/end.ts)_
 
 ## `sf agent preview send`
 
@@ -752,7 +752,7 @@ EXAMPLES
     $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/preview/send.ts)_
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/preview/send.ts)_
 
 ## `sf agent preview sessions`
 
@@ -785,7 +785,7 @@ EXAMPLES
     $ sf agent preview sessions
 ```
 
-_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/preview/sessions.ts)_
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/preview/sessions.ts)_
 
 ## `sf agent preview start`
 
@@ -850,7 +850,7 @@ EXAMPLES
     $ sf agent preview start --api-name My_Published_Agent
 ```
 
-_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/preview/start.ts)_
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -910,7 +910,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --concise
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -919,17 +919,19 @@ Create an agent test in your org using a local test spec YAML file.
 ```
 USAGE
   $ sf agent test create -o <value> [--json] [--flags-dir <value>] [--api-name <value>] [--spec <value>] [--api-version
-    <value>] [--preview] [--force-overwrite]
+    <value>] [--preview] [--force-overwrite] [--test-runner agentforce-studio|testing-center]
 
 FLAGS
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-      --api-name=<value>     API name of the new test; the API name must not exist in the org.
-      --api-version=<value>  Override the api version used for api requests made by this command
-      --force-overwrite      Don't prompt for confirmation when overwriting an existing test (based on API name) in your
-                             org.
-      --preview              Preview the test metadata file (AiEvaluationDefinition) without deploying to your org.
-      --spec=<value>         Path to the test spec YAML file.
+  -o, --target-org=<value>    (required) Username or alias of the target org. Not required if the `target-org`
+                              configuration variable is already set.
+      --api-name=<value>      API name of the new test; the API name must not exist in the org.
+      --api-version=<value>   Override the api version used for api requests made by this command
+      --force-overwrite       Don't prompt for confirmation when overwriting an existing test (based on API name) in
+                              your org.
+      --preview               Preview the test metadata file without deploying to your org.
+      --spec=<value>          Path to the test spec YAML file.
+      --test-runner=<option>  Explicitly specify which test runner to use (agentforce-studio or testing-center).
+                              <options: agentforce-studio|testing-center>
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -943,8 +945,9 @@ DESCRIPTION
   to this command with the --spec flag, or run this command with no flags to be prompted.
 
   When this command completes, your org contains the new agent test, which you can view and edit using the Testing
-  Center UI. This command also retrieves the metadata component (AiEvaluationDefinition) associated with the new test to
-  your local Salesforce DX project and displays its filename.
+  Center UI (legacy) or Agentforce Studio (NGT). This command also retrieves the metadata component associated with the
+  new test to your local Salesforce DX project and displays its filename. By default, the legacy AiEvaluationDefinition
+  is created; use --test-runner agentforce-studio to author an AiTestingDefinition (NGT) instead.
 
   After you've created the test in the org, use the "agent test run" command to run it.
 
@@ -963,9 +966,23 @@ EXAMPLES
   Preview what the agent test metadata (AiEvaluationDefinition) looks like without deploying it to your default org:
 
     $ sf agent test create --spec specs/Resort_Manager-testSpec.yaml --api-name Resort_Manager_Test --preview
+
+  Author an Agentforce Studio (NGT) test from an NGT-shaped YAML; writes an AiTestingDefinition metadata file:
+
+    $ sf agent test create --spec specs/ReturnsCheckout.ngt.yaml --api-name Returns_Checkout --test-runner \
+      agentforce-studio --target-org my-org
+
+FLAG DESCRIPTIONS
+  --test-runner=agentforce-studio|testing-center
+
+    Explicitly specify which test runner to use (agentforce-studio or testing-center).
+
+    By default, the command automatically detects which test runner to use based on the test definition metadata type in
+    your org. Use this flag to explicitly specify the runner type. 'agentforce-studio' uses AiTestingDefinition
+    metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -1000,7 +1017,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -1076,7 +1093,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -1160,7 +1177,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -1244,7 +1261,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/run.ts)_
 
 ## `sf agent test run-eval`
 
@@ -1320,7 +1337,7 @@ EXAMPLES
   $ echo '{"tests":[...]}' | sf agent test run-eval --spec --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/test/run-eval.ts)_
+_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/test/run-eval.ts)_
 
 ## `sf agent trace delete`
 
@@ -1384,7 +1401,7 @@ EXAMPLES
     $ sf agent trace delete --no-prompt
 ```
 
-_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/trace/delete.ts)_
+_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/trace/delete.ts)_
 
 ## `sf agent trace list`
 
@@ -1454,7 +1471,7 @@ FLAG DESCRIPTIONS
     (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
 ```
 
-_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/trace/list.ts)_
+_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/trace/list.ts)_
 
 ## `sf agent trace read`
 
@@ -1542,7 +1559,7 @@ EXAMPLES
     $ sf agent trace read --session-id <SESSION_ID> --json
 ```
 
-_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/trace/read.ts)_
+_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/trace/read.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -1589,6 +1606,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.40.5/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.41.0/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
