@@ -14,11 +14,17 @@
         "fileName": {
           "type": "string"
         },
+        "fileNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "libraryId": {
           "type": "string"
         }
       },
-      "required": ["success", "fileName", "libraryId"],
+      "required": ["success", "fileName", "fileNames", "libraryId"],
       "additionalProperties": false
     }
   }
