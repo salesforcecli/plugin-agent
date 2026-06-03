@@ -1,3 +1,13 @@
+# [1.42.0](https://github.com/salesforcecli/plugin-agent/compare/1.41.0...1.42.0) (2026-06-03)
+
+### Bug Fixes
+
+- - update validation, typo fix, revert test/create ([5d6d449](https://github.com/salesforcecli/plugin-agent/commit/5d6d449d2c06752d647986aaa50d3e7884cd44b0))
+
+### Features
+
+- add agent adl commands for Agentforce Data Library management @W-22787736@ ([c0e116a](https://github.com/salesforcecli/plugin-agent/commit/c0e116a75f73baf9ca70bedb0b4befee4bf14950))
+
 # [1.41.0](https://github.com/salesforcecli/plugin-agent/compare/1.40.5...1.41.0) (2026-06-02)
 
 ### Bug Fixes
