@@ -32,6 +32,10 @@ export default class AgentAdlList extends SfCommand<AgentAdlListResult> {
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
+    'source-type': Flags.option({
+      summary: messages.getMessage('flags.source-type.summary'),
+      options: ['sfdrive', 'knowledge', 'retriever'] as const,
+    })(),
   };
 
   public async run(): Promise<AgentAdlListResult> {
@@ -40,7 +44,9 @@ export default class AgentAdlList extends SfCommand<AgentAdlListResult> {
 
     let result: { libraries: DataLibrarySummary[] };
     try {
-      result = await AgentDataLibrary.list(connection);
+      result = await AgentDataLibrary.list(connection, {
+        sourceType: flags['source-type'],
+      });
     } catch (error) {
       const wrapped = SfError.wrap(error);
       throw new SfError(messages.getMessage('error.listFailed', [wrapped.message]), 'ListFailed', [], 4, wrapped);

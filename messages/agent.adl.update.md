@@ -44,6 +44,10 @@ Comma-separated list of content fields for KNOWLEDGE libraries (triggers re-inde
 
 Restrict to public Knowledge articles only (KNOWLEDGE libraries, triggers re-indexing).
 
+# flags.retriever-id.summary
+
+Swap the retriever for a RETRIEVER library (must be an active Custom Retriever ID).
+
 # error.updateFailed
 
 Failed to update data library: %s

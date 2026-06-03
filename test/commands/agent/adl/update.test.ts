@@ -147,6 +147,31 @@ describe('agent adl update', () => {
     expect(result.libraryId).to.equal('1JD000001');
   });
 
+  it('should pass retriever-id for RETRIEVER swap', async () => {
+    const mockResult = { libraryId: '1JD000001', masterLabel: 'Ret', developerName: 'Ret', status: 'READY' };
+    let capturedBody: string | undefined;
+
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    $$.fakeConnectionRequest = (request: { method?: string; body?: string }) => {
+      if (request.method === 'PATCH') capturedBody = request.body;
+      return Promise.resolve(mockResult);
+    };
+
+    await AgentAdlUpdate.run([
+      '--target-org',
+      testOrg.username,
+      '--library-id',
+      '1JD000001',
+      '--retriever-id',
+      '1Cx000NEW',
+    ]);
+
+    const body = JSON.parse(capturedBody!);
+    expect(body.groundingSource.sourceType).to.equal('RETRIEVER');
+    expect(body.groundingSource.retrieverId).to.equal('1Cx000NEW');
+  });
+
   it('should throw UpdateFailed on API error', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);

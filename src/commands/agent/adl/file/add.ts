@@ -37,11 +37,12 @@ export default class AgentAdlFileAdd extends SfCommand<AgentAdlFileAddResult> {
       char: 'i',
       required: true,
     }),
-    file: Flags.file({
-      summary: messages.getMessage('flags.file.summary'),
+    path: Flags.file({
+      summary: messages.getMessage('flags.path.summary'),
       char: 'f',
       required: true,
       exists: true,
+      multiple: true,
     }),
   };
 
@@ -49,11 +50,11 @@ export default class AgentAdlFileAdd extends SfCommand<AgentAdlFileAddResult> {
     const { flags } = await this.parse(AgentAdlFileAdd);
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const libraryId = flags['library-id'];
-    const filePath = flags.file;
+    const filePaths = flags.path;
 
     let result: FileAddResult;
     try {
-      result = await AgentDataLibrary.addFile(connection, libraryId, filePath);
+      result = await AgentDataLibrary.addFile(connection, libraryId, filePaths);
     } catch (error) {
       const wrapped = SfError.wrap(error);
       throw new SfError(messages.getMessage('error.addFailed', [wrapped.message]), 'AddFailed', [], 4, wrapped);

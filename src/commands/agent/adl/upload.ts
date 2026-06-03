@@ -42,6 +42,7 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
       char: 'f',
       required: true,
       exists: true,
+      multiple: true,
     }),
     // eslint-disable-next-line sf-plugin/flag-min-max-default
     wait: Flags.duration({
@@ -56,11 +57,11 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
     const { flags } = await this.parse(AgentAdlUpload);
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const libraryId = flags['library-id'];
-    const filePath = flags.file;
+    const filePaths = flags.file;
 
     let result: UploadResult;
     try {
-      result = await AgentDataLibrary.upload(connection, libraryId, filePath, {
+      result = await AgentDataLibrary.upload(connection, libraryId, filePaths, {
         waitMinutes: flags.wait?.minutes,
       });
     } catch (error) {

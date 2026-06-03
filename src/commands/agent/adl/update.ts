@@ -51,6 +51,9 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       summary: messages.getMessage('flags.restrict-to-public-articles.summary'),
       allowNo: true,
     }),
+    'retriever-id': Flags.string({
+      summary: messages.getMessage('flags.retriever-id.summary'),
+    }),
   };
 
   public async run(): Promise<AgentAdlUpdateResult> {
@@ -83,6 +86,13 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
           knowledgeConfig,
         };
       }
+    }
+
+    if (flags['retriever-id']) {
+      input.groundingSource = {
+        sourceType: 'RETRIEVER',
+        retrieverId: flags['retriever-id'],
+      };
     }
 
     let result: DataLibraryDetail;

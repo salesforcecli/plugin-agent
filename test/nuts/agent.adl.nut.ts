@@ -104,11 +104,11 @@ describe('agent adl SFDRIVE NUTs', function () {
     expect(result.jsonOutput!.result.indexingStatus).to.have.property('status');
   });
 
-  it('should upload a file and wait for READY', function () {
+  it('should upload multiple files and wait for READY', function () {
     this.timeout(10 * 60 * 1000);
 
     const result = execCmd<{ libraryId: string; status: string; retrieverId?: string }>(
-      `agent adl upload --target-org ${targetOrg} --library-id ${libraryId} --file ${testFile} --wait 10 --json`,
+      `agent adl upload --target-org ${targetOrg} --library-id ${libraryId} --file ${testFile} --file ${testFile2} --wait 10 --json`,
       { ensureExitCode: 0 }
     );
 
@@ -130,7 +130,21 @@ describe('agent adl SFDRIVE NUTs', function () {
     this.timeout(3 * 60 * 1000);
 
     const result = execCmd<{ success: boolean; fileName: string }>(
-      `agent adl file add --target-org ${targetOrg} --library-id ${libraryId} --file ${testFile2} --json`,
+      `agent adl file add -i ${libraryId} --path ${testFile2} --target-org ${targetOrg} --json`,
+      { ensureExitCode: 0 }
+    );
+
+    expect(result.jsonOutput!.result.success).to.be.true;
+  });
+
+  it('should add multiple files in batch', function () {
+    this.timeout(3 * 60 * 1000);
+
+    const file3 = join(tmpdir(), 'adl-nut-test3.txt');
+    writeFileSync(file3, 'Third NUT test file.');
+
+    const result = execCmd<{ success: boolean; fileName: string }>(
+      `agent adl file add -i ${libraryId} --path ${testFile2} --path ${file3} --target-org ${targetOrg} --json`,
       { ensureExitCode: 0 }
     );
 
@@ -139,11 +153,22 @@ describe('agent adl SFDRIVE NUTs', function () {
 
   it('should list files in the library', () => {
     const result = execCmd<{ files: Array<{ fileId: string; fileName: string }> }>(
-      `agent adl file list --target-org ${targetOrg} --library-id ${libraryId} --json`,
+      `agent adl file list -i ${libraryId} -o ${targetOrg} --json`,
       { ensureExitCode: 0 }
     );
 
     expect(result.jsonOutput!.result.files.length).to.be.greaterThan(0);
+  });
+
+  it('should list with --source-type filter', () => {
+    const result = execCmd<{ libraries: Array<{ sourceType: string }> }>(
+      `agent adl list --target-org ${targetOrg} --source-type sfdrive --json`,
+      { ensureExitCode: 0 }
+    );
+
+    for (const lib of result.jsonOutput!.result.libraries) {
+      expect(lib.sourceType).to.equal('SFDRIVE');
+    }
   });
 
   it('should delete the library (best-effort cleanup)', () => {
@@ -286,6 +311,15 @@ describe('agent adl RETRIEVER NUTs', function () {
     );
 
     expect(result.jsonOutput!.result.masterLabel).to.equal('NUT_Ret_Updated');
+  });
+
+  it('should swap retrieverId via --retriever-id flag', () => {
+    const result = execCmd<{ libraryId: string; retrieverId: string }>(
+      `agent adl update --target-org ${targetOrg} --library-id ${libraryId} --retriever-id ${retrieverId} --json`,
+      { ensureExitCode: 0 }
+    );
+
+    expect(result.jsonOutput!.result.retrieverId).to.equal(retrieverId);
   });
 
   it('should delete Retriever library', () => {
