@@ -89,6 +89,14 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
     }
 
     if (flags['retriever-id']) {
+      if (hasKnowledgeFlags) {
+        throw new SfError(
+          'Cannot combine --retriever-id with --content-fields or --restrict-to-public-articles.',
+          'ConflictingFlags',
+          [],
+          1
+        );
+      }
       input.groundingSource = {
         sourceType: 'RETRIEVER',
         retrieverId: flags['retriever-id'],
