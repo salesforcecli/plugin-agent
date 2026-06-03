@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlUploadResult",
+  "definitions": {
+    "AgentAdlUploadResult": {
+      "$ref": "#/definitions/UploadResult"
+    },
+    "UploadResult": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "retrieverId": {
+          "type": "string"
+        },
+        "ragFeatureConfigId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": ["libraryId", "status"],
+      "additionalProperties": false
+    }
+  }
+}

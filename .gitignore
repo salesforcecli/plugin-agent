@@ -49,3 +49,6 @@ node_modules
 .idea
 /test/mock-projects/agent-generate-template/.sf/
 /test/mock-projects/agent-generate-template/.sfdx/
+
+stderr*.txt
+stdout*.txt

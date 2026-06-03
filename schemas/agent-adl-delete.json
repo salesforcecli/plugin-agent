@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlDeleteResult",
+  "definitions": {
+    "AgentAdlDeleteResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "libraryId": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "libraryId"],
+      "additionalProperties": false
+    }
+  }
+}

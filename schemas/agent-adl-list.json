@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlListResult",
+  "definitions": {
+    "AgentAdlListResult": {
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataLibrarySummary"
+          }
+        }
+      },
+      "required": ["libraries"],
+      "additionalProperties": false
+    },
+    "DataLibrarySummary": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "masterLabel": {
+          "type": "string"
+        },
+        "developerName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": ["libraryId", "masterLabel", "developerName", "sourceType", "status"],
+      "additionalProperties": false
+    }
+  }
+}

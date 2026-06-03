@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentAdlFileListResult",
+  "definitions": {
+    "AgentAdlFileListResult": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GroundingFileRef"
+          }
+        }
+      },
+      "required": ["files"],
+      "additionalProperties": false
+    },
+    "GroundingFileRef": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        }
+      },
+      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "additionalProperties": false
+    }
+  }
+}

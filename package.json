@@ -12,7 +12,7 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.36",
-    "@salesforce/agents": "^1.7.1",
+    "@salesforce/agents": "^1.8.0",
     "@salesforce/core": "^8.28.3",
     "@salesforce/kit": "^3.2.6",
     "@salesforce/sf-plugins-core": "^12.2.6",
@@ -94,6 +94,16 @@
           "validate": {
             "description": "Command to validate an Agent Script file.",
             "external": true
+          },
+          "adl": {
+            "description": "Commands to manage Agentforce Data Libraries.",
+            "external": true,
+            "subtopics": {
+              "file": {
+                "description": "Commands to manage files in an SFDRIVE data library.",
+                "external": true
+              }
+            }
           }
         }
       }
