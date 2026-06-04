@@ -17,7 +17,8 @@
 import { join, relative } from 'node:path';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { expect } from 'chai';
-import { getHiddenDirs, traverseForFiles } from '../src/flags.js';
+import { SfError } from '@salesforce/core';
+import { getHiddenDirs, parseContextVariables, traverseForFiles } from '../src/flags.js';
 
 describe('traverseForFiles', () => {
   const testDir = join(process.cwd(), 'test-temp');
@@ -105,5 +106,52 @@ describe('promptForSpecYaml', () => {
     expect(defaultAgentSpecOption).to.be.ok;
     expect(defaultAgentSpecOption?.name).to.equal('Default Agent Spec');
     expect(defaultAgentSpecOption?.value).to.be.undefined;
+  });
+});
+
+describe('parseContextVariables', () => {
+  it('returns [] for undefined', () => {
+    expect(parseContextVariables(undefined)).to.deep.equal([]);
+  });
+
+  it('returns [] for empty array', () => {
+    expect(parseContextVariables([])).to.deep.equal([]);
+  });
+
+  it('parses Name=Value into { name, type: "Text", value }', () => {
+    expect(parseContextVariables(['RoutableId=0Mw'])).to.deep.equal([
+      { name: 'RoutableId', type: 'Text', value: '0Mw' },
+    ]);
+  });
+
+  it('preserves "$Context." prefix verbatim', () => {
+    expect(parseContextVariables(['$Context.RoutableId=abc'])).to.deep.equal([
+      { name: '$Context.RoutableId', type: 'Text', value: 'abc' },
+    ]);
+  });
+
+  it('preserves "=" inside the value (split on first =)', () => {
+    expect(parseContextVariables(['key=a=b=c'])).to.deep.equal([{ name: 'key', type: 'Text', value: 'a=b=c' }]);
+  });
+
+  it('trims whitespace around the name', () => {
+    expect(parseContextVariables(['  RoutableId  =0Mw'])).to.deep.equal([
+      { name: 'RoutableId', type: 'Text', value: '0Mw' },
+    ]);
+  });
+
+  it('handles multiple entries', () => {
+    expect(parseContextVariables(['a=1', 'b=2'])).to.deep.equal([
+      { name: 'a', type: 'Text', value: '1' },
+      { name: 'b', type: 'Text', value: '2' },
+    ]);
+  });
+
+  it('throws SfError on entry without =', () => {
+    expect(() => parseContextVariables(['noEqualsHere'])).to.throw(SfError, /Expected Name=Value/);
+  });
+
+  it('throws SfError on entry with empty name', () => {
+    expect(() => parseContextVariables(['=value'])).to.throw(SfError, /Name cannot be empty/);
   });
 });

@@ -23,6 +23,7 @@ import { select } from '@inquirer/prompts';
 import { Lifecycle, Messages, SfError } from '@salesforce/core';
 import { AgentPreviewReact } from '../../components/agent-preview-react.js';
 import { loadAgentJson } from '../../common.js';
+import { contextVariablesFlag, parseContextVariables } from '../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview');
@@ -70,6 +71,7 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
       summary: messages.getMessage('flags.use-live-actions.summary'),
       default: false,
     }),
+    'context-variables': contextVariablesFlag,
     'agent-json': Flags.file({
       summary: messages.getMessage('flags.agent-json.summary'),
       hidden: true,
@@ -142,12 +144,15 @@ export default class AgentPreview extends SfCommand<AgentPreviewResult> {
 
     selectedAgent.preview.setApexDebugging(flags['apex-debug']);
 
+    const contextVariables = parseContextVariables(flags['context-variables']);
+
     const instance = render(
       React.createElement(AgentPreviewReact, {
         agent: selectedAgent.preview,
         name: selectedAgent.name ?? '',
         outputDir,
         isLocalAgent: selectedAgent instanceof ScriptAgent,
+        contextVariables,
       }),
       { exitOnCtrlC: false }
     );
