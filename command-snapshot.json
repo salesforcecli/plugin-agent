@@ -41,7 +41,7 @@
     "command": "agent:adl:file:add",
     "flagAliases": [],
     "flagChars": ["f", "i", "o"],
-    "flags": ["api-version", "file", "flags-dir", "json", "library-id", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "path", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -73,7 +73,7 @@
     "command": "agent:adl:list",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "source-type", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -98,6 +98,7 @@
       "library-id",
       "name",
       "restrict-to-public-articles",
+      "retriever-id",
       "target-org"
     ],
     "plugin": "@salesforce/plugin-agent"

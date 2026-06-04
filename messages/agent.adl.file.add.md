@@ -12,15 +12,19 @@ Constraints: at least 1 file required, no duplicate file names in a batch, maxim
 
 - Add a file to an existing library:
 
-  <%= config.bin %> <%= command.id %> --library-id 1JDSG000007IbWX4A0 --file ./docs/new-guide.pdf --target-org myOrg
+  <%= config.bin %> <%= command.id %> -i 1JDSG000007IbWX4A0 --path ./docs/new-guide.pdf --target-org myOrg
+
+- Add multiple files:
+
+  <%= config.bin %> <%= command.id %> -i 1JDSG000007IbWX4A0 --path ./docs/guide.pdf --path ./docs/faq.txt --target-org myOrg
 
 # flags.library-id.summary
 
 Agentforce Data Library ID (18-char Salesforce ID with prefix 1JD).
 
-# flags.file.summary
+# flags.path.summary
 
-Path to the file to add to the library.
+Path to file(s) to add. Specify multiple times for batch upload.
 
 # error.addFailed
 

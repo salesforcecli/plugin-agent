@@ -52,6 +52,20 @@ describe('agent adl list', () => {
     expect(result.libraries).to.deep.equal(mockLibraries);
   });
 
+  it('should pass --source-type filter', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    let capturedUrl: string | undefined;
+    $$.fakeConnectionRequest = (request: { url?: string }) => {
+      capturedUrl = request.url;
+      return Promise.resolve({ libraries: [] });
+    };
+
+    await AgentAdlList.run(['--target-org', testOrg.username, '--source-type', 'knowledge']);
+
+    expect(capturedUrl).to.include('?sourceType=KNOWLEDGE');
+  });
+
   it('should throw ListFailed on API error', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
