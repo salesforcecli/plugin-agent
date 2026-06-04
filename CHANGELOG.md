@@ -1,3 +1,14 @@
+## [1.42.1](https://github.com/salesforcecli/plugin-agent/compare/1.42.0...1.42.1) (2026-06-04)
+
+### Bug Fixes
+
+- generate schema ([c388d61](https://github.com/salesforcecli/plugin-agent/commit/c388d61a270971ff40ba8665964204e077b3a43f))
+- handle sub-agents with one action W-22841550 ([#439](https://github.com/salesforcecli/plugin-agent/issues/439)) ([520d3e1](https://github.com/salesforcecli/plugin-agent/commit/520d3e1e2725cabc58c0f6567a02a86a06ed3c01))
+- improve human-readable output for upload, get, file add, file list ([26ce133](https://github.com/salesforcecli/plugin-agent/commit/26ce133199c7ace9abe63b47db53850d2d10cfd1))
+- multi-file, list filter, retriever swap, oclif fix @W-22816781@ ([d6c471e](https://github.com/salesforcecli/plugin-agent/commit/d6c471eff112a879fdd24bfb22addd4026f9f6a7))
+- multi-file, list filter, retriever swap, oclif fix @W-22816781@ ([1a2ea72](https://github.com/salesforcecli/plugin-agent/commit/1a2ea72037b5e7758a71dda4702672ce162f0614))
+- mutual exclusivity validation ([cdd68dc](https://github.com/salesforcecli/plugin-agent/commit/cdd68dc45a70a43c275a7e8c3075caa87b7d2382))
+
 # [1.42.0](https://github.com/salesforcecli/plugin-agent/compare/1.41.0...1.42.0) (2026-06-03)
 
 ### Bug Fixes
