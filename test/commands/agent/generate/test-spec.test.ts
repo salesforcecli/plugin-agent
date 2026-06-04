@@ -186,6 +186,94 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
       });
     });
 
+    it('should not fail when a topic has a single localActionLinks (fast-xml-parser returns object, not array)', async () => {
+      const name = 'myAgent';
+      const cs = new ComponentSet([
+        { fullName: name, type: { name: 'Bot', id: 'bot', directoryName: 'bot' } },
+        {
+          fullName: 'myGenAiPlannerBundle',
+          type: { name: 'GenAiPlannerBundle', id: 'genaiplannerbundle', directoryName: 'genaiplannerbundle' },
+        },
+        {
+          fullName: 'local_weather_16jDU000000Gmm5',
+          type: { name: 'GenAiPlugin', id: 'genaiplugin', directoryName: 'genaiplugin' },
+        },
+      ]);
+
+      // Call sequence for getComponentFilenamesByNameAndType:
+      //   1. Bot (getMetadataFilePaths)
+      //   2. GenAiPlannerBundle (getMetadataFilePaths) — no GenAiPlanner in CS so no call for it
+      //   3. GenAiPlugin for local_weather (reduce over localTopicLinks)
+      $$.stub(cs, 'getComponentFilenamesByNameAndType')
+        .onFirstCall()
+        .returns(['myBot.bot-meta.xml'])
+        .onSecondCall()
+        .returns(['myGenAiPlannerBundle.genAiPlannerBundle-meta.xml'])
+        .onThirdCall()
+        .returns(['local_weather.genAiPlugin-meta.xml']);
+
+      // Call sequence for readFile:
+      //   1. BotVersion XML
+      //   2. GenAiPlanner attempt — readFile(undefined) because {} has no key → rejects (caught silently)
+      //   3. GenAiPlannerBundle XML
+      $$.stub(fs.promises, 'readFile')
+        .onFirstCall()
+        .resolves(
+          `<?xml version="1.0" encoding="UTF-8"?>
+<BotVersion xmlns="http://soap.sforce.com/2006/04/metadata">
+    <conversationDefinitionPlanners>
+        <genAiPlannerName>myGenAiPlannerBundle</genAiPlannerName>
+    </conversationDefinitionPlanners>
+</BotVersion>
+`
+        )
+        .onSecondCall()
+        .rejects() // readFile(undefined) from empty genAiPlanners map
+        .onThirdCall()
+        .resolves(
+          `<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>A resort agent.</description>
+    <localTopicLinks>
+        <genAiPluginName>local_weather_16jDU000000Gmm5</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>off_topic_16jDU000000Gmm5</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect off-topic requests</description>
+        <developerName>off_topic_16jDU000000Gmm5</developerName>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>local_weather_16jDU000000Gmm5</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Provides weather info.</description>
+        <developerName>local_weather_16jDU000000Gmm5</developerName>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>check_weather_179DU000000Gn0s</functionName>
+        </localActionLinks>
+        <localDeveloperName>local_weather</localDeveloperName>
+        <masterLabel>Local Weather</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Local Info Agent</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>
+`
+        );
+
+      const result = await getPluginsAndFunctions(name, cs);
+      expect(result.genAiFunctions).to.deep.equal(['check_weather_179DU000000Gn0s']);
+      expect(result.genAiPlugins).to.deep.equal({
+        // eslint-disable-next-line camelcase
+        local_weather_16jDU000000Gmm5: 'local_weather.genAiPlugin-meta.xml',
+      });
+    });
+
     it('should not fail when theres no actions', async () => {
       const name = 'myAgent';
       const cs = new ComponentSet([

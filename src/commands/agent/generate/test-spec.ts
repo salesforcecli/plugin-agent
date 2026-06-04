@@ -358,7 +358,7 @@ export async function getPluginsAndFunctions(
             localDeveloperName: string;
             masterLabel: string;
             pluginType: string;
-            localActionLinks?: Array<{ functionName: string }>;
+            localActionLinks?: Array<{ functionName: string }> | { functionName: string };
             genAiPluginInstructions: {
               description: string;
               developerName: string;
@@ -371,7 +371,7 @@ export async function getPluginsAndFunctions(
       };
       genAiFunctions = ensureArray(
         parsedPlannerBundle.GenAiPlannerBundle.localTopics
-          .flatMap((topic) => topic.localActionLinks?.map((lal) => lal.functionName))
+          .flatMap((topic) => ensureArray(topic.localActionLinks)?.map((lal) => lal.functionName))
           .filter((f) => typeof f === 'string')
       );
 
