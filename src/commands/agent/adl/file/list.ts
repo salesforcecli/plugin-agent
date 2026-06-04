@@ -51,7 +51,20 @@ export default class AgentAdlFileList extends SfCommand<AgentAdlFileListResult> 
       throw new SfError(messages.getMessage('error.listFailed', [wrapped.message]), 'ListFailed', [], 4, wrapped);
     }
 
-    this.log(`Found ${files.length} file(s).`);
+    if (!this.jsonEnabled() && files.length > 0) {
+      this.table({
+        data: files,
+        columns: [
+          { key: 'fileName', name: 'File Name' },
+          { key: 'fileSize', name: 'Size (bytes)' },
+          { key: 'fileId', name: 'File ID' },
+          { key: 'createdDate', name: 'Created' },
+        ],
+      });
+    } else if (!this.jsonEnabled()) {
+      this.log('No files found.');
+    }
+
     return { files };
   }
 }

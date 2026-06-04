@@ -58,9 +58,13 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const libraryId = flags['library-id'];
     const filePaths = flags.file;
+    const fileCount = filePaths.length;
+
+    this.log(`Uploading ${fileCount} file(s) to library ${libraryId}...`);
 
     let result: UploadResult;
     try {
+      this.log('Checking upload readiness...');
       result = await AgentDataLibrary.upload(connection, libraryId, filePaths, {
         waitMinutes: flags.wait?.minutes,
       });
@@ -70,9 +74,12 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
     }
 
     if (result.status === 'READY') {
-      this.log(`Library ready. retrieverId: ${String(result.retrieverId)}`);
+      this.log('Library ready.');
+      this.log(`  retrieverId: ${String(result.retrieverId)}`);
+      this.log(`  rag_feature_config_id: ${String(result.ragFeatureConfigId)}`);
     } else {
-      this.log('Indexing triggered. Use "sf agent adl get" to check readiness.');
+      this.log(`Upload complete — indexing ${fileCount} file(s).`);
+      this.log('Use "sf agent adl status" to check progress, or "sf agent adl get" for readiness.');
     }
 
     return result;

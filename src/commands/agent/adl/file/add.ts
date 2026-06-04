@@ -60,7 +60,10 @@ export default class AgentAdlFileAdd extends SfCommand<AgentAdlFileAddResult> {
       throw new SfError(messages.getMessage('error.addFailed', [wrapped.message]), 'AddFailed', [], 4, wrapped);
     }
 
-    this.log(`File added to library ${libraryId}.`);
+    this.log(`Added ${result.fileNames.length} file(s) to library ${libraryId}:`);
+    for (const name of result.fileNames) {
+      this.log(`  ${name}`);
+    }
     return result;
   }
 }

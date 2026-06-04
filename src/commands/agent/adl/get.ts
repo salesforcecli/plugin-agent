@@ -51,7 +51,22 @@ export default class AgentAdlGet extends SfCommand<AgentAdlGetResult> {
       throw new SfError(messages.getMessage('error.getFailed', [wrapped.message]), 'GetFailed', [], 4, wrapped);
     }
 
-    this.log(`Library: ${result.masterLabel} (${result.libraryId}) — ${result.sourceType} — ${String(result.status)}`);
+    if (!this.jsonEnabled()) {
+      this.log(`Library: ${result.masterLabel} (${result.libraryId})`);
+      this.log(`  Source Type: ${result.sourceType}`);
+      this.log(`  Status: ${String(result.status)}`);
+      if (result.retrieverId) {
+        this.log(`  Retriever ID: ${result.retrieverId}`);
+        this.log(`  rag_feature_config_id: ARFPC_${result.libraryId}`);
+      }
+      if (result.description) {
+        this.log(`  Description: ${result.description}`);
+      }
+      const fileCount = result.groundingSource?.groundingFileRefs?.length;
+      if (fileCount) {
+        this.log(`  Files: ${String(fileCount)}`);
+      }
+    }
     return result;
   }
 }
