@@ -1411,15 +1411,15 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@salesforce/agents@^1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.8.1.tgz#3739755f7356c36b8b88f861a13c0f72797d57ba"
-  integrity sha512-DyybLIzO/eo1xLxus02e9W1e/xY6Jwet531qztaUfMF/YCW+Mbonn6WJFeN2orWJcSop5TOz1C5tkDOrNAQsDg==
+"@salesforce/agents@^1.8.3":
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.8.3.tgz#30f42c1ca46b6084d3eb78704239e2d7d12f39b3"
+  integrity sha512-+FCvoIXCKukwmIx/x2ZEnRYtubHgLXQqtmPn+RZ8BHPjOZDa9089dU8h4Z9p40L6VMjhd5ZxsMJT3n8213hrSw==
   dependencies:
     "@salesforce/core" "^8.31.0"
     "@salesforce/kit" "^3.2.6"
-    "@salesforce/source-deploy-retrieve" "^12.36.0"
-    "@salesforce/types" "^1.7.1"
+    "@salesforce/source-deploy-retrieve" "^12.36.2"
+    "@salesforce/types" "^1.7.3"
     fast-xml-parser "^5.8.0"
     nock "^14.0.15"
     yaml "^2.8.4"
@@ -1544,10 +1544,10 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^12.35.3", "@salesforce/source-deploy-retrieve@^12.36.0":
-  version "12.36.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.36.1.tgz#c054e6efc95fefc29179e6ee83b81ff145187a51"
-  integrity sha512-W+jVWAovoAfbtgCRzBKtVxKhQoBzFoEyAHLiCtT8U84/lBLIqeTCklYTA155GRSdC8DwQ26j0NKiDgpR79TqcQ==
+"@salesforce/source-deploy-retrieve@^12.35.3", "@salesforce/source-deploy-retrieve@^12.36.2":
+  version "12.36.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-12.36.2.tgz#54b8f414687960581a5513216bcd5b77b9489136"
+  integrity sha512-N3+dnM2EBsviXbnzP89iuBbdSyzB5b3RqUPZwyCw99SF6x6u9GKQVL164kfWyozl4XtZnhTQvbU75qkriFYWoQ==
   dependencies:
     "@salesforce/core" "^8.31.0"
     "@salesforce/kit" "^3.2.4"
@@ -1574,7 +1574,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.7.1.tgz#8983f87508ac21bfb334fe650b7cafdfe4278cf8"
   integrity sha512-PyV3ZyZum8bjO1LByNXWCSOGt1b9X9x2knIiFWgnYTsHmLK8OP+f6i+wPh4qu1e8+Zr+hNV0rTKVP8p/kCGqyQ==
 
-"@salesforce/types@^1.6.0", "@salesforce/types@^1.7.1":
+"@salesforce/types@^1.6.0", "@salesforce/types@^1.7.3":
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/@salesforce/types/-/types-1.7.3.tgz#e670a92439a183a219bab81a3ae596d79b9fd589"
   integrity sha512-6rzz2njJ4IEL9q1TgM4cEUPbiKcrQmKlTk5Ki6q7m5c6spYkbbA5jPxX3/8F9Ux5UKu0r9QCKAfZ33b88lq1PA==
