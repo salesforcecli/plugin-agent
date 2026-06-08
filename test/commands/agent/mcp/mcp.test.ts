@@ -280,6 +280,55 @@ describe('agent mcp commands', () => {
     expect(JSON.parse(captured.body as string).assets[0].name).to.equal('tool-b');
   });
 
+  it('asset replace accepts the allowlist inline via --assets', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    let captured: any;
+    $$.fakeConnectionRequest = (req: any) => {
+      captured = req;
+      return Promise.resolve({ assets: [{ id: '1', name: 'tool-inline', kind: 'MCP_TOOL', active: true }] });
+    };
+
+    await AgentMcpAssetReplace.run([
+      '--target-org',
+      testOrg.username,
+      '--mcp-server-id',
+      '0XS1',
+      '--assets',
+      '{"assets":[{"name":"tool-inline","active":true}]}',
+    ]);
+
+    expect(captured.method).to.equal('PUT');
+    expect(captured.url).to.match(/\/mcp-servers\/0XS1\/assets$/);
+    expect(JSON.parse(captured.body as string).assets[0].name).to.equal('tool-inline');
+  });
+
+  it('asset replace rejects passing both --assets and --assets-file', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    const dir = mkdtempSync(join(tmpdir(), 'mcp-'));
+    const file = join(dir, 'assets.json');
+    writeFileSync(file, JSON.stringify({ assets: [] }));
+    $$.fakeConnectionRequest = () => Promise.resolve({ assets: [] } as any);
+
+    try {
+      await AgentMcpAssetReplace.run([
+        '--target-org',
+        testOrg.username,
+        '--mcp-server-id',
+        '0XS1',
+        '--assets',
+        '{"assets":[]}',
+        '--assets-file',
+        file,
+      ]);
+      expect.fail('should have thrown');
+    } catch (err) {
+      // oclif raises a mutually-exclusive flags error before run() executes.
+      expect((err as Error).message).to.match(/cannot also be provided|exclusive/i);
+    }
+  });
+
   it('asset replace throws InvalidShape for a non-asset JSON file', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);

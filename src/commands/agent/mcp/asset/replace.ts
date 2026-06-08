@@ -43,10 +43,15 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
       char: 'i',
       required: true,
     }),
+    assets: Flags.string({
+      summary: messages.getMessage('flags.assets.summary'),
+      allowStdin: true,
+      exclusive: ['assets-file'],
+    }),
     'assets-file': Flags.file({
       summary: messages.getMessage('flags.assets-file.summary'),
-      required: true,
       exists: true,
+      exclusive: ['assets'],
     }),
   };
 
@@ -54,7 +59,13 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
     const { flags } = await this.parse(ApiCatalogMcpServerAssetReplace);
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
-    const raw = readFileSync(flags['assets-file'], 'utf8');
+    // Accept the allowlist either inline (--assets '<json>' or --assets - for stdin) or
+    // from a file (--assets-file). Exactly one is required.
+    const raw = flags.assets ?? (flags['assets-file'] ? readFileSync(flags['assets-file'], 'utf8') : undefined);
+    if (raw === undefined) {
+      throw new SfError(messages.getMessage('error.noInput'), 'NoInput', [], 1);
+    }
+
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);

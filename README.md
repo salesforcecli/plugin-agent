@@ -1001,16 +1001,18 @@ Replace the asset set of an MCP server in the API Catalog.
 
 ```
 USAGE
-  $ sf agent mcp asset replace -o <value> -i <value> --assets-file <value> [--json] [--flags-dir <value>] [--api-version
-    <value>]
+  $ sf agent mcp asset replace -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--assets <value>
+    | --assets-file <value>]
 
 FLAGS
   -i, --mcp-server-id=<value>  (required) ID of the MCP server whose assets you want to replace.
   -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
                                configuration variable is already set.
       --api-version=<value>    Override the api version used for api requests made by this command
-      --assets-file=<value>    (required) Path to a JSON file containing an array of asset items or an object of the
-                               form { "assets": [...] }.
+      --assets=<value>         The desired asset allowlist as a JSON string (or "-" to read from stdin). Mutually
+                               exclusive with --assets-file.
+      --assets-file=<value>    Path to a JSON file containing the desired asset allowlist. Mutually exclusive with
+                               --assets.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1019,20 +1021,25 @@ GLOBAL FLAGS
 DESCRIPTION
   Replace the asset set of an MCP server in the API Catalog.
 
-  Replaces the full set of assets (tools, prompts, resources) for an MCP server with the asset items supplied in a JSON
-  file. The file must contain either a JSON array of asset items or an object of the form `{ "assets": [...] }`. Each
-  asset item may include `id`, `name`, `label`, `description`, `active`, and `kind`. Existing assets not present in the
-  supplied set may be removed, so provide the complete desired asset set.
+  Replaces the full set of assets (tools, prompts, resources) for an MCP server with the asset items you supply. Provide
+  the assets either inline with `--assets` (a JSON string, or `-` to read from stdin) or from a file with
+  `--assets-file`. The JSON must be either an array of asset items or an object of the form `{ "assets": [...] }`. Each
+  asset item may include `id`, `name`, `label`, `description`, `active`, and `kind`. This is a full replacement:
+  existing assets not present in the supplied set are removed, so provide the complete desired asset set (read the
+  current set first with `agent mcp asset list` or `agent mcp fetch`).
 
 EXAMPLES
-  Replace the assets of an MCP server using a JSON file that contains an array of asset items:
+  Replace the assets inline with a JSON string:
+
+    $ sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets \
+      '{"assets":[{"name":"McpTool__add","active":true}]}' --target-org myOrg
+
+  Replace the assets from a JSON file:
 
     $ sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets-file ./assets.json --target-org myOrg
 
-  Replace the assets and output the result as JSON:
-
-    $ sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets-file ./assets.json --target-org myOrg \
-      --json
+  Pipe the assets from stdin:
+  cat assets.json | sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets - --target-org myOrg
 ```
 
 _See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/asset/replace.ts)_

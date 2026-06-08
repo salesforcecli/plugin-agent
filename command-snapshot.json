@@ -360,6 +360,7 @@
     ],
     "flags": [
       "api-version",
+      "assets",
       "assets-file",
       "flags-dir",
       "json",
