@@ -66,13 +66,14 @@ describe('AgentGenerateScorerSpec', () => {
     });
 
     it('writes Number template to default path when no flags provided', async () => {
-      await AgentGenerateScorerSpec.run(['--force-overwrite']);
+      const result = await AgentGenerateScorerSpec.run(['--force-overwrite']);
 
       expect(writeScorerSpecTemplateStub.calledOnce).to.be.true;
       const [outputFile, dataType, overrides] = writeScorerSpecTemplateStub.firstCall.args;
       expect(outputFile).to.equal(join('specs', 'My_Custom_Scorer-scorerSpec.yaml'));
       expect(dataType).to.equal('Number');
       expect(overrides).to.deep.equal({ name: undefined, agentApiName: undefined });
+      expect(result).to.deep.equal({ path: join('specs', 'My_Custom_Scorer-scorerSpec.yaml') });
     });
 
     it('passes --name to writeScorerSpecTemplate and uses it in default path', async () => {

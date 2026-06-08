@@ -80,12 +80,15 @@ async function determineFilePath(
   return forceOverwrite ? defaultFile : promptUntilUniqueFile(defaultFile);
 }
 
-export default class AgentGenerateScorerSpec extends SfCommand<void> {
+export type AgentGenerateScorerSpecResult = {
+  path: string;
+};
+
+export default class AgentGenerateScorerSpec extends SfCommand<AgentGenerateScorerSpecResult> {
   public static state = 'beta';
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  public static readonly enableJsonFlag = false;
 
   public static readonly flags = {
     'output-file': Flags.file({
@@ -109,13 +112,13 @@ export default class AgentGenerateScorerSpec extends SfCommand<void> {
     }),
   };
 
-  public async run(): Promise<void> {
+  public async run(): Promise<AgentGenerateScorerSpecResult> {
     const { flags } = await this.parse(AgentGenerateScorerSpec);
 
     const outputFile = await determineFilePath(flags['output-file'], flags['force-overwrite'], flags['name']);
     if (!outputFile) {
       this.log(messages.getMessage('info.cancel'));
-      return;
+      return { path: '' };
     }
 
     await AgentScorer.writeScorerSpecTemplate(outputFile, flags['data-type'], {
@@ -123,5 +126,6 @@ export default class AgentGenerateScorerSpec extends SfCommand<void> {
       agentApiName: flags['agent-api-name'],
     });
     this.log(`Created ${outputFile}`);
+    return { path: outputFile };
   }
 }
