@@ -104,6 +104,16 @@
                 "external": true
               }
             }
+          },
+          "mcp": {
+            "description": "Commands to manage MCP server registrations in the API Catalog.",
+            "external": true,
+            "subtopics": {
+              "asset": {
+                "description": "Commands to manage the asset allowlist of an MCP server.",
+                "external": true
+              }
+            }
           }
         }
       }
