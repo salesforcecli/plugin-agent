@@ -38,7 +38,8 @@ Sets variables on the agent preview session, mirroring what the in-org Agentforc
 
 Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
 
-State variables use the bare developerName, no prefix. These seed mutable agent state declared in agentVersion.stateVariables. Example: MyStateVar=some-value
+State variables use the bare developerName, no prefix. These seed mutable agent state declared in agentVersion.stateVariables. Example: MyStateVar=some-value.
+
 
 Pass --context-variables multiple times, or comma-separate. Both namespaces can mix in one value: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'
 
