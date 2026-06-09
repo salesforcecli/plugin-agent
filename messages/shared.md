@@ -30,7 +30,7 @@ By default, the command automatically detects which test runner to use based on 
 
 # flags.context-variables.summary
 
-Pre-populate session variables for the preview session, in the form Name=Value. Repeatable.
+Session variables for the agent preview session, in the form Name=Value.
 
 # flags.context-variables.description
 
