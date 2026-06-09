@@ -191,6 +191,48 @@ describe('agent preview', function () {
       );
     });
 
+    it('should reflect --context-variables overrides in the live preview session trace', async function () {
+      this.timeout(5 * 60 * 1000);
+
+      const bundleApiName = 'Willie_Resort_Manager';
+      const targetOrg = getUsername();
+      const overrideValue = '0MwXX0000000000000';
+
+      // Start with a $Context.<Name> override (linked variable shape)
+      const startResult = execCmd<AgentPreviewStartResult>(
+        `agent preview start --authoring-bundle ${bundleApiName} --simulate-actions --context-variables "$Context.RoutableId=${overrideValue}" --target-org ${targetOrg} --json`
+      ).jsonOutput?.result;
+      expect(startResult?.sessionId).to.be.a('string');
+      const sessionId = startResult!.sessionId;
+
+      // Send a message so the planner emits at least one trace
+      execCmd<AgentPreviewSendResult>(
+        `agent preview send --session-id ${sessionId} --authoring-bundle ${bundleApiName} --utterance "hello" --target-org ${targetOrg} --json`
+      );
+
+      // Fetch traces via the SDK and verify the override echoes back
+      const org = await Org.create({ aliasOrUsername: targetOrg });
+      const conn = org.getConnection();
+      const project = await SfProject.resolve(session.project.dir);
+      const agent = await Agent.init({ connection: conn, project, aabName: bundleApiName });
+      agent.setSessionId(sessionId);
+      const traces = await agent.preview.getAllTraces();
+
+      const allStepsJson = traces
+        .flatMap((t) => t?.plan ?? [])
+        .map((s) => JSON.stringify(s))
+        .join('\n');
+      expect(allStepsJson).to.contain(
+        overrideValue,
+        'expected --context-variables override value to appear in at least one trace plan step'
+      );
+
+      // Clean up
+      execCmd<AgentPreviewEndResult>(
+        `agent preview end --session-id ${sessionId} --authoring-bundle ${bundleApiName} --target-org ${targetOrg} --json`
+      );
+    });
+
     it('should start, send, end a preview (Published agent)', async function () {
       this.timeout(5 * 60 * 1000); // 5 minutes for this test
 

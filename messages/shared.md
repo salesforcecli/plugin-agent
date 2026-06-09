@@ -28,6 +28,24 @@ Explicitly specify which test runner to use (agentforce-studio or testing-center
 
 By default, the command automatically detects which test runner to use based on the test definition metadata type in your org. Use this flag to explicitly specify the runner type. 'agentforce-studio' uses AiTestingDefinition metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 
+# flags.context-variables.summary
+
+Session variables for the agent preview session, in the form Name=Value.
+
+# flags.context-variables.description
+
+Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't transform them.
+
+Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
+
+State variables use the bare developerName, no prefix. These seed mutable agent state declared in agentVersion.stateVariables. Example: MyStateVar=some-value.
+
+
+Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
+
+
+Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name will see null. (3) Type defaults to Text. 
+
 # error.invalidAgentType
 
 agentType must be either "customer" or "internal". Found: [%s]

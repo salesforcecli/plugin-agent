@@ -23,7 +23,7 @@ import { Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import { AgentTest, AgentTestResultsResponse } from '@salesforce/agents';
+import { AgentTest, AgentTestResultsResponse, type ContextVariable } from '@salesforce/agents';
 import { theme } from './inquirer-theme.js';
 import { AgentTestResultsResult } from './commands/agent/test/results.js';
 
@@ -73,6 +73,38 @@ export const testRunnerFlag = Flags.custom<'agentforce-studio' | 'testing-center
   summary: messages.getMessage('flags.test-runner.summary'),
   description: messages.getMessage('flags.test-runner.description'),
 })();
+
+export const contextVariablesFlag = Flags.string({
+  multiple: true,
+  delimiter: ',',
+  summary: messages.getMessage('flags.context-variables.summary'),
+  description: messages.getMessage('flags.context-variables.description'),
+});
+
+/**
+ * Parses raw "Name=Value" entries from --context-variables into ContextVariable
+ * objects for the SDK. Type defaults to "Text" — the only empirically-observed
+ * variant on the wire today.
+ *
+ * Names pass through verbatim. The runtime distinguishes two namespaces by name
+ * shape: "$Context.<Name>" for linked context variables, bare "<developerName>"
+ * for mutable state variables. The CLI does not transform either.
+ */
+export function parseContextVariables(raw: string[] | undefined): ContextVariable[] {
+  if (!raw || raw.length === 0) return [];
+  return raw.map((entry) => {
+    const eq = entry.indexOf('=');
+    if (eq === -1) {
+      throw new SfError(`Invalid --context-variables: ${entry}. Expected Name=Value.`);
+    }
+    const name = entry.slice(0, eq).trim();
+    const value = entry.slice(eq + 1);
+    if (!name) {
+      throw new SfError(`Invalid --context-variables: ${entry}. Name cannot be empty.`);
+    }
+    return { name, type: 'Text', value };
+  });
+}
 
 function validateInput(input: string, validate: (input: string) => boolean | string): never | string {
   const result = validate(input);
