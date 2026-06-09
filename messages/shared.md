@@ -36,7 +36,7 @@ Session variables for the agent preview session, in the form Name=Value.
 
 Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't transform them.
 
-Linked context variables use the "$Context." prefix. These map to externally-provided fields the runtime resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value
+Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
 
 State variables use the bare developerName, no prefix. These seed mutable agent state declared in agentVersion.stateVariables. Example: MyStateVar=some-value
 
