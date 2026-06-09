@@ -44,7 +44,7 @@ State variables use the bare developerName, no prefix. These seed mutable agent 
 Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
 
 
-Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name will see null. (3) Type defaults to Text. Numeric/Boolean variables are not yet supported.
+Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name will see null. (3) Type defaults to Text. 
 
 # error.invalidAgentType
 
