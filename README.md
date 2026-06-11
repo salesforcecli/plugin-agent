@@ -140,7 +140,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --version 2 --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/activate.ts)_
 
 ## `sf agent adl create`
 
@@ -198,7 +198,7 @@ EXAMPLES
       --source-type retriever --retriever-id 0ppXX0000000001
 ```
 
-_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/create.ts)_
+_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/create.ts)_
 
 ## `sf agent adl delete`
 
@@ -229,7 +229,7 @@ EXAMPLES
     $ sf agent adl delete --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/delete.ts)_
+_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/delete.ts)_
 
 ## `sf agent adl file add`
 
@@ -268,7 +268,7 @@ EXAMPLES
     $ sf agent adl file add -i 1JDSG000007IbWX4A0 --path ./docs/guide.pdf --path ./docs/faq.txt --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/file/add.ts)_
+_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/file/add.ts)_
 
 ## `sf agent adl file delete`
 
@@ -301,7 +301,7 @@ EXAMPLES
     $ sf agent adl file delete --library-id 1JDSG000007IbWX4A0 --file-id a1B2C3D4E5F6G7H8I9 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/file/delete.ts)_
+_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/file/delete.ts)_
 
 ## `sf agent adl file list`
 
@@ -336,7 +336,7 @@ EXAMPLES
     $ sf agent adl file list --library-id 1JDSG000007IbWX4A0 --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/file/list.ts)_
+_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/file/list.ts)_
 
 ## `sf agent adl get`
 
@@ -367,7 +367,7 @@ EXAMPLES
     $ sf agent adl get --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/get.ts)_
+_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/get.ts)_
 
 ## `sf agent adl list`
 
@@ -404,7 +404,7 @@ EXAMPLES
     $ sf agent adl list --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/list.ts)_
+_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/list.ts)_
 
 ## `sf agent adl status`
 
@@ -436,7 +436,7 @@ EXAMPLES
     $ sf agent adl status --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/status.ts)_
+_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/status.ts)_
 
 ## `sf agent adl update`
 
@@ -488,7 +488,7 @@ EXAMPLES
     $ sf agent adl update --library-id 1JDSG000007IbWX4A0 --restrict-to-public-articles --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/update.ts)_
+_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/update.ts)_
 
 ## `sf agent adl upload`
 
@@ -531,7 +531,7 @@ EXAMPLES
     $ sf agent adl upload --library-id 1JDSG000007IbWX4A0 --file ./docs/guide.pdf --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/adl/upload.ts)_
+_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/adl/upload.ts)_
 
 ## `sf agent create`
 
@@ -598,7 +598,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -639,7 +639,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -746,7 +746,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -823,7 +823,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -885,7 +885,7 @@ EXAMPLES
       my-package --source-org my-scratch-org
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -950,7 +950,7 @@ EXAMPLES
       force-app//main/default/aiEvaluationDefinitions/Resort_Manager_Tests.aiEvaluationDefinition-meta.xml
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent preview`
 
@@ -959,19 +959,20 @@ Interact with an agent to preview how it responds to your statements, questions,
 ```
 USAGE
   $ sf agent preview -o <value> [--flags-dir <value>] [--api-version <value>] [-n <value>] [--authoring-bundle
-    <value>] [-d <value>] [-x] [--use-live-actions]
+    <value>] [-d <value>] [-x] [--use-live-actions] [--context-variables <value>...]
 
 FLAGS
-  -d, --output-dir=<value>        Directory where conversation transcripts are saved.
-  -n, --api-name=<value>          API name of the activated published agent you want to interact with.
-  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
-                                  configuration variable is already set.
-  -x, --apex-debug                Enable Apex debug logging during the agent preview conversation.
-      --api-version=<value>       Override the api version used for api requests made by this command
-      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
-                                  Script file.
-      --use-live-actions          Use real actions in the org; if not specified, preview uses AI to simulate (mock)
-                                  actions.
+  -d, --output-dir=<value>            Directory where conversation transcripts are saved.
+  -n, --api-name=<value>              API name of the activated published agent you want to interact with.
+  -o, --target-org=<value>            (required) Username or alias of the target org. Not required if the `target-org`
+                                      configuration variable is already set.
+  -x, --apex-debug                    Enable Apex debug logging during the agent preview conversation.
+      --api-version=<value>           Override the api version used for api requests made by this command
+      --authoring-bundle=<value>      API name of the authoring bundle metadata component that contains the agent's
+                                      Agent Script file.
+      --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+      --use-live-actions              Use real actions in the org; if not specified, preview uses AI to simulate (mock)
+                                      actions.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1021,9 +1022,32 @@ EXAMPLES
   "./transcripts/my-preview" directory, enable the Apex debug logs, and use your default org:
 
     $ sf agent preview --use-live-actions --apex-debug --output-dir transcripts/my-preview
+
+FLAG DESCRIPTIONS
+  --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+
+    Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override
+    variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces
+    are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't
+    transform them.
+
+    Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime
+    resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and
+    topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
+
+    State variables use the bare developerName, no prefix. These seed mutable agent state declared in
+    agentVersion.stateVariables. Example: MyStateVar=some-value.
+
+
+    Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
+
+
+    Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
+    bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name
+    will see null. (3) Type defaults to Text.
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview.ts)_
 
 ## `sf agent preview end`
 
@@ -1095,7 +1119,7 @@ EXAMPLES
     $ sf agent preview end --all --target-org <target_org>
 ```
 
-_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/preview/end.ts)_
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview/end.ts)_
 
 ## `sf agent preview send`
 
@@ -1153,7 +1177,7 @@ EXAMPLES
     $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/preview/send.ts)_
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview/send.ts)_
 
 ## `sf agent preview sessions`
 
@@ -1186,7 +1210,7 @@ EXAMPLES
     $ sf agent preview sessions
 ```
 
-_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/preview/sessions.ts)_
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview/sessions.ts)_
 
 ## `sf agent preview start`
 
@@ -1195,19 +1219,20 @@ Start a programmatic agent preview session.
 ```
 USAGE
   $ sf agent preview start -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
-    [--authoring-bundle <value>] [--use-live-actions | --simulate-actions]
+    [--authoring-bundle <value>] [--use-live-actions | --simulate-actions] [--context-variables <value>...]
 
 FLAGS
-  -n, --api-name=<value>          API name of the activated published agent you want to preview.
-  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
-                                  configuration variable is already set.
-      --api-version=<value>       Override the api version used for api requests made by this command
-      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
-                                  Script file.
-      --simulate-actions          Use AI to simulate action execution instead of calling real actions. Required with
-                                  --authoring-bundle.
-      --use-live-actions          Execute real actions in the org (Apex classes, flows, etc.). Required with
-                                  --authoring-bundle.
+  -n, --api-name=<value>              API name of the activated published agent you want to preview.
+  -o, --target-org=<value>            (required) Username or alias of the target org. Not required if the `target-org`
+                                      configuration variable is already set.
+      --api-version=<value>           Override the api version used for api requests made by this command
+      --authoring-bundle=<value>      API name of the authoring bundle metadata component that contains the agent's
+                                      Agent Script file.
+      --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+      --simulate-actions              Use AI to simulate action execution instead of calling real actions. Required with
+                                      --authoring-bundle.
+      --use-live-actions              Execute real actions in the org (Apex classes, flows, etc.). Required with
+                                      --authoring-bundle.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1249,9 +1274,32 @@ EXAMPLES
   Start a preview session with an activated published agent (always uses live actions):
 
     $ sf agent preview start --api-name My_Published_Agent
+
+FLAG DESCRIPTIONS
+  --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+
+    Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override
+    variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces
+    are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't
+    transform them.
+
+    Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime
+    resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and
+    topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
+
+    State variables use the bare developerName, no prefix. These seed mutable agent state declared in
+    agentVersion.stateVariables. Example: MyStateVar=some-value.
+
+
+    Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
+
+
+    Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
+    bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name
+    will see null. (3) Type defaults to Text.
 ```
 
-_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/preview/start.ts)_
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -1311,7 +1359,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --concise
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -1383,7 +1431,7 @@ FLAG DESCRIPTIONS
     metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -1418,7 +1466,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -1494,7 +1542,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -1578,7 +1626,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -1662,7 +1710,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/run.ts)_
 
 ## `sf agent test run-eval`
 
@@ -1738,7 +1786,7 @@ EXAMPLES
   $ echo '{"tests":[...]}' | sf agent test run-eval --spec --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/test/run-eval.ts)_
+_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/test/run-eval.ts)_
 
 ## `sf agent trace delete`
 
@@ -1802,7 +1850,7 @@ EXAMPLES
     $ sf agent trace delete --no-prompt
 ```
 
-_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/trace/delete.ts)_
+_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/trace/delete.ts)_
 
 ## `sf agent trace list`
 
@@ -1872,7 +1920,7 @@ FLAG DESCRIPTIONS
     (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
 ```
 
-_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/trace/list.ts)_
+_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/trace/list.ts)_
 
 ## `sf agent trace read`
 
@@ -1960,7 +2008,7 @@ EXAMPLES
     $ sf agent trace read --session-id <SESSION_ID> --json
 ```
 
-_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/trace/read.ts)_
+_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/trace/read.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -2007,6 +2055,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/1.42.1/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
