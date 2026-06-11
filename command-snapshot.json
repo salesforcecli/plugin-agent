@@ -192,6 +192,98 @@
   },
   {
     "alias": [],
+    "command": "agent:mcp:asset:list",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "mcp-server-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:asset:replace",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "assets", "assets-file", "flags-dir", "json", "mcp-server-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:create",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": [
+      "api-version",
+      "auth-type",
+      "client-id",
+      "client-secret",
+      "description",
+      "flags-dir",
+      "identity-provider",
+      "json",
+      "label",
+      "name",
+      "scope",
+      "server-url",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:delete",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "mcp-server-id", "no-prompt", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:fetch",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "mcp-server-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:get",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "mcp-server-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "label", "status", "target-org", "type"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:mcp:update",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": [
+      "api-version",
+      "auth-type",
+      "client-id",
+      "client-secret",
+      "description",
+      "flags-dir",
+      "identity-provider",
+      "json",
+      "label",
+      "mcp-server-id",
+      "scope",
+      "server-url",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:preview",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "x"],
