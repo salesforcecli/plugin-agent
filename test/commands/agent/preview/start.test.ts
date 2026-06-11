@@ -32,13 +32,15 @@ describe('agent preview start', () => {
   let setMockModeStub: sinon.SinonStub;
   let initStub: sinon.SinonStub;
   let createCacheStub: sinon.SinonStub;
+  let startStub: sinon.SinonStub;
   let AgentPreviewStart: any;
 
   beforeEach(async () => {
     setMockModeStub = $$.SANDBOX.stub();
+    startStub = $$.SANDBOX.stub().resolves({ sessionId: 'test-session-id' });
     const mockPreview = {
       setMockMode: setMockModeStub,
-      start: $$.SANDBOX.stub().resolves({ sessionId: 'test-session-id' }),
+      start: startStub,
     };
     class MockScriptAgent {
       public preview = mockPreview;
@@ -239,6 +241,83 @@ describe('agent preview start', () => {
         expect.fail('Should have thrown an error');
       } catch (error: unknown) {
         expect((error as Error).message).to.match(/exactly one|api-name|authoring-bundle/i);
+      }
+    });
+  });
+
+  describe('--context-variables flag', () => {
+    it('passes empty contextVariables to start() when flag absent', async () => {
+      await AgentPreviewStart.run(['--api-name', 'TestAgent', '--target-org', 'test@org.com']);
+      const call = startStub.getCall(0);
+      expect(call.args[0]).to.deep.equal({ contextVariables: [] });
+    });
+
+    it('passes parsed contextVariables to start() when flag provided', async () => {
+      await AgentPreviewStart.run([
+        '--api-name',
+        'TestAgent',
+        '--target-org',
+        'test@org.com',
+        '--context-variables',
+        'RoutableId=abc',
+      ]);
+      const call = startStub.getCall(0);
+      expect(call.args[0]).to.deep.equal({
+        contextVariables: [{ name: 'RoutableId', type: 'Text', value: 'abc' }],
+      });
+    });
+
+    it('accepts repeated --context-variables invocations', async () => {
+      await AgentPreviewStart.run([
+        '--api-name',
+        'TestAgent',
+        '--target-org',
+        'test@org.com',
+        '--context-variables',
+        'RoutableId=abc',
+        '--context-variables',
+        'OpenAgent=general_faq',
+      ]);
+      const call = startStub.getCall(0);
+      expect(call.args[0]).to.deep.equal({
+        contextVariables: [
+          { name: 'RoutableId', type: 'Text', value: 'abc' },
+          { name: 'OpenAgent', type: 'Text', value: 'general_faq' },
+        ],
+      });
+    });
+
+    it('accepts comma-separated values in a single invocation', async () => {
+      await AgentPreviewStart.run([
+        '--api-name',
+        'TestAgent',
+        '--target-org',
+        'test@org.com',
+        '--context-variables',
+        'RoutableId=abc,OpenAgent=general_faq',
+      ]);
+      const call = startStub.getCall(0);
+      expect(call.args[0]).to.deep.equal({
+        contextVariables: [
+          { name: 'RoutableId', type: 'Text', value: 'abc' },
+          { name: 'OpenAgent', type: 'Text', value: 'general_faq' },
+        ],
+      });
+    });
+
+    it('throws SfError on malformed Name=Value (no =)', async () => {
+      try {
+        await AgentPreviewStart.run([
+          '--api-name',
+          'TestAgent',
+          '--target-org',
+          'test@org.com',
+          '--context-variables',
+          'noEqualsHere',
+        ]);
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        expect((error as Error).message).to.match(/Expected Name=Value/);
       }
     });
   });

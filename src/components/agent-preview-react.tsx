@@ -20,7 +20,7 @@ import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import { SfError, Lifecycle } from '@salesforce/core';
-import { ScriptAgent, ProductionAgent } from '@salesforce/agents';
+import { ScriptAgent, ProductionAgent, type ContextVariable } from '@salesforce/agents';
 import { sleep, env } from '@salesforce/kit';
 
 type ScriptAgentPreview = ScriptAgent['preview'];
@@ -63,6 +63,7 @@ export function AgentPreviewReact(props: {
   readonly name: string;
   readonly outputDir: string | undefined;
   readonly isLocalAgent: boolean;
+  readonly contextVariables?: ContextVariable[];
 }): React.ReactNode {
   const [messages, setMessages] = React.useState<Array<{ timestamp: Date; role: string; content: string }>>([]);
   const [header, setHeader] = React.useState('Starting session...');
@@ -76,7 +77,7 @@ export function AgentPreviewReact(props: {
   const [saveDir, setSaveDir] = React.useState('');
   const [savedPath, setSavedPath] = React.useState<string | undefined>();
 
-  const { agent, name, outputDir, isLocalAgent } = props;
+  const { agent, name, outputDir, isLocalAgent, contextVariables } = props;
 
   useInput((input, key) => {
     // If user is in directory input and presses ESC, cancel and exit without saving
@@ -163,7 +164,9 @@ export function AgentPreviewReact(props: {
 
     const startSession = async (): Promise<void> => {
       try {
-        const session = await agent.start();
+        const session = await agent.start(
+          contextVariables && contextVariables.length > 0 ? { contextVariables } : undefined
+        );
         setSessionId(session.sessionId);
         setHeader(`New session started with "${props.name}" (${session.sessionId})`);
 
@@ -183,7 +186,7 @@ export function AgentPreviewReact(props: {
     };
 
     void startSession();
-  }, [agent, name, props.name, isLocalAgent]);
+  }, [agent, name, props.name, isLocalAgent, contextVariables]);
 
   // Handle saving when user confirms save on exit
   React.useEffect(() => {
