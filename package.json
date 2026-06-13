@@ -12,7 +12,7 @@
     "@inquirer/prompts": "^7.10.1",
     "@oclif/core": "^4",
     "@oclif/multi-stage-output": "^0.8.36",
-    "@salesforce/agents": "^1.8.3",
+    "@salesforce/agents": "^1.8.4",
     "@salesforce/core": "^8.28.3",
     "@salesforce/kit": "^3.2.6",
     "@salesforce/sf-plugins-core": "^12.2.6",
@@ -101,6 +101,16 @@
             "subtopics": {
               "file": {
                 "description": "Commands to manage files in an SFDRIVE data library.",
+                "external": true
+              }
+            }
+          },
+          "mcp": {
+            "description": "Commands to manage MCP server registrations in the API Catalog.",
+            "external": true,
+            "subtopics": {
+              "asset": {
+                "description": "Commands to manage the asset allowlist of an MCP server.",
                 "external": true
               }
             }

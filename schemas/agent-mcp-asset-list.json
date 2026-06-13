@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ApiCatalogMcpServerAssetListResult",
+  "definitions": {
+    "ApiCatalogMcpServerAssetListResult": {
+      "$ref": "#/definitions/McpServerAssetCollection"
+    },
+    "McpServerAssetCollection": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/McpServerAssetOutput"
+          }
+        }
+      },
+      "required": [
+        "assets"
+      ],
+      "additionalProperties": false
+    },
+    "McpServerAssetOutput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/McpAssetKind"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "availableAsAgentAction": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "active"
+      ],
+      "additionalProperties": false
+    },
+    "McpAssetKind": {
+      "type": "string",
+      "enum": [
+        "MCP_TOOL",
+        "MCP_PROMPT",
+        "MCP_RESOURCE"
+      ]
+    }
+  }
+}

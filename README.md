@@ -76,6 +76,14 @@ sf plugins
 - [`sf agent generate authoring-bundle`](#sf-agent-generate-authoring-bundle)
 - [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
+- [`sf agent mcp asset list`](#sf-agent-mcp-asset-list)
+- [`sf agent mcp asset replace`](#sf-agent-mcp-asset-replace)
+- [`sf agent mcp create`](#sf-agent-mcp-create)
+- [`sf agent mcp delete`](#sf-agent-mcp-delete)
+- [`sf agent mcp fetch`](#sf-agent-mcp-fetch)
+- [`sf agent mcp get`](#sf-agent-mcp-get)
+- [`sf agent mcp list`](#sf-agent-mcp-list)
+- [`sf agent mcp update`](#sf-agent-mcp-update)
 - [`sf agent preview`](#sf-agent-preview)
 - [`sf agent preview end`](#sf-agent-preview-end)
 - [`sf agent preview send`](#sf-agent-preview-send)
@@ -952,6 +960,343 @@ EXAMPLES
 
 _See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/generate/test-spec.ts)_
 
+## `sf agent mcp asset list`
+
+List the assets (tools, prompts, and resources) for an MCP server in the catalog.
+
+```
+USAGE
+  $ sf agent mcp asset list -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --mcp-server-id=<value>  (required) The ID of the MCP server whose assets you want to list.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List the assets (tools, prompts, and resources) for an MCP server in the catalog.
+
+  Returns the assets discovered for the specified MCP server, including each asset's kind (MCP_TOOL, MCP_PROMPT, or
+  MCP_RESOURCE), whether it is active, and whether it is available as an agent action.
+
+EXAMPLES
+  List the assets for an MCP server in the default target org:
+
+    $ sf agent mcp asset list --target-org myOrg --mcp-server-id 0XSxx0000000001
+
+  List the assets for an MCP server and output as JSON:
+
+    $ sf agent mcp asset list --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
+```
+
+_See code: [src/commands/agent/mcp/asset/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/asset/list.ts)_
+
+## `sf agent mcp asset replace`
+
+Replace the asset set of an MCP server in the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp asset replace -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--assets <value>
+    | --assets-file <value>]
+
+FLAGS
+  -i, --mcp-server-id=<value>  (required) ID of the MCP server whose assets you want to replace.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+      --assets=<value>         The desired asset allowlist as a JSON string (or "-" to read from stdin). Mutually
+                               exclusive with --assets-file.
+      --assets-file=<value>    Path to a JSON file containing the desired asset allowlist. Mutually exclusive with
+                               --assets.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Replace the asset set of an MCP server in the API Catalog.
+
+  Replaces the full set of assets (tools, prompts, resources) for an MCP server with the asset items you supply. Provide
+  the assets either inline with `--assets` (a JSON string, or `-` to read from stdin) or from a file with
+  `--assets-file`. The JSON must be either an array of asset items or an object of the form `{ "assets": [...] }`. Each
+  asset item may include `id`, `name`, `label`, `description`, `active`, and `kind`. This is a full replacement:
+  existing assets not present in the supplied set are removed, so provide the complete desired asset set (read the
+  current set first with `agent mcp asset list` or `agent mcp fetch`).
+
+EXAMPLES
+  Replace the assets inline with a JSON string:
+
+    $ sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets \
+      '{"assets":[{"name":"McpTool__add","active":true}]}' --target-org myOrg
+
+  Replace the assets from a JSON file:
+
+    $ sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets-file ./assets.json --target-org myOrg
+
+  Pipe the assets from stdin:
+  cat assets.json | sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets - --target-org myOrg
+```
+
+_See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/asset/replace.ts)_
+
+## `sf agent mcp create`
+
+Create an MCP server in the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp create -o <value> -n <value> --server-url <value> [--json] [--flags-dir <value>] [--api-version
+    <value>] [--label <value>] [--description <value>] [--auth-type OAUTH|NO_AUTH] [--identity-provider <value>]
+    [--client-id <value>] [--client-secret <value>] [--scope <value>]
+
+FLAGS
+  -n, --name=<value>               (required) Unique name of the MCP server.
+  -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
+                                   configuration variable is already set.
+      --api-version=<value>        Override the api version used for api requests made by this command
+      --auth-type=<option>         [default: NO_AUTH] Authorization type to use when connecting to the MCP server.
+                                   <options: OAUTH|NO_AUTH>
+      --client-id=<value>          OAuth client ID. Required when auth-type is OAUTH.
+      --client-secret=<value>      OAuth client secret. Required when auth-type is OAUTH. Pass "-" to read it from stdin
+                                   (piped) and keep it out of shell history.
+      --description=<value>        Description of the MCP server.
+      --identity-provider=<value>  Identity provider to use for OAuth authorization. Required when auth-type is OAUTH.
+      --label=<value>              Human-readable label for the MCP server.
+      --scope=<value>              OAuth scope to request. Required when auth-type is OAUTH.
+      --server-url=<value>         (required) URL of the external MCP server.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Create an MCP server in the API Catalog.
+
+  Registers an external Model Context Protocol (MCP) server with the API Catalog and discovers its assets (tools,
+  prompts, and resources). Provide the server URL and, when the server requires it, OAuth authorization details. When
+  the authorization type is OAUTH you must supply the identity provider, client ID, client secret, and scope.
+
+EXAMPLES
+  Create an MCP server with no authentication:
+
+    $ sf agent mcp create --name myServer --server-url https://mcp.example.com --target-org myOrg
+
+  Create an MCP server that uses OAuth authentication, piping the client secret from stdin to keep it out of shell history:
+  cat secret.txt | sf agent mcp create --name myServer --server-url https://mcp.example.com --auth-type OAUTH --identity-provider myIdp --client-id abc123 --client-secret - --scope "read write" --target-org myOrg
+```
+
+_See code: [src/commands/agent/mcp/create.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/create.ts)_
+
+## `sf agent mcp delete`
+
+Delete an MCP server from the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp delete -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--no-prompt]
+
+FLAGS
+  -i, --mcp-server-id=<value>  (required) ID of the MCP server to delete.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+      --no-prompt              Skip the confirmation prompt and delete the MCP server immediately.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Delete an MCP server from the API Catalog.
+
+  Permanently removes an MCP (Model Context Protocol) server registration from the API Catalog, identified by its ID. By
+  default you are prompted to confirm the deletion; pass --no-prompt to skip the confirmation (for example in scripts
+  and CI).
+
+EXAMPLES
+  Delete an MCP server, confirming interactively:
+
+    $ sf agent mcp delete --mcp-server-id 0XSxx0000000001 --target-org myOrg
+
+  Delete an MCP server without a confirmation prompt:
+
+    $ sf agent mcp delete --mcp-server-id 0XSxx0000000001 --target-org myOrg --no-prompt
+```
+
+_See code: [src/commands/agent/mcp/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/delete.ts)_
+
+## `sf agent mcp fetch`
+
+Fetch the live assets (tools, prompts, resources) advertised by an MCP server.
+
+```
+USAGE
+  $ sf agent mcp fetch -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --mcp-server-id=<value>  (required) ID of the MCP server to fetch assets from.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Fetch the live assets (tools, prompts, resources) advertised by an MCP server.
+
+  Performs a live fetch against the configured MCP server identified by its ID, returning the assets (MCP tools,
+  prompts, and resources) it currently advertises along with their status and activation state. Use this to refresh the
+  view of what an MCP server exposes before activating its assets as agent actions.
+
+EXAMPLES
+  Fetch the assets advertised by an MCP server in the default target org:
+
+    $ sf agent mcp fetch --target-org myOrg --mcp-server-id 0XSxx0000000001
+
+  Fetch MCP server assets and output as JSON:
+
+    $ sf agent mcp fetch --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
+```
+
+_See code: [src/commands/agent/mcp/fetch.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/fetch.ts)_
+
+## `sf agent mcp get`
+
+Get a single MCP server registered in the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp get -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --mcp-server-id=<value>  (required) The identifier of the MCP server to retrieve.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Get a single MCP server registered in the API Catalog.
+
+  Retrieves the details of an MCP (Model Context Protocol) server by its identifier, including its name, label, type,
+  status, and server URL.
+
+EXAMPLES
+  Get an MCP server by id in the default target org:
+
+    $ sf agent mcp get --target-org myOrg --mcp-server-id 0Mx000000000001
+
+  Get an MCP server and output as JSON:
+
+    $ sf agent mcp get --target-org myOrg --mcp-server-id 0Mx000000000001 --json
+```
+
+_See code: [src/commands/agent/mcp/get.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/get.ts)_
+
+## `sf agent mcp list`
+
+List the MCP servers registered in the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp list -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [--label <value>] [--type
+    EXTERNAL] [--status ACTIVE|DISCONNECTED]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --label=<value>        Filter the MCP servers by label.
+      --status=<option>      Filter the MCP servers by connection status. Only ACTIVE and DISCONNECTED are supported as
+                             filters.
+                             <options: ACTIVE|DISCONNECTED>
+      --type=<option>        Filter the MCP servers by type.
+                             <options: EXTERNAL>
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List the MCP servers registered in the API Catalog.
+
+  Returns the Model Context Protocol (MCP) servers registered in the API Catalog, optionally filtered by label, type, or
+  status. Use this to discover which MCP servers are available and inspect their server URLs and current status.
+
+EXAMPLES
+  List all MCP servers in the default target org:
+
+    $ sf agent mcp list --target-org myOrg
+
+  List external MCP servers filtered by status and output as JSON:
+
+    $ sf agent mcp list --target-org myOrg --type EXTERNAL --status ACTIVE --json
+```
+
+_See code: [src/commands/agent/mcp/list.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/list.ts)_
+
+## `sf agent mcp update`
+
+Update an MCP server registered in the API Catalog.
+
+```
+USAGE
+  $ sf agent mcp update -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--label <value>]
+    [--description <value>] [--server-url <value>] [--auth-type OAUTH|NO_AUTH] [--identity-provider <value>]
+    [--client-id <value>] [--client-secret <value>] [--scope <value>]
+
+FLAGS
+  -i, --mcp-server-id=<value>      (required) ID of the MCP server to update.
+  -o, --target-org=<value>         (required) Username or alias of the target org. Not required if the `target-org`
+                                   configuration variable is already set.
+      --api-version=<value>        Override the api version used for api requests made by this command
+      --auth-type=<option>         Authorization type to apply to the MCP server (OAUTH or NO_AUTH).
+                                   <options: OAUTH|NO_AUTH>
+      --client-id=<value>          OAuth client ID (required when --auth-type is OAUTH).
+      --client-secret=<value>      OAuth client secret (required when --auth-type is OAUTH). Pass "-" to read it from
+                                   stdin (piped) and keep it out of shell history.
+      --description=<value>        New description for the MCP server.
+      --identity-provider=<value>  Identity provider name for OAuth authorization (required when --auth-type is OAUTH).
+      --label=<value>              New display label for the MCP server.
+      --scope=<value>              OAuth scope (required when --auth-type is OAUTH).
+      --server-url=<value>         New endpoint URL of the MCP server.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Update an MCP server registered in the API Catalog.
+
+  Updates an existing MCP server in the API Catalog. Only the fields you provide are changed; omitted fields are left
+  untouched. You can update the label, description, and server URL, and replace the authorization configuration. When
+  setting `--auth-type OAUTH`, you must also provide `--identity-provider`, `--client-id`, `--client-secret`, and
+  `--scope`. When setting `--auth-type NO_AUTH`, no authorization credentials are required. At least one updatable field
+  must be supplied.
+
+EXAMPLES
+  Update the label and description of an MCP server in the default target org:
+
+    $ sf agent mcp update --mcp-server-id 0XSxx0000000001 --label "Orders MCP" --description "Order tooling" \
+      --target-org myOrg
+
+  Update the server URL and switch the authorization to OAuth, piping the client secret from stdin and outputting as JSON:
+  cat secret.txt | sf agent mcp update --mcp-server-id 0XSxx0000000001 --server-url https://mcp.example.com --auth-type OAUTH --identity-provider MyIdp --client-id abc --client-secret - --scope "read write" --target-org myOrg --json
+```
+
+_See code: [src/commands/agent/mcp/update.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/mcp/update.ts)_
+
 ## `sf agent preview`
 
 Interact with an agent to preview how it responds to your statements, questions, and commands (utterances).
@@ -1038,9 +1383,7 @@ FLAG DESCRIPTIONS
     State variables use the bare developerName, no prefix. These seed mutable agent state declared in
     agentVersion.stateVariables. Example: MyStateVar=some-value.
 
-
-    Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
-
+    Both namespaces can be mixed in one value. Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
 
     Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
     bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name
@@ -1290,9 +1633,7 @@ FLAG DESCRIPTIONS
     State variables use the bare developerName, no prefix. These seed mutable agent state declared in
     agentVersion.stateVariables. Example: MyStateVar=some-value.
 
-
-    Both namespaces can be mixed in one value.  Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
-
+    Both namespaces can be mixed in one value. Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
 
     Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
     bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ApiCatalogMcpServerUpdateResult",
+  "definitions": {
+    "ApiCatalogMcpServerUpdateResult": {
+      "$ref": "#/definitions/McpServerOutput"
+    },
+    "McpServerOutput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/McpServerType"
+        },
+        "status": {
+          "type": "string"
+        },
+        "serverUrl": {
+          "type": "string"
+        },
+        "authorization": {
+          "$ref": "#/definitions/McpServerAuthorizationOutput"
+        },
+        "createdById": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "lastModifiedById": {
+          "type": "string"
+        },
+        "lastModifiedDate": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "McpServerType": {
+      "type": "string",
+      "const": "EXTERNAL"
+    },
+    "McpServerAuthorizationOutput": {
+      "type": "object",
+      "properties": {
+        "authType": {
+          "$ref": "#/definitions/McpAuthType"
+        },
+        "identityProvider": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "authType"
+      ],
+      "additionalProperties": false
+    },
+    "McpAuthType": {
+      "type": "string",
+      "enum": [
+        "OAUTH",
+        "NO_AUTH"
+      ]
+    }
+  }
+}
