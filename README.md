@@ -58,47 +58,48 @@ sf plugins
 ## Commands
 
 <!-- commands -->
-* [`sf agent activate`](#sf-agent-activate)
-* [`sf agent adl create`](#sf-agent-adl-create)
-* [`sf agent adl delete`](#sf-agent-adl-delete)
-* [`sf agent adl file add`](#sf-agent-adl-file-add)
-* [`sf agent adl file delete`](#sf-agent-adl-file-delete)
-* [`sf agent adl file list`](#sf-agent-adl-file-list)
-* [`sf agent adl get`](#sf-agent-adl-get)
-* [`sf agent adl list`](#sf-agent-adl-list)
-* [`sf agent adl status`](#sf-agent-adl-status)
-* [`sf agent adl update`](#sf-agent-adl-update)
-* [`sf agent adl upload`](#sf-agent-adl-upload)
-* [`sf agent create`](#sf-agent-create)
-* [`sf agent deactivate`](#sf-agent-deactivate)
-* [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
-* [`sf agent generate authoring-bundle`](#sf-agent-generate-authoring-bundle)
-* [`sf agent generate template`](#sf-agent-generate-template)
-* [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
-* [`sf agent mcp asset list`](#sf-agent-mcp-asset-list)
-* [`sf agent mcp asset replace`](#sf-agent-mcp-asset-replace)
-* [`sf agent mcp create`](#sf-agent-mcp-create)
-* [`sf agent mcp delete`](#sf-agent-mcp-delete)
-* [`sf agent mcp fetch`](#sf-agent-mcp-fetch)
-* [`sf agent mcp get`](#sf-agent-mcp-get)
-* [`sf agent mcp list`](#sf-agent-mcp-list)
-* [`sf agent mcp update`](#sf-agent-mcp-update)
-* [`sf agent preview`](#sf-agent-preview)
-* [`sf agent preview end`](#sf-agent-preview-end)
-* [`sf agent preview send`](#sf-agent-preview-send)
-* [`sf agent preview sessions`](#sf-agent-preview-sessions)
-* [`sf agent preview start`](#sf-agent-preview-start)
-* [`sf agent publish authoring-bundle`](#sf-agent-publish-authoring-bundle)
-* [`sf agent test create`](#sf-agent-test-create)
-* [`sf agent test list`](#sf-agent-test-list)
-* [`sf agent test results`](#sf-agent-test-results)
-* [`sf agent test resume`](#sf-agent-test-resume)
-* [`sf agent test run`](#sf-agent-test-run)
-* [`sf agent test run-eval`](#sf-agent-test-run-eval)
-* [`sf agent trace delete`](#sf-agent-trace-delete)
-* [`sf agent trace list`](#sf-agent-trace-list)
-* [`sf agent trace read`](#sf-agent-trace-read)
-* [`sf agent validate authoring-bundle`](#sf-agent-validate-authoring-bundle)
+
+- [`sf agent activate`](#sf-agent-activate)
+- [`sf agent adl create`](#sf-agent-adl-create)
+- [`sf agent adl delete`](#sf-agent-adl-delete)
+- [`sf agent adl file add`](#sf-agent-adl-file-add)
+- [`sf agent adl file delete`](#sf-agent-adl-file-delete)
+- [`sf agent adl file list`](#sf-agent-adl-file-list)
+- [`sf agent adl get`](#sf-agent-adl-get)
+- [`sf agent adl list`](#sf-agent-adl-list)
+- [`sf agent adl status`](#sf-agent-adl-status)
+- [`sf agent adl update`](#sf-agent-adl-update)
+- [`sf agent adl upload`](#sf-agent-adl-upload)
+- [`sf agent create`](#sf-agent-create)
+- [`sf agent deactivate`](#sf-agent-deactivate)
+- [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
+- [`sf agent generate authoring-bundle`](#sf-agent-generate-authoring-bundle)
+- [`sf agent generate template`](#sf-agent-generate-template)
+- [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
+- [`sf agent mcp asset list`](#sf-agent-mcp-asset-list)
+- [`sf agent mcp asset replace`](#sf-agent-mcp-asset-replace)
+- [`sf agent mcp create`](#sf-agent-mcp-create)
+- [`sf agent mcp delete`](#sf-agent-mcp-delete)
+- [`sf agent mcp fetch`](#sf-agent-mcp-fetch)
+- [`sf agent mcp get`](#sf-agent-mcp-get)
+- [`sf agent mcp list`](#sf-agent-mcp-list)
+- [`sf agent mcp update`](#sf-agent-mcp-update)
+- [`sf agent preview`](#sf-agent-preview)
+- [`sf agent preview end`](#sf-agent-preview-end)
+- [`sf agent preview send`](#sf-agent-preview-send)
+- [`sf agent preview sessions`](#sf-agent-preview-sessions)
+- [`sf agent preview start`](#sf-agent-preview-start)
+- [`sf agent publish authoring-bundle`](#sf-agent-publish-authoring-bundle)
+- [`sf agent test create`](#sf-agent-test-create)
+- [`sf agent test list`](#sf-agent-test-list)
+- [`sf agent test results`](#sf-agent-test-results)
+- [`sf agent test resume`](#sf-agent-test-resume)
+- [`sf agent test run`](#sf-agent-test-run)
+- [`sf agent test run-eval`](#sf-agent-test-run-eval)
+- [`sf agent trace delete`](#sf-agent-trace-delete)
+- [`sf agent trace list`](#sf-agent-trace-list)
+- [`sf agent trace read`](#sf-agent-trace-read)
+- [`sf agent validate authoring-bundle`](#sf-agent-validate-authoring-bundle)
 
 ## `sf agent activate`
 
@@ -1303,19 +1304,20 @@ Interact with an agent to preview how it responds to your statements, questions,
 ```
 USAGE
   $ sf agent preview -o <value> [--flags-dir <value>] [--api-version <value>] [-n <value>] [--authoring-bundle
-    <value>] [-d <value>] [-x] [--use-live-actions]
+    <value>] [-d <value>] [-x] [--use-live-actions] [--context-variables <value>...]
 
 FLAGS
-  -d, --output-dir=<value>        Directory where conversation transcripts are saved.
-  -n, --api-name=<value>          API name of the activated published agent you want to interact with.
-  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
-                                  configuration variable is already set.
-  -x, --apex-debug                Enable Apex debug logging during the agent preview conversation.
-      --api-version=<value>       Override the api version used for api requests made by this command
-      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
-                                  Script file.
-      --use-live-actions          Use real actions in the org; if not specified, preview uses AI to simulate (mock)
-                                  actions.
+  -d, --output-dir=<value>            Directory where conversation transcripts are saved.
+  -n, --api-name=<value>              API name of the activated published agent you want to interact with.
+  -o, --target-org=<value>            (required) Username or alias of the target org. Not required if the `target-org`
+                                      configuration variable is already set.
+  -x, --apex-debug                    Enable Apex debug logging during the agent preview conversation.
+      --api-version=<value>           Override the api version used for api requests made by this command
+      --authoring-bundle=<value>      API name of the authoring bundle metadata component that contains the agent's
+                                      Agent Script file.
+      --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+      --use-live-actions              Use real actions in the org; if not specified, preview uses AI to simulate (mock)
+                                      actions.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1365,6 +1367,27 @@ EXAMPLES
   "./transcripts/my-preview" directory, enable the Apex debug logs, and use your default org:
 
     $ sf agent preview --use-live-actions --apex-debug --output-dir transcripts/my-preview
+
+FLAG DESCRIPTIONS
+  --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+
+    Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override
+    variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces
+    are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't
+    transform them.
+
+    Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime
+    resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and
+    topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
+
+    State variables use the bare developerName, no prefix. These seed mutable agent state declared in
+    agentVersion.stateVariables. Example: MyStateVar=some-value.
+
+    Both namespaces can be mixed in one value. Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
+
+    Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
+    bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name
+    will see null. (3) Type defaults to Text.
 ```
 
 _See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview.ts)_
@@ -1539,19 +1562,20 @@ Start a programmatic agent preview session.
 ```
 USAGE
   $ sf agent preview start -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>]
-    [--authoring-bundle <value>] [--use-live-actions | --simulate-actions]
+    [--authoring-bundle <value>] [--use-live-actions | --simulate-actions] [--context-variables <value>...]
 
 FLAGS
-  -n, --api-name=<value>          API name of the activated published agent you want to preview.
-  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
-                                  configuration variable is already set.
-      --api-version=<value>       Override the api version used for api requests made by this command
-      --authoring-bundle=<value>  API name of the authoring bundle metadata component that contains the agent's Agent
-                                  Script file.
-      --simulate-actions          Use AI to simulate action execution instead of calling real actions. Required with
-                                  --authoring-bundle.
-      --use-live-actions          Execute real actions in the org (Apex classes, flows, etc.). Required with
-                                  --authoring-bundle.
+  -n, --api-name=<value>              API name of the activated published agent you want to preview.
+  -o, --target-org=<value>            (required) Username or alias of the target org. Not required if the `target-org`
+                                      configuration variable is already set.
+      --api-version=<value>           Override the api version used for api requests made by this command
+      --authoring-bundle=<value>      API name of the authoring bundle metadata component that contains the agent's
+                                      Agent Script file.
+      --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+      --simulate-actions              Use AI to simulate action execution instead of calling real actions. Required with
+                                      --authoring-bundle.
+      --use-live-actions              Execute real actions in the org (Apex classes, flows, etc.). Required with
+                                      --authoring-bundle.
 
 GLOBAL FLAGS
   --flags-dir=<value>  Import flag values from a directory.
@@ -1593,6 +1617,27 @@ EXAMPLES
   Start a preview session with an activated published agent (always uses live actions):
 
     $ sf agent preview start --api-name My_Published_Agent
+
+FLAG DESCRIPTIONS
+  --context-variables=<value>...  Session variables for the agent preview session, in the form Name=Value.
+
+    Sets variables on the agent preview session, mirroring what the in-org Agentforce Builder UI does when you override
+    variables before sending a message. Specify this flag multiple times or use comma-separated values. Two namespaces
+    are supported, distinguished by the name shape. Names pass through to the runtime verbatim — the CLI doesn't
+    transform them.
+
+    Linked context variables use the "$Context." prefix. These map to externally-provided fields that the runtime
+    resolves (declared in the bundle's globalConfiguration.contextVariables) and are read by live actions and
+    topic-routing expressions via $Context.Name. Example: $Context.MyLinkedVar=some-value.
+
+    State variables use the bare developerName, no prefix. These seed mutable agent state declared in
+    agentVersion.stateVariables. Example: MyStateVar=some-value.
+
+    Both namespaces can be mixed in one value. Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
+
+    Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a
+    bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name
+    will see null. (3) Type defaults to Text.
 ```
 
 _See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/preview/start.ts)_
@@ -2352,4 +2397,5 @@ EXAMPLES
 ```
 
 _See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/v1.42.1/src/commands/agent/validate/authoring-bundle.ts)_
+
 <!-- commandsstop -->
