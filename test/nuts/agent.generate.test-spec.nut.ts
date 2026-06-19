@@ -15,7 +15,7 @@
  */
 
 import { join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
@@ -77,5 +77,70 @@ describe('agent generate test-spec NUTs', function () {
     execCmd(`agent generate test-spec --from-definition ${invalidFile} --output-file ${outputFile} --force-overwrite`, {
       ensureExitCode: 'nonZero',
     });
+  });
+
+  it('should generate NGT test spec from AiTestingDefinition with explicit --test-runner agentforce-studio', () => {
+    const definitionFile = join(
+      session.project.dir,
+      'force-app',
+      'main',
+      'default',
+      'aiTestingDefinitions',
+      'ReturnsCheckoutSuite.aiTestingDefinition-meta.xml'
+    );
+    const outputFile = join(session.project.dir, 'specs', genUniqueString('ngtTestSpec_%s.yaml'));
+
+    execCmd(
+      `agent generate test-spec --from-definition ${definitionFile} --test-runner agentforce-studio --output-file ${outputFile} --force-overwrite`,
+      { ensureExitCode: 0 }
+    );
+
+    expect(existsSync(outputFile)).to.be.true;
+    const yaml = readFileSync(outputFile, 'utf8');
+    // NGT-shaped YAML: per-case `inputs:` array and `scorers:` array.
+    expect(yaml).to.match(/inputs:/);
+    expect(yaml).to.match(/scorers:/);
+    expect(yaml).to.match(/subjectName:\s*ReturnsAgent/);
+  });
+
+  it('should infer agentforce-studio runner from AiTestingDefinition extension when --test-runner is omitted', () => {
+    const definitionFile = join(
+      session.project.dir,
+      'force-app',
+      'main',
+      'default',
+      'aiTestingDefinitions',
+      'ReturnsCheckoutSuite.aiTestingDefinition-meta.xml'
+    );
+    const outputFile = join(session.project.dir, 'specs', genUniqueString('ngtTestSpec_%s.yaml'));
+
+    execCmd(
+      `agent generate test-spec --from-definition ${definitionFile} --output-file ${outputFile} --force-overwrite`,
+      { ensureExitCode: 0 }
+    );
+
+    expect(existsSync(outputFile)).to.be.true;
+    const yaml = readFileSync(outputFile, 'utf8');
+    expect(yaml).to.match(/inputs:/);
+    expect(yaml).to.match(/scorers:/);
+  });
+
+  it('should fail with RunnerMismatch when legacy XML is paired with --test-runner agentforce-studio', () => {
+    const definitionFile = join(
+      session.project.dir,
+      'force-app',
+      'main',
+      'default',
+      'aiEvaluationDefinitions',
+      'Local_Info_Agent_Test.aiEvaluationDefinition-meta.xml'
+    );
+    const outputFile = join(session.project.dir, 'specs', genUniqueString('ngtTestSpec_%s.yaml'));
+
+    const result = execCmd(
+      `agent generate test-spec --from-definition ${definitionFile} --test-runner agentforce-studio --output-file ${outputFile} --force-overwrite`,
+      { ensureExitCode: 'nonZero' }
+    );
+    const stderr = result.shellOutput.stderr ?? '';
+    expect(stderr).to.match(/RunnerMismatch|test-runner|extension/i);
   });
 });

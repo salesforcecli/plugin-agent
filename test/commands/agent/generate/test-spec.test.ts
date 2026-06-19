@@ -26,6 +26,7 @@ import {
   getMetadataFilePaths,
   getPluginsAndFunctions,
   createCustomEvaluation,
+  inferRunnerFromMdPath,
 } from '../../../../src/commands/agent/generate/test-spec.js';
 
 describe('AgentGenerateTestSpec Helper Methods', () => {
@@ -775,6 +776,26 @@ describe('AgentGenerateTestSpec Helper Methods', () => {
       expect(evaluation.name).to.equal('numeric_comparison');
       expect(evaluation.parameters[1].value).to.equal('$.response.data[0].nested["special-key"].value');
       expect(evaluation.parameters[2].value).to.equal('3.14159');
+    });
+  });
+
+  describe('inferRunnerFromMdPath', () => {
+    it('infers testing-center for AiEvaluationDefinition extension', () => {
+      expect(inferRunnerFromMdPath(join('a', 'b', 'Foo.aiEvaluationDefinition-meta.xml'))).to.equal('testing-center');
+    });
+
+    it('infers agentforce-studio for AiTestingDefinition extension', () => {
+      expect(inferRunnerFromMdPath(join('a', 'b', 'Foo.aiTestingDefinition-meta.xml'))).to.equal('agentforce-studio');
+    });
+
+    it('throws UnknownDefinitionExtension for an unrecognized extension', () => {
+      expect(() => inferRunnerFromMdPath(join('a', 'b', 'Foo.xml'))).to.throw(/UnknownDefinitionExtension|must be/i);
+    });
+
+    it('throws UnknownDefinitionExtension for a Bot metadata file', () => {
+      expect(() => inferRunnerFromMdPath(join('a', 'b', 'Foo.bot-meta.xml'))).to.throw(
+        /UnknownDefinitionExtension|must be/i
+      );
     });
   });
 });
