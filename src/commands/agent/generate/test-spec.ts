@@ -18,7 +18,17 @@ import { join, parse } from 'node:path';
 import { existsSync } from 'node:fs';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
-import { AgentTest } from '@salesforce/agents';
+import {
+  AgentTest,
+  NgtScorerCatalog,
+  type KnownNgtScorerName,
+  type NgtConversationTurn,
+  type NgtContextVar,
+  type NgtTestCase,
+  type NgtTestCaseInput,
+  type NgtTestCaseScorer,
+  type NgtTestSpec,
+} from '@salesforce/agents';
 import { select, input, confirm, checkbox } from '@inquirer/prompts';
 import { XMLParser } from 'fast-xml-parser';
 import { ComponentSet, ComponentSetBuilder } from '@salesforce/source-deploy-retrieve';
@@ -26,6 +36,9 @@ import { warn } from '@oclif/core/errors';
 import { ensureArray } from '@salesforce/kit';
 import { theme } from '../../../inquirer-theme.js';
 import yesNoOrCancel from '../../../yes-no-cancel.js';
+import { testRunnerFlag } from '../../../flags.js';
+
+type TestRunner = 'agentforce-studio' | 'testing-center';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.generate.test-spec');
@@ -406,6 +419,16 @@ export function ensureYamlExtension(filePath: string): string {
   return normalized;
 }
 
+/**
+ * Infer the test runner from the file extension of an AiEvaluationDefinition / AiTestingDefinition
+ * metadata XML file. Throws when the extension matches neither.
+ */
+export function inferRunnerFromMdPath(mdPath: string): TestRunner {
+  if (mdPath.endsWith('aiTestingDefinition-meta.xml')) return 'agentforce-studio';
+  if (mdPath.endsWith('aiEvaluationDefinition-meta.xml')) return 'testing-center';
+  throw messages.createError('error.UnknownDefinitionExtension', [mdPath]);
+}
+
 async function promptUntilUniqueFile(subjectName: string, filePath?: string): Promise<string | undefined> {
   const outputFile =
     filePath ??
@@ -450,10 +473,180 @@ async function promptUntilUniqueFile(subjectName: string, filePath?: string): Pr
 async function determineFilePath(
   subjectName: string,
   outputFile: string | undefined,
-  forceOverwrite: boolean
+  forceOverwrite: boolean,
+  testRunner: TestRunner = 'testing-center'
 ): Promise<string | undefined> {
-  const defaultFile = ensureYamlExtension(outputFile ?? join('specs', `${subjectName}-testSpec.yaml`));
+  const suffix = testRunner === 'agentforce-studio' ? '-ngtTestSpec.yaml' : '-testSpec.yaml';
+  const defaultFile = ensureYamlExtension(outputFile ?? join('specs', `${subjectName}${suffix}`));
   return forceOverwrite ? defaultFile : promptUntilUniqueFile(subjectName, defaultFile);
+}
+
+const NGT_BOILERPLATE_HISTORY: NgtConversationTurn[] = [
+  { role: 'user', message: 'example user message' },
+  { role: 'agent', message: 'example agent message', topic: 'Example_agent_topic' },
+];
+
+async function promptForNgtContextVariables(): Promise<NgtContextVar[]> {
+  const vars: NgtContextVar[] = [];
+  let wantsMore = await confirm({ message: 'Add context variables to this case', default: false, theme });
+  while (wantsMore) {
+    // eslint-disable-next-line no-await-in-loop
+    const name = await input({
+      message: 'Variable name',
+      validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
+      theme,
+    });
+    // eslint-disable-next-line no-await-in-loop
+    const value = await input({ message: 'Variable value', theme });
+    vars.push({ name, value });
+    // eslint-disable-next-line no-await-in-loop
+    wantsMore = await confirm({ message: 'Add another context variable', default: false, theme });
+  }
+  return vars;
+}
+
+async function promptForNgtUtterance(message: string): Promise<string> {
+  return input({
+    message,
+    validate: (d: string): boolean | string => d.length > 0 || 'utterance cannot be empty',
+    theme,
+  });
+}
+
+async function promptForNgtInputs(): Promise<NgtTestCaseInput[]> {
+  const isMulti = await confirm({
+    message: 'Does this case have multiple input phrasings sharing one scorer set',
+    default: false,
+    theme,
+  });
+
+  // contextVariables / conversationHistory are decided once and shared across the input set.
+  const contextVariables = await promptForNgtContextVariables();
+  const wantsHistory = await confirm({
+    message: 'Generate boilerplate conversation history for this case',
+    default: false,
+    theme,
+  });
+  const conversationHistory = wantsHistory ? [...NGT_BOILERPLATE_HISTORY] : undefined;
+
+  const utterances: string[] = [];
+  if (!isMulti) {
+    utterances.push(await promptForNgtUtterance('Utterance'));
+  } else {
+    utterances.push(await promptForNgtUtterance('Utterance #1'));
+    let addAnother = await confirm({ message: 'Add another input utterance', default: true, theme });
+    while (addAnother) {
+      // eslint-disable-next-line no-await-in-loop
+      utterances.push(await promptForNgtUtterance(`Utterance #${utterances.length + 1}`));
+      // eslint-disable-next-line no-await-in-loop
+      addAnother = await confirm({ message: 'Add another input utterance', default: false, theme });
+    }
+  }
+
+  return utterances.map((utterance) => {
+    const ngtInput: NgtTestCaseInput = { utterance };
+    if (contextVariables.length > 0) ngtInput.contextVariables = contextVariables;
+    if (conversationHistory) ngtInput.conversationHistory = conversationHistory;
+    return ngtInput;
+  });
+}
+
+/* eslint-disable camelcase */
+const NGT_SCORER_HELP: Partial<Record<KnownNgtScorerName, string>> = {
+  topic_sequence_match: 'Topic API name (DeveloperName from a GenAiPlugin).',
+  action_sequence_match:
+    "Single action API name, OR a Python-list-style string for multi-action: ['Verify_Customer','Get_Order_Status'].",
+  agent_handoff_match: "Target agent's DeveloperName (NOT label).",
+  bot_response_rating: "Natural-language assertion (LLM-judged). Example: 'Agent confirms the cancellation.'",
+  response_match: "Natural-language assertion (LLM-judged). Example: 'Agent confirms the cancellation.'",
+};
+/* eslint-enable camelcase */
+
+async function promptForNgtScorerExpected(
+  scorerName: KnownNgtScorerName,
+  topics: string[],
+  bots: string[],
+  subjectName: string
+): Promise<string> {
+  const help = NGT_SCORER_HELP[scorerName] ?? '';
+
+  if (scorerName === 'topic_sequence_match' && topics.length > 0) {
+    return select<string>({
+      message: `Expected for ${scorerName}: ${help}`,
+      choices: topics.map((t) => ({ name: t, value: t })),
+      theme,
+    });
+  }
+  if (scorerName === 'agent_handoff_match') {
+    const targets = bots.filter((b) => b !== subjectName);
+    if (targets.length > 0) {
+      return select<string>({
+        message: `Expected for ${scorerName}: ${help}`,
+        choices: targets.map((t) => ({ name: t, value: t })),
+        theme,
+      });
+    }
+  }
+
+  return input({
+    message: `Expected for ${scorerName}${help ? `: ${help}` : ''}`,
+    validate: (d: string): boolean | string => d.length > 0 || 'expected cannot be empty',
+    theme,
+  });
+}
+
+async function promptForNgtScorers(
+  topics: string[],
+  bots: string[],
+  subjectName: string
+): Promise<NgtTestCaseScorer[]> {
+  const choices = (Object.keys(NgtScorerCatalog) as KnownNgtScorerName[]).map((n) => ({ name: n, value: n }));
+  const selected = await checkbox<KnownNgtScorerName>({
+    message: 'Select scorers for this test case',
+    choices,
+    required: true,
+    theme,
+  });
+
+  const scorers: NgtTestCaseScorer[] = [];
+  for (const name of selected) {
+    if (NgtScorerCatalog[name].needsExpected) {
+      // eslint-disable-next-line no-await-in-loop
+      const expected = await promptForNgtScorerExpected(name, topics, bots, subjectName);
+      scorers.push({ name, expected });
+    } else {
+      scorers.push({ name });
+    }
+  }
+  return scorers;
+}
+
+export async function promptForNgtTestCase(
+  topics: string[],
+  bots: string[],
+  subjectName: string,
+  caseNumber: number,
+  log: (msg?: string) => void
+): Promise<NgtTestCase> {
+  const inputs = await promptForNgtInputs();
+  const scorers = await promptForNgtScorers(topics, bots, subjectName);
+
+  const usesTaskResolution = scorers.some((s) => s.name === 'task_resolution');
+  const hasHistory = inputs.some((i) => Array.isArray(i.conversationHistory) && i.conversationHistory.length > 0);
+  if (usesTaskResolution && !hasHistory) {
+    const wantsBoilerplate = await confirm({
+      message: 'task_resolution requires conversationHistory. Add boilerplate conversation history now',
+      default: true,
+      theme,
+    });
+    if (wantsBoilerplate) {
+      const stamped = inputs.map((i) => ({ ...i, conversationHistory: [...NGT_BOILERPLATE_HISTORY] }));
+      return { inputs: stamped, scorers };
+    }
+    log(messages.getMessage('warning.NoConversationHistoryForTaskResolution', [caseNumber.toString()]));
+  }
+
+  return { inputs, scorers };
 }
 
 export default class AgentGenerateTestSpec extends SfCommand<void> {
@@ -467,13 +660,6 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       char: 'd',
       exists: true,
       summary: messages.getMessage('flags.from-definition.summary'),
-      parse: async (raw): Promise<string> => {
-        if (!raw.endsWith('aiEvaluationDefinition-meta.xml')) {
-          throw messages.createError('error.InvalidAiEvaluationDefinition');
-        }
-
-        return Promise.resolve(raw);
-      },
     }),
     'force-overwrite': Flags.boolean({
       summary: messages.getMessage('flags.force-overwrite.summary'),
@@ -483,6 +669,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       summary: messages.getMessage('flags.output-file.summary'),
       parse: async (raw): Promise<string> => Promise.resolve(ensureYamlExtension(raw)),
     }),
+    'test-runner': testRunnerFlag,
   };
 
   public async run(): Promise<void> {
@@ -500,10 +687,21 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
     });
 
     if (flags['from-definition']) {
+      const inferredRunner = inferRunnerFromMdPath(flags['from-definition']);
+      if (flags['test-runner'] && flags['test-runner'] !== inferredRunner) {
+        throw messages.createError('error.RunnerMismatch', [flags['test-runner'], inferredRunner]);
+      }
+      const testRunner = flags['test-runner'] ?? inferredRunner;
+
       const agentTest = new AgentTest({ mdPath: flags['from-definition'] });
       const spec = await agentTest.getTestSpec();
 
-      const outputFile = await determineFilePath(spec.subjectName, flags['output-file'], flags['force-overwrite']);
+      const outputFile = await determineFilePath(
+        spec.subjectName,
+        flags['output-file'],
+        flags['force-overwrite'],
+        testRunner
+      );
       if (!outputFile) {
         this.log(messages.getMessage('info.cancel'));
         return;
@@ -524,6 +722,8 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       throw messages.createError('error.NoAgentsFound', [directoryPaths.join(', ')]);
     }
 
+    const testRunner: TestRunner = flags['test-runner'] ?? 'testing-center';
+
     const subjectType = (await select<string>({
       message: 'What are you testing',
       choices: ['AGENT'],
@@ -536,7 +736,7 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       theme,
     });
 
-    const outputFile = await determineFilePath(subjectName, flags['output-file'], flags['force-overwrite']);
+    const outputFile = await determineFilePath(subjectName, flags['output-file'], flags['force-overwrite'], testRunner);
     if (!outputFile) {
       this.log(messages.getMessage('info.cancel'));
       return;
@@ -561,6 +761,47 @@ export default class AgentGenerateTestSpec extends SfCommand<void> {
       message: 'Enter a description for the test (optional)',
       theme,
     });
+
+    if (testRunner === 'agentforce-studio') {
+      const subjectVersion = await input({
+        message: 'Enter the agent version (e.g. v1)',
+        default: 'v1',
+        theme,
+      });
+
+      const ngtTestCases: NgtTestCase[] = [];
+      do {
+        this.log();
+        this.styledHeader(`Adding test case #${ngtTestCases.length + 1}`);
+        // eslint-disable-next-line no-await-in-loop
+        const tc = await promptForNgtTestCase(
+          Object.keys(genAiPlugins),
+          bots,
+          subjectName,
+          ngtTestCases.length + 1,
+          (msg) => this.warn(msg ?? '')
+        );
+        ngtTestCases.push(tc);
+      } while ( // eslint-disable-next-line no-await-in-loop
+        await confirm({ message: 'Do you want to add another test case', default: true })
+      );
+
+      this.log();
+
+      const ngtSpec: NgtTestSpec = {
+        name,
+        description: description || undefined,
+        subjectType,
+        subjectName,
+        subjectVersion,
+        testCases: ngtTestCases,
+      };
+
+      const agentTest = new AgentTest({ specData: ngtSpec });
+      await agentTest.writeTestSpec(outputFile);
+      this.log(`Created ${outputFile}`);
+      return;
+    }
 
     const testCases = [];
     do {

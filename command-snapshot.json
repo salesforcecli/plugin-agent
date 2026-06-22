@@ -187,7 +187,7 @@
     "command": "agent:generate:test-spec",
     "flagAliases": [],
     "flagChars": ["d", "f"],
-    "flags": ["flags-dir", "force-overwrite", "from-definition", "output-file"],
+    "flags": ["flags-dir", "force-overwrite", "from-definition", "output-file", "test-runner"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
