@@ -153,7 +153,6 @@ describe('agent trace list', () => {
 
   describe('--since filter', () => {
     it('returns only traces at or after the given date (date-only)', async () => {
-      // RECENT_MTIME is 2026-04-07, OLD_MTIME is 2026-03-01
       const dateString = MIDDLE_MTIME.toISOString().slice(0, 10).toString();
       const result = await AgentTraceList.run(['--since', dateString]);
       const planIds = result.map((r: any) => r.planId);
@@ -163,19 +162,21 @@ describe('agent trace list', () => {
     });
 
     it('returns only traces at or after the given datetime', async () => {
-      const result = await AgentTraceList.run(['--since', '2026-04-07T17:00:00.000Z']);
+      const result = await AgentTraceList.run(['--since', RECENT_MTIME.toISOString()]);
       const planIds = result.map((r: any) => r.planId);
       expect(planIds).to.include('plan-1'); // exactly equal — mtime >= since
       expect(planIds).to.not.include('plan-2');
     });
 
     it('returns all traces when since is before all mtimes', async () => {
-      const result = await AgentTraceList.run(['--since', '2026-01-01']);
+      const beforeAll = new Date(OLD_MTIME.getTime() - 86_400_000).toISOString().slice(0, 10);
+      const result = await AgentTraceList.run(['--since', beforeAll]);
       expect(result).to.have.length(3);
     });
 
     it('returns empty when since is after all mtimes', async () => {
-      const result = await AgentTraceList.run(['--since', '2027-01-01']);
+      const afterAll = new Date(RECENT_MTIME.getTime() + 86_400_000).toISOString();
+      const result = await AgentTraceList.run(['--since', afterAll]);
       expect(result).to.deep.equal([]);
     });
 

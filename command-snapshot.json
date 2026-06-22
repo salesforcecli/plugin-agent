@@ -176,6 +176,14 @@
   },
   {
     "alias": [],
+    "command": "agent:generate:scorer-spec",
+    "flagAliases": [],
+    "flagChars": ["f"],
+    "flags": ["agent-api-name", "data-type", "flags-dir", "force-overwrite", "json", "name", "output-file"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:template",
     "flagAliases": [],
     "flagChars": ["f", "r", "s"],
