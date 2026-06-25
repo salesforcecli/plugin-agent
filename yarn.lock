@@ -1413,7 +1413,7 @@
 
 "@salesforce/agents@^1.9.0":
   version "1.9.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/agents/-/agents-1.9.0.tgz#58d5a48f164942009ae57bb15a0de8c6729a72c4"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-1.9.0.tgz#58d5a48f164942009ae57bb15a0de8c6729a72c4"
   integrity sha512-CcMVeKfzUc5I/64JSUiFwCuYjQjPbx9EUyXeUfYEpB65f8sRpSQtbO3xJe2jjrrEo0RUVzU9gJSh4kB+SnzgJg==
   dependencies:
     "@salesforce/core" "^8.31.0"
