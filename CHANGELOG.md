@@ -1,3 +1,15 @@
+# [1.43.0](https://github.com/salesforcecli/plugin-agent/compare/1.42.1...1.43.0) (2026-06-25)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/agents from 1.8.1 to 1.8.3 ([a49690e](https://github.com/salesforcecli/plugin-agent/commit/a49690ec73420cd29d176e00e08bbe2900afddb0))
+- yarn.lock repo cleanup and stable test time filter W-23182333 ([#452](https://github.com/salesforcecli/plugin-agent/issues/452)) ([54375f7](https://github.com/salesforcecli/plugin-agent/commit/54375f7d1d39d7b621c02b52952780b8c8618c10))
+
+### Features
+
+- add --context-variables flag to agent preview commands @W-22829332@ ([#438](https://github.com/salesforcecli/plugin-agent/issues/438)) ([3480f1b](https://github.com/salesforcecli/plugin-agent/commit/3480f1b4023101f4e3cb12887d7daa526b29a3ba))
+- wire --test-runner agentforce-studio into agent generate test-spec @W-22904110@ ([dd0b29a](https://github.com/salesforcecli/plugin-agent/commit/dd0b29acf2982a2b32798e907f947f64723f4042))
+
 ## [1.42.1](https://github.com/salesforcecli/plugin-agent/compare/1.42.0...1.42.1) (2026-06-04)
 
 ### Bug Fixes
