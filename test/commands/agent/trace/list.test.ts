@@ -163,7 +163,7 @@ describe('agent trace list', () => {
     });
 
     it('returns only traces at or after the given datetime', async () => {
-      const result = await AgentTraceList.run(['--since', '2026-04-07T17:00:00.000Z']);
+      const result = await AgentTraceList.run(['--since', RECENT_MTIME.toISOString()]);
       const planIds = result.map((r: any) => r.planId);
       expect(planIds).to.include('plan-1'); // exactly equal — mtime >= since
       expect(planIds).to.not.include('plan-2');
