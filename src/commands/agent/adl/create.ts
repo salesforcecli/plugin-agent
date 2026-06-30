@@ -93,6 +93,15 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
       throw new SfError(messages.getMessage('error.missingRetrieverId'), 'MissingRetrieverId', [], 1);
     }
 
+    if (flags['data-category-ids'] && flags['data-category-names']) {
+      throw new SfError(
+        messages.getMessage('error.dataCategoryMutuallyExclusive'),
+        'DataCategoryMutuallyExclusive',
+        [],
+        1
+      );
+    }
+
     const groundingSource: GroundingSource = { sourceType };
 
     if (sourceType === 'SFDRIVE' && flags['index-mode']) {

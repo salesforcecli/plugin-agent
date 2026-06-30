@@ -77,3 +77,7 @@ KNOWLEDGE source type requires --primary-index-field1 and --primary-index-field2
 # error.missingRetrieverId
 
 RETRIEVER source type requires --retriever-id.
+
+# error.dataCategoryMutuallyExclusive
+
+--data-category-ids and --data-category-names are mutually exclusive. Provide one or the other, not both.
