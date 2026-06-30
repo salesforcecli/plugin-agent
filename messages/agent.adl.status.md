@@ -4,7 +4,7 @@ Get indexing status of an Agentforce Data Library.
 
 # description
 
-Returns the current indexing status including stage details (DATA_LAKE_OBJECT, SEARCH_INDEX, RETRIEVER) and any errors.
+Returns the current indexing status including stage details (DATA_STREAM, DATA_LAKE_OBJECT, DATA_MODEL_OBJECT, SEARCH_INDEX, RETRIEVER) and any errors.
 
 # examples
 
@@ -18,7 +18,7 @@ Agentforce Data Library ID (18-char Salesforce ID with prefix 1JD).
 
 # flags.include-artifacts.summary
 
-Resolve DC asset artifacts (DLO, DMO, SearchIndex, Retriever) with entity IDs and names on each stage. Slower — requires additional queries.
+Resolve DC asset artifacts (DataStream, DLO, DMO, SearchIndex, Retriever) with entity IDs and names on each stage. Slower — requires additional queries.
 
 # error.statusFailed
 
