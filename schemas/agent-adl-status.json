@@ -30,11 +30,16 @@
               "type": "number"
             }
           },
-          "required": ["libraryId", "status"],
+          "required": [
+            "libraryId",
+            "status"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["indexingStatus"],
+      "required": [
+        "indexingStatus"
+      ],
       "additionalProperties": false
     },
     "StageDetail": {
@@ -65,7 +70,10 @@
           "type": "string"
         }
       },
-      "required": ["name", "status"],
+      "required": [
+        "name",
+        "status"
+      ],
       "additionalProperties": false
     },
     "StageArtifact": {
@@ -84,7 +92,11 @@
           "type": "string"
         }
       },
-      "required": ["id", "label", "assetType"],
+      "required": [
+        "id",
+        "label",
+        "assetType"
+      ],
       "additionalProperties": false
     }
   }

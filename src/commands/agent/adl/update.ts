@@ -51,6 +51,10 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       summary: messages.getMessage('flags.restrict-to-public-articles.summary'),
       allowNo: true,
     }),
+    'data-category-rule': Flags.boolean({
+      summary: messages.getMessage('flags.data-category-rule.summary'),
+      allowNo: true,
+    }),
     'retriever-id': Flags.string({
       summary: messages.getMessage('flags.retriever-id.summary'),
     }),
@@ -65,16 +69,22 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
     if (flags.description) input.description = flags.description;
 
     const hasKnowledgeFlags =
-      flags['content-fields'] !== undefined || flags['restrict-to-public-articles'] !== undefined;
+      flags['content-fields'] !== undefined ||
+      flags['restrict-to-public-articles'] !== undefined ||
+      flags['data-category-rule'] !== undefined;
 
     if (hasKnowledgeFlags) {
       const detail = await AgentDataLibrary.get(connection, flags['library-id']);
       if (detail.sourceType !== 'KNOWLEDGE') {
         this.warn(
-          '--content-fields and --restrict-to-public-articles are only valid for KNOWLEDGE libraries. Ignoring.'
+          '--content-fields, --restrict-to-public-articles, and --data-category-rule are only valid for KNOWLEDGE libraries. Ignoring.'
         );
       } else {
-        const knowledgeConfig: { contentFields?: string[]; isRestrictToPublicArticle?: boolean } = {};
+        const knowledgeConfig: {
+          contentFields?: string[];
+          isRestrictToPublicArticle?: boolean;
+          isDataCategoryRuleEnabled?: boolean;
+        } = {};
         if (flags['content-fields'] !== undefined) {
           knowledgeConfig.contentFields = flags['content-fields']
             .split(',')
@@ -83,6 +93,9 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
         }
         if (flags['restrict-to-public-articles'] !== undefined) {
           knowledgeConfig.isRestrictToPublicArticle = flags['restrict-to-public-articles'];
+        }
+        if (flags['data-category-rule'] !== undefined) {
+          knowledgeConfig.isDataCategoryRuleEnabled = flags['data-category-rule'];
         }
         input.groundingSource = {
           sourceType: 'KNOWLEDGE',

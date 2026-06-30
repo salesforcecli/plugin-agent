@@ -21,7 +21,10 @@
           "type": "string"
         }
       },
-      "required": ["libraryId", "status"],
+      "required": [
+        "libraryId",
+        "status"
+      ],
       "additionalProperties": false
     }
   }

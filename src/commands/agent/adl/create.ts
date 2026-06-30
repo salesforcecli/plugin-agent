@@ -117,14 +117,16 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
       }
 
       if (flags['data-category-ids']) {
-        groundingSource.knowledgeConfig.dataCategoryIds = flags['data-category-ids']
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionIds = flags['data-category-ids']
           .split(',')
           .map((f) => f.trim())
           .filter(Boolean);
       }
 
       if (flags['data-category-names']) {
-        groundingSource.knowledgeConfig.dataCategoryNames = flags['data-category-names']
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionNames = flags['data-category-names']
           .split(',')
           .map((f) => f.trim())
           .filter(Boolean);

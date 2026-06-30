@@ -60,7 +60,12 @@
           "additionalProperties": {}
         }
       },
-      "required": ["libraryId", "masterLabel", "developerName", "sourceType"],
+      "required": [
+        "libraryId",
+        "masterLabel",
+        "developerName",
+        "sourceType"
+      ],
       "additionalProperties": false
     },
     "RetrieverDetail": {
@@ -76,7 +81,10 @@
           "type": "string"
         }
       },
-      "required": ["id", "label"],
+      "required": [
+        "id",
+        "label"
+      ],
       "additionalProperties": false
     },
     "RetrieverActionDetail": {
@@ -92,7 +100,10 @@
           "type": "string"
         }
       },
-      "required": ["id", "label"],
+      "required": [
+        "id",
+        "label"
+      ],
       "additionalProperties": false
     },
     "GroundingFileRef": {
@@ -120,7 +131,12 @@
           "type": "string"
         }
       },
-      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "required": [
+        "fileId",
+        "fileName",
+        "filePath",
+        "fileSize"
+      ],
       "additionalProperties": false
     }
   }

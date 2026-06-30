@@ -44,6 +44,10 @@ Comma-separated list of content fields for KNOWLEDGE libraries (triggers re-inde
 
 Restrict to public Knowledge articles only (KNOWLEDGE libraries, triggers re-indexing).
 
+# flags.data-category-rule.summary
+
+Enable or disable data category filtering for KNOWLEDGE libraries. Use --no-data-category-rule to disable.
+
 # flags.retriever-id.summary
 
 Swap the retriever for a RETRIEVER library (must be an active Custom Retriever ID).

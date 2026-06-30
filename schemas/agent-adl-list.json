@@ -12,7 +12,9 @@
           }
         }
       },
-      "required": ["libraries"],
+      "required": [
+        "libraries"
+      ],
       "additionalProperties": false
     },
     "DataLibrarySummary": {
@@ -43,7 +45,13 @@
           "$ref": "#/definitions/RetrieverActionDetail"
         }
       },
-      "required": ["libraryId", "masterLabel", "developerName", "sourceType", "status"],
+      "required": [
+        "libraryId",
+        "masterLabel",
+        "developerName",
+        "sourceType",
+        "status"
+      ],
       "additionalProperties": false
     },
     "RetrieverDetail": {
@@ -59,7 +67,10 @@
           "type": "string"
         }
       },
-      "required": ["id", "label"],
+      "required": [
+        "id",
+        "label"
+      ],
       "additionalProperties": false
     },
     "RetrieverActionDetail": {
@@ -75,7 +86,10 @@
           "type": "string"
         }
       },
-      "required": ["id", "label"],
+      "required": [
+        "id",
+        "label"
+      ],
       "additionalProperties": false
     }
   }

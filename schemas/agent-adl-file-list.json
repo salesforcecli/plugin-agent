@@ -24,7 +24,10 @@
           "type": "string"
         }
       },
-      "required": ["files", "totalSize"],
+      "required": [
+        "files",
+        "totalSize"
+      ],
       "additionalProperties": false
     },
     "GroundingFileRef": {
@@ -52,7 +55,12 @@
           "type": "string"
         }
       },
-      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "required": [
+        "fileId",
+        "fileName",
+        "filePath",
+        "fileSize"
+      ],
       "additionalProperties": false
     }
   }
