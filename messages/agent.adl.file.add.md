@@ -6,6 +6,8 @@ Add files to an existing Agentforce Data Library.
 
 Adds one or more files to an existing SFDRIVE data library and triggers SearchIndex re-hydration. This is the day-2 operation for adding files to an already-provisioned library.
 
+Adds files to an existing READY library. Unlike `sf agent adl upload`, this does NOT create new downstream Data Cloud assets — it appends files to the existing SearchIndex and triggers re-indexing.
+
 Constraints: at least 1 file required, no duplicate file names in a batch, maximum 1000 files per library.
 
 # examples

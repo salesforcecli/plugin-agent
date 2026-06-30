@@ -3,6 +3,9 @@
   "$ref": "#/definitions/AgentAdlFileListResult",
   "definitions": {
     "AgentAdlFileListResult": {
+      "$ref": "#/definitions/FileListResponse"
+    },
+    "FileListResponse": {
       "type": "object",
       "properties": {
         "files": {
@@ -10,9 +13,18 @@
           "items": {
             "$ref": "#/definitions/GroundingFileRef"
           }
+        },
+        "totalSize": {
+          "type": "number"
+        },
+        "currentPageUrl": {
+          "type": "string"
+        },
+        "nextPageUrl": {
+          "type": "string"
         }
       },
-      "required": ["files"],
+      "required": ["files", "totalSize"],
       "additionalProperties": false
     },
     "GroundingFileRef": {
@@ -34,6 +46,9 @@
           "type": "string"
         },
         "createdBy": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         }
       },

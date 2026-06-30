@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type DataLibraryDetail, type UpdateLibraryInput } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.update');
@@ -27,7 +28,6 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -76,7 +76,10 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       } else {
         const knowledgeConfig: { contentFields?: string[]; isRestrictToPublicArticle?: boolean } = {};
         if (flags['content-fields'] !== undefined) {
-          knowledgeConfig.contentFields = flags['content-fields'].split(',').map((f) => f.trim());
+          knowledgeConfig.contentFields = flags['content-fields']
+            .split(',')
+            .map((f) => f.trim())
+            .filter(Boolean);
         }
         if (flags['restrict-to-public-articles'] !== undefined) {
           knowledgeConfig.isRestrictToPublicArticle = flags['restrict-to-public-articles'];
@@ -108,7 +111,8 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       result = await AgentDataLibrary.update(connection, flags['library-id'], input);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.updateFailed', [wrapped.message]), 'UpdateFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.updateFailed', [cleanMessage]), 'UpdateFailed', [], 4, wrapped);
     }
 
     this.log(`Updated data library "${result.masterLabel}" (${result.libraryId}).`);

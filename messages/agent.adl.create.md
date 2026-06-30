@@ -6,6 +6,8 @@ Create an Agentforce Data Library.
 
 Creates a new data library in the target org. The --source-type flag determines the type of library: SFDRIVE (file upload), KNOWLEDGE (Salesforce Knowledge articles), or RETRIEVER (existing active Custom Retriever).
 
+For SFDRIVE libraries, creation provisions the full Data Cloud pipeline (DATA_STREAM → DLO → DMO → SearchIndex → Retriever). Upload files with `sf agent adl upload` after creation.
+
 # examples
 
 - Create an SFDRIVE library:
@@ -51,6 +53,18 @@ Primary index field 1 for KNOWLEDGE libraries (required, immutable after creatio
 # flags.primary-index-field2.summary
 
 Primary index field 2 for KNOWLEDGE libraries (required, immutable after creation).
+
+# flags.content-fields.summary
+
+Comma-separated list of content fields for KNOWLEDGE libraries (optional, mutable after creation).
+
+# flags.data-category-ids.summary
+
+Comma-separated list of data category IDs for KNOWLEDGE libraries (optional, mutable after creation).
+
+# flags.data-category-names.summary
+
+Comma-separated list of data category names for KNOWLEDGE libraries in group:name format (optional, mutable after creation).
 
 # error.createFailed
 

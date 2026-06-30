@@ -20,6 +20,14 @@ Returns the list of files in an SFDRIVE library including file name, size, and c
 
 Agentforce Data Library ID (18-char Salesforce ID with prefix 1JD).
 
+# flags.page-size.summary
+
+Number of files to return per page (1-200, default 50).
+
+# flags.status.summary
+
+Filter files by indexing status.
+
 # error.listFailed
 
 Failed to list files: %s

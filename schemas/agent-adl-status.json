@@ -54,9 +54,37 @@
         },
         "error": {
           "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StageArtifact"
+          }
+        },
+        "errorCode": {
+          "type": "string"
         }
       },
       "required": ["name", "status"],
+      "additionalProperties": false
+    },
+    "StageArtifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        },
+        "assetType": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "label", "assetType"],
       "additionalProperties": false
     }
   }

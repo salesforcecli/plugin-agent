@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type FileAddResult } from '@salesforce/agents';
+import { extractApiError } from '../../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.file.add');
@@ -27,7 +28,6 @@ export default class AgentAdlFileAdd extends SfCommand<AgentAdlFileAddResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -57,7 +57,8 @@ export default class AgentAdlFileAdd extends SfCommand<AgentAdlFileAddResult> {
       result = await AgentDataLibrary.addFile(connection, libraryId, filePaths);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.addFailed', [wrapped.message]), 'AddFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.addFailed', [cleanMessage]), 'AddFailed', [], 4, wrapped);
     }
 
     this.log(`Added ${result.fileNames.length} file(s) to library ${libraryId}:`);

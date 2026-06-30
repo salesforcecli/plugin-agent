@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type UploadResult } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.upload');
@@ -27,7 +28,6 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -70,7 +70,8 @@ export default class AgentAdlUpload extends SfCommand<AgentAdlUploadResult> {
       });
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(wrapped.message, wrapped.name ?? 'UploadFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(cleanMessage, wrapped.name ?? 'UploadFailed', [], 4, wrapped);
     }
 
     if (result.status === 'READY') {

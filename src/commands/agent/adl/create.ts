@@ -22,6 +22,7 @@ import {
   type SourceType,
   type CreateLibraryInput,
 } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.create');
@@ -33,7 +34,6 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -68,6 +68,15 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
     'primary-index-field2': Flags.string({
       summary: messages.getMessage('flags.primary-index-field2.summary'),
     }),
+    'content-fields': Flags.string({
+      summary: messages.getMessage('flags.content-fields.summary'),
+    }),
+    'data-category-ids': Flags.string({
+      summary: messages.getMessage('flags.data-category-ids.summary'),
+    }),
+    'data-category-names': Flags.string({
+      summary: messages.getMessage('flags.data-category-names.summary'),
+    }),
   };
 
   public async run(): Promise<AgentAdlCreateResult> {
@@ -99,6 +108,27 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
         primaryIndexField1: flags['primary-index-field1']!,
         primaryIndexField2: flags['primary-index-field2']!,
       };
+
+      if (flags['content-fields']) {
+        groundingSource.knowledgeConfig.contentFields = flags['content-fields']
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-ids']) {
+        groundingSource.knowledgeConfig.dataCategoryIds = flags['data-category-ids']
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-names']) {
+        groundingSource.knowledgeConfig.dataCategoryNames = flags['data-category-names']
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
     }
 
     const input: CreateLibraryInput = {
@@ -116,7 +146,8 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
       result = await AgentDataLibrary.create(connection, input);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.createFailed', [wrapped.message]), 'CreateFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.createFailed', [cleanMessage]), 'CreateFailed', [], 4, wrapped);
     }
 
     this.log(`Created data library "${result.masterLabel}" (${result.libraryId}).`);

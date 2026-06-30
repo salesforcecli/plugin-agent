@@ -35,9 +35,47 @@
         },
         "status": {
           "type": "string"
+        },
+        "retriever": {
+          "$ref": "#/definitions/RetrieverDetail"
+        },
+        "retrieverAction": {
+          "$ref": "#/definitions/RetrieverActionDetail"
         }
       },
       "required": ["libraryId", "masterLabel", "developerName", "sourceType", "status"],
+      "additionalProperties": false
+    },
+    "RetrieverDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "label"],
+      "additionalProperties": false
+    },
+    "RetrieverActionDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "label"],
       "additionalProperties": false
     }
   }

@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type IndexingStatusResponse } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.status');
@@ -27,7 +28,6 @@ export default class AgentAdlStatus extends SfCommand<AgentAdlStatusResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -37,6 +37,10 @@ export default class AgentAdlStatus extends SfCommand<AgentAdlStatusResult> {
       char: 'i',
       required: true,
     }),
+    'include-artifacts': Flags.boolean({
+      summary: messages.getMessage('flags.include-artifacts.summary'),
+      default: false,
+    }),
   };
 
   public async run(): Promise<AgentAdlStatusResult> {
@@ -45,17 +49,28 @@ export default class AgentAdlStatus extends SfCommand<AgentAdlStatusResult> {
 
     let result: IndexingStatusResponse;
     try {
-      result = await AgentDataLibrary.status(connection, flags['library-id']);
+      result = await AgentDataLibrary.status(connection, flags['library-id'], {
+        includeArtifacts: flags['include-artifacts'],
+      });
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.statusFailed', [wrapped.message]), 'StatusFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.statusFailed', [cleanMessage]), 'StatusFailed', [], 4, wrapped);
     }
 
     const { indexingStatus } = result;
     this.log(`Library ${indexingStatus.libraryId}: ${indexingStatus.status}`);
     if (indexingStatus.stageDetails) {
       for (const stage of indexingStatus.stageDetails) {
-        this.log(`  ${stage.name}: ${stage.status}${stage.error ? ` (${stage.error})` : ''}`);
+        let line = `  ${stage.name}: ${stage.status}`;
+        if (stage.errorCode) line += ` [${stage.errorCode}]`;
+        if (stage.error) line += ` (${stage.error})`;
+        this.log(line);
+        if (stage.artifacts?.length) {
+          for (const artifact of stage.artifacts) {
+            this.log(`    → ${artifact.assetType}: ${artifact.label} (${artifact.id})`);
+          }
+        }
       }
     }
     return result;

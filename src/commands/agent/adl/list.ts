@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type DataLibrarySummary } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.list');
@@ -27,7 +28,6 @@ export default class AgentAdlList extends SfCommand<AgentAdlListResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -49,7 +49,8 @@ export default class AgentAdlList extends SfCommand<AgentAdlListResult> {
       });
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.listFailed', [wrapped.message]), 'ListFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.listFailed', [cleanMessage]), 'ListFailed', [], 4, wrapped);
     }
 
     if (!this.jsonEnabled()) {

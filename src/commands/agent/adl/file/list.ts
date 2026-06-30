@@ -15,19 +15,19 @@
  */
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
-import { AgentDataLibrary, type GroundingFileRef } from '@salesforce/agents';
+import { AgentDataLibrary, type FileListResponse } from '@salesforce/agents';
+import { extractApiError } from '../../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.file.list');
 
-export type AgentAdlFileListResult = { files: GroundingFileRef[] };
+export type AgentAdlFileListResult = FileListResponse;
 
 export default class AgentAdlFileList extends SfCommand<AgentAdlFileListResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -37,34 +37,51 @@ export default class AgentAdlFileList extends SfCommand<AgentAdlFileListResult> 
       char: 'i',
       required: true,
     }),
+    'page-size': Flags.integer({
+      summary: messages.getMessage('flags.page-size.summary'),
+      min: 1,
+      max: 200,
+    }),
+    status: Flags.option({
+      summary: messages.getMessage('flags.status.summary'),
+      options: ['uploaded', 'indexing', 'indexed', 'index_failed', 'deleting', 'delete_failed'] as const,
+    })(),
   };
 
   public async run(): Promise<AgentAdlFileListResult> {
     const { flags } = await this.parse(AgentAdlFileList);
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
-    let files: GroundingFileRef[];
+    let result: FileListResponse;
     try {
-      files = await AgentDataLibrary.listFiles(connection, flags['library-id']);
+      result = await AgentDataLibrary.listFiles(connection, flags['library-id'], {
+        pageSize: flags['page-size'],
+        status: flags.status?.toUpperCase(),
+      });
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.listFailed', [wrapped.message]), 'ListFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.listFailed', [cleanMessage]), 'ListFailed', [], 4, wrapped);
     }
 
-    if (!this.jsonEnabled() && files.length > 0) {
+    if (!this.jsonEnabled() && result.files.length > 0) {
       this.table({
-        data: files,
+        data: result.files,
         columns: [
           { key: 'fileName', name: 'File Name' },
+          { key: 'status', name: 'Status' },
           { key: 'fileSize', name: 'Size (bytes)' },
           { key: 'fileId', name: 'File ID' },
           { key: 'createdDate', name: 'Created' },
         ],
       });
+      if (result.nextPageUrl) {
+        this.log(`\nShowing ${result.files.length} of ${result.totalSize} files. More results available.`);
+      }
     } else if (!this.jsonEnabled()) {
       this.log('No files found.');
     }
 
-    return { files };
+    return result;
   }
 }
