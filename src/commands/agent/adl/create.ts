@@ -77,80 +77,28 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
     'data-category-names': Flags.string({
       summary: messages.getMessage('flags.data-category-names.summary'),
     }),
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
+    wait: Flags.duration({
+      char: 'w',
+      unit: 'minutes',
+      min: 1,
+      summary: messages.getMessage('flags.wait.summary'),
+    }),
   };
 
   public async run(): Promise<AgentAdlCreateResult> {
     const { flags } = await this.parse(AgentAdlCreate);
     const connection = flags['target-org'].getConnection(flags['api-version']);
-
     const sourceType = flags['source-type'].toUpperCase() as SourceType;
 
-    if (sourceType === 'KNOWLEDGE' && (!flags['primary-index-field1'] || !flags['primary-index-field2'])) {
-      throw new SfError(messages.getMessage('error.missingKnowledgeFields'), 'MissingKnowledgeFields', [], 1);
-    }
-
-    if (sourceType === 'RETRIEVER' && !flags['retriever-id']) {
-      throw new SfError(messages.getMessage('error.missingRetrieverId'), 'MissingRetrieverId', [], 1);
-    }
-
-    if (flags['data-category-ids'] && flags['data-category-names']) {
-      throw new SfError(
-        messages.getMessage('error.dataCategoryMutuallyExclusive'),
-        'DataCategoryMutuallyExclusive',
-        [],
-        1
-      );
-    }
-
-    const groundingSource: GroundingSource = { sourceType };
-
-    if (sourceType === 'SFDRIVE' && flags['index-mode']) {
-      groundingSource.indexMode = flags['index-mode'].toUpperCase();
-    }
-
-    if (sourceType === 'RETRIEVER') {
-      groundingSource.retrieverId = flags['retriever-id'];
-    }
-
-    if (sourceType === 'KNOWLEDGE') {
-      groundingSource.knowledgeConfig = {
-        primaryIndexField1: flags['primary-index-field1']!,
-        primaryIndexField2: flags['primary-index-field2']!,
-      };
-
-      if (flags['content-fields']) {
-        groundingSource.knowledgeConfig.contentFields = flags['content-fields']
-          .split(',')
-          .map((f) => f.trim())
-          .filter(Boolean);
-      }
-
-      if (flags['data-category-ids']) {
-        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
-        groundingSource.knowledgeConfig.dataCategorySelectionIds = flags['data-category-ids']
-          .split(',')
-          .map((f) => f.trim())
-          .filter(Boolean);
-      }
-
-      if (flags['data-category-names']) {
-        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
-        groundingSource.knowledgeConfig.dataCategorySelectionNames = flags['data-category-names']
-          .split(',')
-          .map((f) => f.trim())
-          .filter(Boolean);
-      }
-    }
+    this.validateFlags(flags, sourceType);
 
     const input: CreateLibraryInput = {
       masterLabel: flags.name,
       developerName: flags['developer-name'],
-      groundingSource,
+      groundingSource: this.buildGroundingSource(flags, sourceType),
     };
-
-    if (flags.description) {
-      input.description = flags.description;
-    }
+    if (flags.description) input.description = flags.description;
 
     let result: DataLibraryDetail;
     try {
@@ -162,6 +110,88 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
     }
 
     this.log(`Created data library "${result.masterLabel}" (${result.libraryId}).`);
+
+    if (flags.wait && result.status !== 'READY') {
+      if (sourceType === 'SFDRIVE') {
+        this.log(
+          'SFDRIVE libraries require file upload before indexing. Use "sf agent adl upload --wait" to provision and wait for READY.'
+        );
+      } else {
+        this.log(`Waiting up to ${flags.wait.minutes} minutes for indexing to complete...`);
+        try {
+          result = await AgentDataLibrary.waitForReady(connection, result.libraryId, flags.wait.minutes * 60);
+          this.log('Library ready.');
+          this.log(`  retrieverId: ${String(result.retrieverId)}`);
+        } catch (error) {
+          const wrapped = SfError.wrap(error);
+          this.warn(wrapped.message);
+        }
+      }
+    }
+
     return result;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private validateFlags(flags: Record<string, unknown>, sourceType: SourceType): void {
+    if (sourceType === 'KNOWLEDGE' && (!flags['primary-index-field1'] || !flags['primary-index-field2'])) {
+      throw new SfError(messages.getMessage('error.missingKnowledgeFields'), 'MissingKnowledgeFields', [], 1);
+    }
+    if (sourceType === 'RETRIEVER' && !flags['retriever-id']) {
+      throw new SfError(messages.getMessage('error.missingRetrieverId'), 'MissingRetrieverId', [], 1);
+    }
+    if (flags['data-category-ids'] && flags['data-category-names']) {
+      throw new SfError(
+        messages.getMessage('error.dataCategoryMutuallyExclusive'),
+        'DataCategoryMutuallyExclusive',
+        [],
+        1
+      );
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private buildGroundingSource(flags: Record<string, unknown>, sourceType: SourceType): GroundingSource {
+    const groundingSource: GroundingSource = { sourceType };
+
+    if (sourceType === 'SFDRIVE' && flags['index-mode']) {
+      groundingSource.indexMode = (flags['index-mode'] as string).toUpperCase();
+    }
+
+    if (sourceType === 'RETRIEVER') {
+      groundingSource.retrieverId = flags['retriever-id'] as string;
+    }
+
+    if (sourceType === 'KNOWLEDGE') {
+      groundingSource.knowledgeConfig = {
+        primaryIndexField1: flags['primary-index-field1'] as string,
+        primaryIndexField2: flags['primary-index-field2'] as string,
+      };
+
+      if (flags['content-fields']) {
+        groundingSource.knowledgeConfig.contentFields = (flags['content-fields'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-ids']) {
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionIds = (flags['data-category-ids'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-names']) {
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionNames = (flags['data-category-names'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+    }
+
+    return groundingSource;
   }
 }

@@ -66,6 +66,10 @@ Comma-separated list of data category selection IDs for KNOWLEDGE libraries. Mut
 
 Comma-separated list of data category names in qualified format (e.g., "Group_API_Name.Category"). Mutually exclusive with --data-category-ids (provide one or the other, not both).
 
+# flags.wait.summary
+
+Wait N minutes for indexing to complete (KNOWLEDGE libraries). SFDRIVE libraries require upload before indexing; RETRIEVER libraries are ready immediately.
+
 # error.createFailed
 
 Failed to create data library: %s

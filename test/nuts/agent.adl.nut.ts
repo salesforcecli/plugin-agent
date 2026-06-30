@@ -245,6 +245,24 @@ describe('agent adl KNOWLEDGE NUTs', function () {
     }
   });
 
+  it('should create KNOWLEDGE library with --wait and poll until READY', function () {
+    this.timeout(10 * 60 * 1000);
+
+    const devName = `NUT_Wait_${Date.now()}`;
+    const result = execCmd<{ libraryId: string; status: string; retrieverId?: string }>(
+      `agent adl create --target-org ${targetOrg} --name "${devName}" --developer-name "${devName}" --source-type knowledge --primary-index-field1 ArticleNumber --primary-index-field2 Title --wait 5 --json`,
+      { ensureExitCode: 0 }
+    );
+
+    expect(result.jsonOutput!.result).to.have.property('libraryId');
+    expect(result.jsonOutput!.result.status).to.equal('READY');
+    expect(result.jsonOutput!.result.retrieverId).to.be.a('string');
+    console.log(`✓ --wait polled until READY, retrieverId: ${result.jsonOutput!.result.retrieverId}`);
+
+    // Cleanup
+    execCmd(`agent adl delete --target-org ${targetOrg} --library-id ${result.jsonOutput!.result.libraryId} --json`);
+  });
+
   it('should delete Knowledge library (best-effort cleanup)', () => {
     const result = execCmd<{ success: boolean; libraryId: string }>(
       `agent adl delete --target-org ${targetOrg} --library-id ${libraryId} --json`
@@ -271,7 +289,9 @@ describe('agent adl KNOWLEDGE Data Category NUTs', function () {
 
   before(function skipIfNoOrg() {
     if (!targetOrg || !dataCategoryNames) {
-      console.log('Skipping Data Category NUTs: set TARGET_ORG and DATA_CATEGORY_NAMES (e.g., "Group_A.A_B,Group_A.A_C")');
+      console.log(
+        'Skipping Data Category NUTs: set TARGET_ORG and DATA_CATEGORY_NAMES (e.g., "Group_A.A_B,Group_A.A_C")'
+      );
       this.skip();
     }
   });
@@ -304,9 +324,7 @@ describe('agent adl KNOWLEDGE Data Category NUTs', function () {
   it('should disable data category rule via --no-data-category-rule', () => {
     const result = execCmd<{
       groundingSource: { knowledgeConfig: { isDataCategoryRuleEnabled: boolean } };
-    }>(
-      `agent adl update --target-org ${targetOrg} --library-id ${libraryId} --no-data-category-rule --json`
-    );
+    }>(`agent adl update --target-org ${targetOrg} --library-id ${libraryId} --no-data-category-rule --json`);
 
     if (result.jsonOutput?.result) {
       expect(result.jsonOutput.result.groundingSource.knowledgeConfig.isDataCategoryRuleEnabled).to.be.false;
@@ -319,9 +337,7 @@ describe('agent adl KNOWLEDGE Data Category NUTs', function () {
   it('should re-enable data category rule via --data-category-rule', () => {
     const result = execCmd<{
       groundingSource: { knowledgeConfig: { isDataCategoryRuleEnabled: boolean } };
-    }>(
-      `agent adl update --target-org ${targetOrg} --library-id ${libraryId} --data-category-rule --json`
-    );
+    }>(`agent adl update --target-org ${targetOrg} --library-id ${libraryId} --data-category-rule --json`);
 
     if (result.jsonOutput?.result) {
       expect(result.jsonOutput.result.groundingSource.knowledgeConfig.isDataCategoryRuleEnabled).to.be.true;
