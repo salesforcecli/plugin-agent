@@ -1,3 +1,9 @@
+## [1.44.3](https://github.com/salesforcecli/plugin-agent/compare/1.44.2...1.44.3) (2026-07-01)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 1.10.2 ([9db7be6](https://github.com/salesforcecli/plugin-agent/commit/9db7be6f89837d5580da4bf6fb811b28a36383de)), closes [forcedotcom/agents#310](https://github.com/forcedotcom/agents/issues/310)
+
 ## [1.44.2](https://github.com/salesforcecli/plugin-agent/compare/1.44.1...1.44.2) (2026-07-01)
 
 ### Bug Fixes
