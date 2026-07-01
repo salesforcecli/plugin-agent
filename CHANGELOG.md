@@ -1,3 +1,9 @@
+## [1.44.1](https://github.com/salesforcecli/plugin-agent/compare/1.44.0...1.44.1) (2026-07-01)
+
+### Bug Fixes
+
+- pin CTC step to Node 22 until change-case-management supports Node 24 ([a52f75f](https://github.com/salesforcecli/plugin-agent/commit/a52f75fb611767d1a0d0e3a3e79ff18ee89858aa))
+
 # [1.44.0](https://github.com/salesforcecli/plugin-agent/compare/1.43.0...1.44.0) (2026-07-01)
 
 ### Bug Fixes
