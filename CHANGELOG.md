@@ -1,3 +1,9 @@
+## [1.44.2](https://github.com/salesforcecli/plugin-agent/compare/1.44.1...1.44.2) (2026-07-01)
+
+### Bug Fixes
+
+- pin CTC to Node 20 — unsettled await affects Node 22.23 too ([#455](https://github.com/salesforcecli/plugin-agent/issues/455)) ([e885d89](https://github.com/salesforcecli/plugin-agent/commit/e885d890402d9259a5f8029141b30f9423356b51))
+
 ## [1.44.1](https://github.com/salesforcecli/plugin-agent/compare/1.44.0...1.44.1) (2026-07-01)
 
 ### Bug Fixes
