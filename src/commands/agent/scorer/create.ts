@@ -140,43 +140,45 @@ type OutputEnumValue = {
   isSystemFallback: boolean;
 };
 
+async function promptForSingleEnumValue(index: number): Promise<OutputEnumValue & { addMore: boolean }> {
+  const value = await promptForFlag({
+    message: 'Output value name',
+    promptMessage: `Output value #${index + 1} (e.g., "Good", "Bad", "N/A")`,
+    validate: (d: string): boolean | string => d.length > 0 || 'Value cannot be empty',
+  });
+
+  const outcomeType = await promptForFlag({
+    message: 'Outcome type',
+    promptMessage: 'Outcome type for this value',
+    options: ['Pass', 'Fail', 'NotApplicable'],
+    validate: (d: string): boolean | string =>
+      ['Pass', 'Fail', 'NotApplicable'].includes(d) || 'Invalid',
+  });
+
+  const isFallback = await confirm({
+    message: 'Is this the fallback value?',
+    default: index === 0,
+    theme,
+  });
+
+  const addMore = await confirm({
+    message: 'Add another output value?',
+    default: index < 1,
+    theme,
+  });
+
+  return { value, outcomeType, isFallback, isSystemFallback: false, addMore };
+}
+
 async function promptForOutputEnumValues(): Promise<OutputEnumValue[]> {
   const values: OutputEnumValue[] = [];
   let addMore = true;
 
   while (addMore) {
-    const value = await promptForFlag({
-      message: 'Output value name',
-      promptMessage: `Output value #${values.length + 1} (e.g., "Good", "Bad", "N/A")`,
-      validate: (d: string): boolean | string => d.length > 0 || 'Value cannot be empty',
-    });
-
-    const outcomeType = await promptForFlag({
-      message: 'Outcome type',
-      promptMessage: 'Outcome type for this value',
-      options: ['Pass', 'Fail', 'NotApplicable'],
-      validate: (d: string): boolean | string =>
-        ['Pass', 'Fail', 'NotApplicable'].includes(d) || 'Invalid',
-    });
-
-    const isFallback = await confirm({
-      message: 'Is this the fallback value?',
-      default: values.length === 0,
-      theme,
-    });
-
-    values.push({
-      value,
-      outcomeType,
-      isFallback,
-      isSystemFallback: false,
-    });
-
-    addMore = await confirm({
-      message: 'Add another output value?',
-      default: values.length < 2,
-      theme,
-    });
+    // eslint-disable-next-line no-await-in-loop
+    const result = await promptForSingleEnumValue(values.length);
+    addMore = result.addMore;
+    values.push({ value: result.value, outcomeType: result.outcomeType, isFallback: result.isFallback, isSystemFallback: result.isSystemFallback });
   }
 
   return values;
@@ -358,7 +360,8 @@ function buildScorerXml(spec: ScorerSpecFile): string {
     suppressBooleanAttributes: false,
   });
 
-  return builder.build(xmlObj) as string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return builder.build(xmlObj);
 }
 
 function getPromptTemplateType(spec: ScorerSpecFile): string {
@@ -422,7 +425,8 @@ function buildPromptTemplateXml(apiName: string, promptContent: string, spec: Sc
     suppressBooleanAttributes: false,
   });
 
-  return builder.build(xmlObj) as string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return builder.build(xmlObj);
 }
 
 function labelToApiName(label: string): string {
@@ -459,223 +463,109 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     }),
   };
 
+  // eslint-disable-next-line complexity
   public async run(): Promise<AgentScorerCreateResult> {
     const { flags } = await this.parse(AgentScorerCreate);
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
-    let spec: ScorerSpecFile;
+    const spec = flags.spec
+      ? this.loadSpecFromFile(flags.spec)
+      : await this.runInteractiveInterview(flags, connection);
 
-    if (flags.spec) {
-      spec = YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as ScorerSpecFile;
-      this.log(`Reading scorer spec from ${flags.spec}`);
-    } else {
-      if (this.jsonEnabled()) {
-        const missing = Object.entries(FLAGGABLE_PROMPTS)
-          .filter(([key, p]) => 'required' in p && p.required && !flags[key as keyof typeof flags])
-          .map(([key]) => key);
-        if (!flags['agent-api-name']) missing.push('agent-api-name');
-        if (missing.length) {
-          throw messages.createError('error.missingRequiredFlags', [missing.join(', ')]);
-        }
+    return this.generateOutput(spec, flags);
+  }
+
+  private loadSpecFromFile(specPath: string): ScorerSpecFile {
+    const spec = YAML.parse(readFileSync(resolve(specPath), 'utf8')) as ScorerSpecFile;
+    this.log(`Reading scorer spec from ${specPath}`);
+    return spec;
+  }
+
+  private async runInteractiveInterview(
+    flags: Record<string, unknown>,
+    connection: ReturnType<import('@salesforce/core').Org['getConnection']>
+  ): Promise<ScorerSpecFile> {
+    if (this.jsonEnabled()) {
+      const missing = Object.entries(FLAGGABLE_PROMPTS)
+        .filter(([key, p]) => 'required' in p && p.required && !flags[key])
+        .map(([key]) => key);
+      if (!flags['agent-api-name']) missing.push('agent-api-name');
+      if (missing.length) {
+        throw messages.createError('error.missingRequiredFlags', [missing.join(', ')]);
       }
-
-      this.log();
-      this.styledHeader('Scorer Definition');
-
-      // 1. Label
-      const label = flags.label ?? (await promptForFlag(FLAGGABLE_PROMPTS.label));
-
-      // 2. API name (default derived from label)
-      const defaultApiName = labelToApiName(label);
-      let apiName: string;
-      if (flags['api-name']) {
-        apiName = flags['api-name'];
-      } else {
-        apiName = await inquirerInput({
-          message: 'Scorer API name',
-          default: defaultApiName,
-          validate: FLAGGABLE_PROMPTS['api-name'].validate,
-          theme,
-        });
-      }
-
-      // 3. Description
-      const description = flags.description ?? (await promptForFlag(FLAGGABLE_PROMPTS.description));
-
-      // 4. Status (default Draft)
-      const status = flags.status ?? (await promptForFlag(FLAGGABLE_PROMPTS.status));
-
-      // 5. Data type (output scope)
-      const dataType = flags['data-type'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['data-type']));
-
-      // 7. Type-specific collection
-      let outputEnumValues: OutputEnumValue[] | undefined;
-      let specification: ScorerSpecFile['specification'] | undefined;
-      let lightningType: string | undefined;
-      let scorerType: ScorerSpecFile['scorerType'] | undefined;
-
-      if (dataType === 'Number') {
-        this.log();
-        this.styledHeader('Number Scale');
-        const numSpec = await promptForNumberSpecification();
-        specification = { valueSpecification: numSpec };
-      } else if (dataType === 'OpenEnded') {
-        this.log();
-        this.styledHeader('Open Scorer Configuration');
-        scorerType = 'OpenEnded';
-
-        lightningType = await select<string>({
-          message: 'Select the lightning type for open-ended values',
-          choices: SUPPORTED_LIGHTNING_TYPES.map((t) => ({ name: t, value: t })),
-          theme,
-        });
-
-        const addEnumValues = await confirm({
-          message: 'Add output enum values?',
-          default: false,
-          theme,
-        });
-        if (addEnumValues) {
-          outputEnumValues = await promptForOutputEnumValues();
-        }
-      } else {
-        // Text
-        this.log();
-        this.styledHeader('Output Values');
-        outputEnumValues = await promptForOutputEnumValues();
-      }
-
-      // 7b. Semantic type (optional, for any data type)
-      const semanticType = await select<string>({
-        message: 'Semantic type (how this scorer is used in analytics)',
-        choices: [
-          { name: 'None', value: '' },
-          { name: 'Dimension (categorical grouping)', value: 'Dimension' },
-          { name: 'Measurement (numeric aggregation)', value: 'Measurement' },
-        ],
-        theme,
-      });
-
-      // 7. Engine type
-      const engineType = flags['engine-type'] ?? (await promptForFlag(FLAGGABLE_PROMPTS['engine-type']));
-
-      // Prompt template source (only for PromptTemplate engines, before agent selection)
-      let promptContent: string | undefined;
-      let existingPromptTemplateName: string | undefined;
-      if (engineType === 'PromptTemplate') {
-        this.log();
-        this.styledHeader('Prompt Template');
-
-        const promptChoice = await select<string>({
-          message: 'Prompt template source',
-          choices: [
-            { name: 'Generate a new default prompt template', value: 'generate' },
-            { name: 'Use an existing prompt template', value: 'existing' },
-          ],
-          theme,
-        });
-
-        if (promptChoice === 'existing') {
-          existingPromptTemplateName = await inquirerInput({
-            message: 'Existing prompt template API name',
-            validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
-            theme,
-          });
-        }
-      }
-
-      // 8. Select agent
-      let agentAssociation: AgentAssociation;
-      if (flags['agent-api-name']) {
-        agentAssociation = { agentApiName: flags['agent-api-name'], isActive: false };
-      } else {
-        const agentsInOrg = await Agent.listRemote(connection);
-        if (!agentsInOrg.length) {
-          throw new Error('No agents found in the org.');
-        }
-        const agentApiName = await select<string>({
-          message: 'Select the agent to associate with this scorer',
-          choices: agentsInOrg
-            .filter((a) => !a.IsDeleted)
-            .sort((a, b) => a.DeveloperName.localeCompare(b.DeveloperName))
-            .map((a) => ({ name: a.DeveloperName, value: a.DeveloperName })),
-          theme,
-        });
-        agentAssociation = { agentApiName, isActive: false };
-      }
-
-      // 9. Input scope for the agent association
-      const associationInputScope = await select<string>({
-        message: 'Input scope for this agent association',
-        choices: [
-          { name: 'Session', value: 'Session' },
-          { name: 'Intent', value: 'Intent' },
-        ],
-        default: 'Session',
-        theme,
-      });
-      agentAssociation.inputScope = associationInputScope as 'Session' | 'Intent';
-
-      // 10. Activation (only for PromptTemplate engines)
-      if (engineType === 'PromptTemplate') {
-        const isActive = await confirm({
-          message: 'Activate scoring for this agent?',
-          default: false,
-          theme,
-        });
-        agentAssociation.isActive = isActive;
-
-        // 11. Sampling rate (only if active)
-        if (isActive) {
-          const samplingRateStr = await promptForFlag({
-            message: 'Sampling rate (0.0 - 1.0)',
-            promptMessage: 'Sampling rate (0.0 to 1.0, where 1.0 = score every session)',
-            validate: (d: string): boolean | string => {
-              const n = parseFloat(d);
-              if (isNaN(n) || n < 0 || n > 1) return 'Must be between 0.0 and 1.0';
-              return true;
-            },
-            default: '1.0',
-          });
-          agentAssociation.samplingRate = parseFloat(samplingRateStr);
-        }
-      }
-
-      // Map 'OpenEnded' user-facing name to 'LightningType' metadata value
-      const resolvedDataType = dataType === 'OpenEnded' ? 'LightningType' : dataType;
-
-      spec = {
-        apiName,
-        dataType: resolvedDataType as ScorerSpecFile['dataType'],
-        scorerType,
-        lightningType,
-        semanticType: (semanticType || undefined) as ScorerSpecFile['semanticType'],
-        inputScope: 'Session',
-        label,
-        description: description || undefined,
-        engineType: engineType as ScorerSpecFile['engineType'],
-        promptContent,
-        promptTemplateName: existingPromptTemplateName,
-        status: status as ScorerSpecFile['status'],
-        outputEnumValues: outputEnumValues as ScorerSpecFile['outputEnumValues'],
-        specification,
-        agentAssociation,
-      };
     }
 
-    // ─── Generate scorer XML ──────────────────────────────────────────────
+    this.log();
+    this.styledHeader('Scorer Definition');
+
+    const label = (flags.label as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.label));
+
+    const defaultApiName = labelToApiName(label);
+    const apiName = (flags['api-name'] as string) ?? (await inquirerInput({
+      message: 'Scorer API name',
+      default: defaultApiName,
+      validate: FLAGGABLE_PROMPTS['api-name'].validate,
+      theme,
+    }));
+
+    const description = (flags.description as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.description));
+    const status = (flags.status as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.status));
+    const dataType = (flags['data-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['data-type']));
+
+    const dataTypeDetails = await this.promptForDataTypeDetails(dataType);
+
+    const semanticType = await select<string>({
+      message: 'Semantic type (how this scorer is used in analytics)',
+      choices: [
+        { name: 'None', value: '' },
+        { name: 'Dimension (categorical grouping)', value: 'Dimension' },
+        { name: 'Measurement (numeric aggregation)', value: 'Measurement' },
+      ],
+      theme,
+    });
+
+    const engineType = (flags['engine-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['engine-type']));
+    const engineConfig = await this.promptForEngineConfig(engineType);
+    const agentAssociation = await this.promptForAgentAssociationDetails(
+      connection, engineType, flags['agent-api-name'] as string | undefined
+    );
+
+    const resolvedDataType = dataType === 'OpenEnded' ? 'LightningType' : dataType;
+
+    return {
+      apiName,
+      dataType: resolvedDataType as ScorerSpecFile['dataType'],
+      scorerType: dataTypeDetails.scorerType,
+      lightningType: dataTypeDetails.lightningType,
+      semanticType: (semanticType || undefined) as ScorerSpecFile['semanticType'],
+      inputScope: 'Session',
+      label,
+      description: description || undefined,
+      engineType: engineType as ScorerSpecFile['engineType'],
+      promptContent: engineConfig.promptContent,
+      promptTemplateName: engineConfig.promptTemplateName,
+      status: status as ScorerSpecFile['status'],
+      outputEnumValues: dataTypeDetails.outputEnumValues as ScorerSpecFile['outputEnumValues'],
+      specification: dataTypeDetails.specification,
+      agentAssociation,
+    };
+  }
+
+  private async generateOutput(
+    spec: ScorerSpecFile,
+    flags: Record<string, unknown>
+  ): Promise<AgentScorerCreateResult> {
     const scorerXml = buildScorerXml(spec);
-    const outputDir = resolve(flags['output-dir']);
+    const outputDir = resolve(flags['output-dir'] as string);
     const scorerDir = join(outputDir, 'aiAgentScorerDefinitions');
     const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
     const scorerPath = join(scorerDir, scorerFileName);
 
-    // ─── Generate prompt template XML (if PromptTemplate engine and not using existing) ──
     let promptTemplatePath: string | undefined;
     let promptTemplateXml: string | undefined;
     if (spec.engineType === 'PromptTemplate' && !spec.promptTemplateName) {
-      const promptContent = spec.promptContent ?? buildDefaultPromptContent(spec);
-      promptTemplateXml = buildPromptTemplateXml(spec.apiName, promptContent, spec);
+      const content = spec.promptContent ?? buildDefaultPromptContent(spec);
+      promptTemplateXml = buildPromptTemplateXml(spec.apiName, content, spec);
       const promptDir = join(outputDir, 'genAiPromptTemplates');
       const promptFileName = `${spec.apiName}.genAiPromptTemplate-meta.xml`;
       promptTemplatePath = join(promptDir, promptFileName);
@@ -691,7 +581,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       return { path: scorerPath, apiName: spec.apiName, contents: scorerXml, promptTemplatePath };
     }
 
-    // ─── Write scorer ─────────────────────────────────────────────────────
     mkdirSync(scorerDir, { recursive: true });
     if (existsSync(scorerPath) && !this.jsonEnabled()) {
       const overwrite = await confirm({
@@ -707,7 +596,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     writeFileSync(scorerPath, scorerXml);
     this.log(`\nScorer definition written to: ${scorerPath}`);
 
-    // ─── Write prompt template ────────────────────────────────────────────
     if (promptTemplateXml && promptTemplatePath) {
       const promptDir = join(outputDir, 'genAiPromptTemplates');
       mkdirSync(promptDir, { recursive: true });
@@ -718,27 +606,155 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     return { path: scorerPath, apiName: spec.apiName, contents: scorerXml, promptTemplatePath };
   }
 
+  private async promptForDataTypeDetails(dataType: string): Promise<{
+    outputEnumValues?: OutputEnumValue[];
+    specification?: ScorerSpecFile['specification'];
+    lightningType?: string;
+    scorerType?: ScorerSpecFile['scorerType'];
+  }> {
+    if (dataType === 'Number') {
+      this.log();
+      this.styledHeader('Number Scale');
+      const numSpec = await promptForNumberSpecification();
+      return { specification: { valueSpecification: numSpec } };
+    }
+
+    if (dataType === 'OpenEnded') {
+      this.log();
+      this.styledHeader('Open Scorer Configuration');
+
+      const lightningType = await select<string>({
+        message: 'Select the lightning type for open-ended values',
+        choices: SUPPORTED_LIGHTNING_TYPES.map((t) => ({ name: t, value: t })),
+        theme,
+      });
+
+      const addEnumValues = await confirm({
+        message: 'Add output enum values?',
+        default: false,
+        theme,
+      });
+      const outputEnumValues = addEnumValues ? await promptForOutputEnumValues() : undefined;
+      return { scorerType: 'OpenEnded', lightningType, outputEnumValues };
+    }
+
+    // Text
+    this.log();
+    this.styledHeader('Output Values');
+    const outputEnumValues = await promptForOutputEnumValues();
+    return { outputEnumValues };
+  }
+
+  private async promptForEngineConfig(engineType: string): Promise<{ promptContent?: string; promptTemplateName?: string }> {
+    if (engineType !== 'PromptTemplate') return {};
+
+    this.log();
+    this.styledHeader('Prompt Template');
+
+    const promptChoice = await select<string>({
+      message: 'Prompt template source',
+      choices: [
+        { name: 'Generate a new default prompt template', value: 'generate' },
+        { name: 'Use an existing prompt template', value: 'existing' },
+      ],
+      theme,
+    });
+
+    if (promptChoice === 'existing') {
+      const promptTemplateName = await inquirerInput({
+        message: 'Existing prompt template API name',
+        validate: (d: string): boolean | string => d.length > 0 || 'Name cannot be empty',
+        theme,
+      });
+      return { promptTemplateName };
+    }
+
+    return {};
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private async promptForAgentAssociationDetails(
+    connection: ReturnType<import('@salesforce/core').Org['getConnection']>,
+    engineType: string,
+    agentApiNameFlag?: string
+  ): Promise<AgentAssociation> {
+    let agentAssociation: AgentAssociation;
+    if (agentApiNameFlag) {
+      agentAssociation = { agentApiName: agentApiNameFlag, isActive: false };
+    } else {
+      const agentsInOrg = await Agent.listRemote(connection);
+      if (!agentsInOrg.length) {
+        throw new Error('No agents found in the org.');
+      }
+      const agentApiName = await select<string>({
+        message: 'Select the agent to associate with this scorer',
+        choices: agentsInOrg
+          .filter((a) => !a.IsDeleted)
+          .sort((a, b) => a.DeveloperName.localeCompare(b.DeveloperName))
+          .map((a) => ({ name: a.DeveloperName, value: a.DeveloperName })),
+        theme,
+      });
+      agentAssociation = { agentApiName, isActive: false };
+    }
+
+    const associationInputScope = await select<string>({
+      message: 'Input scope for this agent association',
+      choices: [
+        { name: 'Session', value: 'Session' },
+        { name: 'Intent', value: 'Intent' },
+      ],
+      default: 'Session',
+      theme,
+    });
+    agentAssociation.inputScope = associationInputScope as 'Session' | 'Intent';
+
+    if (engineType === 'PromptTemplate') {
+      const isActive = await confirm({
+        message: 'Activate scoring for this agent?',
+        default: false,
+        theme,
+      });
+      agentAssociation.isActive = isActive;
+
+      if (isActive) {
+        const samplingRateStr = await promptForFlag({
+          message: 'Sampling rate (0.0 - 1.0)',
+          promptMessage: 'Sampling rate (0.0 to 1.0, where 1.0 = score every session)',
+          validate: (d: string): boolean | string => {
+            const n = parseFloat(d);
+            if (isNaN(n) || n < 0 || n > 1) return 'Must be between 0.0 and 1.0';
+            return true;
+          },
+          default: '1.0',
+        });
+        agentAssociation.samplingRate = parseFloat(samplingRateStr);
+      }
+    }
+
+    return agentAssociation;
+  }
+
 }
 
 function buildDefaultPromptContent(spec: Partial<ScorerSpecFile>): string {
   if (spec.scorerType === 'OpenEnded') {
     return [
-      `Analyze the following agent-user conversation and provide your evaluation.`,
-      ``,
-      `Your response must conform to the expected data type.`,
-      ``,
-      `session audit data:`,
-      `{!$Input:Session}`,
+      'Analyze the following agent-user conversation and provide your evaluation.',
+      '',
+      'Your response must conform to the expected data type.',
+      '',
+      'session audit data:',
+      '{!$Input:Session}',
     ].join('\n');
   }
 
   return [
-    `Analyze the following agent-user conversation and evaluate it based on your scoring criteria.`,
-    ``,
-    `Respond with ONLY one of the allowed values: {!$Input:AllowedLabels}`,
-    `or fallback to: {!$Input:FallbackLabel}`,
-    ``,
-    `session audit data:`,
-    `{!$Input:Session}`,
+    'Analyze the following agent-user conversation and evaluate it based on your scoring criteria.',
+    '',
+    'Respond with ONLY one of the allowed values: {!$Input:AllowedLabels}',
+    'or fallback to: {!$Input:FallbackLabel}',
+    '',
+    'session audit data:',
+    '{!$Input:Session}',
   ].join('\n');
 }
