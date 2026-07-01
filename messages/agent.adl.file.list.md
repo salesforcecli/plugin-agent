@@ -24,6 +24,10 @@ Agentforce Data Library ID (18-char Salesforce ID with prefix 1JD).
 
 Number of files to return per page (1-200, default 50).
 
+# flags.offset.summary
+
+Number of files to skip before returning results (for pagination).
+
 # flags.status.summary
 
 Filter files by indexing status.

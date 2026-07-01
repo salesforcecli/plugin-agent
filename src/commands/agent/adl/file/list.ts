@@ -41,6 +41,12 @@ export default class AgentAdlFileList extends SfCommand<AgentAdlFileListResult> 
       summary: messages.getMessage('flags.page-size.summary'),
       min: 1,
       max: 200,
+      default: 50,
+    }),
+    offset: Flags.integer({
+      summary: messages.getMessage('flags.offset.summary'),
+      min: 0,
+      default: 0,
     }),
     status: Flags.option({
       summary: messages.getMessage('flags.status.summary'),
@@ -56,6 +62,7 @@ export default class AgentAdlFileList extends SfCommand<AgentAdlFileListResult> 
     try {
       result = await AgentDataLibrary.listFiles(connection, flags['library-id'], {
         pageSize: flags['page-size'],
+        offset: flags.offset,
         status: flags.status?.toUpperCase(),
       });
     } catch (error) {
