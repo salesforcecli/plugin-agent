@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type DataLibraryDetail, type UpdateLibraryInput } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.update');
@@ -27,7 +28,6 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -51,6 +51,10 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       summary: messages.getMessage('flags.restrict-to-public-articles.summary'),
       allowNo: true,
     }),
+    'data-category-rule': Flags.boolean({
+      summary: messages.getMessage('flags.data-category-rule.summary'),
+      allowNo: true,
+    }),
     'retriever-id': Flags.string({
       summary: messages.getMessage('flags.retriever-id.summary'),
     }),
@@ -65,21 +69,33 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
     if (flags.description) input.description = flags.description;
 
     const hasKnowledgeFlags =
-      flags['content-fields'] !== undefined || flags['restrict-to-public-articles'] !== undefined;
+      flags['content-fields'] !== undefined ||
+      flags['restrict-to-public-articles'] !== undefined ||
+      flags['data-category-rule'] !== undefined;
 
     if (hasKnowledgeFlags) {
       const detail = await AgentDataLibrary.get(connection, flags['library-id']);
       if (detail.sourceType !== 'KNOWLEDGE') {
         this.warn(
-          '--content-fields and --restrict-to-public-articles are only valid for KNOWLEDGE libraries. Ignoring.'
+          '--content-fields, --restrict-to-public-articles, and --data-category-rule are only valid for KNOWLEDGE libraries. Ignoring.'
         );
       } else {
-        const knowledgeConfig: { contentFields?: string[]; isRestrictToPublicArticle?: boolean } = {};
+        const knowledgeConfig: {
+          contentFields?: string[];
+          isRestrictToPublicArticle?: boolean;
+          isDataCategoryRuleEnabled?: boolean;
+        } = {};
         if (flags['content-fields'] !== undefined) {
-          knowledgeConfig.contentFields = flags['content-fields'].split(',').map((f) => f.trim());
+          knowledgeConfig.contentFields = flags['content-fields']
+            .split(',')
+            .map((f) => f.trim())
+            .filter(Boolean);
         }
         if (flags['restrict-to-public-articles'] !== undefined) {
           knowledgeConfig.isRestrictToPublicArticle = flags['restrict-to-public-articles'];
+        }
+        if (flags['data-category-rule'] !== undefined) {
+          knowledgeConfig.isDataCategoryRuleEnabled = flags['data-category-rule'];
         }
         input.groundingSource = {
           sourceType: 'KNOWLEDGE',
@@ -108,7 +124,8 @@ export default class AgentAdlUpdate extends SfCommand<AgentAdlUpdateResult> {
       result = await AgentDataLibrary.update(connection, flags['library-id'], input);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.updateFailed', [wrapped.message]), 'UpdateFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.updateFailed', [cleanMessage]), 'UpdateFailed', [], 4, wrapped);
     }
 
     this.log(`Updated data library "${result.masterLabel}" (${result.libraryId}).`);

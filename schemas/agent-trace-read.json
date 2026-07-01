@@ -10,7 +10,11 @@
         },
         "format": {
           "type": "string",
-          "enum": ["summary", "detail", "raw"]
+          "enum": [
+            "summary",
+            "detail",
+            "raw"
+          ]
         },
         "dimension": {
           "$ref": "#/definitions/Dimension"
@@ -34,12 +38,20 @@
           }
         }
       },
-      "required": ["sessionId", "format"],
+      "required": [
+        "sessionId",
+        "format"
+      ],
       "additionalProperties": false
     },
     "Dimension": {
       "type": "string",
-      "enum": ["actions", "grounding", "routing", "errors"]
+      "enum": [
+        "actions",
+        "grounding",
+        "routing",
+        "errors"
+      ]
     },
     "TurnSummary": {
       "type": "object",
@@ -69,10 +81,22 @@
           "type": "number"
         },
         "error": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
-      "required": ["turn", "planId", "topic", "userInput", "agentResponse", "actionsExecuted", "latencyMs", "error"],
+      "required": [
+        "turn",
+        "planId",
+        "topic",
+        "userInput",
+        "agentResponse",
+        "actionsExecuted",
+        "latencyMs",
+        "error"
+      ],
       "additionalProperties": false
     },
     "DimensionRow": {
@@ -117,10 +141,22 @@
           "type": "number"
         },
         "error": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
-      "required": ["dimension", "turn", "planId", "action", "input", "output", "latencyMs", "error"],
+      "required": [
+        "dimension",
+        "turn",
+        "planId",
+        "action",
+        "input",
+        "output",
+        "latencyMs",
+        "error"
+      ],
       "additionalProperties": false
     },
     "GroundingRow": {
@@ -146,7 +182,14 @@
           "type": "number"
         }
       },
-      "required": ["dimension", "turn", "planId", "prompt", "response", "latencyMs"],
+      "required": [
+        "dimension",
+        "turn",
+        "planId",
+        "prompt",
+        "response",
+        "latencyMs"
+      ],
       "additionalProperties": false
     },
     "RoutingRow": {
@@ -172,7 +215,14 @@
           "type": "string"
         }
       },
-      "required": ["dimension", "turn", "planId", "fromTopic", "toTopic", "intent"],
+      "required": [
+        "dimension",
+        "turn",
+        "planId",
+        "fromTopic",
+        "toTopic",
+        "intent"
+      ],
       "additionalProperties": false
     },
     "ErrorsRow": {
@@ -198,7 +248,14 @@
           "type": "string"
         }
       },
-      "required": ["dimension", "turn", "planId", "source", "errorCode", "message"],
+      "required": [
+        "dimension",
+        "turn",
+        "planId",
+        "source",
+        "errorCode",
+        "message"
+      ],
       "additionalProperties": false
     },
     "PlannerResponse": {
@@ -227,7 +284,14 @@
           }
         }
       },
-      "required": ["type", "planId", "sessionId", "intent", "topic", "plan"],
+      "required": [
+        "type",
+        "planId",
+        "sessionId",
+        "intent",
+        "topic",
+        "plan"
+      ],
       "additionalProperties": false
     },
     "PlanStep": {
@@ -263,7 +327,10 @@
           "type": "string"
         }
       },
-      "required": ["type", "message"],
+      "required": [
+        "type",
+        "message"
+      ],
       "additionalProperties": false
     },
     "LLMExecutionStep": {
@@ -330,7 +397,14 @@
           "items": {}
         }
       },
-      "required": ["type", "topic", "description", "job", "instructions", "availableFunctions"],
+      "required": [
+        "type",
+        "topic",
+        "description",
+        "job",
+        "instructions",
+        "availableFunctions"
+      ],
       "additionalProperties": false
     },
     "EventStep": {
@@ -356,11 +430,19 @@
               "type": "string"
             }
           },
-          "required": ["oldTopic", "newTopic"],
+          "required": [
+            "oldTopic",
+            "newTopic"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["type", "eventName", "isError", "payload"],
+      "required": [
+        "type",
+        "eventName",
+        "isError",
+        "payload"
+      ],
       "additionalProperties": false
     },
     "FunctionStep": {
@@ -385,7 +467,11 @@
               "additionalProperties": {}
             }
           },
-          "required": ["name", "input", "output"],
+          "required": [
+            "name",
+            "input",
+            "output"
+          ],
           "additionalProperties": false
         },
         "executionLatency": {
@@ -398,7 +484,13 @@
           "type": "number"
         }
       },
-      "required": ["type", "function", "executionLatency", "startExecutionTime", "endExecutionTime"],
+      "required": [
+        "type",
+        "function",
+        "executionLatency",
+        "startExecutionTime",
+        "endExecutionTime"
+      ],
       "additionalProperties": false
     },
     "PlannerResponseStep": {
@@ -451,15 +543,33 @@
                   "type": "number"
                 }
               },
-              "required": ["toxicity", "hate", "identity", "violence", "physical", "sexual", "profanity", "biased"],
+              "required": [
+                "toxicity",
+                "hate",
+                "identity",
+                "violence",
+                "physical",
+                "sexual",
+                "profanity",
+                "biased"
+              ],
               "additionalProperties": false
             }
           },
-          "required": ["safety_score", "category_scores"],
+          "required": [
+            "safety_score",
+            "category_scores"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["type", "message", "responseType", "isContentSafe", "safetyScore"],
+      "required": [
+        "type",
+        "message",
+        "responseType",
+        "isContentSafe",
+        "safetyScore"
+      ],
       "additionalProperties": false
     }
   }

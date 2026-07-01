@@ -24,7 +24,12 @@
           "type": "string"
         }
       },
-      "required": ["success", "fileName", "fileNames", "libraryId"],
+      "required": [
+        "success",
+        "fileName",
+        "fileNames",
+        "libraryId"
+      ],
       "additionalProperties": false
     }
   }

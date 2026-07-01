@@ -32,25 +32,26 @@ describe('agent adl file list', () => {
     $$.restore();
   });
 
-  it('should return files from groundingSource.groundingFileRefs', async () => {
+  it('should return files from paginated /files endpoint', async () => {
     const mockResult = {
-      libraryId: '1JD000001',
-      groundingSource: {
-        groundingFileRefs: [
-          {
-            fileId: '1Jc000001',
-            fileName: 'doc.pdf',
-            filePath: '$agentforce_data_library$/1JD000001/doc.pdf',
-            fileSize: 1024,
-          },
-          {
-            fileId: '1Jc000002',
-            fileName: 'guide.txt',
-            filePath: '$agentforce_data_library$/1JD000001/guide.txt',
-            fileSize: 512,
-          },
-        ],
-      },
+      files: [
+        {
+          fileId: '1Jc000001',
+          fileName: 'doc.pdf',
+          filePath: '$agentforce_data_library$/1JD000001/doc.pdf',
+          fileSize: 1024,
+          status: 'INDEXED',
+        },
+        {
+          fileId: '1Jc000002',
+          fileName: 'guide.txt',
+          filePath: '$agentforce_data_library$/1JD000001/guide.txt',
+          fileSize: 512,
+          status: 'UPLOADED',
+        },
+      ],
+      totalSize: 2,
+      currentPageUrl: '/einstein/data-libraries/1JD000001/files?pageSize=50&offset=0',
     };
 
     const testOrg = new MockTestOrgData();
@@ -61,13 +62,16 @@ describe('agent adl file list', () => {
 
     expect(result.files).to.have.lengthOf(2);
     expect(result.files[0].fileName).to.equal('doc.pdf');
+    expect(result.files[0].status).to.equal('INDEXED');
     expect(result.files[1].fileName).to.equal('guide.txt');
+    expect(result.totalSize).to.equal(2);
   });
 
   it('should return empty array when no files', async () => {
     const mockResult = {
-      libraryId: '1JD000001',
-      groundingSource: { groundingFileRefs: [] },
+      files: [],
+      totalSize: 0,
+      currentPageUrl: '/einstein/data-libraries/1JD000001/files?pageSize=50&offset=0',
     };
 
     const testOrg = new MockTestOrgData();
@@ -77,18 +81,33 @@ describe('agent adl file list', () => {
     const result = await AgentAdlFileList.run(['--target-org', testOrg.username, '--library-id', '1JD000001']);
 
     expect(result.files).to.have.lengthOf(0);
+    expect(result.totalSize).to.equal(0);
   });
 
-  it('should handle missing groundingSource gracefully', async () => {
-    const mockResult = { libraryId: '1JD000001' };
+  it('should include nextPageUrl when more results exist', async () => {
+    const mockResult = {
+      files: [{ fileId: '1Jc000001', fileName: 'doc.pdf', filePath: 'path', fileSize: 1024, status: 'INDEXED' }],
+      totalSize: 10,
+      currentPageUrl: '/einstein/data-libraries/1JD000001/files?pageSize=1&offset=0',
+      nextPageUrl: '/einstein/data-libraries/1JD000001/files?pageSize=1&offset=1',
+    };
 
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
     $$.fakeConnectionRequest = () => Promise.resolve(mockResult);
 
-    const result = await AgentAdlFileList.run(['--target-org', testOrg.username, '--library-id', '1JD000001']);
+    const result = await AgentAdlFileList.run([
+      '--target-org',
+      testOrg.username,
+      '--library-id',
+      '1JD000001',
+      '--page-size',
+      '1',
+    ]);
 
-    expect(result.files).to.have.lengthOf(0);
+    expect(result.files).to.have.lengthOf(1);
+    expect(result.totalSize).to.equal(10);
+    expect(result.nextPageUrl).to.be.a('string');
   });
 
   it('should throw ListFailed on API error', async () => {

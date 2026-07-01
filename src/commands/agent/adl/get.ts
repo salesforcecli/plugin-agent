@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary, type DataLibraryDetail } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.get');
@@ -27,7 +28,6 @@ export default class AgentAdlGet extends SfCommand<AgentAdlGetResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -48,7 +48,8 @@ export default class AgentAdlGet extends SfCommand<AgentAdlGetResult> {
       result = await AgentDataLibrary.get(connection, flags['library-id']);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.getFailed', [wrapped.message]), 'GetFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.getFailed', [cleanMessage]), 'GetFailed', [], 4, wrapped);
     }
 
     if (!this.jsonEnabled()) {
@@ -59,12 +60,30 @@ export default class AgentAdlGet extends SfCommand<AgentAdlGetResult> {
         this.log(`  Retriever ID: ${result.retrieverId}`);
         this.log(`  rag_feature_config_id: ARFPC_${result.libraryId}`);
       }
+      if (result.retriever) {
+        this.log(`  Retriever: ${result.retriever.label} (${result.retriever.id})`);
+      }
+      if (result.retrieverAction) {
+        this.log(
+          `  Retriever Action: ${result.retrieverAction.label} (${
+            result.retrieverAction.apiName ?? result.retrieverAction.id
+          })`
+        );
+      }
       if (result.description) {
         this.log(`  Description: ${result.description}`);
       }
-      const fileCount = result.groundingSource?.groundingFileRefs?.length;
+      const fileCount = result.totalFileCount ?? result.groundingSource?.groundingFileRefs?.length;
       if (fileCount) {
         this.log(`  Files: ${String(fileCount)}`);
+      }
+
+      // Warn if files are truncated at 200
+      const fileRefs = result.groundingSource?.groundingFileRefs;
+      if (fileRefs && result.totalFileCount && result.totalFileCount > fileRefs.length) {
+        this.warn(
+          `Showing ${fileRefs.length} of ${result.totalFileCount} files. Use \`sf agent adl file list\` for full paginated listing.`
+        );
       }
     }
     return result;

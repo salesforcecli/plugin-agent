@@ -20,6 +20,10 @@ Agentforce Data Library ID (18-char Salesforce ID with prefix 1JD).
 
 ID of the file to delete (AiGroundingFileRef record ID).
 
+# success
+
+Deletion initiated for file %s. Use `sf agent adl file list` to check file status.
+
 # error.deleteFailed
 
 Failed to delete file: %s

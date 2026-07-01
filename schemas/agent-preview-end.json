@@ -14,7 +14,9 @@
               }
             }
           },
-          "required": ["ended"],
+          "required": [
+            "ended"
+          ],
           "additionalProperties": false
         },
         {
@@ -32,7 +34,10 @@
           "type": "string"
         }
       },
-      "required": ["sessionId", "tracesPath"],
+      "required": [
+        "sessionId",
+        "tracesPath"
+      ],
       "additionalProperties": false
     }
   }

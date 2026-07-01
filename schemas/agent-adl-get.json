@@ -35,6 +35,15 @@
         "dataSpaceScopeId": {
           "type": "string"
         },
+        "retriever": {
+          "$ref": "#/definitions/RetrieverDetail"
+        },
+        "retrieverAction": {
+          "$ref": "#/definitions/RetrieverActionDetail"
+        },
+        "totalFileCount": {
+          "type": "number"
+        },
         "groundingSource": {
           "type": "object",
           "properties": {
@@ -51,7 +60,50 @@
           "additionalProperties": {}
         }
       },
-      "required": ["libraryId", "masterLabel", "developerName", "sourceType"],
+      "required": [
+        "libraryId",
+        "masterLabel",
+        "developerName",
+        "sourceType"
+      ],
+      "additionalProperties": false
+    },
+    "RetrieverDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "RetrieverActionDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
       "additionalProperties": false
     },
     "GroundingFileRef": {
@@ -74,9 +126,17 @@
         },
         "createdBy": {
           "type": "string"
+        },
+        "status": {
+          "type": "string"
         }
       },
-      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "required": [
+        "fileId",
+        "fileName",
+        "filePath",
+        "fileSize"
+      ],
       "additionalProperties": false
     }
   }

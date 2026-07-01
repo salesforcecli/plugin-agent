@@ -6,6 +6,8 @@ Upload a file to an SFDRIVE Agentforce Data Library.
 
 Performs the multi-step upload workflow: checks upload readiness, obtains a pre-signed S3 URL, uploads the file, triggers indexing, and optionally polls until the library is ready (retrieverId is populated).
 
+Upload triggers the full Data Cloud provisioning pipeline, creating all downstream assets (DLO, DMO, SearchIndex, Retriever). Use `sf agent adl status` to monitor progress. For adding files to an already-provisioned library, use `sf agent adl file add` instead.
+
 This command only works with SFDRIVE libraries. KNOWLEDGE libraries index automatically after creation, and RETRIEVER libraries require no file upload.
 
 # examples

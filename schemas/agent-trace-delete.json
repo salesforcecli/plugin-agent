@@ -20,7 +20,12 @@
             "type": "string"
           }
         },
-        "required": ["agent", "sessionId", "planId", "path"],
+        "required": [
+          "agent",
+          "sessionId",
+          "planId",
+          "path"
+        ],
         "additionalProperties": false
       }
     }

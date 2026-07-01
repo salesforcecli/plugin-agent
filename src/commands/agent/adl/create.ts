@@ -22,6 +22,7 @@ import {
   type SourceType,
   type CreateLibraryInput,
 } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.create');
@@ -33,7 +34,6 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -68,58 +68,130 @@ export default class AgentAdlCreate extends SfCommand<AgentAdlCreateResult> {
     'primary-index-field2': Flags.string({
       summary: messages.getMessage('flags.primary-index-field2.summary'),
     }),
+    'content-fields': Flags.string({
+      summary: messages.getMessage('flags.content-fields.summary'),
+    }),
+    'data-category-ids': Flags.string({
+      summary: messages.getMessage('flags.data-category-ids.summary'),
+    }),
+    'data-category-names': Flags.string({
+      summary: messages.getMessage('flags.data-category-names.summary'),
+    }),
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
+    wait: Flags.duration({
+      char: 'w',
+      unit: 'minutes',
+      min: 1,
+      summary: messages.getMessage('flags.wait.summary'),
+    }),
   };
 
   public async run(): Promise<AgentAdlCreateResult> {
     const { flags } = await this.parse(AgentAdlCreate);
     const connection = flags['target-org'].getConnection(flags['api-version']);
-
     const sourceType = flags['source-type'].toUpperCase() as SourceType;
 
-    if (sourceType === 'KNOWLEDGE' && (!flags['primary-index-field1'] || !flags['primary-index-field2'])) {
-      throw new SfError(messages.getMessage('error.missingKnowledgeFields'), 'MissingKnowledgeFields', [], 1);
-    }
-
-    if (sourceType === 'RETRIEVER' && !flags['retriever-id']) {
-      throw new SfError(messages.getMessage('error.missingRetrieverId'), 'MissingRetrieverId', [], 1);
-    }
-
-    const groundingSource: GroundingSource = { sourceType };
-
-    if (sourceType === 'SFDRIVE' && flags['index-mode']) {
-      groundingSource.indexMode = flags['index-mode'].toUpperCase();
-    }
-
-    if (sourceType === 'RETRIEVER') {
-      groundingSource.retrieverId = flags['retriever-id'];
-    }
-
-    if (sourceType === 'KNOWLEDGE') {
-      groundingSource.knowledgeConfig = {
-        primaryIndexField1: flags['primary-index-field1']!,
-        primaryIndexField2: flags['primary-index-field2']!,
-      };
-    }
+    this.validateFlags(flags, sourceType);
 
     const input: CreateLibraryInput = {
       masterLabel: flags.name,
       developerName: flags['developer-name'],
-      groundingSource,
+      groundingSource: this.buildGroundingSource(flags, sourceType),
     };
-
-    if (flags.description) {
-      input.description = flags.description;
-    }
+    if (flags.description) input.description = flags.description;
 
     let result: DataLibraryDetail;
     try {
       result = await AgentDataLibrary.create(connection, input);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.createFailed', [wrapped.message]), 'CreateFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.createFailed', [cleanMessage]), 'CreateFailed', [], 4, wrapped);
     }
 
     this.log(`Created data library "${result.masterLabel}" (${result.libraryId}).`);
+
+    if (flags.wait && result.status !== 'READY') {
+      if (sourceType === 'SFDRIVE') {
+        this.log(
+          'SFDRIVE libraries require file upload before indexing. Use "sf agent adl upload --wait" to provision and wait for READY.'
+        );
+      } else {
+        this.log(`Waiting up to ${flags.wait.minutes} minutes for indexing to complete...`);
+        try {
+          result = await AgentDataLibrary.waitForReady(connection, result.libraryId, flags.wait.minutes * 60);
+          this.log('Library ready.');
+          this.log(`  retrieverId: ${String(result.retrieverId)}`);
+        } catch (error) {
+          const wrapped = SfError.wrap(error);
+          this.warn(wrapped.message);
+        }
+      }
+    }
+
     return result;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private validateFlags(flags: Record<string, unknown>, sourceType: SourceType): void {
+    if (sourceType === 'KNOWLEDGE' && (!flags['primary-index-field1'] || !flags['primary-index-field2'])) {
+      throw new SfError(messages.getMessage('error.missingKnowledgeFields'), 'MissingKnowledgeFields', [], 1);
+    }
+    if (sourceType === 'RETRIEVER' && !flags['retriever-id']) {
+      throw new SfError(messages.getMessage('error.missingRetrieverId'), 'MissingRetrieverId', [], 1);
+    }
+    if (flags['data-category-ids'] && flags['data-category-names']) {
+      throw new SfError(
+        messages.getMessage('error.dataCategoryMutuallyExclusive'),
+        'DataCategoryMutuallyExclusive',
+        [],
+        1
+      );
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private buildGroundingSource(flags: Record<string, unknown>, sourceType: SourceType): GroundingSource {
+    const groundingSource: GroundingSource = { sourceType };
+
+    if (sourceType === 'SFDRIVE' && flags['index-mode']) {
+      groundingSource.indexMode = (flags['index-mode'] as string).toUpperCase();
+    }
+
+    if (sourceType === 'RETRIEVER') {
+      groundingSource.retrieverId = flags['retriever-id'] as string;
+    }
+
+    if (sourceType === 'KNOWLEDGE') {
+      groundingSource.knowledgeConfig = {
+        primaryIndexField1: flags['primary-index-field1'] as string,
+        primaryIndexField2: flags['primary-index-field2'] as string,
+      };
+
+      if (flags['content-fields']) {
+        groundingSource.knowledgeConfig.contentFields = (flags['content-fields'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-ids']) {
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionIds = (flags['data-category-ids'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+
+      if (flags['data-category-names']) {
+        groundingSource.knowledgeConfig.isDataCategoryRuleEnabled = true;
+        groundingSource.knowledgeConfig.dataCategorySelectionNames = (flags['data-category-names'] as string)
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean);
+      }
+    }
+
+    return groundingSource;
   }
 }

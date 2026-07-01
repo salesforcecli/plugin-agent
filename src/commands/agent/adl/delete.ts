@@ -16,6 +16,7 @@
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import { AgentDataLibrary } from '@salesforce/agents';
+import { extractApiError } from '../../../adlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.adl.delete');
@@ -27,7 +28,6 @@ export default class AgentAdlDelete extends SfCommand<AgentAdlDeleteResult> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly enableJsonFlag = true;
-  public static readonly state = 'preview';
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
@@ -48,7 +48,8 @@ export default class AgentAdlDelete extends SfCommand<AgentAdlDeleteResult> {
       await AgentDataLibrary.delete(connection, libraryId);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(messages.getMessage('error.deleteFailed', [wrapped.message]), 'DeleteFailed', [], 4, wrapped);
+      const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
+      throw new SfError(messages.getMessage('error.deleteFailed', [cleanMessage]), 'DeleteFailed', [], 4, wrapped);
     }
 
     this.log(`Deleted data library ${libraryId}.`);

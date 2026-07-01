@@ -11,9 +11,12 @@
     "alias": [],
     "command": "agent:adl:create",
     "flagAliases": [],
-    "flagChars": ["n", "o"],
+    "flagChars": ["n", "o", "w"],
     "flags": [
       "api-version",
+      "content-fields",
+      "data-category-ids",
+      "data-category-names",
       "description",
       "developer-name",
       "flags-dir",
@@ -24,7 +27,8 @@
       "primary-index-field2",
       "retriever-id",
       "source-type",
-      "target-org"
+      "target-org",
+      "wait"
     ],
     "plugin": "@salesforce/plugin-agent"
   },
@@ -57,7 +61,7 @@
     "command": "agent:adl:file:list",
     "flagAliases": [],
     "flagChars": ["i", "o"],
-    "flags": ["api-version", "flags-dir", "json", "library-id", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "offset", "page-size", "status", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -81,7 +85,7 @@
     "command": "agent:adl:status",
     "flagAliases": [],
     "flagChars": ["i", "o"],
-    "flags": ["api-version", "flags-dir", "json", "library-id", "target-org"],
+    "flags": ["api-version", "flags-dir", "include-artifacts", "json", "library-id", "target-org"],
     "plugin": "@salesforce/plugin-agent"
   },
   {
@@ -92,6 +96,7 @@
     "flags": [
       "api-version",
       "content-fields",
+      "data-category-rule",
       "description",
       "flags-dir",
       "json",

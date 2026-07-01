@@ -12,7 +12,10 @@
           "type": "string"
         }
       },
-      "required": ["success", "libraryId"],
+      "required": [
+        "success",
+        "libraryId"
+      ],
       "additionalProperties": false
     }
   }
