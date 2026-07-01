@@ -555,6 +555,15 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     spec: ScorerSpecFile,
     flags: Record<string, unknown>
   ): Promise<AgentScorerCreateResult> {
+    if (spec.dataType === 'Text' && spec.outputEnumValues) {
+      const fallbackCount = spec.outputEnumValues.filter((v) => v.isFallback).length;
+      if (fallbackCount !== 1) {
+        throw new Error(
+          `Text scorers must have exactly 1 fallback value, but found ${fallbackCount}.`
+        );
+      }
+    }
+
     const scorerXml = buildScorerXml(spec);
     const outputDir = resolve(flags['output-dir'] as string);
     const scorerDir = join(outputDir, 'aiAgentScorerDefinitions');

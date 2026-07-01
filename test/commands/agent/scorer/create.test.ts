@@ -16,6 +16,8 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
 
+import { join } from 'node:path';
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { expect } from 'chai';
 import esmock from 'esmock';
 import sinon from 'sinon';
@@ -896,6 +898,93 @@ describe('agent scorer create', () => {
         expect(error.message).to.include('engine-type');
         expect(error.message).to.include('agent-api-name');
       }
+    });
+  });
+
+  describe('Text scorer fallback validation', () => {
+    let tmpDir: string;
+    let specFile: string;
+
+    beforeEach(() => {
+      tmpDir = join(process.cwd(), 'tmp-test-fallback-' + Date.now());
+      mkdirSync(tmpDir, { recursive: true });
+      specFile = join(tmpDir, 'scorer.yaml');
+    });
+
+    afterEach(() => {
+      rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('should throw when Text scorer has no fallback value', async () => {
+      const spec = makeTextSpec({
+        outputEnumValues: [
+          { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
+          { value: 'Bad', outcomeType: 'Fail', isFallback: false, isSystemFallback: false },
+        ],
+      });
+      writeFileSync(specFile, YAML.stringify(spec));
+      const { Command } = await loadMockedCommand(spec);
+
+      try {
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--spec', specFile,
+          '--preview',
+          '--json',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        const error = err as { message: string };
+        expect(error.message).to.include('exactly 1 fallback value');
+        expect(error.message).to.include('found 0');
+      }
+    });
+
+    it('should throw when Text scorer has multiple fallback values', async () => {
+      const spec = makeTextSpec({
+        outputEnumValues: [
+          { value: 'Good', outcomeType: 'Pass', isFallback: true, isSystemFallback: false },
+          { value: 'Bad', outcomeType: 'Fail', isFallback: true, isSystemFallback: false },
+        ],
+      });
+      writeFileSync(specFile, YAML.stringify(spec));
+      const { Command } = await loadMockedCommand(spec);
+
+      try {
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--spec', specFile,
+          '--preview',
+          '--json',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        const error = err as { message: string };
+        expect(error.message).to.include('exactly 1 fallback value');
+        expect(error.message).to.include('found 2');
+      }
+    });
+
+    it('should pass when Text scorer has exactly 1 fallback value', async () => {
+      const spec = makeTextSpec({
+        outputEnumValues: [
+          { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
+          { value: 'Bad', outcomeType: 'Fail', isFallback: false, isSystemFallback: false },
+          { value: 'N/A', outcomeType: 'NotApplicable', isFallback: true, isSystemFallback: false },
+        ],
+      });
+      writeFileSync(specFile, YAML.stringify(spec));
+      const { Command } = await loadMockedCommand(spec);
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--spec', specFile,
+        '--preview',
+        '--json',
+      ]);
+
+      expect(result.apiName).to.equal('Test_Scorer');
+      expect(result.contents).to.include('<value>N/A</value>');
     });
   });
 
