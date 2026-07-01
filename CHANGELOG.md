@@ -1,3 +1,17 @@
+# [1.44.0](https://github.com/salesforcecli/plugin-agent/compare/1.43.0...1.44.0) (2026-07-01)
+
+### Bug Fixes
+
+- add adlUtils unit tests and enforce data-category mutual exclusivity @W-23237764@ ([f417238](https://github.com/salesforcecli/plugin-agent/commit/f41723891a9edd0abd419da5bc8c92a85f7a2f15)), closes [#453](https://github.com/salesforcecli/plugin-agent/issues/453)
+- clarify data-category flags are mutually exclusive @W-23237764@ ([815b539](https://github.com/salesforcecli/plugin-agent/commit/815b539a57bb1bc73ca986c3123cb811b93b7b4d))
+- data category field names and add --data-category-rule flag @W-23237764@ ([9cbcc16](https://github.com/salesforcecli/plugin-agent/commit/9cbcc162e0926f295fa1224d31592eeb341c5d8c))
+
+### Features
+
+- add --offset flag to file list for pagination support @W-23237764@ ([9c2f136](https://github.com/salesforcecli/plugin-agent/commit/9c2f13656c6d6af7026b83c071a4a8b4c4448b49))
+- add --wait flag to adl create and reduce run() complexity @W-23237764@ ([fc4f556](https://github.com/salesforcecli/plugin-agent/commit/fc4f556596fa1b8ae02217799331b16139e6ff63))
+- adl cli update to 262.11 api and fix P2/P3 bugs @W-23237764@ ([9166c90](https://github.com/salesforcecli/plugin-agent/commit/9166c909e22236406156852db7bc241c4577d1fc))
+
 # [1.43.0](https://github.com/salesforcecli/plugin-agent/compare/1.42.1...1.43.0) (2026-06-25)
 
 ### Bug Fixes
