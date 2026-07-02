@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages, EnvironmentVariable } from '@salesforce/core';
 import { Agent } from '@salesforce/agents';
@@ -454,6 +455,10 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       summary: messages.getMessage('flags.spec.summary'),
       exists: true,
     }),
+    'spec-schema': Flags.boolean({
+      summary: messages.getMessage('flags.spec-schema.summary'),
+      default: false,
+    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       default: join('force-app', 'main', 'default'),
@@ -466,6 +471,17 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
   // eslint-disable-next-line complexity
   public async run(): Promise<AgentScorerCreateResult> {
     const { flags } = await this.parse(AgentScorerCreate);
+
+    if (flags['spec-schema']) {
+      const schemaPath = resolve(
+        dirname(fileURLToPath(import.meta.url)),
+        '..', '..', '..', '..', 'schemas', 'agent-scorer-create__spec.json'
+      );
+      const schema = readFileSync(schemaPath, 'utf8');
+      this.styledJSON(JSON.parse(schema) as unknown as import('@salesforce/ts-types').AnyJson);
+      return { path: '', apiName: '', contents: '' };
+    }
+
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
     const spec = flags.spec

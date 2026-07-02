@@ -44,6 +44,10 @@ Initial status of the scorer version (Available or Draft).
 
 Path to a scorer spec YAML file. Bypasses interactive prompts.
 
+# flags.spec-schema.summary
+
+Output the JSON Schema for the --spec YAML file and exit.
+
 # flags.output-dir.summary
 
 Output directory for the generated metadata XML files (scorer definition and prompt template).
@@ -53,6 +57,10 @@ Output directory for the generated metadata XML files (scorer definition and pro
 Preview the generated XML without writing to disk.
 
 # examples
+
+- Show the JSON Schema for the spec YAML file:
+
+  <%= config.bin %> <%= command.id %> --spec-schema
 
 - Create a scorer interactively:
 
