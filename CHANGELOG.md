@@ -1,3 +1,9 @@
+## [1.44.4](https://github.com/salesforcecli/plugin-agent/compare/1.44.3...1.44.4) (2026-07-02)
+
+### Bug Fixes
+
+- unpin CTC Node version now that change-case-management supports current LTS ([3bc64ad](https://github.com/salesforcecli/plugin-agent/commit/3bc64ade79cfe19895792c8b510b3dd4fc567bdd))
+
 ## [1.44.3](https://github.com/salesforcecli/plugin-agent/compare/1.44.2...1.44.3) (2026-07-01)
 
 ### Bug Fixes
