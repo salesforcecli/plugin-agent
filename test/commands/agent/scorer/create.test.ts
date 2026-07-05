@@ -502,6 +502,25 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('agentforce_session_tracing__scorerMeasurement');
     });
 
+    it('should use AllowedRange input for scorerMeasurement type', async () => {
+      const { Command, writtenFiles } = await loadMockedCommand(
+        makePromptTemplateSpec({ semanticType: 'Measurement' })
+      );
+
+      await Command.run([
+        '--target-org', testOrg.username,
+        '--spec', 'test.yaml',
+        '--output-dir', '/tmp/out',
+        '--json',
+      ]);
+
+      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
+      expect(promptFile!.content).to.include('<apiName>AllowedRange</apiName>');
+      expect(promptFile!.content).to.include('<referenceName>Input:AllowedRange</referenceName>');
+      expect(promptFile!.content).not.to.include('<apiName>AllowedLabels</apiName>');
+      expect(promptFile!.content).not.to.include('<apiName>FallbackLabel</apiName>');
+    });
+
     it('should use scorerMultilabel type for default Text scorers', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
@@ -740,6 +759,25 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('{!$Input:Session}');
       expect(promptFile!.content).not.to.include('{!$Input:AllowedLabels}');
     });
+
+    it('should use Measurement default prompt with AllowedRange', async () => {
+      const spec = makePromptTemplateSpec({ semanticType: 'Measurement' });
+      delete (spec as any).promptContent;
+      const { Command, writtenFiles } = await loadMockedCommand(spec);
+
+      await Command.run([
+        '--target-org', testOrg.username,
+        '--spec', 'test.yaml',
+        '--output-dir', '/tmp/out',
+        '--json',
+      ]);
+
+      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
+      expect(promptFile!.content).to.include('{!$Input:Session}');
+      expect(promptFile!.content).to.include('{!$Input:AllowedRange}');
+      expect(promptFile!.content).not.to.include('{!$Input:AllowedLabels}');
+      expect(promptFile!.content).not.to.include('{!$Input:FallbackLabel}');
+    });
   });
 
   describe('output directory', () => {
@@ -852,6 +890,26 @@ describe('agent scorer create', () => {
       const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
       expect(promptFile!.content).to.include('<primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>');
       expect(promptFile!.content).to.include('<status>Published</status>');
+    });
+
+    it('should include activeVersionIdentifier and versionIdentifier', async () => {
+      const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
+
+      await Command.run([
+        '--target-org', testOrg.username,
+        '--spec', 'test.yaml',
+        '--output-dir', '/tmp/out',
+        '--json',
+      ]);
+
+      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
+      expect(promptFile!.content).to.include('<activeVersionIdentifier>');
+      expect(promptFile!.content).to.include('<versionIdentifier>');
+      // Both should have the same value
+      const activeMatch = promptFile!.content.match(/<activeVersionIdentifier>(.+?)<\/activeVersionIdentifier>/);
+      const versionMatch = promptFile!.content.match(/<versionIdentifier>(.+?)<\/versionIdentifier>/);
+      expect(activeMatch![1]).to.equal(versionMatch![1]);
+      expect(activeMatch![1]).to.match(/.+=_1$/);
     });
 
     it('should include Session input with correct definition', async () => {

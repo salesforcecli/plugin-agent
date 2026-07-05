@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { join, resolve, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
@@ -379,32 +380,48 @@ function buildPromptTemplateXml(apiName: string, promptContent: string, spec: Sc
   const templateType = getPromptTemplateType(spec);
 
   const isOpenEnded = spec.scorerType === 'OpenEnded';
+  const isMeasurement = templateType === 'agentforce_session_tracing__scorerMeasurement';
 
-  const inputs = [
+  const inputs: Array<{ apiName: string; definition: string; referenceName: string; required: boolean }> = [
     {
       apiName: 'Session',
       definition: 'lightningtype://propertyType/agentforce_session_tracing__stdmDetailViewType',
       referenceName: 'Input:Session',
       required: true,
     },
-    {
-      apiName: 'AllowedLabels',
-      definition: 'primitive://String',
-      referenceName: 'Input:AllowedLabels',
-      required: !isOpenEnded,
-    },
-    {
-      apiName: 'FallbackLabel',
-      definition: 'primitive://String',
-      referenceName: 'Input:FallbackLabel',
-      required: !isOpenEnded,
-    },
   ];
+
+  if (isMeasurement) {
+    inputs.push({
+      apiName: 'AllowedRange',
+      definition: 'primitive://String',
+      referenceName: 'Input:AllowedRange',
+      required: true,
+    });
+  } else {
+    inputs.push(
+      {
+        apiName: 'AllowedLabels',
+        definition: 'primitive://String',
+        referenceName: 'Input:AllowedLabels',
+        required: !isOpenEnded,
+      },
+      {
+        apiName: 'FallbackLabel',
+        definition: 'primitive://String',
+        referenceName: 'Input:FallbackLabel',
+        required: !isOpenEnded,
+      }
+    );
+  }
+
+  const versionIdentifier = createHash('sha256').update(promptContent).digest('base64') + '_1';
 
   const xmlObj = {
     '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
     GenAiPromptTemplate: {
       '@_xmlns': 'http://soap.sforce.com/2006/04/metadata',
+      activeVersionIdentifier: versionIdentifier,
       developerName: apiName,
       masterLabel: apiName,
       overridable: false,
@@ -413,6 +430,7 @@ function buildPromptTemplateXml(apiName: string, promptContent: string, spec: Sc
         inputs,
         primaryModel: 'sfdc_ai__DefaultOpenAIGPT4OmniMini',
         status: 'Published',
+        versionIdentifier,
       },
       type: templateType,
       visibility: 'Global',
@@ -767,6 +785,17 @@ function buildDefaultPromptContent(spec: Partial<ScorerSpecFile>): string {
       'Analyze the following agent-user conversation and provide your evaluation.',
       '',
       'Your response must conform to the expected data type.',
+      '',
+      'session audit data:',
+      '{!$Input:Session}',
+    ].join('\n');
+  }
+
+  if (spec.semanticType === 'Measurement') {
+    return [
+      'Analyze the following agent-user conversation and evaluate it based on your scoring criteria.',
+      '',
+      'Respond with ONLY a number within the allowed range: {!$Input:AllowedRange}',
       '',
       'session audit data:',
       '{!$Input:Session}',
