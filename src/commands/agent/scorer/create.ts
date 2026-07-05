@@ -109,7 +109,7 @@ const FLAGGABLE_PROMPTS = {
   'data-type': {
     message: messages.getMessage('flags.data-type.summary'),
     promptMessage: 'What data type does this scorer produce?',
-    options: ['Text', 'Number', 'OpenEnded'],
+    options: ['OpenEnded', 'Text', 'Number'],
     validate: (d: string): boolean | string => ['Text', 'Number', 'OpenEnded'].includes(d) || 'Invalid data type',
     required: true,
   },
