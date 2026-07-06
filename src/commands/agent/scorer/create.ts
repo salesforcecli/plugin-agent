@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 import { join, resolve, dirname } from 'node:path';
-import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages, EnvironmentVariable } from '@salesforce/core';
-import { Agent } from '@salesforce/agents';
-import { XMLBuilder } from 'fast-xml-parser';
+import {
+  Agent,
+  type ScorerSpec,
+  createScorerDefinition,
+  labelToApiName,
+  SUPPORTED_LIGHTNING_TYPES,
+  MAX_ENUM_VALUES,
+} from '@salesforce/agents';
 import { confirm, select, input as inquirerInput } from '@inquirer/prompts';
 import YAML from 'yaml';
 import { FlaggablePrompt, makeFlags, promptForFlag } from '../../../flags.js';
@@ -36,57 +41,8 @@ export type AgentScorerCreateResult = {
   promptTemplatePath?: string;
 };
 
-export type ScorerSpecFile = {
-  apiName: string;
-  dataType: 'Text' | 'Number' | 'LightningType';
-  scorerType?: 'Predefined' | 'OpenEnded';
-  lightningType?: string;
-  semanticType?: 'Dimension' | 'Measurement';
-  inputScope?: 'Session' | 'Intent';
-  label: string;
-  description?: string;
-  engineType: 'Manual' | 'PromptTemplate';
-  promptContent?: string;
-  promptTemplateName?: string;
-  status?: 'Available' | 'Draft';
-  agentAssociation: {
-    agentApiName: string;
-    isActive: boolean;
-    samplingRate?: number;
-    inputScope?: 'Session' | 'Intent';
-  };
-  outputEnumValues?: Array<{
-    value: string;
-    outcomeType: 'Pass' | 'Fail' | 'NotApplicable';
-    isFallback?: boolean;
-    isSystemFallback?: boolean;
-  }>;
-  specification?: {
-    valueSpecification: {
-      min: number;
-      max: number;
-      step: number;
-      threshold?: number;
-    };
-  };
-};
-
-const MAX_ENUM_VALUES = 101;
-
-const SUPPORTED_LIGHTNING_TYPES = [
-  'lightning__textType',
-  'lightning__multilineTextType',
-  'lightning__richTextType',
-  'lightning__numberType',
-  'lightning__integerType',
-  'lightning__booleanType',
-  'lightning__dateType',
-  'lightning__dateTimeType',
-  'lightning__dateTimeStringType',
-  'lightning__urlType',
-  'lightning__objectType',
-  'lightning__listType',
-];
+/** @deprecated Use ScorerSpec from @salesforce/agents directly. */
+export type ScorerSpecFile = ScorerSpec;
 
 const FLAGGABLE_PROMPTS = {
   label: {
@@ -135,14 +91,14 @@ const FLAGGABLE_PROMPTS = {
   },
 } satisfies Record<string, FlaggablePrompt>;
 
-type OutputEnumValue = {
+type OutputEnumValueInput = {
   value: string;
   outcomeType: string;
   isFallback: boolean;
   isSystemFallback: boolean;
 };
 
-async function promptForSingleEnumValue(index: number): Promise<OutputEnumValue & { addMore: boolean }> {
+async function promptForSingleEnumValue(index: number): Promise<OutputEnumValueInput & { addMore: boolean }> {
   const value = await promptForFlag({
     message: 'Output value name',
     promptMessage: `Output value #${index + 1} (e.g., "Good", "Bad", "N/A")`,
@@ -172,8 +128,8 @@ async function promptForSingleEnumValue(index: number): Promise<OutputEnumValue 
   return { value, outcomeType, isFallback, isSystemFallback: false, addMore };
 }
 
-async function promptForOutputEnumValues(): Promise<OutputEnumValue[]> {
-  const values: OutputEnumValue[] = [];
+async function promptForOutputEnumValues(): Promise<OutputEnumValueInput[]> {
+  const values: OutputEnumValueInput[] = [];
   let addMore = true;
 
   while (addMore) {
@@ -186,14 +142,7 @@ async function promptForOutputEnumValues(): Promise<OutputEnumValue[]> {
   return values;
 }
 
-type NumberSpecification = {
-  min: number;
-  max: number;
-  step: number;
-  threshold?: number;
-};
-
-async function promptForNumberSpecification(): Promise<NumberSpecification> {
+async function promptForNumberSpecification(): Promise<{ min: number; max: number; step: number; threshold?: number }> {
   const minStr = await inquirerInput({
     message: 'Minimum value',
     default: '0',
@@ -229,10 +178,9 @@ async function promptForNumberSpecification(): Promise<NumberSpecification> {
   });
 
   const step = parseFloat(stepStr);
-  const numValues = Math.floor((max - min) / step) + 1;
 
   const addThreshold = await confirm({
-    message: `Add a threshold value? (${numValues} output values will be generated from ${min} to ${max})`,
+    message: `Add a threshold value? (${Math.floor((max - min) / step) + 1} output values will be generated from ${min} to ${max})`,
     default: false,
     theme,
   });
@@ -253,203 +201,6 @@ async function promptForNumberSpecification(): Promise<NumberSpecification> {
   }
 
   return { min, max, step, threshold };
-}
-
-function generateNumberEnumValues(spec: NumberSpecification): OutputEnumValue[] {
-  const values: OutputEnumValue[] = [];
-  const epsilon = 1e-9;
-  let current = spec.min;
-
-  while (current <= spec.max + epsilon) {
-    const rounded = Math.round(current * 1e9) / 1e9;
-    values.push({
-      value: String(rounded),
-      outcomeType: 'NotApplicable',
-      isFallback: false,
-      isSystemFallback: false,
-    });
-    current += spec.step;
-  }
-
-  return values;
-}
-
-type AgentAssociation = {
-  agentApiName: string;
-  isActive: boolean;
-  samplingRate?: number;
-  inputScope?: 'Session' | 'Intent';
-};
-
-function buildScorerXml(spec: ScorerSpecFile): string {
-  const engine: Record<string, unknown> = {};
-  if (spec.engineType === 'PromptTemplate') {
-    engine.engineRef = spec.promptTemplateName ?? spec.apiName;
-  }
-  engine.engineType = spec.engineType;
-
-  const agentAssociationXml: Record<string, unknown> = {
-    agentApiName: spec.agentAssociation.agentApiName,
-    ...(spec.agentAssociation.inputScope ? { inputScope: spec.agentAssociation.inputScope } : {}),
-    isActive: spec.agentAssociation.isActive,
-    samplingRate: spec.agentAssociation.samplingRate ?? 1.0,
-  };
-
-  const scorerVersion: Record<string, unknown> = {
-    agentAssociation: agentAssociationXml,
-    ...(spec.description ? { description: spec.description } : {}),
-    engine,
-    label: spec.label,
-  };
-
-  // For Number type with specification, generate enum values from spec
-  if (spec.dataType === 'Number' && spec.specification) {
-    const numSpec = spec.specification.valueSpecification;
-    const enumValues = generateNumberEnumValues(numSpec);
-    scorerVersion.outputEnumValue = enumValues.map((v) => ({
-      isFallback: false,
-      isSystemFallback: false,
-      outcomeType: v.outcomeType,
-      value: v.value,
-    }));
-    scorerVersion.specification = {
-      valueSpecification: {
-        min: numSpec.min,
-        max: numSpec.max,
-        step: numSpec.step,
-        ...(numSpec.threshold != null ? { threshold: numSpec.threshold } : {}),
-      },
-    };
-  } else if (spec.outputEnumValues) {
-    scorerVersion.outputEnumValue = spec.outputEnumValues.map((v) => ({
-      isFallback: v.isFallback ?? false,
-      isSystemFallback: v.isSystemFallback ?? false,
-      outcomeType: v.outcomeType,
-      value: v.value,
-    }));
-  }
-
-  scorerVersion.status = spec.status ?? 'Draft';
-  scorerVersion.versionNumber = 1;
-
-  const definition: Record<string, unknown> = {
-    '@_xmlns': 'http://soap.sforce.com/2006/04/metadata',
-    dataType: spec.dataType,
-    inputScope: spec.inputScope ?? 'Session',
-  };
-
-  if (spec.lightningType) {
-    definition.lightningType = spec.lightningType;
-  }
-  if (spec.scorerType) {
-    definition.scorerType = spec.scorerType;
-  }
-  if (spec.semanticType) {
-    definition.semanticType = spec.semanticType;
-  }
-
-  definition.scorerVersion = scorerVersion;
-
-  const xmlObj = {
-    '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
-    AiAgentScorerDefinition: definition,
-  };
-
-  const builder = new XMLBuilder({
-    format: true,
-    ignoreAttributes: false,
-    indentBy: '    ',
-    suppressBooleanAttributes: false,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return builder.build(xmlObj);
-}
-
-function getPromptTemplateType(spec: ScorerSpecFile): string {
-  if (spec.scorerType === 'OpenEnded') {
-    return 'agentforce_session_tracing__scorerOpenEnded';
-  }
-  if (spec.semanticType === 'Measurement') {
-    return 'agentforce_session_tracing__scorerMeasurement';
-  }
-  return 'agentforce_session_tracing__scorerMultilabel';
-}
-
-function buildPromptTemplateXml(apiName: string, promptContent: string, spec: ScorerSpecFile): string {
-  const templateType = getPromptTemplateType(spec);
-
-  const isOpenEnded = spec.scorerType === 'OpenEnded';
-  const isMeasurement = templateType === 'agentforce_session_tracing__scorerMeasurement';
-
-  const inputs: Array<{ apiName: string; definition: string; referenceName: string; required: boolean }> = [
-    {
-      apiName: 'Session',
-      definition: 'lightningtype://propertyType/agentforce_session_tracing__stdmDetailViewType',
-      referenceName: 'Input:Session',
-      required: true,
-    },
-  ];
-
-  if (isMeasurement) {
-    inputs.push({
-      apiName: 'AllowedRange',
-      definition: 'primitive://String',
-      referenceName: 'Input:AllowedRange',
-      required: true,
-    });
-  } else {
-    inputs.push(
-      {
-        apiName: 'AllowedLabels',
-        definition: 'primitive://String',
-        referenceName: 'Input:AllowedLabels',
-        required: !isOpenEnded,
-      },
-      {
-        apiName: 'FallbackLabel',
-        definition: 'primitive://String',
-        referenceName: 'Input:FallbackLabel',
-        required: !isOpenEnded,
-      }
-    );
-  }
-
-  const versionIdentifier = createHash('sha256').update(promptContent).digest('base64') + '_1';
-
-  const xmlObj = {
-    '?xml': { '@_version': '1.0', '@_encoding': 'UTF-8' },
-    GenAiPromptTemplate: {
-      '@_xmlns': 'http://soap.sforce.com/2006/04/metadata',
-      activeVersionIdentifier: versionIdentifier,
-      developerName: apiName,
-      masterLabel: apiName,
-      overridable: false,
-      templateVersions: {
-        content: promptContent,
-        inputs,
-        primaryModel: 'sfdc_ai__DefaultOpenAIGPT4OmniMini',
-        status: 'Published',
-        versionIdentifier,
-      },
-      type: templateType,
-      visibility: 'Global',
-    },
-  };
-
-  const builder = new XMLBuilder({
-    format: true,
-    ignoreAttributes: false,
-    indentBy: '    ',
-    suppressBooleanAttributes: false,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return builder.build(xmlObj);
-}
-
-function labelToApiName(label: string): string {
-  return label.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '');
 }
 
 export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult> {
@@ -502,23 +253,51 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
-    const spec = flags.spec
-      ? this.loadSpecFromFile(flags.spec)
+    const spec: ScorerSpec = flags.spec
+      ? (YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as ScorerSpec)
       : await this.runInteractiveInterview(flags, connection);
 
-    return this.generateOutput(spec, flags);
-  }
+    const outputDir = resolve(flags['output-dir'] as string);
 
-  private loadSpecFromFile(specPath: string): ScorerSpecFile {
-    const spec = YAML.parse(readFileSync(resolve(specPath), 'utf8')) as ScorerSpecFile;
-    this.log(`Reading scorer spec from ${specPath}`);
-    return spec;
+    if (flags.preview) {
+      const result = await createScorerDefinition(spec, { outputDir, write: false });
+      this.log('\n--- Scorer Definition (preview) ---\n');
+      this.log(result.contents);
+      if (result.promptTemplateContents) {
+        this.log('\n--- Prompt Template (preview) ---\n');
+        this.log(result.promptTemplateContents);
+      }
+      return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
+    }
+
+    const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
+    const scorerPath = join(outputDir, 'aiAgentScorerDefinitions', scorerFileName);
+
+    if (existsSync(scorerPath) && !this.jsonEnabled()) {
+      const overwrite = await confirm({
+        message: `${scorerFileName} already exists. Overwrite?`,
+        default: false,
+        theme,
+      });
+      if (!overwrite) {
+        this.log('Operation canceled.');
+        return { path: '', apiName: spec.apiName, contents: '' };
+      }
+    }
+
+    const result = await createScorerDefinition(spec, { outputDir });
+    this.log(`\nScorer definition written to: ${result.path}`);
+    if (result.promptTemplatePath) {
+      this.log(`Prompt template written to: ${result.promptTemplatePath}`);
+    }
+
+    return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
   }
 
   private async runInteractiveInterview(
     flags: Record<string, unknown>,
     connection: ReturnType<import('@salesforce/core').Org['getConnection']>
-  ): Promise<ScorerSpecFile> {
+  ): Promise<ScorerSpec> {
     if (this.jsonEnabled()) {
       const missing = Object.entries(FLAGGABLE_PROMPTS)
         .filter(([key, p]) => 'required' in p && p.required && !flags[key])
@@ -568,92 +347,28 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     return {
       apiName,
-      dataType: resolvedDataType as ScorerSpecFile['dataType'],
+      dataType: resolvedDataType as ScorerSpec['dataType'],
       scorerType: dataTypeDetails.scorerType,
       lightningType: dataTypeDetails.lightningType,
-      semanticType: (semanticType || undefined) as ScorerSpecFile['semanticType'],
+      semanticType: (semanticType || undefined) as ScorerSpec['semanticType'],
       inputScope: 'Session',
       label,
       description: description || undefined,
-      engineType: engineType as ScorerSpecFile['engineType'],
+      engineType: engineType as ScorerSpec['engineType'],
       promptContent: engineConfig.promptContent,
       promptTemplateName: engineConfig.promptTemplateName,
-      status: status as ScorerSpecFile['status'],
-      outputEnumValues: dataTypeDetails.outputEnumValues as ScorerSpecFile['outputEnumValues'],
+      status: status as ScorerSpec['status'],
+      outputEnumValues: dataTypeDetails.outputEnumValues as ScorerSpec['outputEnumValues'],
       specification: dataTypeDetails.specification,
       agentAssociation,
     };
   }
 
-  private async generateOutput(
-    spec: ScorerSpecFile,
-    flags: Record<string, unknown>
-  ): Promise<AgentScorerCreateResult> {
-    if (spec.dataType === 'Text' && spec.outputEnumValues) {
-      const fallbackCount = spec.outputEnumValues.filter((v) => v.isFallback).length;
-      if (fallbackCount !== 1) {
-        throw new Error(
-          `Text scorers must have exactly 1 fallback value, but found ${fallbackCount}.`
-        );
-      }
-    }
-
-    const scorerXml = buildScorerXml(spec);
-    const outputDir = resolve(flags['output-dir'] as string);
-    const scorerDir = join(outputDir, 'aiAgentScorerDefinitions');
-    const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
-    const scorerPath = join(scorerDir, scorerFileName);
-
-    let promptTemplatePath: string | undefined;
-    let promptTemplateXml: string | undefined;
-    if (spec.engineType === 'PromptTemplate' && !spec.promptTemplateName) {
-      const content = spec.promptContent ?? buildDefaultPromptContent(spec);
-      promptTemplateXml = buildPromptTemplateXml(spec.apiName, content, spec);
-      const promptDir = join(outputDir, 'genAiPromptTemplates');
-      const promptFileName = `${spec.apiName}.genAiPromptTemplate-meta.xml`;
-      promptTemplatePath = join(promptDir, promptFileName);
-    }
-
-    if (flags.preview) {
-      this.log('\n--- Scorer Definition (preview) ---\n');
-      this.log(scorerXml);
-      if (promptTemplateXml) {
-        this.log('\n--- Prompt Template (preview) ---\n');
-        this.log(promptTemplateXml);
-      }
-      return { path: scorerPath, apiName: spec.apiName, contents: scorerXml, promptTemplatePath };
-    }
-
-    mkdirSync(scorerDir, { recursive: true });
-    if (existsSync(scorerPath) && !this.jsonEnabled()) {
-      const overwrite = await confirm({
-        message: `${scorerFileName} already exists. Overwrite?`,
-        default: false,
-        theme,
-      });
-      if (!overwrite) {
-        this.log('Operation canceled.');
-        return { path: '', apiName: spec.apiName, contents: '' };
-      }
-    }
-    writeFileSync(scorerPath, scorerXml);
-    this.log(`\nScorer definition written to: ${scorerPath}`);
-
-    if (promptTemplateXml && promptTemplatePath) {
-      const promptDir = join(outputDir, 'genAiPromptTemplates');
-      mkdirSync(promptDir, { recursive: true });
-      writeFileSync(promptTemplatePath, promptTemplateXml);
-      this.log(`Prompt template written to: ${promptTemplatePath}`);
-    }
-
-    return { path: scorerPath, apiName: spec.apiName, contents: scorerXml, promptTemplatePath };
-  }
-
   private async promptForDataTypeDetails(dataType: string): Promise<{
-    outputEnumValues?: OutputEnumValue[];
-    specification?: ScorerSpecFile['specification'];
+    outputEnumValues?: OutputEnumValueInput[];
+    specification?: ScorerSpec['specification'];
     lightningType?: string;
-    scorerType?: ScorerSpecFile['scorerType'];
+    scorerType?: ScorerSpec['scorerType'];
   }> {
     if (dataType === 'Number') {
       this.log();
@@ -720,8 +435,8 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     connection: ReturnType<import('@salesforce/core').Org['getConnection']>,
     engineType: string,
     agentApiNameFlag?: string
-  ): Promise<AgentAssociation> {
-    let agentAssociation: AgentAssociation;
+  ): Promise<ScorerSpec['agentAssociation']> {
+    let agentAssociation: ScorerSpec['agentAssociation'];
     if (agentApiNameFlag) {
       agentAssociation = { agentApiName: agentApiNameFlag, isActive: false };
     } else {
@@ -777,38 +492,4 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     return agentAssociation;
   }
 
-}
-
-function buildDefaultPromptContent(spec: Partial<ScorerSpecFile>): string {
-  if (spec.scorerType === 'OpenEnded') {
-    return [
-      'Analyze the following agent-user conversation and provide your evaluation.',
-      '',
-      'Your response must conform to the expected data type.',
-      '',
-      'session audit data:',
-      '{!$Input:Session}',
-    ].join('\n');
-  }
-
-  if (spec.semanticType === 'Measurement') {
-    return [
-      'Analyze the following agent-user conversation and evaluate it based on your scoring criteria.',
-      '',
-      'Respond with ONLY a number within the allowed range: {!$Input:AllowedRange}',
-      '',
-      'session audit data:',
-      '{!$Input:Session}',
-    ].join('\n');
-  }
-
-  return [
-    'Analyze the following agent-user conversation and evaluate it based on your scoring criteria.',
-    '',
-    'Respond with ONLY one of the allowed values: {!$Input:AllowedLabels}',
-    'or fallback to: {!$Input:FallbackLabel}',
-    '',
-    'session audit data:',
-    '{!$Input:Session}',
-  ].join('\n');
 }
