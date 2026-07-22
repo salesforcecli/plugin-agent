@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ScorerSpecFile",
+  "definitions": {
+    "ScorerSpecFile": {
+      "type": "object",
+      "description": "YAML spec file for creating an agent scorer definition via `sf agent scorer create --spec <file>`.",
+      "properties": {
+        "apiName": {
+          "type": "string",
+          "description": "API name of the scorer definition. Max 35 characters, must start with a letter, only alphanumerics and underscores.",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,34}$",
+          "maxLength": 35
+        },
+        "dataType": {
+          "type": "string",
+          "enum": ["Text", "Number", "LightningType"],
+          "description": "Data type produced by the scorer. Use 'Text' for categorical labels, 'Number' for numeric scales, 'LightningType' for open-ended evaluations."
+        },
+        "scorerType": {
+          "type": "string",
+          "enum": ["Predefined", "OpenEnded"],
+          "description": "Set to 'OpenEnded' when dataType is 'LightningType' for free-form evaluation."
+        },
+        "lightningType": {
+          "type": "string",
+          "enum": [
+            "lightning__textType",
+            "lightning__multilineTextType",
+            "lightning__richTextType",
+            "lightning__numberType",
+            "lightning__integerType",
+            "lightning__booleanType",
+            "lightning__dateType",
+            "lightning__dateTimeType",
+            "lightning__dateTimeStringType",
+            "lightning__urlType",
+            "lightning__objectType",
+            "lightning__listType"
+          ],
+          "description": "Required when dataType is 'LightningType'. Specifies the lightning type for open-ended values."
+        },
+        "semanticType": {
+          "type": "string",
+          "enum": ["Dimension", "Measurement"],
+          "description": "How this scorer is used in analytics. 'Dimension' for categorical grouping, 'Measurement' for numeric aggregation."
+        },
+        "inputScope": {
+          "type": "string",
+          "enum": ["Session", "Intent"],
+          "default": "Session",
+          "description": "Whether the scorer evaluates an entire session or a single intent within a session."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label for the scorer version.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of what this scorer evaluates."
+        },
+        "engineType": {
+          "type": "string",
+          "enum": ["Manual", "PromptTemplate"],
+          "description": "'Manual' for human-evaluated scoring, 'PromptTemplate' for LLM-evaluated scoring."
+        },
+        "promptContent": {
+          "type": "string",
+          "description": "Prompt text for PromptTemplate engine type. Use {!$Input:Session} to reference the session data, {!$Input:AllowedLabels} for allowed output values, and {!$Input:FallbackLabel} for the fallback value. Ignored when engineType is 'Manual'."
+        },
+        "promptTemplateName": {
+          "type": "string",
+          "description": "API name of an existing prompt template to use instead of generating a new one. Mutually exclusive with promptContent."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Available", "Draft"],
+          "default": "Draft",
+          "description": "Initial status of the scorer version."
+        },
+        "agentAssociation": {
+          "$ref": "#/definitions/AgentAssociation"
+        },
+        "outputEnumValues": {
+          "type": "array",
+          "description": "Output value definitions. Required for 'Text' dataType. For 'Text' scorers, exactly one value must have isFallback: true.",
+          "items": {
+            "$ref": "#/definitions/OutputEnumValue"
+          }
+        },
+        "specification": {
+          "$ref": "#/definitions/NumberSpecification",
+          "description": "Required when dataType is 'Number'. Defines the numeric scale."
+        }
+      },
+      "required": ["apiName", "dataType", "label", "engineType", "agentAssociation"],
+      "additionalProperties": false
+    },
+    "AgentAssociation": {
+      "type": "object",
+      "description": "Associates the scorer with an agent in the org.",
+      "properties": {
+        "agentApiName": {
+          "type": "string",
+          "description": "API name of the agent to associate with this scorer."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether scoring is active for this agent association."
+        },
+        "samplingRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1.0,
+          "description": "Fraction of sessions to score (0.0 to 1.0). Only relevant when isActive is true."
+        },
+        "inputScope": {
+          "type": "string",
+          "enum": ["Session", "Intent"],
+          "description": "Override input scope for this specific agent association."
+        }
+      },
+      "required": ["agentApiName", "isActive"],
+      "additionalProperties": false
+    },
+    "OutputEnumValue": {
+      "type": "object",
+      "description": "A possible output value for the scorer.",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The output label (e.g., 'Good', 'Bad', 'N/A').",
+          "minLength": 1
+        },
+        "outcomeType": {
+          "type": "string",
+          "enum": ["Pass", "Fail", "NotApplicable"],
+          "description": "Maps this value to a pass/fail outcome for reporting."
+        },
+        "isFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is the fallback value. Exactly one value must be the fallback for Text scorers."
+        },
+        "isSystemFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is a system-generated fallback. Typically false for user-defined scorers."
+        }
+      },
+      "required": ["value", "outcomeType"],
+      "additionalProperties": false
+    },
+    "NumberSpecification": {
+      "type": "object",
+      "properties": {
+        "valueSpecification": {
+          "type": "object",
+          "description": "Defines the numeric scale. The number of generated values ((max - min) / step + 1) must not exceed 101.",
+          "properties": {
+            "min": {
+              "type": "number",
+              "description": "Minimum value of the scale."
+            },
+            "max": {
+              "type": "number",
+              "description": "Maximum value of the scale. Must be greater than min."
+            },
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Step size between values."
+            },
+            "threshold": {
+              "type": "number",
+              "description": "Optional threshold value (must be between min and max)."
+            }
+          },
+          "required": ["min", "max", "step"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["valueSpecification"],
+      "additionalProperties": false
+    }
+  }
+}
