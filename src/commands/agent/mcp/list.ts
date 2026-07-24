@@ -58,25 +58,30 @@ export default class ApiCatalogMcpServerList extends SfCommand<ApiCatalogMcpServ
       });
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(
-        messages.getMessage('error.failed', [wrapped.message]),
-        'ListMcpServersFailed',
-        [],
-        4,
-        wrapped
-      );
+      throw new SfError(messages.getMessage('error.failed', [wrapped.message]), 'ListMcpServersFailed', [], 4, wrapped);
     }
 
     if (!this.jsonEnabled()) {
       this.table({
-        data: result.mcpServers ?? [],
+        data: (result.mcpServers ?? []).map((s) => ({
+          id: s.id,
+          name: s.name,
+          label: s.label,
+          type: s.type,
+          status: s.status,
+          authType: s.authorization?.authType,
+          serverUrl: s.serverUrl,
+          description: s.description,
+        })),
         columns: [
           { key: 'id', name: 'ID' },
           { key: 'name', name: 'Name' },
           { key: 'label', name: 'Label' },
           { key: 'type', name: 'Type' },
           { key: 'status', name: 'Status' },
+          { key: 'authType', name: 'Auth Type' },
           { key: 'serverUrl', name: 'Server URL' },
+          { key: 'description', name: 'Description' },
         ],
       });
     }

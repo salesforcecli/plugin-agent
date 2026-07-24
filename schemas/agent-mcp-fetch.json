@@ -46,6 +46,9 @@
         },
         "status": {
           "type": "string"
+        },
+        "securityWarning": {
+          "type": "string"
         }
       },
       "required": [

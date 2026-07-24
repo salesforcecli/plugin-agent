@@ -33,9 +33,10 @@ import AgentMcpAssetReplace from '../../../../src/commands/agent/mcp/asset/repla
 
 describe('agent mcp commands', () => {
   const $$ = new TestContext();
+  let sfCommandStubs: ReturnType<typeof stubSfCommandUx>;
 
   beforeEach(() => {
-    stubSfCommandUx($$.SANDBOX);
+    sfCommandStubs = stubSfCommandUx($$.SANDBOX);
   });
 
   afterEach(() => {
@@ -275,7 +276,14 @@ describe('agent mcp commands', () => {
       return Promise.resolve({ assets: [] });
     };
 
-    await AgentMcpAssetReplace.run(['--target-org', testOrg.username, '--mcp-server-id', '0XS1', '--assets-file', file]);
+    await AgentMcpAssetReplace.run([
+      '--target-org',
+      testOrg.username,
+      '--mcp-server-id',
+      '0XS1',
+      '--assets-file',
+      file,
+    ]);
 
     expect(JSON.parse(captured.body as string).assets[0].name).to.equal('tool-b');
   });
@@ -338,7 +346,14 @@ describe('agent mcp commands', () => {
     $$.fakeConnectionRequest = () => Promise.resolve({} as any);
 
     try {
-      await AgentMcpAssetReplace.run(['--target-org', testOrg.username, '--mcp-server-id', '0XS1', '--assets-file', file]);
+      await AgentMcpAssetReplace.run([
+        '--target-org',
+        testOrg.username,
+        '--mcp-server-id',
+        '0XS1',
+        '--assets-file',
+        file,
+      ]);
       expect.fail('should have thrown');
     } catch (err) {
       expect((err as { name: string }).name).to.equal('InvalidShape');
@@ -406,5 +421,95 @@ describe('agent mcp commands', () => {
     expect(captured.method).to.equal('GET');
     expect(captured.url).to.match(/\/mcp-servers\/0XS1\/assets$/);
     expect(result.assets[0].name).to.equal('McpTool__add');
+  });
+
+  it('asset list renders the tool description in the human-readable table', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    $$.fakeConnectionRequest = () =>
+      Promise.resolve({
+        assets: [{ id: '1', name: 'McpTool__add', kind: 'MCP_TOOL', active: true, description: 'Add two numbers' }],
+      });
+
+    await AgentMcpAssetList.run(['--target-org', testOrg.username, '--mcp-server-id', '0XS1']);
+
+    // The table must expose a Description column so a user can review a tool before approving it.
+    const tableArg = sfCommandStubs.table.firstCall.firstArg as {
+      data: Array<Record<string, unknown>>;
+      columns: Array<{ key: string; name: string }>;
+    };
+    expect(tableArg.columns.map((c) => c.key)).to.include('description');
+    expect(tableArg.data[0].description).to.equal('Add two numbers');
+  });
+
+  it('create renders the tool description and security warning in the discovered-asset table', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    // The auto-fetch on create returns the same live tool metadata as /fetch,
+    // including securityWarning — so the discovered-asset table must surface it.
+    $$.fakeConnectionRequest = () =>
+      Promise.resolve({
+        server: { id: '0XS1', name: 'my-server', type: 'EXTERNAL', status: 'ACTIVE' },
+        assets: [
+          {
+            name: 'McpTool__add',
+            kind: 'MCP_TOOL',
+            active: false,
+            description: 'Add two numbers',
+            securityWarning: 'Tool description contains text in multiple languages or scripts.',
+          },
+        ],
+      });
+
+    await AgentMcpCreate.run([
+      '--target-org',
+      testOrg.username,
+      '--name',
+      'my-server',
+      '--server-url',
+      'https://example.com/mcp',
+    ]);
+
+    const tableArg = sfCommandStubs.table.firstCall.firstArg as {
+      data: Array<Record<string, unknown>>;
+      columns: Array<{ key: string; name: string }>;
+    };
+    const keys = tableArg.columns.map((c) => c.key);
+    expect(keys).to.include('description');
+    expect(keys).to.include('securityWarning');
+    expect(tableArg.data[0].description).to.equal('Add two numbers');
+    expect(tableArg.data[0].securityWarning).to.equal(
+      'Tool description contains text in multiple languages or scripts.'
+    );
+  });
+
+  it('fetch renders the tool description and security warning in the human-readable table', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    // securityWarning is only populated by the live /fetch introspection.
+    $$.fakeConnectionRequest = () =>
+      Promise.resolve({
+        assets: [
+          {
+            name: 'McpTool__add',
+            kind: 'MCP_TOOL',
+            status: 'IN_SYNC',
+            description: 'Add two numbers',
+            securityWarning: 'Tool description was modified since last approval.',
+          },
+        ],
+      });
+
+    await AgentMcpFetch.run(['--target-org', testOrg.username, '--mcp-server-id', '0XS1']);
+
+    const tableArg = sfCommandStubs.table.firstCall.firstArg as {
+      data: Array<Record<string, unknown>>;
+      columns: Array<{ key: string; name: string }>;
+    };
+    const keys = tableArg.columns.map((c) => c.key);
+    expect(keys).to.include('description');
+    expect(keys).to.include('securityWarning');
+    expect(tableArg.data[0].description).to.equal('Add two numbers');
+    expect(tableArg.data[0].securityWarning).to.equal('Tool description was modified since last approval.');
   });
 });

@@ -62,16 +62,20 @@ export default class ApiCatalogMcpServerAssetList extends SfCommand<ApiCatalogMc
         data: (result.assets ?? []).map((a) => ({
           id: a.id,
           name: a.name,
+          label: a.label,
           kind: a.kind,
           active: a.active,
           availableAsAgentAction: a.availableAsAgentAction,
+          description: a.description,
         })),
         columns: [
           { key: 'id', name: 'ID' },
           { key: 'name', name: 'Name' },
+          { key: 'label', name: 'Label' },
           { key: 'kind', name: 'Kind' },
           { key: 'active', name: 'Active' },
           { key: 'availableAsAgentAction', name: 'Agent Action' },
+          { key: 'description', name: 'Description' },
         ],
       });
     }
