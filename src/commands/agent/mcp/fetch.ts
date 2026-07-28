@@ -48,30 +48,30 @@ export default class ApiCatalogMcpServerFetch extends SfCommand<ApiCatalogMcpSer
       result = await ApiCatalog.fetchMcpServer(connection, flags['mcp-server-id']);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(
-        messages.getMessage('error.failed', [wrapped.message]),
-        'FetchMcpServerFailed',
-        [],
-        4,
-        wrapped
-      );
+      throw new SfError(messages.getMessage('error.failed', [wrapped.message]), 'FetchMcpServerFailed', [], 4, wrapped);
     }
 
     if (!this.jsonEnabled()) {
       this.table({
         data: (result.assets ?? []).map((a) => ({
           name: a.name,
+          label: a.label,
           kind: a.kind,
           status: a.status,
           active: a.active,
           availableAsAgentAction: a.availableAsAgentAction,
+          description: a.description,
+          securityWarning: a.securityWarning,
         })),
         columns: [
           { key: 'name', name: 'Name' },
+          { key: 'label', name: 'Label' },
           { key: 'kind', name: 'Kind' },
           { key: 'status', name: 'Status' },
           { key: 'active', name: 'Active' },
           { key: 'availableAsAgentAction', name: 'Agent Action' },
+          { key: 'description', name: 'Description' },
+          { key: 'securityWarning', name: 'Security Warning' },
         ],
       });
     }

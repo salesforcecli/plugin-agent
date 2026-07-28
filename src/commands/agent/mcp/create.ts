@@ -129,6 +129,28 @@ export default class ApiCatalogMcpServerCreate extends SfCommand<McpServerCreate
     if (!this.jsonEnabled()) {
       this.log(`Created MCP server "${result.server.name}" (${result.server.id}).`);
       this.log(`Discovered ${result.assets.length} asset(s).`);
+      if (result.assets.length > 0) {
+        this.table({
+          data: result.assets.map((a) => ({
+            name: a.name,
+            label: a.label,
+            kind: a.kind,
+            active: a.active,
+            availableAsAgentAction: a.availableAsAgentAction,
+            description: a.description,
+            securityWarning: a.securityWarning,
+          })),
+          columns: [
+            { key: 'name', name: 'Name' },
+            { key: 'label', name: 'Label' },
+            { key: 'kind', name: 'Kind' },
+            { key: 'active', name: 'Active' },
+            { key: 'availableAsAgentAction', name: 'Agent Action' },
+            { key: 'description', name: 'Description' },
+            { key: 'securityWarning', name: 'Security Warning' },
+          ],
+        });
+      }
     }
 
     return result;

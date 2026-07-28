@@ -48,22 +48,18 @@ export default class ApiCatalogMcpServerGet extends SfCommand<ApiCatalogMcpServe
       result = await ApiCatalog.getMcpServer(connection, flags['mcp-server-id']);
     } catch (error) {
       const wrapped = SfError.wrap(error);
-      throw new SfError(
-        messages.getMessage('error.failed', [wrapped.message]),
-        'GetMcpServerFailed',
-        [],
-        4,
-        wrapped
-      );
+      throw new SfError(messages.getMessage('error.failed', [wrapped.message]), 'GetMcpServerFailed', [], 4, wrapped);
     }
 
     if (!this.jsonEnabled()) {
-      this.log(`Id:        ${result.id}`);
-      this.log(`Name:      ${result.name}`);
-      this.log(`Label:     ${result.label ?? ''}`);
-      this.log(`Type:      ${result.type}`);
-      this.log(`Status:    ${result.status}`);
-      this.log(`Server URL: ${result.serverUrl ?? ''}`);
+      this.log(`Id:          ${result.id}`);
+      this.log(`Name:        ${result.name}`);
+      this.log(`Label:       ${result.label ?? ''}`);
+      this.log(`Type:        ${result.type}`);
+      this.log(`Status:      ${result.status}`);
+      this.log(`Auth Type:   ${result.authorization?.authType ?? ''}`);
+      this.log(`Server URL:  ${result.serverUrl ?? ''}`);
+      this.log(`Description: ${result.description ?? ''}`);
     }
 
     return result;

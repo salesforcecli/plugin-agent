@@ -73,9 +73,9 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
       throw new SfError(messages.getMessage('error.invalidJson'), 'InvalidJson', [], 1);
     }
 
-    const assets = (
-      Array.isArray(parsed) ? parsed : (parsed as { assets?: McpServerAssetReplaceItem[] }).assets
-    ) as McpServerAssetReplaceItem[] | undefined;
+    const assets = (Array.isArray(parsed) ? parsed : (parsed as { assets?: McpServerAssetReplaceItem[] }).assets) as
+      | McpServerAssetReplaceItem[]
+      | undefined;
     if (!assets || !Array.isArray(assets)) {
       throw new SfError(messages.getMessage('error.invalidShape'), 'InvalidShape', [], 1);
     }
@@ -101,14 +101,20 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
         data: (result.assets ?? []).map((a) => ({
           id: a.id,
           name: a.name,
+          label: a.label,
           kind: a.kind,
           active: a.active,
+          availableAsAgentAction: a.availableAsAgentAction,
+          description: a.description,
         })),
         columns: [
           { key: 'id', name: 'ID' },
           { key: 'name', name: 'Name' },
+          { key: 'label', name: 'Label' },
           { key: 'kind', name: 'Kind' },
           { key: 'active', name: 'Active' },
+          { key: 'availableAsAgentAction', name: 'Agent Action' },
+          { key: 'description', name: 'Description' },
         ],
       });
     }
