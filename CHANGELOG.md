@@ -1,3 +1,9 @@
+# [1.45.0](https://github.com/salesforcecli/plugin-agent/compare/1.44.5...1.45.0) (2026-07-28)
+
+### Features
+
+- surface MCP asset descriptions and metadata in readable output @W-23572634 ([#464](https://github.com/salesforcecli/plugin-agent/issues/464)) ([b9a2add](https://github.com/salesforcecli/plugin-agent/commit/b9a2add56c4af3c94b0d69021243c9564b08aea2)), closes [forcedotcom/agents#322](https://github.com/forcedotcom/agents/issues/322) [forcedotcom/agents#322](https://github.com/forcedotcom/agents/issues/322)
+
 ## [1.44.5](https://github.com/salesforcecli/plugin-agent/compare/1.44.4...1.44.5) (2026-07-14)
 
 ### Bug Fixes
