@@ -29,7 +29,7 @@ let agentUsername: string | undefined;
 
 // Helper function to wait for Einstein AI services to be ready
 async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): Promise<void> {
-  // eslint-disable-next-line no-await-in-loop
+   
   for (let i = 0; i < maxAttempts; i++) {
     try {
       // Check Agent API status using direct HTTP call
