@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/salesforcecli/plugin-agent/compare/2.0.0...2.0.1) (2026-08-11)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.0.1 ([1980fb5](https://github.com/salesforcecli/plugin-agent/commit/1980fb5b179a9013194ee172f735906114ffec14))
+
 # [2.0.0](https://github.com/salesforcecli/plugin-agent/compare/1.45.0...2.0.0) (2026-07-30)
 
 - feat!: require Node >=22, drop EOL Node versions @W-23480655@ ([a411c7b](https://github.com/salesforcecli/plugin-agent/commit/a411c7b0f84cb339650a0a372217b32f726c0a85))
