@@ -20,7 +20,7 @@ import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { RunEvalResult } from '../../src/commands/agent/test/run-eval.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-/* eslint-disable no-console */
+ 
 
 describe('agent test run-eval', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
