@@ -1,3 +1,9 @@
+## [2.0.3](https://github.com/salesforcecli/plugin-agent/compare/2.0.2...2.0.3) (2026-08-18)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.0.4 ([f15b828](https://github.com/salesforcecli/plugin-agent/commit/f15b828d511e707592cb01732b380f7bba3be787))
+
 ## [2.0.2](https://github.com/salesforcecli/plugin-agent/compare/2.0.1...2.0.2) (2026-08-14)
 
 ### Bug Fixes
