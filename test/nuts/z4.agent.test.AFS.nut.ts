@@ -123,9 +123,11 @@ describe('agent test (agentforce-studio)', function () {
     writeFileSync(join(metaDir, `${afsTestName}.aiTestingDefinition-meta.xml`), metaXml, 'utf8');
     console.log(`Wrote AiTestingDefinition metadata to ${metaDir}`);
 
-    // Deploy the definition
+    // Deploy the definition. Scope to just the file we authored — deploying the whole
+    // aiTestingDefinitions dir would also sweep in static fixtures (e.g. ReturnsCheckoutSuite,
+    // which targets a non-deployed multi-agent subject) and fail server-side validation.
     const cs = await ComponentSetBuilder.build({
-      sourcepath: [metaDir],
+      sourcepath: [join(metaDir, `${afsTestName}.aiTestingDefinition-meta.xml`)],
     });
     const deploy = await cs.deploy({ usernameOrConnection: getUsername() });
     const deployResult = await deploy.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(10) });
