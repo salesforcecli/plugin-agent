@@ -87,6 +87,25 @@ describe('agent publish authoring-bundle NUTs', function () {
     connection = org.getConnection();
   });
 
+  // Per-attempt timing so a slow publish is visible in CI. This fires on EVERY attempt
+  // (including the ones mocha's this.retries() would otherwise hide by reporting only the
+  // final pass), so a stalled first attempt shows up here as a large elapsed with a failed
+  // state. Paired with the bounded publish-poll timeout, a genuine stall also surfaces which
+  // poll hung via its error (agentRetrievalError vs authoringBundleDeploymentError).
+  let attemptStart = 0;
+  beforeEach(() => {
+    attemptStart = Date.now();
+  });
+  afterEach(function () {
+    const elapsedSec = Math.round((Date.now() - attemptStart) / 1000);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[z2 publish timing] "${this.currentTest?.title ?? 'unknown'}" attempt took ${elapsedSec}s (${
+        this.currentTest?.state ?? 'unknown'
+      })`
+    );
+  });
+
   it('should publish a new agent (first version)', async function () {
     // Increase timeout to 30 minutes since deployment can take a long time
     this.timeout(30 * 60 * 1000); // 30 minutes
