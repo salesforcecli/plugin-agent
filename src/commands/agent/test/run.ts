@@ -178,9 +178,17 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         );
       }
 
-      if (completed) await agentTestCache.removeCacheEntry(response.runId);
-
       this.mso.stop();
+
+      // A client-side poll timeout does not mean the run finished — it is still running
+      // server-side. Leave the cache entry in place so `agent test resume` works (poll() has
+      // already printed the resume hint) and report the in-progress status rather than masking
+      // the timeout as COMPLETED with no results.
+      if (!completed || !detailsResponse) {
+        return { status: 'IN_PROGRESS', runId: response.runId };
+      }
+
+      await agentTestCache.removeCacheEntry(response.runId);
 
       await handleTestResults({
         id: response.runId,
@@ -195,7 +203,6 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
       // Test assertion failures are business logic and should not affect exit code
       // Only applicable to legacy responses (Agentforce Studio doesn't have test case status)
       if (
-        detailsResponse &&
         'subjectName' in detailsResponse &&
         detailsResponse.testCases.some((tc) => 'status' in tc && tc.status === 'ERROR')
       ) {
