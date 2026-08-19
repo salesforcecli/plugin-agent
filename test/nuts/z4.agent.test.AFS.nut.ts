@@ -141,8 +141,10 @@ describe('agent test (agentforce-studio)', function () {
     console.log(`Deployed AiTestingDefinition '${afsTestName}'`);
   });
 
-  // Set by the run test, consumed by the results tests (Mocha runs describes sequentially)
-  let completedRunId: string;
+  // Set by the run test, consumed by the results/resume tests (Mocha runs describes sequentially).
+  // The AFS eval can outlast the client --wait window, so the run may still be IN_PROGRESS here.
+  let sharedRunId: string;
+  let primaryRunCompleted = false;
 
   describe('agent test list', () => {
     it('should include the AFS test definition in list', async () => {
@@ -164,20 +166,26 @@ describe('agent test (agentforce-studio)', function () {
         { ensureExitCode: 0 }
       ).jsonOutput;
 
-      expect(output?.result.status).to.equal('COMPLETED');
-      expect(output?.result.runId.startsWith('3A2')).to.be.true;
       const result = output?.result as AgentTestRunResult & { testCases?: unknown[] };
-      expect(result?.testCases).to.be.an('array');
+      // The AFS eval can take longer than the --wait window. A client-side timeout is a valid
+      // outcome that now reports IN_PROGRESS (rather than masking as COMPLETED), so accept either
+      // and assert only the run shape. testCases is only guaranteed once the run has COMPLETED.
+      expect(result?.status).to.be.oneOf(['COMPLETED', 'IN_PROGRESS']);
+      expect(result?.runId.startsWith('3A2')).to.be.true;
       expect(result).to.not.have.property('subjectName');
+      if (result?.status === 'COMPLETED') {
+        expect(result?.testCases).to.be.an('array');
+        primaryRunCompleted = true;
+      }
 
-      completedRunId = output!.result.runId;
+      sharedRunId = output!.result.runId;
     });
   });
 
   describe('agent test results', () => {
     it('should fetch AFS results by job ID (json)', async () => {
       const output = execCmd<AgentTestResultsResult>(
-        `agent test results --job-id ${completedRunId} --target-org ${getUsername()} --json`,
+        `agent test results --job-id ${sharedRunId} --target-org ${getUsername()} --json`,
         { ensureExitCode: 0 }
       ).jsonOutput;
 
@@ -189,7 +197,7 @@ describe('agent test (agentforce-studio)', function () {
 
     it('should support human result format', () => {
       const output = execCmd(
-        `agent test results --job-id ${completedRunId} --result-format human --target-org ${getUsername()}`,
+        `agent test results --job-id ${sharedRunId} --result-format human --target-org ${getUsername()}`,
         { ensureExitCode: 0 }
       );
       expect(output.shellOutput.stdout).to.be.a('string').with.length.greaterThan(0);
@@ -197,7 +205,7 @@ describe('agent test (agentforce-studio)', function () {
 
     it('should support junit result format', () => {
       const output = execCmd(
-        `agent test results --job-id ${completedRunId} --result-format junit --target-org ${getUsername()}`,
+        `agent test results --job-id ${sharedRunId} --result-format junit --target-org ${getUsername()}`,
         { ensureExitCode: 0 }
       );
       expect(output.shellOutput.stdout).to.include('<?xml');
@@ -206,7 +214,7 @@ describe('agent test (agentforce-studio)', function () {
 
     it('should support tap result format', () => {
       const output = execCmd(
-        `agent test results --job-id ${completedRunId} --result-format tap --target-org ${getUsername()}`,
+        `agent test results --job-id ${sharedRunId} --result-format tap --target-org ${getUsername()}`,
         { ensureExitCode: 0 }
       );
       expect(output.shellOutput.stdout).to.include('TAP version 13');
@@ -214,36 +222,51 @@ describe('agent test (agentforce-studio)', function () {
   });
 
   describe('agent test resume', () => {
-    it('should start async then resume by job ID, and support --use-most-recent', async () => {
-      // Clear any stale entries before the run
-      const cacheBefore = await AgentTestCache.create();
-      cacheBefore.clear();
-      await cacheBefore.write();
+    it('should resume the in-flight run (or a fresh async run) and honor the cache', async function () {
+      this.timeout(30 * 60 * 1000);
 
-      // One async start covers both resume paths
-      const runResult = execCmd<AgentTestRunResult>(
-        `agent test run --api-name ${afsTestName} --target-org ${getUsername()} --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
+      if (primaryRunCompleted) {
+        // The primary --wait run already finished, so its cache entry was removed and no run is
+        // in flight. Start a fresh async run to exercise NEW + cache-write, then resume by job-id.
+        const cacheBefore = await AgentTestCache.create();
+        cacheBefore.clear();
+        await cacheBefore.write();
 
-      expect(runResult?.result.runId.startsWith('3A2')).to.be.true;
-      expect(runResult?.result.status).to.equal('NEW');
+        const runResult = execCmd<AgentTestRunResult>(
+          `agent test run --api-name ${afsTestName} --target-org ${getUsername()} --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
 
-      // Re-read from disk — the run command wrote the cache entry in a subprocess
-      const cache = await AgentTestCache.create();
-      expect(cache.resolveFromCache().runnerType).to.equal('agentforce-studio');
+        expect(runResult?.result.runId.startsWith('3A2')).to.be.true;
+        expect(runResult?.result.status).to.equal('NEW');
 
-      const output = execCmd<AgentTestRunResult>(
-        `agent test resume --job-id ${runResult?.result.runId} --target-org ${getUsername()} --json`,
-        { ensureExitCode: 0 }
-      ).jsonOutput;
+        // Re-read from disk — the run command wrote the cache entry in a subprocess
+        const cache = await AgentTestCache.create();
+        expect(cache.resolveFromCache().runnerType).to.equal('agentforce-studio');
 
-      expect(output?.result.status).to.equal('COMPLETED');
-      expect(output?.result.runId.startsWith('3A2')).to.be.true;
+        const output = execCmd<AgentTestRunResult>(
+          `agent test resume --job-id ${runResult?.result.runId} --target-org ${getUsername()} --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
 
-      // Re-read from disk — resume removes the entry in a subprocess
-      const cacheAfter = await AgentTestCache.create();
-      expect(() => cacheAfter.resolveFromCache()).to.throw('Could not find a runId to resume');
+        // Resume may itself time out (the eval can outlast the poll window); both are valid.
+        expect(output?.result.status).to.be.oneOf(['COMPLETED', 'IN_PROGRESS']);
+        expect(output?.result.runId.startsWith('3A2')).to.be.true;
+      } else {
+        // The primary --wait run timed out client-side and is still running server-side. Our fix
+        // preserves the cache entry on a timeout, so resume --use-most-recent picks it up. Starting
+        // a NEW run here would collide — AFS allows only one run per definition at a time.
+        const cache = await AgentTestCache.create();
+        expect(cache.resolveFromCache().runnerType).to.equal('agentforce-studio');
+
+        const output = execCmd<AgentTestRunResult>(
+          `agent test resume --use-most-recent --target-org ${getUsername()} --json`,
+          { ensureExitCode: 0 }
+        ).jsonOutput;
+
+        expect(output?.result.status).to.be.oneOf(['COMPLETED', 'IN_PROGRESS']);
+        expect(output?.result.runId).to.equal(sharedRunId);
+      }
     });
   });
 
