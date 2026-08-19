@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/salesforcecli/plugin-agent/compare/2.0.3...2.0.4) (2026-08-19)
+
+### Bug Fixes
+
+- report IN_PROGRESS on resume timeout and make AFS NUT tolerant @W-23915028@ ([c858714](https://github.com/salesforcecli/plugin-agent/commit/c85871423e44471666e5a1cbf1f6b3daf543c037))
+- report in-progress status when agent test run --wait times out ([74ca7d6](https://github.com/salesforcecli/plugin-agent/commit/74ca7d650dad9be5bc811ac4a97d767c02907d35))
+
 ## [2.0.3](https://github.com/salesforcecli/plugin-agent/compare/2.0.2...2.0.3) (2026-08-18)
 
 ### Bug Fixes
