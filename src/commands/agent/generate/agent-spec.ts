@@ -224,7 +224,7 @@ export default class AgentCreateSpec extends SfCommand<AgentCreateSpecResult> {
       (flags.tone as AgentTone) ??
       inputSpec?.tone ??
       (flags['full-interview'] ? await promptForFlag(FLAGGABLE_PROMPTS.tone) : 'casual');
-    tone = validateTone(tone as AgentTone);
+    tone = validateTone(tone);
     // const primaryLanguage =
     //   flags['primary-language'] ??
     //   inputSpec?.primaryLanguage ??

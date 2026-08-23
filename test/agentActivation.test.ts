@@ -285,7 +285,7 @@ describe('agentActivation', () => {
 
     it('should return version flag when provided', async () => {
       const result = await getVersionForActivation({
-        agent: mockAgent as unknown as ProductionAgent,
+        agent: mockAgent,
         status: 'Active',
         versionFlag: 5,
       });
@@ -303,7 +303,7 @@ describe('agentActivation', () => {
       } as BotMetadata);
 
       const result = await getVersionForActivation({
-        agent: mockAgent as unknown as ProductionAgent,
+        agent: mockAgent,
         status: 'Active',
       });
 
@@ -322,7 +322,7 @@ describe('agentActivation', () => {
       } as BotMetadata);
 
       const result = await getVersionForActivation({
-        agent: mockAgent as unknown as ProductionAgent,
+        agent: mockAgent,
         status: 'Active',
       });
 
@@ -343,7 +343,7 @@ describe('agentActivation', () => {
       } as BotMetadata);
 
       const result = await getVersionForActivation({
-        agent: mockAgent as unknown as ProductionAgent,
+        agent: mockAgent,
         status: 'Active',
         jsonEnabled: true,
       });
@@ -363,7 +363,7 @@ describe('agentActivation', () => {
       } as BotMetadata);
 
       const result = await getVersionForActivation({
-        agent: mockAgent as unknown as ProductionAgent,
+        agent: mockAgent,
         status: 'Active',
       });
 
@@ -383,7 +383,7 @@ describe('agentActivation', () => {
 
       try {
         await getVersionForActivation({
-          agent: mockAgent as unknown as ProductionAgent,
+          agent: mockAgent,
           status: 'Active',
           jsonEnabled: true,
         });
