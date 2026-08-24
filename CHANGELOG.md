@@ -1,3 +1,5 @@
+## [2.0.5](https://github.com/salesforcecli/plugin-agent/compare/2.0.4...2.0.5) (2026-08-24)
+
 ## [2.0.4](https://github.com/salesforcecli/plugin-agent/compare/2.0.3...2.0.4) (2026-08-19)
 
 ### Bug Fixes
