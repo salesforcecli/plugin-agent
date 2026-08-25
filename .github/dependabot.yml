@@ -19,5 +19,26 @@ updates:
     ignore:
       - dependency-name: '@salesforce/dev-scripts'
       - dependency-name: 'ink'
+      # handled by the dedicated daily block below
+      - dependency-name: '@salesforce/agents'
       - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+
+  # Check for @salesforce/agents updates daily (the most frequent Dependabot supports)
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    versioning-strategy: 'increase'
+    labels:
+      - 'dependencies'
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: '-'
+    commit-message:
+      prefix: fix(deps)
+    allow:
+      - dependency-name: '@salesforce/agents'
+    ignore:
+      - dependency-name: '@salesforce/agents'
         update-types: ['version-update:semver-major']
