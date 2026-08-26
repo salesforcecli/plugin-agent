@@ -1,0 +1,19 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "inputs": [
+        { "name": "account", "value": "Acme" },
+        { "name": "notes", "value": "what is kafka" }
+      ],
+      "subjectResponse": "{\"text\":\"Acme is a manufacturing prospect.\",\"performance\":{\"latency\":{\"duration\":842}},\"tokenUsage\":{\"completion\":89,\"prompt\":{\"total\":156},\"total\":245}}",
+      "testScorerResults": [
+        {
+          "scorerName": "Conciseness Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.7,\"reasoning\":\"Good.\"}"
+        }
+      ]
+    }
+  ]
+}

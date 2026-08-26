@@ -18,6 +18,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
 import {
   AgentTestResultsResponse,
+  AgentforceStudioTestCaseResult,
   AgentforceStudioTestResultsResponse,
   convertTestResultsToFormat,
   humanFriendlyName,
@@ -102,17 +103,55 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
-function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
+type TestCaseInput = { name: string; value: string };
+
+function getTestCaseInputs(testCase: AgentforceStudioTestCaseResult): TestCaseInput[] | undefined {
+  const inputs = (testCase as unknown as { inputs?: unknown }).inputs;
+  if (!Array.isArray(inputs)) {
+    return undefined;
+  }
+  const valid = inputs.filter(
+    (i): i is TestCaseInput =>
+      typeof i === 'object' &&
+      i !== null &&
+      typeof (i as TestCaseInput).name === 'string' &&
+      typeof (i as TestCaseInput).value === 'string'
+  );
+  return valid.length > 0 ? valid : undefined;
+}
+
+function capitalizeInputName(name: string): string {
+  return name.length > 0 ? `${name[0].toUpperCase()}${name.slice(1)}` : name;
+}
+
+function formatInputsLine(inputs: TestCaseInput[]): string {
+  const shown = inputs.slice(0, 3);
+  const remaining = inputs.length - shown.length;
+  const pairs = shown.map((i) => `${capitalizeInputName(i.name)} = "${i.value}"`).join(', ');
+  return remaining > 0 ? `${pairs}  (+${remaining} more)` : pairs;
+}
+
+export function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const ux = new Ux();
   const tables: string[] = [];
 
   for (const testCase of results.testCases) {
-    let userInput = '';
-    try {
-      const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
-      userInput = parsed.userInput ?? '';
-    } catch {
-      // ignore
+    const inputs = getTestCaseInputs(testCase);
+
+    const titleLines = [ansis.bold(`Test Case #${testCase.testNumber}`)];
+    if (inputs) {
+      titleLines.push(`${ansis.dim('Inputs')}: ${formatInputsLine(inputs)}`);
+    } else {
+      let userInput = '';
+      try {
+        const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
+        userInput = parsed.userInput ?? '';
+      } catch {
+        // ignore
+      }
+      if (userInput) {
+        titleLines.push(`${ansis.dim('User Input')}: ${userInput}`);
+      }
     }
 
     const scorerRows = testCase.testScorerResults.map((scorer) => {
@@ -128,7 +167,7 @@ function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsRespons
 
     tables.push(
       ux.makeTable({
-        title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('User Input')}: ${userInput}`,
+        title: titleLines.join('\n'),
         overflow: 'wrap',
         columns: [
           { key: 'scorer', name: 'Scorer' },
@@ -217,7 +256,10 @@ function tapFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse)
   return `TAP version 13\n1..${expectationCount}\n${lines.join('\n')}`;
 }
 
-function convertAgentforceStudioTestResultsToFormat(results: AgentforceStudioTestResultsResponse, format: 'json' | 'junit' | 'tap'): string {
+function convertAgentforceStudioTestResultsToFormat(
+  results: AgentforceStudioTestResultsResponse,
+  format: 'json' | 'junit' | 'tap'
+): string {
   switch (format) {
     case 'json':
       return JSON.stringify(results, null, 2);
@@ -392,9 +434,24 @@ export async function handleTestResults({
   if (!isLegacyResponse(results)) {
     const ngtFormatConfig = {
       human: { ext: 'txt', label: 'human-readable', get: () => humanFormatAgentforceStudio(results), strip: true },
-      json: { ext: 'json', label: 'JSON', get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'), strip: false },
-      junit: { ext: 'xml', label: 'JUnit', get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'), strip: false },
-      tap: { ext: 'txt', label: 'TAP', get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'), strip: false },
+      json: {
+        ext: 'json',
+        label: 'JSON',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'),
+        strip: false,
+      },
+      junit: {
+        ext: 'xml',
+        label: 'JUnit',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'),
+        strip: false,
+      },
+      tap: {
+        ext: 'txt',
+        label: 'TAP',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'),
+        strip: false,
+      },
     } as const;
     const cfg = ngtFormatConfig[format];
     const formatted = cfg.get();

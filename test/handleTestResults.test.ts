@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import { readFile } from 'node:fs/promises';
+import { stripVTControlCharacters } from 'node:util';
 import { expect, config } from 'chai';
-import { AgentTestResultsResponse } from '@salesforce/agents';
-import { humanFormat, readableTime, truncate } from '../src/handleTestResults.js';
+import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
+import { humanFormat, humanFormatAgentforceStudio, readableTime, truncate } from '../src/handleTestResults.js';
 
 config.truncateThreshold = 0;
 
@@ -110,5 +111,37 @@ describe('metric calculations', () => {
     const input = JSON.parse(raw) as AgentTestResultsResponse;
     const output = humanFormat(input);
     expect(output).to.include('Metric Pass %   0.00%');
+  });
+});
+
+describe('humanFormatAgentforceStudio - inputs line', () => {
+  it('renders Inputs line from testCase.inputs, capitalizing each name', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: Account = "Acme", Notes = "what is kafka"');
+  });
+
+  it('falls back to User Input when testCase.inputs is absent but subjectResponse.userInput exists', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/legacy-user-input-fallback.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('User Input: What is the account status?');
+    expect(output).to.not.include('Inputs:');
+  });
+
+  it('omits the inputs line entirely when neither inputs nor userInput is present', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/no-inputs-no-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Inputs:');
+    expect(output).to.not.include('User Input:');
+  });
+
+  it('truncates to the first 3 inputs and appends a "+N more" suffix', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/many-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: Account = "Acme", Region = "ANZ", Tier = "Gold"  (+2 more)');
   });
 });

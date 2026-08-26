@@ -1,0 +1,15 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "subjectResponse": "{\"userInput\":\"What is the account status?\",\"text\":\"The account is active.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.5,\"reasoning\":\"Clear.\"}"
+        }
+      ]
+    }
+  ]
+}
