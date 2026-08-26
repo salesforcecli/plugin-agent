@@ -145,3 +145,36 @@ describe('humanFormatAgentforceStudio - inputs line', () => {
     expect(output).to.include('Inputs: Account = "Acme", Region = "ANZ", Tier = "Gold"  (+2 more)');
   });
 });
+
+describe('humanFormatAgentforceStudio - latency/tokens line', () => {
+  it('renders combined Latency and Tokens line', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Latency: 842ms  |  Tokens: 156 in / 89 out / 245 total');
+  });
+
+  it('renders Latency alone when tokenUsage is missing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/latency-only.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Latency: 500ms');
+    expect(output).to.not.include('Tokens:');
+  });
+
+  it('renders Tokens alone when performance is missing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/tokens-only.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Tokens: 30 in / 20 out / 50 total');
+    expect(output).to.not.include('Latency:');
+  });
+
+  it('omits the metrics line entirely when neither performance nor tokenUsage is present', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/no-inputs-no-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Latency:');
+    expect(output).to.not.include('Tokens:');
+  });
+});

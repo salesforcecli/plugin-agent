@@ -1,0 +1,15 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "subjectResponse": "{\"text\":\"Response with latency only.\",\"performance\":{\"latency\":{\"duration\":500}}}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.1,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

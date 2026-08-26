@@ -131,6 +131,40 @@ function formatInputsLine(inputs: TestCaseInput[]): string {
   return remaining > 0 ? `${pairs}  (+${remaining} more)` : pairs;
 }
 
+type ParsedSubjectResponseMetrics = {
+  performance?: { latency?: { duration?: number } };
+  tokenUsage?: { completion?: number; prompt?: { total?: number }; total?: number };
+};
+
+function parseSubjectResponseMetrics(raw: string): ParsedSubjectResponseMetrics {
+  try {
+    return JSON.parse(raw) as ParsedSubjectResponseMetrics;
+  } catch {
+    return {};
+  }
+}
+
+function formatMetricsLine(parsed: ParsedSubjectResponseMetrics): string | undefined {
+  const parts: string[] = [];
+  const latencyMs = parsed.performance?.latency?.duration;
+  if (typeof latencyMs === 'number') {
+    parts.push(`${ansis.dim('Latency')}: ${latencyMs}ms`);
+  }
+  const tokenUsage = parsed.tokenUsage;
+  const hasTokens =
+    tokenUsage !== undefined &&
+    (typeof tokenUsage.completion === 'number' ||
+      typeof tokenUsage.prompt?.total === 'number' ||
+      typeof tokenUsage.total === 'number');
+  if (hasTokens) {
+    const tokensIn = tokenUsage?.prompt?.total ?? 0;
+    const tokensOut = tokenUsage?.completion ?? 0;
+    const tokensTotal = tokenUsage?.total ?? 0;
+    parts.push(`${ansis.dim('Tokens')}: ${tokensIn} in / ${tokensOut} out / ${tokensTotal} total`);
+  }
+  return parts.length > 0 ? parts.join('  |  ') : undefined;
+}
+
 export function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const ux = new Ux();
   const tables: string[] = [];
@@ -152,6 +186,11 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
       if (userInput) {
         titleLines.push(`${ansis.dim('User Input')}: ${userInput}`);
       }
+    }
+
+    const metricsLine = formatMetricsLine(parseSubjectResponseMetrics(testCase.subjectResponse));
+    if (metricsLine) {
+      titleLines.push(metricsLine);
     }
 
     const scorerRows = testCase.testScorerResults.map((scorer) => {
