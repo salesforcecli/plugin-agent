@@ -12,7 +12,7 @@
 
 "@aws-sdk/checksums@^3.1000.29":
   version "3.1000.29"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/checksums/-/checksums-3.1000.29.tgz#f12a6926eb3789057f5f16582fc226fe533c87fa"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/checksums/-/checksums-3.1000.29.tgz#f12a6926eb3789057f5f16582fc226fe533c87fa"
   integrity sha512-Dtu0gr4dnATZAPwEYbpCsG+MpLM7OAliy2gTepEFQwl1vZ6DL3QMH2FveMa3HLvPsOdhJsPRB3KtxVhph9T75A==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -23,7 +23,7 @@
 
 "@aws-sdk/client-cloudfront@^3.1079.0":
   version "3.1119.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/client-cloudfront/-/client-cloudfront-3.1119.0.tgz#a56d9e58ae54c6cbc9160c01da530def4d1ff879"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-cloudfront/-/client-cloudfront-3.1119.0.tgz#a56d9e58ae54c6cbc9160c01da530def4d1ff879"
   integrity sha512-SnNXK1b5zBuF+TZzOcwV3YpC52HqAsVPUCMR8Gg1FBUyPcc0A9dC8988CePnnxuHdZn0SCjzy2waHEn2gyScdQ==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -37,7 +37,7 @@
 
 "@aws-sdk/client-s3@^3.1079.0":
   version "3.1119.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/client-s3/-/client-s3-3.1119.0.tgz#11e1856fb314f93b513618ae661839fefaf5f92e"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-s3/-/client-s3-3.1119.0.tgz#11e1856fb314f93b513618ae661839fefaf5f92e"
   integrity sha512-8+UH1uBWwjbRu0ugTBhJ/cu3rL/vzf1tm9/3+xZGf1uybIO3HTF2xLJJaTKkRPvzxz8/n/w+YrwoHGZ2Q/a2Zg==
   dependencies:
     "@aws-sdk/checksums" "^3.1000.29"
@@ -54,7 +54,7 @@
 
 "@aws-sdk/core@^3.977.9":
   version "3.977.9"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/core/-/core-3.977.9.tgz#c3d6b4bcce3df3c86831510f18bd2ce32172b136"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/core/-/core-3.977.9.tgz#c3d6b4bcce3df3c86831510f18bd2ce32172b136"
   integrity sha512-reqPFEQrZxDZpeGj4PFMepBeR5LGYHRqq/L0motTzgFkCRBA4rFdaVXDSLYyGHhxVz7sT2PDnPN9CluGSfgyJA==
   dependencies:
     "@aws-sdk/types" "^3.974.5"
@@ -68,7 +68,7 @@
 
 "@aws-sdk/credential-provider-env@^3.972.70":
   version "3.972.70"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-env/-/credential-provider-env-3.972.70.tgz#631ef02069bae65ac7d58c6878a09a42c24cb485"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-env/-/credential-provider-env-3.972.70.tgz#631ef02069bae65ac7d58c6878a09a42c24cb485"
   integrity sha512-H404B7dJl2mCrBqahDEYsanB0xhdDp6tXnXcTUnXmmpy2Q3J0Ho0bUajZ2jr/RdwzCyS59Gi8xXIFwPLGBl6Uw==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -79,7 +79,7 @@
 
 "@aws-sdk/credential-provider-http@^3.972.72":
   version "3.972.72"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-http/-/credential-provider-http-3.972.72.tgz#9b737cc3879d900e703b219777e26d6bb542ffec"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-http/-/credential-provider-http-3.972.72.tgz#9b737cc3879d900e703b219777e26d6bb542ffec"
   integrity sha512-X98zYOrVOeuosCX+6ktf29FC2N2GHPLia7qv6mzPzTc+RPAuHWCDS++Z6JK7eGYqb/v6uaW7bAXaOvDBfol+0w==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -92,7 +92,7 @@
 
 "@aws-sdk/credential-provider-ini@^3.973.15":
   version "3.973.15"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.973.15.tgz#e185c40ba6b3eec90bf3cf7c364c79f639b15cca"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.973.15.tgz#e185c40ba6b3eec90bf3cf7c364c79f639b15cca"
   integrity sha512-Rykg6s5ceBuynMOGWgoowO4N+27JfnqXAnVaSunZl0hOO1XodSrxGNz6sCEbnmS0lAfQZDKyb3fbr46gSuv6Sg==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -111,7 +111,7 @@
 
 "@aws-sdk/credential-provider-login@^3.972.77":
   version "3.972.77"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-login/-/credential-provider-login-3.972.77.tgz#6ee6341077a6b920fc9322cfc37142a5b5bf2660"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-login/-/credential-provider-login-3.972.77.tgz#6ee6341077a6b920fc9322cfc37142a5b5bf2660"
   integrity sha512-Jb59xfEISoN5mmbnA+HYqdtrSX3CgCtJoof+V5D8/TgUI56W63GEEd5Y58WijU3Ou6+WEgaLD1feVzaRXV5IDQ==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -123,7 +123,7 @@
 
 "@aws-sdk/credential-provider-node@^3.972.81":
   version "3.972.81"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-node/-/credential-provider-node-3.972.81.tgz#f803fd0627194e94d673416820577c38a2684b2e"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-node/-/credential-provider-node-3.972.81.tgz#f803fd0627194e94d673416820577c38a2684b2e"
   integrity sha512-Rml+WitoFvXmv6JZ18U/xGdGDGGvB/mOin0ya0lTnTrdC0Z1lrVxTYh7iNklZBcvcRMrs4DoEf6xy1KWyrLQQw==
   dependencies:
     "@aws-sdk/credential-provider-env" "^3.972.70"
@@ -140,7 +140,7 @@
 
 "@aws-sdk/credential-provider-process@^3.972.70":
   version "3.972.70"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-process/-/credential-provider-process-3.972.70.tgz#ca9f5b334442e2ee04712840864563b89cdd5360"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-process/-/credential-provider-process-3.972.70.tgz#ca9f5b334442e2ee04712840864563b89cdd5360"
   integrity sha512-2ry03fGRJr4sV3jI+ocjj5JqALnFD6ymM5KiNCDZMvq8bX2GSbE0vji4aM43TVCl2nXqqLRZaUxdq/KeWRAY4Q==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -151,7 +151,7 @@
 
 "@aws-sdk/credential-provider-sso@^3.973.14":
   version "3.973.14"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.973.14.tgz#064acc04b4d0ef5ae879f2c2633a33c5a9238dda"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.973.14.tgz#064acc04b4d0ef5ae879f2c2633a33c5a9238dda"
   integrity sha512-jkhg/8ocAAoc0RFyLMhCw+/zZh7gystQgd4F4hznNa8P4Cc501PQmxd+jGLiMHodPJ+7Zv/3znM62gZojyasmA==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -164,7 +164,7 @@
 
 "@aws-sdk/credential-provider-web-identity@^3.972.76":
   version "3.972.76"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.972.76.tgz#93a1913bfc7671008831cc80ba072470cba03bd1"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.972.76.tgz#93a1913bfc7671008831cc80ba072470cba03bd1"
   integrity sha512-d3AGyVu759PGr35mEB2s22xxlNEA5rpdxtSPJthfPFJvoQ8dt357iVPECqWfUxXp1toJAvKmbtcIYVGigaGsCA==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -176,7 +176,7 @@
 
 "@aws-sdk/middleware-sdk-s3@^3.972.75":
   version "3.972.75"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/middleware-sdk-s3/-/middleware-sdk-s3-3.972.75.tgz#d20222cbdd61197b245e0aaa3f79b7215dff31dc"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-sdk-s3/-/middleware-sdk-s3-3.972.75.tgz#d20222cbdd61197b245e0aaa3f79b7215dff31dc"
   integrity sha512-wMIsNumRVKaNMKhvU/s9VrdEwE8S6gSzXp4RygFG5BEMnGkkXf8cjh8zf7cKJBpUDpqTWqwbz5isEgp9rH6Lng==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -188,7 +188,7 @@
 
 "@aws-sdk/nested-clients@^3.997.44":
   version "3.997.44"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/nested-clients/-/nested-clients-3.997.44.tgz#ba02b5e0b12b57be425a7306a8c7b82f5eec4e0f"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/nested-clients/-/nested-clients-3.997.44.tgz#ba02b5e0b12b57be425a7306a8c7b82f5eec4e0f"
   integrity sha512-NhEgryjlBF9w38ZXqGymQV28IhkYa1mKhlbYnqIis57AYwWGVYfUPgg/qC2rLRqOUfblxx++irvju10kVTa8Vw==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -202,7 +202,7 @@
 
 "@aws-sdk/signature-v4-multi-region@^3.996.46":
   version "3.996.46"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.996.46.tgz#ee57afe5282da4b57968061ef8706d32890267ab"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.996.46.tgz#ee57afe5282da4b57968061ef8706d32890267ab"
   integrity sha512-L+2xZTye/2T96f3lwCws0Zw6GG2JHZW9e8FpVgGBeeExSKyeoZ6CWRpBml/7DNiK/O26jrgPM9F+Ay8VkgzUWQ==
   dependencies:
     "@aws-sdk/types" "^3.974.5"
@@ -212,7 +212,7 @@
 
 "@aws-sdk/token-providers@3.1116.0":
   version "3.1116.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/token-providers/-/token-providers-3.1116.0.tgz#79c23d5cfeaf63f13a49f25035e8954083e09b6a"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/token-providers/-/token-providers-3.1116.0.tgz#79c23d5cfeaf63f13a49f25035e8954083e09b6a"
   integrity sha512-ygIivKqh8aHzNkucOCXHyIBgBpLPfrSI0mCqXF+vLBsPTUKqj0VSqAY0GFPe7lQl4HntjOcQ+KSyS7oUV2C54Q==
   dependencies:
     "@aws-sdk/core" "^3.977.9"
@@ -224,7 +224,7 @@
 
 "@aws-sdk/types@^3.974.5":
   version "3.974.5"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/types/-/types-3.974.5.tgz#a52691531738d191b8b3fd1ae7757c2eeec7afee"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.974.5.tgz#a52691531738d191b8b3fd1ae7757c2eeec7afee"
   integrity sha512-LkwLL2BLbC6wNNm4JaH9mbEqBMdOZCct6VAYqhdN4U1xrWM+fUJQEfbHwQgDypapOWTRtlk25akb5afM0P8CIQ==
   dependencies:
     "@smithy/types" "^4.17.2"
@@ -232,7 +232,7 @@
 
 "@aws-sdk/xml-builder@^3.972.40":
   version "3.972.40"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws-sdk/xml-builder/-/xml-builder-3.972.40.tgz#3cdb5f3400860ad91301aecb87fb5148a66d6ff7"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/xml-builder/-/xml-builder-3.972.40.tgz#3cdb5f3400860ad91301aecb87fb5148a66d6ff7"
   integrity sha512-wlFmCIGUlwF4zx/kncw+bmxTQh1HeSJq4mYV/V5cZUSJadDP3kXvGW8Rn21cimj/7y9ju+47oYWXi97vF7czaA==
   dependencies:
     "@smithy/types" "^4.17.2"
@@ -240,7 +240,7 @@
 
 "@aws/lambda-invoke-store@^0.3.0":
   version "0.3.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@aws/lambda-invoke-store/-/lambda-invoke-store-0.3.0.tgz#708802d987f8e17bdf4af4de1031660ce1cdd65f"
+  resolved "https://registry.yarnpkg.com/@aws/lambda-invoke-store/-/lambda-invoke-store-0.3.0.tgz#708802d987f8e17bdf4af4de1031660ce1cdd65f"
   integrity sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ==
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.29.7":
@@ -1048,7 +1048,7 @@
 
 "@jsforce/jsforce-node@^3.10.24":
   version "3.10.24"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@jsforce/jsforce-node/-/jsforce-node-3.10.24.tgz#e5e7a32dec73373c370c339295f18c7325b991fc"
+  resolved "https://registry.yarnpkg.com/@jsforce/jsforce-node/-/jsforce-node-3.10.24.tgz#e5e7a32dec73373c370c339295f18c7325b991fc"
   integrity sha512-EejRrqFmn5No4lCiHYPlN5UFRCLo7gEoflNNisxca8AMZFzEO+sdj/aUHGzjzXf4a9K2cbXNZ+4eL4lkiIEsGw==
   dependencies:
     "@sindresorhus/is" "^4"
@@ -1113,7 +1113,7 @@
 
 "@nodable/entities@^3.0.0":
   version "3.0.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@nodable/entities/-/entities-3.0.0.tgz#694703bc864d30eaed55c2e3def00dbd61493670"
+  resolved "https://registry.yarnpkg.com/@nodable/entities/-/entities-3.0.0.tgz#694703bc864d30eaed55c2e3def00dbd61493670"
   integrity sha512-8L9xFeTYKhm49xfIypoe2W5wV1m/3Z58kT+7kR9A8OyFxcPduI4VmxaUMQyKYrRjUoLLSXv6EKKID5Tvj9cUVw==
 
 "@nodelib/fs.scandir@2.1.5":
@@ -1163,7 +1163,7 @@
 
 "@oclif/core@^4.11.11", "@oclif/core@^4.13.3":
   version "4.14.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/core/-/core-4.14.0.tgz#b5c46200788f95ce57809ddec1502ae0aa9abf2b"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-4.14.0.tgz#b5c46200788f95ce57809ddec1502ae0aa9abf2b"
   integrity sha512-QCJIZoVJxV7jywgVAUlsQwl3dr3Sa21kfi5z9KrYolbexWJUtFSEtMoNiBWojD05mYycLnB50gp/VxlGdaOCRA==
   dependencies:
     ansi-escapes "^4.3.2"
@@ -1187,7 +1187,7 @@
 
 "@oclif/multi-stage-output@^0.9.0":
   version "0.9.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/multi-stage-output/-/multi-stage-output-0.9.0.tgz#4b36cb5d2c45759728056834ff2a09d9f0d65708"
+  resolved "https://registry.yarnpkg.com/@oclif/multi-stage-output/-/multi-stage-output-0.9.0.tgz#4b36cb5d2c45759728056834ff2a09d9f0d65708"
   integrity sha512-XufQO8rixA/pcZmKGaE3Z7BIvluqbqFBftjUabqslY5BrkhfmsAA1mnVFKMRy9OCmQBgKhFo6Im7GOYbpeGBJQ==
   dependencies:
     "@oclif/core" "^4"
@@ -1200,7 +1200,7 @@
 
 "@oclif/plugin-command-snapshot@^5.4.0":
   version "5.4.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.4.0.tgz#a5f4a8c52c35a27b00fa2a1f2b9e7056e8c5f55f"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.4.0.tgz#a5f4a8c52c35a27b00fa2a1f2b9e7056e8c5f55f"
   integrity sha512-ZU+PTQZZcHw96ntsUCPAYmbVft+raaYCVdHRTCDnCx0lzZCc3CST6vWqjKh0/hoKRS7D0x3c9F4M1ckbDKbMZw==
   dependencies:
     "@oclif/core" "^4"
@@ -1215,14 +1215,14 @@
 
 "@oclif/plugin-help@^6.2.53":
   version "6.3.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/plugin-help/-/plugin-help-6.3.0.tgz#eac5e68dafc8fcc46fa06203b481cf72160332aa"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-6.3.0.tgz#eac5e68dafc8fcc46fa06203b481cf72160332aa"
   integrity sha512-cpSRv7tyHHFPv39HrV22eNmu8ylrwjmPvqdlNo3URp79+p5319p+a8PI/3ez6A6GZmjwBj1EWUdVz1aPUAsSmw==
   dependencies:
     "@oclif/core" "^4"
 
 "@oclif/plugin-not-found@^3.2.93":
   version "3.3.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/plugin-not-found/-/plugin-not-found-3.3.0.tgz#1c1370074f630475ac688c215e00f31df44e4146"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-not-found/-/plugin-not-found-3.3.0.tgz#1c1370074f630475ac688c215e00f31df44e4146"
   integrity sha512-GbdWJOmmBO3xmrVjDXeWG7tXl4vzeGZ+af9ztCfAmhOPEkd/+eeAAadzQPeZoygedqCvsdux3QLq9/MAxusPKg==
   dependencies:
     "@inquirer/prompts" "^7.10.1"
@@ -1232,7 +1232,7 @@
 
 "@oclif/plugin-warn-if-update-available@^3.1.73":
   version "3.2.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/plugin-warn-if-update-available/-/plugin-warn-if-update-available-3.2.0.tgz#88f4ed54b0dffae7cf3e579b84c39c2df567920c"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-warn-if-update-available/-/plugin-warn-if-update-available-3.2.0.tgz#88f4ed54b0dffae7cf3e579b84c39c2df567920c"
   integrity sha512-E7l+/NTjddOi32Q9G1CWzEtuh0EwNylVHfTRlFxlZD50v1oBqBpziWh+Dzz6oAIe4ee5U7EUc7lP22aLxpW3vA==
   dependencies:
     "@oclif/core" "^4"
@@ -1260,7 +1260,7 @@
 
 "@oclif/test@^4.2.0":
   version "4.2.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@oclif/test/-/test-4.2.0.tgz#3f80e9e431af45a82d71b753792cebb99b64ae84"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-4.2.0.tgz#3f80e9e431af45a82d71b753792cebb99b64ae84"
   integrity sha512-CPNWjgtRnvLs9R2lKggIWg3wZM7TcV5LEymgnF6y9N7NkgiTF/YLo9sZR+FeIsn7b/6iffHcsdwuue0g1CGebQ==
   dependencies:
     ansis "^3.17.0"
@@ -1304,7 +1304,7 @@
 
 "@salesforce/agents@^2.1.0":
   version "2.1.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/agents/-/agents-2.1.0.tgz#3f3d85e8b33489e6786e28806e77a4d0f4b3a6a2"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-2.1.0.tgz#3f3d85e8b33489e6786e28806e77a4d0f4b3a6a2"
   integrity sha512-MeC9CeT9P2HAMFv+6ydRxffuJYkD0B05XlchRiUq+f8Evk/18cZ1iW3ybtSE/xBI43ttqM8wIy/Jacb3Qul57Q==
   dependencies:
     "@salesforce/core" "^9.0.0"
@@ -1316,7 +1316,7 @@
 
 "@salesforce/cli-plugins-testkit@^5.3.66":
   version "5.3.66"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.66.tgz#918a61e62092495bb9fadd1dee38e281d4e7b334"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.3.66.tgz#918a61e62092495bb9fadd1dee38e281d4e7b334"
   integrity sha512-xmco8MRlrpPmj2n9LZ8hkp0aWWDXbFDvNzTOC6h/z756PSu+g3ERNsW+HwXiyrirMd7rH7IalKSMcNXgWS/f3w==
   dependencies:
     "@salesforce/core" "^8.32.6"
@@ -1357,7 +1357,7 @@
 
 "@salesforce/core@^8.31.4", "@salesforce/core@^8.32.6":
   version "8.32.6"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/core/-/core-8.32.6.tgz#2824dc917888dc040995dfef3a9e83d41fafbdea"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-8.32.6.tgz#2824dc917888dc040995dfef3a9e83d41fafbdea"
   integrity sha512-ZR973WoqCgi6cR58WhgokbHVZOaADNKHiuM1FAwS5pTLQnC91xYi04i2e/gpAX2AUf7Ya6zjbusYtZNpSyKKAQ==
   dependencies:
     "@jsforce/jsforce-node" "^3.10.17"
@@ -1407,7 +1407,7 @@
 
 "@salesforce/core@^9.1.4", "@salesforce/core@^9.1.7", "@salesforce/core@^9.1.8":
   version "9.1.8"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/core/-/core-9.1.8.tgz#47c40dbbc1dcbfb02a2b199e176297f3b33060b0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.1.8.tgz#47c40dbbc1dcbfb02a2b199e176297f3b33060b0"
   integrity sha512-Zdk4WtNrzDuNSyWbzE4ofx+W6ThGPwL4lxNjNPIFM/kPzLcKJNLGDkCzY/wCTaXbpRecrmtm7tsM/KNrOK7EVQ==
   dependencies:
     "@jsforce/jsforce-node" "^3.10.24"
@@ -1483,7 +1483,7 @@
 
 "@salesforce/plugin-command-reference@^3.1.132":
   version "3.1.132"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/plugin-command-reference/-/plugin-command-reference-3.1.132.tgz#b40af2618d13466728211b7b88b312a2104c5b4f"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.1.132.tgz#b40af2618d13466728211b7b88b312a2104c5b4f"
   integrity sha512-khxcwV+djsdN7pa2gRQjy3Xvn5RJ4/AqCdvsIfU70bZKo2LqjHK9O+Pkz0F7ci2ao4nyamRlyL9C6rpKPg+N+g==
   dependencies:
     "@oclif/core" "^4"
@@ -1502,7 +1502,7 @@
 
 "@salesforce/sf-plugins-core@^12.2.28":
   version "12.2.28"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/sf-plugins-core/-/sf-plugins-core-12.2.28.tgz#2fae75f25a8a09e2cbd18266ed1407c858c72fd8"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-12.2.28.tgz#2fae75f25a8a09e2cbd18266ed1407c858c72fd8"
   integrity sha512-amfPBfdlgYoM9LCQewtoLWOe29kY7urLnYH1a5G7QLWN74tJeXEkvc1OyM18n+f2MHmpK0/ICAg5Wq276HwxHQ==
   dependencies:
     "@inquirer/confirm" "^6.1.1"
@@ -1518,7 +1518,7 @@
 
 "@salesforce/sf-plugins-core@^13.0.3":
   version "13.0.3"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.3.tgz#698046d9f15727436f4c801e114c4699d3085762"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.3.tgz#698046d9f15727436f4c801e114c4699d3085762"
   integrity sha512-5vL5sk7sZNf2Ab8LtGiH1B30cBzdNbQhfQh1WqeRieiH7qEHRxRPMlOiZWAR3JyYII3DrqxsNyO0SjBBTNNxag==
   dependencies:
     "@inquirer/confirm" "^6.1.1"
@@ -1534,7 +1534,7 @@
 
 "@salesforce/source-deploy-retrieve@^13.1.1", "@salesforce/source-deploy-retrieve@^13.3.0":
   version "13.3.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-13.3.0.tgz#2d1164233243ff40d7e760a5ceaeb837c77b9182"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-13.3.0.tgz#2d1164233243ff40d7e760a5ceaeb837c77b9182"
   integrity sha512-mwiffD4Z2VnmU9OqCZr/E7SjhkVhgRv8SkVcG3AneRiMZI2nb9DHyJZhqDm/yzDuoCCBZnxEXTBj8h6onX0QqQ==
   dependencies:
     "@salesforce/core" "^9.1.7"
@@ -1695,7 +1695,7 @@
 
 "@smithy/core@^3.33.2", "@smithy/core@^3.33.3":
   version "3.33.3"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/core/-/core-3.33.3.tgz#c1e801fe17160bcbf6c714cf16e832057e6bf79e"
+  resolved "https://registry.yarnpkg.com/@smithy/core/-/core-3.33.3.tgz#c1e801fe17160bcbf6c714cf16e832057e6bf79e"
   integrity sha512-CsOeKq/9kA3y6VJHt+/+VTCtBaxJ4OTFpgrjIUhPpDIKxBci1k2bJaQASF2h/ELWrulGp+t97DZ0mevfAD8idg==
   dependencies:
     "@smithy/types" "^4.17.2"
@@ -1703,7 +1703,7 @@
 
 "@smithy/credential-provider-imds@^4.4.16":
   version "4.5.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/credential-provider-imds/-/credential-provider-imds-4.5.2.tgz#da3ea9636b5566b36b0761382d841a6d8fdde14f"
+  resolved "https://registry.yarnpkg.com/@smithy/credential-provider-imds/-/credential-provider-imds-4.5.2.tgz#da3ea9636b5566b36b0761382d841a6d8fdde14f"
   integrity sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==
   dependencies:
     "@smithy/core" "^3.33.2"
@@ -1712,7 +1712,7 @@
 
 "@smithy/fetch-http-handler@^5.7.2":
   version "5.7.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/fetch-http-handler/-/fetch-http-handler-5.7.2.tgz#29e95cd74fe91495225e26a60569617fecae48cc"
+  resolved "https://registry.yarnpkg.com/@smithy/fetch-http-handler/-/fetch-http-handler-5.7.2.tgz#29e95cd74fe91495225e26a60569617fecae48cc"
   integrity sha512-nZyWTmSpJEXl6VtWVMBJve/7x12DZu6sIX1z1a+ZMaHlQQRs9Zpu6NbTe/gmxYXVRpkjxyDYpZ5gx2IM6f/Wkw==
   dependencies:
     "@smithy/core" "^3.33.2"
@@ -1721,7 +1721,7 @@
 
 "@smithy/node-http-handler@^4.11.3":
   version "4.11.3"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/node-http-handler/-/node-http-handler-4.11.3.tgz#27e91a61b6de8a13e9b552f22975d7dd369cb397"
+  resolved "https://registry.yarnpkg.com/@smithy/node-http-handler/-/node-http-handler-4.11.3.tgz#27e91a61b6de8a13e9b552f22975d7dd369cb397"
   integrity sha512-2jY1tSpERfPfWqyBV2pH+iGFaghVsIJszJNsT7hxtQYhVJpWDyc0LqOWI+nXOxOAHaEfZ4PXXtp1wW1TGpHhkA==
   dependencies:
     "@smithy/core" "^3.33.3"
@@ -1730,7 +1730,7 @@
 
 "@smithy/signature-v4@^5.6.12":
   version "5.7.3"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/signature-v4/-/signature-v4-5.7.3.tgz#76603bf1ac9aa44e1d2f4f358b0cc0cf84961e46"
+  resolved "https://registry.yarnpkg.com/@smithy/signature-v4/-/signature-v4-5.7.3.tgz#76603bf1ac9aa44e1d2f4f358b0cc0cf84961e46"
   integrity sha512-7ImGm+FkHRLcBaRttIAMZ6bzJZWb2cJGoYjq46F2UjycujWzrL9GEN9h4w7eQyXJYnltrUhxbbieBAIRrdqpow==
   dependencies:
     "@smithy/core" "^3.33.3"
@@ -1739,7 +1739,7 @@
 
 "@smithy/types@^4.17.2":
   version "4.17.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@smithy/types/-/types-4.17.2.tgz#ad71f6f62460a6409f0e8efc173e2e0f883ea4e6"
+  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.17.2.tgz#ad71f6f62460a6409f0e8efc173e2e0f883ea4e6"
   integrity sha512-FOKpVZob9MPTn2znRzGrnsMHv7BOsKVw3XiP/cOyYLDVZ9qKp4nifIiSCuUU/fIj5Vu0UOAxCFr+qRAtG0NUkA==
   dependencies:
     tslib "^2.6.2"
@@ -1824,7 +1824,7 @@
 
 "@types/inquirer@^9.0.10":
   version "9.0.10"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@types/inquirer/-/inquirer-9.0.10.tgz#0ce7b234181c29e71fdb3038969a6839a39db405"
+  resolved "https://registry.yarnpkg.com/@types/inquirer/-/inquirer-9.0.10.tgz#0ce7b234181c29e71fdb3038969a6839a39db405"
   integrity sha512-vFW2WbXwO9eZpRT5GJGFJ/shgyMNnYozmnjakt9jCQSS1lvqX8pZEQMjJ9RdDPct/YxwciQ8+V8OYn9euIrZDA==
   dependencies:
     "@types/through" "*"
@@ -1931,7 +1931,7 @@
 
 "@types/react@^18.3.31":
   version "18.3.31"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/@types/react/-/react-18.3.31.tgz#b5e95e28ffcceab8d982f33f2eb076e17653c2a4"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.31.tgz#b5e95e28ffcceab8d982f33f2eb076e17653c2a4"
   integrity sha512-vfEqpXTvwT91yhmwdfouStN2hSKwTvyRs8qpLfADyrq/kxDw0hZM7Wk9Ug1FELj8hIby+S/+kQCSRFF32nv2Qw==
   dependencies:
     "@types/prop-types" "*"
@@ -2262,7 +2262,7 @@ anymatch@~3.1.2:
 
 anynum@^1.0.1:
   version "1.0.1"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/anynum/-/anynum-1.0.1.tgz#2aac00e08dfad3726c1d462e60dbc2f831659a44"
+  resolved "https://registry.yarnpkg.com/anynum/-/anynum-1.0.1.tgz#2aac00e08dfad3726c1d462e60dbc2f831659a44"
   integrity sha512-N6//FLET/tXYNM/F6ABca1oH6fWB+KlTt909Le28WMDBk8oaT4vY17DCrwg2MvmuqUKt3Ni4N5dGJ/EoBgcO6A==
 
 append-transform@^2.0.0:
@@ -2537,7 +2537,7 @@ brace-expansion@^5.0.5:
 
 brace-expansion@^5.0.8:
   version "5.0.9"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/brace-expansion/-/brace-expansion-5.0.9.tgz#7c72438809b5fa5babf54199a1f1c281a6984fcf"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.9.tgz#7c72438809b5fa5babf54199a1f1c281a6984fcf"
   integrity sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==
   dependencies:
     balanced-match "^4.0.2"
@@ -2930,7 +2930,7 @@ comma-separated-tokens@^2.0.0:
 
 commander@^14.0.3:
   version "14.0.3"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/commander/-/commander-14.0.3.tgz#425d79b48f9af82fcd9e4fc1ea8af6c5ec07bbc2"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-14.0.3.tgz#425d79b48f9af82fcd9e4fc1ea8af6c5ec07bbc2"
   integrity sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==
 
 comment-parser@1.4.1:
@@ -3340,7 +3340,7 @@ ejs@^3.1.10:
 
 ejs@^6:
   version "6.0.1"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/ejs/-/ejs-6.0.1.tgz#88ea8ce00335c3575d7c3602dd76e84b0bd60f43"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-6.0.1.tgz#88ea8ce00335c3575d7c3602dd76e84b0bd60f43"
   integrity sha512-UaaM14yby8U3k02ihS1Bmj5Kz2d7CCQM1scxpgs4Mhkq8F1wR2gl3+Ts4h5Ne4Mnt7M9m4Dw7jsuMr3+xO4vZA==
 
 electron-to-chromium@^1.5.328:
@@ -3601,7 +3601,7 @@ eslint-config-salesforce@^2.2.0:
 
 eslint-config-xo-react@^0.27.0:
   version "0.27.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/eslint-config-xo-react/-/eslint-config-xo-react-0.27.0.tgz#aeb7593bf3d8fb9fc7fecfcbd7240f0daddb5cb0"
+  resolved "https://registry.yarnpkg.com/eslint-config-xo-react/-/eslint-config-xo-react-0.27.0.tgz#aeb7593bf3d8fb9fc7fecfcbd7240f0daddb5cb0"
   integrity sha512-wiV215xQIn71XZyyVfaOXHaFpR1B14IJttwOjMi/eqUK1s+ojJdHr7eHqTLaGUfh6FKgWha1QNwePlIXx7mBUg==
 
 eslint-config-xo@^0.50.0:
@@ -3683,7 +3683,7 @@ eslint-plugin-react-hooks@^4.6.2:
 
 eslint-plugin-react@^7.37.5:
   version "7.37.5"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/eslint-plugin-react/-/eslint-plugin-react-7.37.5.tgz#2975511472bdda1b272b34d779335c9b0e877065"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.37.5.tgz#2975511472bdda1b272b34d779335c9b0e877065"
   integrity sha512-Qteup0SqU15kdocexFNAJMvCJEfa2xUKNV4CC1xsVMrIIqEy3SQ/rqyxCWNzfrd3/ldy6HMlD2e0JDVpDg2qIA==
   dependencies:
     array-includes "^3.1.8"
@@ -3799,7 +3799,7 @@ eslint@^8.56.0:
 
 esmock@^2.7.6:
   version "2.7.6"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/esmock/-/esmock-2.7.6.tgz#643b911398124cdaa60806d7d38074f0238bbb6c"
+  resolved "https://registry.yarnpkg.com/esmock/-/esmock-2.7.6.tgz#643b911398124cdaa60806d7d38074f0238bbb6c"
   integrity sha512-Moibxg8tl+wUeuDZZxHC9yVFi+rYITrPsu8/JDmO9AWVaXiWrFyvklruDv7pP7h3t0UqqPpZiCaZ51lzwVRK8A==
 
 espree@^10.4.0:
@@ -3971,7 +3971,7 @@ fast-xml-builder@^1.2.0:
 
 fast-xml-parser@^5.11.1:
   version "5.11.1"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/fast-xml-parser/-/fast-xml-parser-5.11.1.tgz#0ee672fcce1710c38185b8290d77e98806ff0bfb"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-5.11.1.tgz#0ee672fcce1710c38185b8290d77e98806ff0bfb"
   integrity sha512-TBw6K/fxoQGGjCmZDw9w/ZwP3uDcnTM4YH/g+PFRWr8sbe5idXtxNN6vITh4+1ruCZaho6uBFurElsA7F0zzgw==
   dependencies:
     "@nodable/entities" "^3.0.0"
@@ -4360,7 +4360,7 @@ glob@^10.3.10:
 
 glob@^11.1.0:
   version "11.1.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/glob/-/glob-11.1.0.tgz#4f826576e4eb99c7dad383793d2f9f08f67e50a6"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-11.1.0.tgz#4f826576e4eb99c7dad383793d2f9f08f67e50a6"
   integrity sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==
   dependencies:
     foreground-child "^3.3.1"
@@ -4372,7 +4372,7 @@ glob@^11.1.0:
 
 glob@^13.0.6:
   version "13.0.6"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/glob/-/glob-13.0.6.tgz#078666566a425147ccacfbd2e332deb66a2be71d"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-13.0.6.tgz#078666566a425147ccacfbd2e332deb66a2be71d"
   integrity sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw==
   dependencies:
     minimatch "^10.2.2"
@@ -4963,7 +4963,7 @@ is-docker@^2.0.0:
 
 is-docker@^3.0.0:
   version "3.0.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/is-docker/-/is-docker-3.0.0.tgz#90093aa3106277d8a77a5910dbae71747e15a200"
+  resolved "https://registry.yarnpkg.com/is-docker/-/is-docker-3.0.0.tgz#90093aa3106277d8a77a5910dbae71747e15a200"
   integrity sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==
 
 is-extglob@^2.1.1:
@@ -5020,7 +5020,7 @@ is-in-ci@^0.1.0:
 
 is-inside-container@^1.0.0:
   version "1.0.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/is-inside-container/-/is-inside-container-1.0.0.tgz#e81fba699662eb31dbdaf26766a61d4814717ea4"
+  resolved "https://registry.yarnpkg.com/is-inside-container/-/is-inside-container-1.0.0.tgz#e81fba699662eb31dbdaf26766a61d4814717ea4"
   integrity sha512-KIYLCCJghfHZxqjYBE7rEy0OBuTd5xCHS7tHVgvCLkx7StIoaxwNW3hCALgEUjFfeRk+MG/Qxmp/vtETEF3tRA==
   dependencies:
     is-docker "^3.0.0"
@@ -5153,7 +5153,7 @@ is-unicode-supported@^2.0.0:
 
 is-unsafe@^2.0.0:
   version "2.0.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/is-unsafe/-/is-unsafe-2.0.2.tgz#bb1ead17f1aa688f6433258b561e98b1a45a1afc"
+  resolved "https://registry.yarnpkg.com/is-unsafe/-/is-unsafe-2.0.2.tgz#bb1ead17f1aa688f6433258b561e98b1a45a1afc"
   integrity sha512-HgbIHPBH0KHHCcjLfGsCvhtPTVxjaAZlXjwdz7/GQC40SjSe4sfQsar8J5VFo8JOSbarkpV0OLG95bbaNd9aAQ==
 
 is-weakmap@^2.0.2:
@@ -5190,7 +5190,7 @@ is-wsl@^2.2.0:
 
 is-wsl@^3.1.0:
   version "3.1.1"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/is-wsl/-/is-wsl-3.1.1.tgz#327897b26832a3eb117da6c27492d04ca132594f"
+  resolved "https://registry.yarnpkg.com/is-wsl/-/is-wsl-3.1.1.tgz#327897b26832a3eb117da6c27492d04ca132594f"
   integrity sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw==
   dependencies:
     is-inside-container "^1.0.0"
@@ -5971,7 +5971,7 @@ minimatch@^10.1.1, minimatch@^10.2.5:
 
 minimatch@^10.2.2:
   version "10.2.6"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/minimatch/-/minimatch-10.2.6.tgz#fd956bbe0b77241e9f15ac5dccb1c638060968ef"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-10.2.6.tgz#fd956bbe0b77241e9f15ac5dccb1c638060968ef"
   integrity sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==
   dependencies:
     brace-expansion "^5.0.8"
@@ -6311,7 +6311,7 @@ object.values@^1.1.6, object.values@^1.2.1:
 
 oclif@^4.24.0:
   version "4.24.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/oclif/-/oclif-4.24.0.tgz#34d2e663caa36600d8c711659f956d5532d2a229"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-4.24.0.tgz#34d2e663caa36600d8c711659f956d5532d2a229"
   integrity sha512-qBSOMDV7T9G7QkJM1XXeC08jVnGjXK/EQaol6MpkXN1ELEOzi/9SeuwElH3zQuCRVEE+MlJLME6nQzNlwN5zVw==
   dependencies:
     "@aws-sdk/client-cloudfront" "^3.1079.0"
@@ -6545,7 +6545,7 @@ path-expression-matcher@^1.5.0:
 
 path-expression-matcher@^1.6.2:
   version "1.6.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/path-expression-matcher/-/path-expression-matcher-1.6.2.tgz#567c73c07197e9dcef24e90edcdc571056599168"
+  resolved "https://registry.yarnpkg.com/path-expression-matcher/-/path-expression-matcher-1.6.2.tgz#567c73c07197e9dcef24e90edcdc571056599168"
   integrity sha512-enSlaiat05iasnzmgNxRj8reFdj3puY2QpNgP1aPIaVfT6nn9ICuPoFlKHk8EN22HcwewshO+mN2DGbkCEOtqQ==
 
 path-is-absolute@^1.0.0:
@@ -6702,7 +6702,7 @@ possible-typed-array-names@^1.0.0, possible-typed-array-names@^1.1.0:
 
 powershell-utils@^0.1.0:
   version "0.1.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/powershell-utils/-/powershell-utils-0.1.0.tgz#5a42c9a824fb4f2f251ccb41aaae73314f5d6ac2"
+  resolved "https://registry.yarnpkg.com/powershell-utils/-/powershell-utils-0.1.0.tgz#5a42c9a824fb4f2f251ccb41aaae73314f5d6ac2"
   integrity sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==
 
 prelude-ls@^1.2.1:
@@ -7224,7 +7224,7 @@ semver@^7.3.4, semver@^7.3.5, semver@^7.5.3, semver@^7.5.4, semver@^7.6.0, semve
 
 semver@^7.8.5:
   version "7.8.5"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/semver/-/semver-7.8.5.tgz#39b646037dd50c14fb451e7e4cac58ed8b863f69"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.8.5.tgz#39b646037dd50c14fb451e7e4cac58ed8b863f69"
   integrity sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==
 
 sentence-case@^3.0.4:
@@ -7760,7 +7760,7 @@ strnum@^2.3.0:
 
 strnum@^2.4.2:
   version "2.4.2"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/strnum/-/strnum-2.4.2.tgz#af43ab51a06d04227023fc2e42ca229214ec10f0"
+  resolved "https://registry.yarnpkg.com/strnum/-/strnum-2.4.2.tgz#af43ab51a06d04227023fc2e42ca229214ec10f0"
   integrity sha512-rDG3Ah4TV0k1hWvLSzkZtMmLN9+eS+h3knq4MP6A42Y3Yh5qGNnOUs1jJkoSr8FG5dsL28c7KgkIBzSEykqtuw==
   dependencies:
     anynum "^1.0.1"
@@ -7909,7 +7909,7 @@ ts-api-utils@^1.0.1, ts-api-utils@^1.3.0:
 
 ts-json-schema-generator@^2.9.0:
   version "2.9.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/ts-json-schema-generator/-/ts-json-schema-generator-2.9.0.tgz#cc2b99db0e64ee9ee6898c8c74905337536ef9fc"
+  resolved "https://registry.yarnpkg.com/ts-json-schema-generator/-/ts-json-schema-generator-2.9.0.tgz#cc2b99db0e64ee9ee6898c8c74905337536ef9fc"
   integrity sha512-NR5ZE108uiPtBHBJNGnhwoUaUx5vWTDJzDFG9YlRoqxPU76n+5FClRh92dcGgysbe1smRmYalM9Saj97GW1J4Q==
   dependencies:
     "@types/json-schema" "^7.0.15"
@@ -8462,7 +8462,7 @@ ws@^8.15.0:
 
 wsl-utils@^0.4.0:
   version "0.4.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/wsl-utils/-/wsl-utils-0.4.0.tgz#58334dda6892a81d7acc80417cd6f141a8074958"
+  resolved "https://registry.yarnpkg.com/wsl-utils/-/wsl-utils-0.4.0.tgz#58334dda6892a81d7acc80417cd6f141a8074958"
   integrity sha512-9YmF+2sFEd+T7TkwlmE337F0IVzfDvDknhtpBQxxXzEOfgPphGlFYpyx0cTuCIFj8/p+sqwBYAeGxOMNSzPPDA==
   dependencies:
     is-wsl "^3.1.0"
@@ -8475,7 +8475,7 @@ xml-naming@^0.1.0:
 
 xml-naming@^0.3.0:
   version "0.3.0"
-  resolved "https://nexus-proxy.repo.local.sfdc.net/nexus/content/groups/npm-all/xml-naming/-/xml-naming-0.3.0.tgz#46c1e18bfe2858479982dd2accf34d16e749eda2"
+  resolved "https://registry.yarnpkg.com/xml-naming/-/xml-naming-0.3.0.tgz#46c1e18bfe2858479982dd2accf34d16e749eda2"
   integrity sha512-ghig2TBE/H11aOVgmahA3MhimvkBr6JIYknH/Dhdk10nXwdbIqBJsbfMxpvFPG8bAw77gN29aQWvKpmVoPlvPQ==
 
 xml2js@^0.6.2:
