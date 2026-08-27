@@ -42,6 +42,9 @@ const minimalGenAiPlannerBundleMock = (): GenAiPlannerBundleExt['GenAiPlannerBun
   attributeMappings: [],
   genAiFunctions: [],
   genAiPlugins: [],
+  localActionLinks: [],
+  localTopics: [],
+  plannerActions: [],
   ruleExpressionAssignments: [],
   ruleExpressions: [
     {
