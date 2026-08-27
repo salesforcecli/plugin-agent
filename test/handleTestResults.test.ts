@@ -115,11 +115,11 @@ describe('metric calculations', () => {
 });
 
 describe('humanFormatAgentforceStudio - inputs line', () => {
-  it('renders Inputs line from testCase.inputs, capitalizing each name', async () => {
+  it('renders Inputs line from testCase.inputs, using the raw field name as-is', async () => {
     const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
     const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
     const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
-    expect(output).to.include('Inputs: Account = "Acme", Notes = "what is kafka"');
+    expect(output).to.include('Inputs: account = "Acme", notes = "what is kafka"');
   });
 
   it('falls back to User Input when testCase.inputs is absent but subjectResponse.userInput exists', async () => {
@@ -142,7 +142,7 @@ describe('humanFormatAgentforceStudio - inputs line', () => {
     const raw = await readFile('./test/mocks/agentforce-studio-results/many-inputs.json', 'utf8');
     const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
     const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
-    expect(output).to.include('Inputs: Account = "Acme", Region = "ANZ", Tier = "Gold"  (+2 more)');
+    expect(output).to.include('Inputs: account = "Acme", region = "ANZ", tier = "Gold"  (+2 more)');
   });
 });
 

@@ -120,14 +120,10 @@ function getTestCaseInputs(testCase: AgentforceStudioTestCaseResult): TestCaseIn
   return valid.length > 0 ? valid : undefined;
 }
 
-function capitalizeInputName(name: string): string {
-  return name.length > 0 ? `${name[0].toUpperCase()}${name.slice(1)}` : name;
-}
-
 function formatInputsLine(inputs: TestCaseInput[]): string {
   const shown = inputs.slice(0, 3);
   const remaining = inputs.length - shown.length;
-  const pairs = shown.map((i) => `${capitalizeInputName(i.name)} = "${i.value}"`).join(', ');
+  const pairs = shown.map((i) => `${i.name} = "${i.value}"`).join(', ');
   return remaining > 0 ? `${pairs}  (+${remaining} more)` : pairs;
 }
 
