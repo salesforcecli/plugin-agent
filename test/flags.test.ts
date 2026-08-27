@@ -18,7 +18,13 @@ import { join, relative } from 'node:path';
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { expect } from 'chai';
 import { SfError } from '@salesforce/core';
-import { getHiddenDirs, parseContextVariables, traverseForFiles } from '../src/flags.js';
+import {
+  getHiddenDirs,
+  mergeContextVariables,
+  parseContextVariables,
+  parseContextVariablesJson,
+  traverseForFiles,
+} from '../src/flags.js';
 
 describe('traverseForFiles', () => {
   const testDir = join(process.cwd(), 'test-temp');
@@ -153,5 +159,132 @@ describe('parseContextVariables', () => {
 
   it('throws SfError on entry with empty name', () => {
     expect(() => parseContextVariables(['=value'])).to.throw(SfError, /Name cannot be empty/);
+  });
+});
+
+describe('parseContextVariablesJson', () => {
+  it('returns [] for undefined', () => {
+    expect(parseContextVariablesJson(undefined)).to.deep.equal([]);
+  });
+
+  it('returns [] for empty/whitespace string', () => {
+    expect(parseContextVariablesJson('')).to.deep.equal([]);
+    expect(parseContextVariablesJson('   ')).to.deep.equal([]);
+  });
+
+  it('parses a Boolean with a native boolean value', () => {
+    expect(parseContextVariablesJson('[{"name":"probeGate","type":"Boolean","value":true}]')).to.deep.equal([
+      { name: 'probeGate', type: 'Boolean', value: true },
+    ]);
+  });
+
+  it('parses a Number with a native number value', () => {
+    expect(parseContextVariablesJson('[{"name":"retryCount","type":"Number","value":3}]')).to.deep.equal([
+      { name: 'retryCount', type: 'Number', value: 3 },
+    ]);
+  });
+
+  it('parses the string-valued types', () => {
+    const json =
+      '[{"name":"a","type":"Text","value":"hi"},{"name":"b","type":"Date","value":"2026-08-27"},{"name":"c","type":"Ref","value":"1M5"}]';
+    expect(parseContextVariablesJson(json)).to.deep.equal([
+      { name: 'a', type: 'Text', value: 'hi' },
+      { name: 'b', type: 'Date', value: '2026-08-27' },
+      { name: 'c', type: 'Ref', value: '1M5' },
+    ]);
+  });
+
+  it('parses Object/List (arrays) and Json (object) values', () => {
+    const json =
+      '[{"name":"o","type":"Object","value":[{"name":"inner","type":"Text","value":"x"}]},{"name":"l","type":"List","value":[{"type":"ref","value":"1M5"}]},{"name":"j","type":"Json","value":{"a":1}}]';
+    expect(parseContextVariablesJson(json)).to.deep.equal([
+      { name: 'o', type: 'Object', value: [{ name: 'inner', type: 'Text', value: 'x' }] },
+      { name: 'l', type: 'List', value: [{ type: 'ref', value: '1M5' }] },
+      { name: 'j', type: 'Json', value: { a: 1 } },
+    ]);
+  });
+
+  it('allows an omitted value (optional)', () => {
+    expect(parseContextVariablesJson('[{"name":"x","type":"Boolean"}]')).to.deep.equal([
+      { name: 'x', type: 'Boolean', value: undefined },
+    ]);
+  });
+
+  it('allows a null value (nullable)', () => {
+    expect(parseContextVariablesJson('[{"name":"x","type":"Boolean","value":null}]')).to.deep.equal([
+      { name: 'x', type: 'Boolean', value: null },
+    ]);
+  });
+
+  it('throws SfError on malformed JSON', () => {
+    expect(() => parseContextVariablesJson('not json')).to.throw(SfError, /not valid JSON/);
+  });
+
+  it('throws SfError when the top level is not an array', () => {
+    expect(() => parseContextVariablesJson('{"name":"x","type":"Text"}')).to.throw(SfError, /expected a JSON array/);
+  });
+
+  it('throws SfError when an entry is not an object', () => {
+    expect(() => parseContextVariablesJson('["x"]')).to.throw(SfError, /must be an object/);
+  });
+
+  it('throws SfError when an entry has no non-empty name', () => {
+    expect(() => parseContextVariablesJson('[{"type":"Text","value":"x"}]')).to.throw(SfError, /non-empty "name"/);
+    expect(() => parseContextVariablesJson('[{"name":"  ","type":"Text"}]')).to.throw(SfError, /non-empty "name"/);
+  });
+
+  it('throws SfError on an unknown type', () => {
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Bogus","value":"y"}]')).to.throw(
+      SfError,
+      /invalid type "Bogus"/
+    );
+  });
+
+  it('throws SfError when the value type does not match the declared type', () => {
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Boolean","value":"true"}]')).to.throw(
+      SfError,
+      /type "Boolean" expects a boolean value, but got a string/
+    );
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Number","value":"3"}]')).to.throw(
+      SfError,
+      /type "Number" expects a number value/
+    );
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Text","value":3}]')).to.throw(
+      SfError,
+      /type "Text" expects a string value/
+    );
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Object","value":{}}]')).to.throw(
+      SfError,
+      /type "Object" expects an array value/
+    );
+    expect(() => parseContextVariablesJson('[{"name":"x","type":"Json","value":[]}]')).to.throw(
+      SfError,
+      /type "Json" expects a JSON object value/
+    );
+  });
+});
+
+describe('mergeContextVariables', () => {
+  it('returns text-only variables when no JSON variables', () => {
+    const text = parseContextVariables(['a=1']);
+    expect(mergeContextVariables(text, [])).to.deep.equal([{ name: 'a', type: 'Text', value: '1' }]);
+  });
+
+  it('appends JSON-only variables after text variables', () => {
+    const text = parseContextVariables(['a=1']);
+    const json = parseContextVariablesJson('[{"name":"b","type":"Number","value":2}]');
+    expect(mergeContextVariables(text, json)).to.deep.equal([
+      { name: 'a', type: 'Text', value: '1' },
+      { name: 'b', type: 'Number', value: 2 },
+    ]);
+  });
+
+  it('lets the JSON variable win on a duplicate name, keeping the text position', () => {
+    const text = parseContextVariables(['flag=True', 'keep=x']);
+    const json = parseContextVariablesJson('[{"name":"flag","type":"Boolean","value":true}]');
+    expect(mergeContextVariables(text, json)).to.deep.equal([
+      { name: 'flag', type: 'Boolean', value: true },
+      { name: 'keep', type: 'Text', value: 'x' },
+    ]);
   });
 });

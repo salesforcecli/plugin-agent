@@ -19,7 +19,13 @@ import { EnvironmentVariable, Lifecycle, Messages, SfError } from '@salesforce/c
 import { Agent, ProductionAgent, ScriptAgent } from '@salesforce/agents';
 import { createCache, SessionType } from '../../../previewSessionStore.js';
 import { COMPILATION_API_EXIT_CODES, loadAgentJson } from '../../../common.js';
-import { contextVariablesFlag, parseContextVariables } from '../../../flags.js';
+import {
+  contextVariablesFlag,
+  contextVariablesJsonFlag,
+  mergeContextVariables,
+  parseContextVariables,
+  parseContextVariablesJson,
+} from '../../../flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.preview.start');
@@ -70,6 +76,7 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
       exclusive: ['use-live-actions'],
     }),
     'context-variables': contextVariablesFlag,
+    'context-variables-json': contextVariablesJsonFlag,
     'agent-json': Flags.file({
       summary: messages.getMessage('flags.agent-json.summary'),
       hidden: true,
@@ -159,7 +166,10 @@ export default class AgentPreviewStart extends SfCommand<AgentPreviewStartResult
     }
 
     // Track telemetry for preview start
-    const contextVariables = parseContextVariables(flags['context-variables']);
+    const contextVariables = mergeContextVariables(
+      parseContextVariables(flags['context-variables']),
+      parseContextVariablesJson(flags['context-variables-json'])
+    );
     let session;
     try {
       session = await agent.preview.start({ contextVariables });
