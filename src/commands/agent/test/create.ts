@@ -64,7 +64,7 @@ const FLAGGABLE_PROMPTS = {
   },
 };
 
-async function promptUntilUniqueName(connection: Connection, name?: string | undefined): Promise<string | undefined> {
+async function promptUntilUniqueName(connection: Connection, name?: string  ): Promise<string | undefined> {
   const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['api-name']));
   const existingDefinitions = await AgentTest.list(connection);
   if (existingDefinitions.some((d) => d.fullName === apiName)) {
