@@ -103,10 +103,14 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
-type TestCaseInput = { name: string; value: string };
+type TestCaseInput = { name: string; value: unknown };
 
-function getTestCaseInputs(testCase: AgentforceStudioTestCaseResult): TestCaseInput[] | undefined {
-  const inputs = (testCase as unknown as { inputs?: unknown }).inputs;
+// AgentforceStudioTestCaseResult doesn't yet declare `inputs` in @salesforce/agents,
+// but the field is present on the wire — see PR #481 review discussion.
+type AgentforceStudioTestCaseResultWithInputs = AgentforceStudioTestCaseResult & { inputs?: unknown };
+
+function getTestCaseInputs(testCase: AgentforceStudioTestCaseResultWithInputs): TestCaseInput[] | undefined {
+  const inputs = testCase.inputs;
   if (!Array.isArray(inputs)) {
     return undefined;
   }
@@ -115,32 +119,41 @@ function getTestCaseInputs(testCase: AgentforceStudioTestCaseResult): TestCaseIn
       typeof i === 'object' &&
       i !== null &&
       typeof (i as TestCaseInput).name === 'string' &&
-      typeof (i as TestCaseInput).value === 'string'
+      (i as TestCaseInput).value !== null &&
+      (i as TestCaseInput).value !== undefined
   );
   return valid.length > 0 ? valid : undefined;
+}
+
+// Strips VT/ANSI escape sequences from untrusted API data before it's interpolated into
+// titleLines, so remote data can't inject raw terminal escapes on the ux.log (non --output-dir) path.
+// stripVTControlCharacters doesn't touch plain newlines, so those are collapsed separately.
+function sanitizeForDisplay(value: string): string {
+  return stripVTControlCharacters(value).replace(/\s*\n\s*/g, ' ');
 }
 
 function formatInputsLine(inputs: TestCaseInput[]): string {
   const shown = inputs.slice(0, 3);
   const remaining = inputs.length - shown.length;
-  const pairs = shown.map((i) => `${i.name} = "${i.value}"`).join(', ');
+  const pairs = shown.map((i) => `${sanitizeForDisplay(i.name)} = "${sanitizeForDisplay(String(i.value))}"`).join(', ');
   return remaining > 0 ? `${pairs}  (+${remaining} more)` : pairs;
 }
 
-type ParsedSubjectResponseMetrics = {
+type ParsedSubjectResponse = {
+  userInput?: string;
   performance?: { latency?: { duration?: number } };
   tokenUsage?: { completion?: number; prompt?: { total?: number }; total?: number };
 };
 
-function parseSubjectResponseMetrics(raw: string): ParsedSubjectResponseMetrics {
+function parseSubjectResponse(raw: string): ParsedSubjectResponse {
   try {
-    return JSON.parse(raw) as ParsedSubjectResponseMetrics;
+    return JSON.parse(raw) as ParsedSubjectResponse;
   } catch {
     return {};
   }
 }
 
-function formatMetricsLine(parsed: ParsedSubjectResponseMetrics): string | undefined {
+function formatMetricsLine(parsed: ParsedSubjectResponse): string | undefined {
   const parts: string[] = [];
   const latencyMs = parsed.performance?.latency?.duration;
   if (typeof latencyMs === 'number') {
@@ -166,25 +179,20 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
   const tables: string[] = [];
 
   for (const testCase of results.testCases) {
-    const inputs = getTestCaseInputs(testCase);
+    const inputs = getTestCaseInputs(testCase as AgentforceStudioTestCaseResultWithInputs);
+    const parsedSubjectResponse = parseSubjectResponse(testCase.subjectResponse);
 
     const titleLines = [ansis.bold(`Test Case #${testCase.testNumber}`)];
     if (inputs) {
       titleLines.push(`${ansis.dim('Inputs')}: ${formatInputsLine(inputs)}`);
     } else {
-      let userInput = '';
-      try {
-        const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
-        userInput = parsed.userInput ?? '';
-      } catch {
-        // ignore
-      }
+      const userInput = parsedSubjectResponse.userInput ?? '';
       if (userInput) {
-        titleLines.push(`${ansis.dim('User Input')}: ${userInput}`);
+        titleLines.push(`${ansis.dim('User Input')}: ${sanitizeForDisplay(userInput)}`);
       }
     }
 
-    const metricsLine = formatMetricsLine(parseSubjectResponseMetrics(testCase.subjectResponse));
+    const metricsLine = formatMetricsLine(parsedSubjectResponse);
     if (metricsLine) {
       titleLines.push(metricsLine);
     }

@@ -17,6 +17,7 @@ import { readFile } from 'node:fs/promises';
 import { stripVTControlCharacters } from 'node:util';
 import { expect, config } from 'chai';
 import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
+import ansis from 'ansis';
 import { humanFormat, humanFormatAgentforceStudio, readableTime, truncate } from '../src/handleTestResults.js';
 
 config.truncateThreshold = 0;
@@ -143,6 +144,52 @@ describe('humanFormatAgentforceStudio - inputs line', () => {
     const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
     const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
     expect(output).to.include('Inputs: account = "Acme", region = "ANZ", tier = "Gold"  (+2 more)');
+  });
+
+  it('renders all inputs when values are a mix of string and non-string primitives', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-type-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: account = "Acme", priority = "5", active = "true"');
+    expect(output).to.not.include('more)');
+  });
+
+  it('renders an Inputs line (not a User Input fallback) when every input value is non-string', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/all-non-string-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs:');
+    expect(output).to.not.include('User Input:');
+  });
+});
+
+describe('humanFormatAgentforceStudio - sanitizing untrusted display data', () => {
+  it('strips ANSI escape sequences from input values before rendering, leaving ansis coloring intact', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/ansi-escape-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    expect(output).to.not.include('[31m');
+    expect(output).to.not.include('[0m');
+    expect(output).to.include('account = "Acme"');
+    expect(output).to.include(ansis.bold('Test Case #5'));
+  });
+
+  it('collapses embedded newlines in input values to a single space', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/newline-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('notes = "line one line two"');
+    expect(output).to.not.include('line one\nline two');
+  });
+
+  it('strips ANSI escape sequences from the User Input fallback before rendering', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/user-input-with-escapes.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    expect(output).to.not.include('[31m');
+    expect(output).to.not.include('[0m');
+    expect(output).to.include(ansis.dim('User Input'));
+    expect(stripVTControlCharacters(output)).to.include('User Input: What is the account status?');
   });
 });
 
