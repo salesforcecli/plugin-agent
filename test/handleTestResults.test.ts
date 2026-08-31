@@ -225,3 +225,39 @@ describe('humanFormatAgentforceStudio - latency/tokens line', () => {
     expect(output).to.not.include('Tokens:');
   });
 });
+
+describe('humanFormatAgentforceStudio - Expected/Actual columns', () => {
+  it('omits the Expected and Actual columns when no scorer row has either value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Expected');
+    expect(output).to.not.include('Actual');
+    expect(output).to.include('Scorer');
+    expect(output).to.include('Result');
+    expect(output).to.include('Reasoning');
+  });
+
+  it('shows both the Expected and Actual columns when a scorer row has either value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-expected-actual.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Expected');
+    expect(output).to.include('Actual');
+  });
+
+  it('decides Expected/Actual visibility independently per test case', async () => {
+    const raw = await readFile(
+      './test/mocks/agentforce-studio-results/mixed-expected-actual-per-test-case.json',
+      'utf8'
+    );
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    const [testCase9Section, testCase10Section] = output.split('Test Case #10');
+
+    expect(testCase9Section).to.include('Expected');
+    expect(testCase9Section).to.include('Actual');
+    expect(testCase10Section).to.not.include('Expected');
+    expect(testCase10Section).to.not.include('Actual');
+  });
+});

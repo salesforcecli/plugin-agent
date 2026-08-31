@@ -208,6 +208,10 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
       };
     });
 
+    // Expected/Actual are a paired unit: show both if either has data on any row for this
+    // test case, otherwise drop both — never show just one.
+    const hasExpectedOrActual = scorerRows.some((row) => row.expected !== '' || row.actual !== '');
+
     tables.push(
       ux.makeTable({
         title: titleLines.join('\n'),
@@ -215,8 +219,12 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
         columns: [
           { key: 'scorer', name: 'Scorer' },
           { key: 'result', name: 'Result' },
-          { key: 'expected', name: 'Expected', width: '25%' },
-          { key: 'actual', name: 'Actual', width: '25%' },
+          ...(hasExpectedOrActual
+            ? [
+                { key: 'expected', name: 'Expected', width: '25%' } as const,
+                { key: 'actual', name: 'Actual', width: '25%' } as const,
+              ]
+            : []),
           { key: 'reasoning', name: 'Reasoning', width: '35%' },
         ],
         data: scorerRows,
