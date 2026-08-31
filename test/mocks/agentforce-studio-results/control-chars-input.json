@@ -1,0 +1,21 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 10,
+      "inputs": [
+        {
+          "name": "notes",
+          "value": "bad\u0007\bvalue"
+        }
+      ],
+      "subjectResponse": "{\"text\": \"BEL and backspace in input value.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\": \"PASS\", \"score\": 4.0, \"reasoning\": \"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

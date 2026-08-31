@@ -128,8 +128,16 @@ function getTestCaseInputs(testCase: AgentforceStudioTestCaseResultWithInputs): 
 // Strips VT/ANSI escape sequences from untrusted API data before it's interpolated into
 // titleLines, so remote data can't inject raw terminal escapes on the ux.log (non --output-dir) path.
 // stripVTControlCharacters doesn't touch plain newlines, so those are collapsed separately.
+// It also doesn't touch bare C0 control characters (e.g. a lone \r without a trailing \n),
+// which could otherwise be used to visually overwrite already-rendered terminal output, so
+// any remaining control characters are stripped outright.
 function sanitizeForDisplay(value: string): string {
-  return stripVTControlCharacters(value).replace(/\s*\n\s*/g, ' ');
+  return (
+    stripVTControlCharacters(value)
+      .replace(/\s*[\n\r\v\f]+\s*/g, ' ')
+      // eslint-disable-next-line no-control-regex -- intentionally stripping raw C0/DEL control chars, not matching them incidentally
+      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+  );
 }
 
 function formatInputsLine(inputs: TestCaseInput[]): string {

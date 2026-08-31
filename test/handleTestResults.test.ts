@@ -191,6 +191,31 @@ describe('humanFormatAgentforceStudio - sanitizing untrusted display data', () =
     expect(output).to.include(ansis.dim('User Input'));
     expect(stripVTControlCharacters(output)).to.include('User Input: What is the account status?');
   });
+
+  it('collapses a bare carriage return (no newline) in an input value instead of letting it through raw', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/bare-cr-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\r');
+    expect(output).to.include('notes = "safe Inputs: EVIL"');
+  });
+
+  it('collapses a bare carriage return (no newline) in the User Input fallback instead of letting it through raw', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/bare-cr-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\r');
+    expect(output).to.include('User Input: safe User Input: EVIL');
+  });
+
+  it('strips stray BEL and backspace control characters from an input value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/control-chars-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\x07');
+    expect(output).to.not.include('\x08');
+    expect(output).to.include('notes = "badvalue"');
+  });
 });
 
 describe('humanFormatAgentforceStudio - latency/tokens line', () => {
