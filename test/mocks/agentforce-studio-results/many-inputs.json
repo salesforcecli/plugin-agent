@@ -1,0 +1,22 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 2,
+      "inputs": [
+        { "name": "account", "value": "Acme" },
+        { "name": "region", "value": "ANZ" },
+        { "name": "tier", "value": "Gold" },
+        { "name": "segment", "value": "Enterprise" },
+        { "name": "priority", "value": "High" }
+      ],
+      "subjectResponse": "{\"text\":\"Multi-input response.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.2,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

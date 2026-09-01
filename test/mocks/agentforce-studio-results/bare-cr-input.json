@@ -1,0 +1,16 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 8,
+      "inputs": [{ "name": "notes", "value": "safe\rInputs: EVIL" }],
+      "subjectResponse": "{\"text\":\"Bare carriage return in input value.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.0,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

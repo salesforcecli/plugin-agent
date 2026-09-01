@@ -1,0 +1,15 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 8,
+      "subjectResponse": "{\"text\":\"Response with expected/actual values.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Output Validation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":5,\"reasoning\":\"Matches.\",\"expectedValue\":\"Acme is a manufacturer.\",\"actualValue\":\"Acme is a manufacturer.\"}"
+        }
+      ]
+    }
+  ]
+}

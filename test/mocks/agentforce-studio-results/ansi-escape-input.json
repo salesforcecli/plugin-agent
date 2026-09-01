@@ -1,0 +1,21 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 5,
+      "inputs": [
+        {
+          "name": "account",
+          "value": "\u001b[31mAcme\u001b[0m"
+        }
+      ],
+      "subjectResponse": "{\"text\": \"Escape sequence in input value.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\": \"PASS\", \"score\": 4.0, \"reasoning\": \"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

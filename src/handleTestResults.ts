@@ -18,6 +18,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { writeFile, mkdir } from 'node:fs/promises';
 import {
   AgentTestResultsResponse,
+  AgentforceStudioTestCaseResult,
   AgentforceStudioTestResultsResponse,
   convertTestResultsToFormat,
   humanFriendlyName,
@@ -102,17 +103,106 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
-function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
+type TestCaseInput = { name: string; value: unknown };
+
+// AgentforceStudioTestCaseResult doesn't yet declare `inputs` in @salesforce/agents,
+// but the field is present on the wire — see PR #481 review discussion.
+type AgentforceStudioTestCaseResultWithInputs = AgentforceStudioTestCaseResult & { inputs?: unknown };
+
+function getTestCaseInputs(testCase: AgentforceStudioTestCaseResultWithInputs): TestCaseInput[] | undefined {
+  const inputs = testCase.inputs;
+  if (!Array.isArray(inputs)) {
+    return undefined;
+  }
+  const valid = inputs.filter(
+    (i): i is TestCaseInput =>
+      typeof i === 'object' &&
+      i !== null &&
+      typeof (i as TestCaseInput).name === 'string' &&
+      (i as TestCaseInput).value !== null &&
+      (i as TestCaseInput).value !== undefined
+  );
+  return valid.length > 0 ? valid : undefined;
+}
+
+// Strips VT/ANSI escape sequences from untrusted API data before it's interpolated into
+// titleLines, so remote data can't inject raw terminal escapes on the ux.log (non --output-dir) path.
+// stripVTControlCharacters doesn't touch plain newlines, so those are collapsed separately.
+// It also doesn't touch bare C0 control characters (e.g. a lone \r without a trailing \n),
+// which could otherwise be used to visually overwrite already-rendered terminal output, so
+// any remaining control characters are stripped outright.
+function sanitizeForDisplay(value: string): string {
+  return (
+    stripVTControlCharacters(value)
+      .replace(/\s*[\n\r\v\f]+\s*/g, ' ')
+      // eslint-disable-next-line no-control-regex -- intentionally stripping raw C0/DEL control chars, not matching them incidentally
+      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+  );
+}
+
+function formatInputsLine(inputs: TestCaseInput[]): string {
+  const shown = inputs.slice(0, 3);
+  const remaining = inputs.length - shown.length;
+  const pairs = shown.map((i) => `${sanitizeForDisplay(i.name)} = "${sanitizeForDisplay(String(i.value))}"`).join(', ');
+  return remaining > 0 ? `${pairs}  (+${remaining} more)` : pairs;
+}
+
+type ParsedSubjectResponse = {
+  userInput?: string;
+  performance?: { latency?: { duration?: number } };
+  tokenUsage?: { completion?: number; prompt?: { total?: number }; total?: number };
+};
+
+function parseSubjectResponse(raw: string): ParsedSubjectResponse {
+  try {
+    return JSON.parse(raw) as ParsedSubjectResponse;
+  } catch {
+    return {};
+  }
+}
+
+function formatMetricsLine(parsed: ParsedSubjectResponse): string | undefined {
+  const parts: string[] = [];
+  const latencyMs = parsed.performance?.latency?.duration;
+  if (typeof latencyMs === 'number') {
+    parts.push(`${ansis.dim('Latency')}: ${latencyMs}ms`);
+  }
+  const tokenUsage = parsed.tokenUsage;
+  const hasTokens =
+    tokenUsage !== undefined &&
+    (typeof tokenUsage.completion === 'number' ||
+      typeof tokenUsage.prompt?.total === 'number' ||
+      typeof tokenUsage.total === 'number');
+  if (hasTokens) {
+    const tokensIn = tokenUsage?.prompt?.total ?? 0;
+    const tokensOut = tokenUsage?.completion ?? 0;
+    const tokensTotal = tokenUsage?.total ?? 0;
+    parts.push(`${ansis.dim('Tokens')}: ${tokensIn} in / ${tokensOut} out / ${tokensTotal} total`);
+  }
+  return parts.length > 0 ? parts.join('  |  ') : undefined;
+}
+
+export function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const ux = new Ux();
   const tables: string[] = [];
 
   for (const testCase of results.testCases) {
-    let userInput = '';
-    try {
-      const parsed = JSON.parse(testCase.subjectResponse) as { userInput?: string };
-      userInput = parsed.userInput ?? '';
-    } catch {
-      // ignore
+    const inputs = getTestCaseInputs(testCase as AgentforceStudioTestCaseResultWithInputs);
+    const parsedSubjectResponse = parseSubjectResponse(testCase.subjectResponse);
+
+    const titleLines = [ansis.bold(`Test Case #${testCase.testNumber}`)];
+    if (inputs) {
+      titleLines.push(`${ansis.dim('Inputs')}: ${formatInputsLine(inputs)}`);
+    } else {
+      const userInput = parsedSubjectResponse.userInput ?? '';
+      if (userInput) {
+        titleLines.push(`${ansis.dim('User Input')}: ${sanitizeForDisplay(userInput)}`);
+      }
+    }
+
+    const metricsLine = formatMetricsLine(parsedSubjectResponse);
+    if (metricsLine) {
+      titleLines.push(metricsLine);
     }
 
     const scorerRows = testCase.testScorerResults.map((scorer) => {
@@ -126,15 +216,23 @@ function humanFormatAgentforceStudio(results: AgentforceStudioTestResultsRespons
       };
     });
 
+    // Expected/Actual are a paired unit: show both if either has data on any row for this
+    // test case, otherwise drop both — never show just one.
+    const hasExpectedOrActual = scorerRows.some((row) => row.expected !== '' || row.actual !== '');
+
     tables.push(
       ux.makeTable({
-        title: `${ansis.bold(`Test Case #${testCase.testNumber}`)}\n${ansis.dim('User Input')}: ${userInput}`,
+        title: titleLines.join('\n'),
         overflow: 'wrap',
         columns: [
           { key: 'scorer', name: 'Scorer' },
           { key: 'result', name: 'Result' },
-          { key: 'expected', name: 'Expected', width: '25%' },
-          { key: 'actual', name: 'Actual', width: '25%' },
+          ...(hasExpectedOrActual
+            ? [
+                { key: 'expected', name: 'Expected', width: '25%' } as const,
+                { key: 'actual', name: 'Actual', width: '25%' } as const,
+              ]
+            : []),
           { key: 'reasoning', name: 'Reasoning', width: '35%' },
         ],
         data: scorerRows,
@@ -217,7 +315,10 @@ function tapFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse)
   return `TAP version 13\n1..${expectationCount}\n${lines.join('\n')}`;
 }
 
-function convertAgentforceStudioTestResultsToFormat(results: AgentforceStudioTestResultsResponse, format: 'json' | 'junit' | 'tap'): string {
+function convertAgentforceStudioTestResultsToFormat(
+  results: AgentforceStudioTestResultsResponse,
+  format: 'json' | 'junit' | 'tap'
+): string {
   switch (format) {
     case 'json':
       return JSON.stringify(results, null, 2);
@@ -392,9 +493,24 @@ export async function handleTestResults({
   if (!isLegacyResponse(results)) {
     const ngtFormatConfig = {
       human: { ext: 'txt', label: 'human-readable', get: () => humanFormatAgentforceStudio(results), strip: true },
-      json: { ext: 'json', label: 'JSON', get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'), strip: false },
-      junit: { ext: 'xml', label: 'JUnit', get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'), strip: false },
-      tap: { ext: 'txt', label: 'TAP', get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'), strip: false },
+      json: {
+        ext: 'json',
+        label: 'JSON',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'json'),
+        strip: false,
+      },
+      junit: {
+        ext: 'xml',
+        label: 'JUnit',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'junit'),
+        strip: false,
+      },
+      tap: {
+        ext: 'txt',
+        label: 'TAP',
+        get: () => convertAgentforceStudioTestResultsToFormat(results, 'tap'),
+        strip: false,
+      },
     } as const;
     const cfg = ngtFormatConfig[format];
     const formatted = cfg.get();

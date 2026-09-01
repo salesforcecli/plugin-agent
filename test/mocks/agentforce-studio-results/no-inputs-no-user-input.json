@@ -1,0 +1,15 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "subjectResponse": "{\"text\":\"Some response with no metadata.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.0,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

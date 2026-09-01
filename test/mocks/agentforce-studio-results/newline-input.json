@@ -1,0 +1,16 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 6,
+      "inputs": [{ "name": "notes", "value": "line one\nline two" }],
+      "subjectResponse": "{\"text\":\"Newline in input value.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.0,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}
