@@ -41,7 +41,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-sf-plugin": "^1.20.33",
     "esmock": "^2.7.6",
-    "oclif": "^4.24.0",
+    "oclif": "^5.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
