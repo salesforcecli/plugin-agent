@@ -1,3 +1,17 @@
+# [2.1.0](https://github.com/salesforcecli/plugin-agent/compare/2.0.5...2.1.0) (2026-09-01)
+
+### Bug Fixes
+
+- address PR review findings on input handling and terminal sanitization ([85fa0ff](https://github.com/salesforcecli/plugin-agent/commit/85fa0ff64d90eb6751696a9225fd95862ae6e2be))
+- show raw input field name in Inputs line, not a capitalized label ([8f84496](https://github.com/salesforcecli/plugin-agent/commit/8f84496acdc0dc091cecd3cea7ccf8ad25af04f7))
+- strip bare C0 control characters in sanitizeForDisplay ([748a54a](https://github.com/salesforcecli/plugin-agent/commit/748a54ae743da634b97d8698a16d5e0ae88e703d))
+
+### Features
+
+- hide empty Expected/Actual scorer columns per test case ([83ea1da](https://github.com/salesforcecli/plugin-agent/commit/83ea1dac8ee9f12407a5bbec82d0e60c717ac488))
+- render latency and token usage in agent test results human format ([739dfe7](https://github.com/salesforcecli/plugin-agent/commit/739dfe77a42b3392bf07c2185bd609c4aa74fb66))
+- render test-case inputs in agent test results human format ([31f8a63](https://github.com/salesforcecli/plugin-agent/commit/31f8a633ace138f72516f1897f3bcfc30ae61729))
+
 ## [2.0.5](https://github.com/salesforcecli/plugin-agent/compare/2.0.4...2.0.5) (2026-08-24)
 
 ## [2.0.4](https://github.com/salesforcecli/plugin-agent/compare/2.0.3...2.0.4) (2026-08-19)
