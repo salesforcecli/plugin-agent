@@ -42,7 +42,23 @@ State variables use the bare developerName, no prefix. These seed mutable agent 
 
 Both namespaces can be mixed in one value. Example: --context-variables '$Context.MyLinkedVar=foo,MyStateVar=bar'.
 
-Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name will see null. (3) Type defaults to Text.
+Tips: (1) Quote the whole value in single quotes so $Context isn't shell-expanded. (2) Names are sent verbatim — a bare name is treated as a state variable, not a linked context variable, so live actions that bind via $Context.Name will see null. (3) Type is always Text; to send a typed variable, use --context-variables-json.
+
+# flags.context-variables-json.summary
+
+Typed session variables for the agent preview session, as a JSON array.
+
+# flags.context-variables-json.description
+
+Sets typed variables on the agent preview session. Use this instead of --context-variables when a variable is not Text, for example a boolean-gated route (available when @variables.myFlag == True) that needs a real Boolean, or a Number, Object, List, or Json value.
+
+The value is a JSON array of objects, each with a "name", a "type", and an optional "value". The "type" is one of Text, Date, DateTime, Money, Ref, Boolean, Number, Object, List, or Json. The JSON type of "value" must match "type": Boolean takes a boolean, Number takes a number, the string types take a string, Object and List take an array, and Json takes an object.
+
+Example: --context-variables-json '[{"name":"probeGate","type":"Boolean","value":true},{"name":"retryCount","type":"Number","value":3}]'.
+
+You can pass both --context-variables and --context-variables-json in the same command. When the same variable name appears in both, the --context-variables-json value wins.
+
+Tip: names follow the same rules as --context-variables. Use the "$Context." prefix for linked context variables, and a bare name for state variables.
 
 # error.invalidAgentType
 

@@ -23,7 +23,12 @@ import { Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import { AgentTest, AgentTestResultsResponse, type ContextVariable } from '@salesforce/agents';
+import {
+  AgentTest,
+  AgentTestResultsResponse,
+  type ContextVariable,
+  type ContextVariableType,
+} from '@salesforce/agents';
 import { theme } from './inquirer-theme.js';
 import { AgentTestResultsResult } from './commands/agent/test/results.js';
 
@@ -82,9 +87,125 @@ export const contextVariablesFlag = Flags.string({
 });
 
 /**
+ * JSON form of --context-variables that carries the variable's type, so callers can
+ * send Boolean/Number/Object/List/Json values (not just Text). Deliberately has no
+ * `delimiter`, so a comma inside the JSON (or inside a List/Object value) is safe.
+ */
+export const contextVariablesJsonFlag = Flags.string({
+  summary: messages.getMessage('flags.context-variables-json.summary'),
+  description: messages.getMessage('flags.context-variables-json.description'),
+});
+
+// The valid ContextVariable.type values, mirroring the preview API's Variable schema.
+const CONTEXT_VARIABLE_TYPES: readonly ContextVariableType[] = [
+  'Text',
+  'Date',
+  'DateTime',
+  'Money',
+  'Ref',
+  'Boolean',
+  'Number',
+  'Object',
+  'List',
+  'Json',
+];
+
+// Types whose `value` is a plain string on the wire.
+const STRING_CONTEXT_VARIABLE_TYPES: readonly ContextVariableType[] = ['Text', 'Date', 'DateTime', 'Money', 'Ref'];
+
+function describeJsonValue(value: unknown): string {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'an array';
+  return `a ${typeof value}`;
+}
+
+/**
+ * Validates that a decoded JSON `value` matches its declared `type`, matching the
+ * preview API's per-type Variable schema (Boolean->boolean, Number->number,
+ * string types->string, Object/List->array, Json->object). `value` is optional and
+ * nullable, so undefined/null pass.
+ */
+function validateContextVariableValue(name: string, type: ContextVariableType, value: unknown): void {
+  if (value === undefined || value === null) return;
+  const reject = (expected: string): never => {
+    throw new SfError(
+      `Invalid --context-variables-json: variable "${name}" of type "${type}" expects ${expected}, but got ${describeJsonValue(
+        value
+      )}.`
+    );
+  };
+  if (type === 'Boolean' && typeof value !== 'boolean') reject('a boolean value');
+  else if (type === 'Number' && typeof value !== 'number') reject('a number value');
+  else if (STRING_CONTEXT_VARIABLE_TYPES.includes(type) && typeof value !== 'string') reject('a string value');
+  else if ((type === 'Object' || type === 'List') && !Array.isArray(value)) reject('an array value');
+  else if (type === 'Json' && (typeof value !== 'object' || Array.isArray(value))) reject('a JSON object value');
+}
+
+function toContextVariable(entry: unknown, index: number): ContextVariable {
+  if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+    throw new SfError(
+      `Invalid --context-variables-json: entry at index ${index} must be an object with "name" and "type" (and optionally "value").`
+    );
+  }
+  const { name, type, value } = entry as Record<string, unknown>;
+  if (typeof name !== 'string' || name.trim() === '') {
+    throw new SfError(`Invalid --context-variables-json: entry at index ${index} is missing a non-empty "name".`);
+  }
+  if (typeof type !== 'string' || !CONTEXT_VARIABLE_TYPES.includes(type as ContextVariableType)) {
+    throw new SfError(
+      `Invalid --context-variables-json: variable "${name}" has invalid type "${String(
+        type
+      )}". Expected one of: ${CONTEXT_VARIABLE_TYPES.join(', ')}.`
+    );
+  }
+  validateContextVariableValue(name, type as ContextVariableType, value);
+  return { name, type, value } as ContextVariable;
+}
+
+const CONTEXT_VARIABLES_JSON_EXAMPLE = '[{"name":"probeGate","type":"Boolean","value":true}]';
+
+/**
+ * Parses the --context-variables-json flag: a JSON array of typed context variables
+ * ({ name, type, value }) matching the preview API's Variable schema. Throws an
+ * SfError with a specific reason on malformed JSON, a non-array, or a bad entry.
+ */
+export function parseContextVariablesJson(raw: string | undefined): ContextVariable[] {
+  if (raw === undefined || raw.trim() === '') return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new SfError(
+      `Invalid --context-variables-json: value is not valid JSON. Expected a JSON array, e.g. ${CONTEXT_VARIABLES_JSON_EXAMPLE}.`
+    );
+  }
+  if (!Array.isArray(parsed)) {
+    throw new SfError(
+      `Invalid --context-variables-json: expected a JSON array, e.g. ${CONTEXT_VARIABLES_JSON_EXAMPLE}.`
+    );
+  }
+  return parsed.map(toContextVariable);
+}
+
+/**
+ * Merges the text-form (--context-variables) and JSON-form (--context-variables-json)
+ * context variables into one array. When the same name appears in both, the JSON entry
+ * wins, keeping the text entry's original position.
+ */
+export function mergeContextVariables(
+  textVariables: ContextVariable[],
+  jsonVariables: ContextVariable[]
+): ContextVariable[] {
+  const byName = new Map<string, ContextVariable>();
+  for (const variable of textVariables) byName.set(variable.name, variable);
+  for (const variable of jsonVariables) byName.set(variable.name, variable);
+  return [...byName.values()];
+}
+
+/**
  * Parses raw "Name=Value" entries from --context-variables into ContextVariable
- * objects for the SDK. Type defaults to "Text" — the only empirically-observed
- * variant on the wire today.
+ * objects for the SDK. Type is always "Text"; to send a typed variable
+ * (Boolean/Number/Object/List/Json) use --context-variables-json instead.
  *
  * Names pass through verbatim. The runtime distinguishes two namespaces by name
  * shape: "$Context.<Name>" for linked context variables, bare "<developerName>"
