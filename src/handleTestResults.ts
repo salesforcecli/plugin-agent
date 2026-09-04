@@ -103,9 +103,6 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
-// The Agentforce Studio API has been observed emitting `status` in different casings
-// across orgs/jobs (e.g. "PASS" vs "Pass") for the same scorer — see W-24087944. Compare
-// case-insensitively so rendering doesn't depend on which casing a given job returns.
 function isPassStatus(status: unknown): boolean {
   return typeof status === 'string' && status.toUpperCase() === 'PASS';
 }
