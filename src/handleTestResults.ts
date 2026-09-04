@@ -103,6 +103,13 @@ function parseScorerResponse(raw: string): ParsedScorerResponse {
   }
 }
 
+// The Agentforce Studio API has been observed emitting `status` in different casings
+// across orgs/jobs (e.g. "PASS" vs "Pass") for the same scorer — see W-24087944. Compare
+// case-insensitively so rendering doesn't depend on which casing a given job returns.
+function isPassStatus(status: unknown): boolean {
+  return typeof status === 'string' && status.toUpperCase() === 'PASS';
+}
+
 type TestCaseInput = { name: string; value: unknown };
 
 // AgentforceStudioTestCaseResult doesn't yet declare `inputs` in @salesforce/agents,
@@ -209,7 +216,7 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
       const parsed = parseScorerResponse(scorer.scorerResponse);
       return {
         scorer: scorer.scorerName,
-        result: parsed.status === 'PASS' ? ansis.green('Pass') : ansis.red('Fail'),
+        result: isPassStatus(parsed.status) ? ansis.green('Pass') : ansis.red('Fail'),
         expected: parsed.expectedValue ?? '',
         actual: parsed.actualValue ?? '',
         reasoning: parsed.reasoning ?? '',
@@ -244,7 +251,7 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
 
   const totalCases = results.testCases.length;
   const passCases = results.testCases.filter((tc) =>
-    tc.testScorerResults.every((s) => parseScorerResponse(s.scorerResponse).status === 'PASS')
+    tc.testScorerResults.every((s) => isPassStatus(parseScorerResponse(s.scorerResponse).status))
   ).length;
 
   const summary = makeSimpleTable(
@@ -264,7 +271,7 @@ function junitFormatAgentforceStudio(results: AgentforceStudioTestResultsRespons
   const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
   const testCount = results.testCases.length;
   const failureCount = results.testCases.filter((tc) =>
-    tc.testScorerResults.some((s) => parseScorerResponse(s.scorerResponse).status !== 'PASS')
+    tc.testScorerResults.some((s) => !isPassStatus(parseScorerResponse(s.scorerResponse).status))
   ).length;
 
   const suites = builder.build({
@@ -279,7 +286,7 @@ function junitFormatAgentforceStudio(results: AgentforceStudioTestResultsRespons
         failure: tc.testScorerResults
           .map((s) => {
             const parsed = parseScorerResponse(s.scorerResponse);
-            if (parsed.status !== 'PASS') {
+            if (!isPassStatus(parsed.status)) {
               return { $message: parsed.reasoning ?? 'Unknown error', $name: s.scorerName };
             }
           })
@@ -298,7 +305,7 @@ function tapFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse)
   for (const tc of results.testCases) {
     for (const scorer of tc.testScorerResults) {
       const parsed = parseScorerResponse(scorer.scorerResponse);
-      const pass = parsed.status === 'PASS';
+      const pass = isPassStatus(parsed.status);
       expectationCount++;
       lines.push(`${pass ? 'ok' : 'not ok'} ${expectationCount} ${tc.testNumber}.${scorer.scorerName}`);
       if (!pass) {
