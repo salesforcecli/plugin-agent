@@ -311,4 +311,21 @@ describe('humanFormatAgentforceStudio - scorer status casing (W-24087944)', () =
     expect(output).to.include('Passing Test Cases 1');
     expect(output).to.include('Failing Test Cases 2');
   });
+
+  it('treats a null or missing scorer status as Fail, without throwing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/null-or-missing-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+
+    let output = '';
+    expect(() => {
+      output = humanFormatAgentforceStudio(input);
+    }).to.not.throw();
+
+    expect(output).to.include(ansis.red('Fail'));
+    expect(output).to.not.include(ansis.green('Pass'));
+
+    const singleLine = stripVTControlCharacters(output).replace(/\s+/g, ' ');
+    expect(singleLine).to.include('Passing Test Cases 0');
+    expect(singleLine).to.include('Failing Test Cases 1');
+  });
 });
