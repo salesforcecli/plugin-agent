@@ -329,3 +329,15 @@ describe('humanFormatAgentforceStudio - scorer status casing (W-24087944)', () =
     expect(singleLine).to.include('Failing Test Cases 1');
   });
 });
+
+describe('humanFormatAgentforceStudio - empty scorer results (W-24087944)', () => {
+  it('counts a test case with no scorer results as failing, not passing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/empty-scorer-results.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input)).replace(/\s+/g, ' ');
+
+    expect(output).to.include('Total Test Cases 2');
+    expect(output).to.include('Passing Test Cases 1');
+    expect(output).to.include('Failing Test Cases 1');
+  });
+});

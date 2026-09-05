@@ -247,8 +247,11 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
   }
 
   const totalCases = results.testCases.length;
-  const passCases = results.testCases.filter((tc) =>
-    tc.testScorerResults.every((s) => isPassStatus(parseScorerResponse(s.scorerResponse).status))
+  // A test case with no scorer results (e.g. it errored before any scorer ran) is not passing.
+  const passCases = results.testCases.filter(
+    (tc) =>
+      tc.testScorerResults.length > 0 &&
+      tc.testScorerResults.every((s) => isPassStatus(parseScorerResponse(s.scorerResponse).status))
   ).length;
 
   const summary = makeSimpleTable(
@@ -267,8 +270,11 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
 function junitFormatAgentforceStudio(results: AgentforceStudioTestResultsResponse): string {
   const builder = new XMLBuilder({ format: true, attributeNamePrefix: '$', ignoreAttributes: false });
   const testCount = results.testCases.length;
-  const failureCount = results.testCases.filter((tc) =>
-    tc.testScorerResults.some((s) => !isPassStatus(parseScorerResponse(s.scorerResponse).status))
+  // A test case with no scorer results (e.g. it errored before any scorer ran) is not passing.
+  const failureCount = results.testCases.filter(
+    (tc) =>
+      tc.testScorerResults.length === 0 ||
+      tc.testScorerResults.some((s) => !isPassStatus(parseScorerResponse(s.scorerResponse).status))
   ).length;
 
   const suites = builder.build({
