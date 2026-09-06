@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve } from 'node:path';
 import { readFileSync, existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
 import { Messages, EnvironmentVariable } from '@salesforce/core';
 import {
@@ -24,6 +23,8 @@ import {
   createScorerDefinition,
   labelToApiName,
   scorerEnumValueCount,
+  scorerSpecJsonSchema,
+  type SupportedLightningType,
   SUPPORTED_LIGHTNING_TYPES,
   MAX_ENUM_VALUES,
   SCORER_API_NAME_MAX_LENGTH,
@@ -255,12 +256,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     const { flags } = await this.parse(AgentScorerCreate);
 
     if (flags['spec-schema']) {
-      const schemaPath = resolve(
-        dirname(fileURLToPath(import.meta.url)),
-        '..', '..', '..', '..', 'schemas', 'agent-scorer-create__spec.json'
-      );
-      const schema = readFileSync(schemaPath, 'utf8');
-      this.styledJSON(JSON.parse(schema) as unknown as import('@salesforce/ts-types').AnyJson);
+      this.styledJSON(scorerSpecJsonSchema() as unknown as import('@salesforce/ts-types').AnyJson);
       return { path: '', apiName: '', contents: '' };
     }
 
@@ -270,7 +266,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       ? (YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as ScorerSpec)
       : await this.runInteractiveInterview(flags, connection);
 
-    const outputDir = resolve(flags['output-dir'] as string);
+    const outputDir = resolve(flags['output-dir']);
 
     if (flags.preview) {
       const result = await createScorerDefinition(spec, { outputDir, write: false });
@@ -380,7 +376,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
   private async promptForDataTypeDetails(dataType: string): Promise<{
     outputEnumValues?: OutputEnumValueInput[];
     specification?: ScorerSpec['specification'];
-    lightningType?: string;
+    lightningType?: SupportedLightningType;
     scorerType?: ScorerSpec['scorerType'];
   }> {
     if (dataType === 'Number') {
@@ -394,7 +390,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       this.log();
       this.styledHeader('Open Scorer Configuration');
 
-      const lightningType = await select<string>({
+      const lightningType = await select<SupportedLightningType>({
         message: 'Select the lightning type for open-ended values',
         choices: SUPPORTED_LIGHTNING_TYPES.map((t) => ({ name: t, value: t })),
         theme,

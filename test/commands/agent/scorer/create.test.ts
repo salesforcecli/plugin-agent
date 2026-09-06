@@ -17,10 +17,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
 
 import { join } from 'node:path';
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { createRequire } from 'node:module';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { expect } from 'chai';
 import esmock from 'esmock';
 import sinon from 'sinon';
+
+// The command reads specs via node:fs, but createScorerDefinition (in @salesforce/agents) writes
+// output via node:fs/promises (writeFile/mkdir). node: core modules are singletons, so stubbing
+// this shared instance captures the library's real writes without touching disk. Obtained through
+// createRequire because ESM namespace objects are frozen and cannot be stubbed.
+const fsPromises = createRequire(import.meta.url)('node:fs/promises') as {
+  writeFile: (...args: any[]) => Promise<void>;
+  mkdir: (...args: any[]) => Promise<unknown>;
+};
 import YAML from 'yaml';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
@@ -126,16 +137,31 @@ async function loadMockedCommand(
 
   const fsMock: Record<string, any> = {
     readFileSync: () => yamlContent,
-    writeFileSync: (path: string, content: string) => {
-      writtenFiles.push({ path, content });
-    },
-    mkdirSync: (path: string) => {
-      createdDirs.push(path);
-    },
     existsSync: fileExists,
   };
 
   const mocks: Record<string, any> = { 'node:fs': fsMock };
+
+  // Capture the scorer/prompt-template files written by createScorerDefinition (via
+  // node:fs/promises) without hitting disk; delegate any unrelated writes to the real fns.
+  const isScorerOutput = (p: unknown): boolean =>
+    typeof p === 'string' && (p.includes('aiAgentScorerDefinitions') || p.includes('genAiPromptTemplates'));
+  const origWriteFile = fsPromises.writeFile;
+  const origMkdir = fsPromises.mkdir;
+  sinon.stub(fsPromises, 'writeFile').callsFake((path: unknown, content: unknown, options: unknown) => {
+    if (isScorerOutput(path)) {
+      writtenFiles.push({ path: String(path), content: String(content) });
+      return Promise.resolve();
+    }
+    return origWriteFile(path, content, options);
+  });
+  sinon.stub(fsPromises, 'mkdir').callsFake((path: unknown, options: unknown) => {
+    if (isScorerOutput(path)) {
+      createdDirs.push(String(path));
+      return Promise.resolve(undefined);
+    }
+    return origMkdir(path, options);
+  });
 
   if (opts?.confirmResult !== undefined) {
     mocks['@inquirer/prompts'] = {
@@ -149,9 +175,26 @@ async function loadMockedCommand(
   return { Command: mod.default, writtenFiles, createdDirs };
 }
 
+// Bare spec filenames used across the --spec tests. `spec: Flags.file({ exists: true })` makes
+// oclif stat the path at parse time (via a CJS require of node:fs/promises deep inside
+// @oclif/core, which esmock cannot intercept), so these must physically exist on disk. We create
+// them in a temp dir and chdir there; the command's readFileSync is still mocked, so file
+// contents are irrelevant — only their existence matters.
+const SPEC_FILENAMES = [
+  'test.yaml',
+  'test-scorer.yaml',
+  'numeric-scorer.yaml',
+  'threshold-scorer.yaml',
+  'open-scorer.yaml',
+  'prompt-scorer.yaml',
+  'manual-scorer.yaml',
+];
+
 describe('agent scorer create', () => {
   const $$ = new TestContext();
   let testOrg: MockTestOrgData;
+  let originalCwd: string;
+  let specDir: string;
 
   before(async function () {
     // Warm up esmock to check it can load the module
@@ -165,9 +208,20 @@ describe('agent scorer create', () => {
         },
       });
     } catch (e: any) {
+      // eslint-disable-next-line no-console
       console.error('esmock warmup failed:', e.message);
       this.skip();
     }
+
+    originalCwd = process.cwd();
+    specDir = mkdtempSync(join(tmpdir(), 'scorer-specs-'));
+    for (const name of SPEC_FILENAMES) writeFileSync(join(specDir, name), '');
+    process.chdir(specDir);
+  });
+
+  after(() => {
+    if (originalCwd) process.chdir(originalCwd);
+    if (specDir) rmSync(specDir, { recursive: true, force: true });
   });
 
   beforeEach(async () => {
@@ -178,6 +232,7 @@ describe('agent scorer create', () => {
 
   afterEach(() => {
     $$.restore();
+    sinon.restore();
   });
 
   describe('--spec flag (YAML-driven) with --preview', () => {
@@ -218,8 +273,6 @@ describe('agent scorer create', () => {
       expect(result.contents).to.include('<min>0</min>');
       expect(result.contents).to.include('<max>5</max>');
       expect(result.contents).to.include('<step>1</step>');
-      expect(result.contents).to.include('<value>0</value>');
-      expect(result.contents).to.include('<value>5</value>');
       expect(result.contents).to.include('<status>Available</status>');
     });
 
@@ -486,9 +539,9 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('agentforce_session_tracing__scorerOpenEnded');
     });
 
-    it('should use scorerMeasurement type for Measurement semanticType', async () => {
+    it('should use scorerMeasurement type for Number scorers', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(
-        makePromptTemplateSpec({ semanticType: 'Measurement' })
+        makeNumberSpec({ engineType: 'PromptTemplate' })
       );
 
       await Command.run([
@@ -504,7 +557,7 @@ describe('agent scorer create', () => {
 
     it('should use AllowedRange input for scorerMeasurement type', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(
-        makePromptTemplateSpec({ semanticType: 'Measurement' })
+        makeNumberSpec({ engineType: 'PromptTemplate' })
       );
 
       await Command.run([
@@ -536,79 +589,10 @@ describe('agent scorer create', () => {
     });
   });
 
-  describe('number enum value generation', () => {
-    it('should generate correct values for integer steps', async () => {
-      const spec = makeNumberSpec({
-        specification: { valueSpecification: { min: 0, max: 3, step: 1 } },
-      });
-      const { Command } = await loadMockedCommand(spec);
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<value>0</value>');
-      expect(result.contents).to.include('<value>1</value>');
-      expect(result.contents).to.include('<value>2</value>');
-      expect(result.contents).to.include('<value>3</value>');
-    });
-
-    it('should generate correct values for decimal steps', async () => {
-      const spec = makeNumberSpec({
-        specification: { valueSpecification: { min: 0, max: 1, step: 0.5 } },
-      });
-      const { Command } = await loadMockedCommand(spec);
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<value>0</value>');
-      expect(result.contents).to.include('<value>0.5</value>');
-      expect(result.contents).to.include('<value>1</value>');
-    });
-
-    it('should set outcomeType to NotApplicable for number values', async () => {
-      const spec = makeNumberSpec({
-        specification: { valueSpecification: { min: 1, max: 2, step: 1 } },
-      });
-      const { Command } = await loadMockedCommand(spec);
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      const matches = result.contents.match(/<outcomeType>NotApplicable<\/outcomeType>/g);
-      expect(matches).to.have.length(2);
-    });
-
-    it('should handle large step generating few values', async () => {
-      const spec = makeNumberSpec({
-        specification: { valueSpecification: { min: 0, max: 100, step: 50 } },
-      });
-      const { Command } = await loadMockedCommand(spec);
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<value>0</value>');
-      expect(result.contents).to.include('<value>50</value>');
-      expect(result.contents).to.include('<value>100</value>');
-    });
-  });
+  // NOTE: number scorers no longer expand min/max/step into enumerated <value> entries; the
+  // generateNumberEnumValues helper was removed (they now emit a compact <valueSpecification>,
+  // covered by 'should create a Number scorer with specification'). The former
+  // 'number enum value generation' suite tested that removed behavior and was deleted.
 
   describe('XML structure', () => {
     it('should include XML declaration and namespace', async () => {
@@ -761,8 +745,7 @@ describe('agent scorer create', () => {
     });
 
     it('should use Measurement default prompt with AllowedRange', async () => {
-      const spec = makePromptTemplateSpec({ semanticType: 'Measurement' });
-      delete (spec as any).promptContent;
+      const spec = makeNumberSpec({ engineType: 'PromptTemplate' });
       const { Command, writtenFiles } = await loadMockedCommand(spec);
 
       await Command.run([
