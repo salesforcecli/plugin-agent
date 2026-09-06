@@ -23,8 +23,15 @@ import {
   type ScorerSpec,
   createScorerDefinition,
   labelToApiName,
+  scorerEnumValueCount,
   SUPPORTED_LIGHTNING_TYPES,
   MAX_ENUM_VALUES,
+  SCORER_API_NAME_MAX_LENGTH,
+  SCORER_API_NAME_PATTERN,
+  SCORER_ENGINE_TYPES,
+  SCORER_STATUSES,
+  SCORER_OUTCOME_TYPES,
+  SCORER_INPUT_SCOPES,
 } from '@salesforce/agents';
 import { confirm, select, input as inquirerInput } from '@inquirer/prompts';
 import YAML from 'yaml';
@@ -44,6 +51,11 @@ export type AgentScorerCreateResult = {
 /** @deprecated Use ScorerSpec from @salesforce/agents directly. */
 export type ScorerSpecFile = ScorerSpec;
 
+// The CLI presents "OpenEnded" as a data-type choice; it maps to core dataType 'LightningType' +
+// scorerType 'OpenEnded' (see runInteractiveInterview). This is a UI-level set, distinct from the
+// core SCORER_DATA_TYPES union, so it is defined locally.
+const UI_SCORER_DATA_TYPES = ['OpenEnded', 'Text', 'Number'] as const;
+
 const FLAGGABLE_PROMPTS = {
   label: {
     message: messages.getMessage('flags.label.summary'),
@@ -56,8 +68,8 @@ const FLAGGABLE_PROMPTS = {
     promptMessage: 'Scorer API name',
     validate: (d: string): boolean | string => {
       if (!d.length) return 'API name cannot be empty';
-      if (d.length > 35) return 'API name cannot exceed 35 characters';
-      if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(d)) return 'Must start with letter, only alphanumerics and underscores';
+      if (d.length > SCORER_API_NAME_MAX_LENGTH) return `API name cannot exceed ${SCORER_API_NAME_MAX_LENGTH} characters`;
+      if (!SCORER_API_NAME_PATTERN.test(d)) return 'Must start with letter, only alphanumerics and underscores';
       return true;
     },
     required: true,
@@ -65,8 +77,9 @@ const FLAGGABLE_PROMPTS = {
   'data-type': {
     message: messages.getMessage('flags.data-type.summary'),
     promptMessage: 'What data type does this scorer produce?',
-    options: ['OpenEnded', 'Text', 'Number'],
-    validate: (d: string): boolean | string => ['Text', 'Number', 'OpenEnded'].includes(d) || 'Invalid data type',
+    options: UI_SCORER_DATA_TYPES,
+    validate: (d: string): boolean | string =>
+      (UI_SCORER_DATA_TYPES as readonly string[]).includes(d) || 'Invalid data type',
     required: true,
   },
   description: {
@@ -77,16 +90,16 @@ const FLAGGABLE_PROMPTS = {
   'engine-type': {
     message: messages.getMessage('flags.engine-type.summary'),
     promptMessage: 'Scoring engine type',
-    options: ['Manual', 'PromptTemplate'],
+    options: SCORER_ENGINE_TYPES,
     validate: (d: string): boolean | string =>
-      ['Manual', 'PromptTemplate'].includes(d) || 'Invalid engine type',
+      (SCORER_ENGINE_TYPES as readonly string[]).includes(d) || 'Invalid engine type',
     required: true,
   },
   status: {
     message: messages.getMessage('flags.status.summary'),
     promptMessage: 'Initial status',
-    options: ['Draft', 'Available'],
-    validate: (d: string): boolean | string => ['Available', 'Draft'].includes(d) || 'Invalid status',
+    options: SCORER_STATUSES,
+    validate: (d: string): boolean | string => (SCORER_STATUSES as readonly string[]).includes(d) || 'Invalid status',
     default: 'Draft',
   },
 } satisfies Record<string, FlaggablePrompt>;
@@ -108,9 +121,9 @@ async function promptForSingleEnumValue(index: number): Promise<OutputEnumValueI
   const outcomeType = await promptForFlag({
     message: 'Outcome type',
     promptMessage: 'Outcome type for this value',
-    options: ['Pass', 'Fail', 'NotApplicable'],
+    options: SCORER_OUTCOME_TYPES,
     validate: (d: string): boolean | string =>
-      ['Pass', 'Fail', 'NotApplicable'].includes(d) || 'Invalid',
+      (SCORER_OUTCOME_TYPES as readonly string[]).includes(d) || 'Invalid',
   });
 
   const isFallback = await confirm({
@@ -170,7 +183,7 @@ async function promptForNumberSpecification(): Promise<{ min: number; max: numbe
     validate: (d: string): boolean | string => {
       const n = parseFloat(d);
       if (isNaN(n) || n <= 0) return 'Step must be a positive number';
-      const numValues = Math.floor((max - min) / n) + 1;
+      const numValues = scorerEnumValueCount(min, max, n);
       if (numValues > MAX_ENUM_VALUES) return `Step too small: would generate ${numValues} values (max ${MAX_ENUM_VALUES})`;
       return true;
     },
@@ -180,7 +193,7 @@ async function promptForNumberSpecification(): Promise<{ min: number; max: numbe
   const step = parseFloat(stepStr);
 
   const addThreshold = await confirm({
-    message: `Add a threshold value? (${Math.floor((max - min) / step) + 1} output values will be generated from ${min} to ${max})`,
+    message: `Add a threshold value? (${scorerEnumValueCount(min, max, step)} output values will be generated from ${min} to ${max})`,
     default: false,
     theme,
   });
@@ -457,10 +470,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     const associationInputScope = await select<string>({
       message: 'Input scope for this agent association',
-      choices: [
-        { name: 'Session', value: 'Session' },
-        { name: 'Intent', value: 'Intent' },
-      ],
+      choices: SCORER_INPUT_SCOPES.map((s) => ({ name: s, value: s })),
       default: 'Session',
       theme,
     });
