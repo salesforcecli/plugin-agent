@@ -209,7 +209,7 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
         process.exitCode = 1;
       }
 
-      return { ...detailsResponse, status: 'COMPLETED', runId: response.runId } as AgentTestRunResult;
+      return { ...detailsResponse, status: 'COMPLETED', runId: response.runId };
     } else {
       this.mso.stop();
       this.log(

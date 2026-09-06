@@ -89,7 +89,7 @@ export default class ApiCatalogMcpServerUpdate extends SfCommand<ApiCatalogMcpSe
       input.serverUrl = flags['server-url'];
     }
 
-    const authType = flags['auth-type'] as McpAuthType | undefined;
+    const authType = flags['auth-type'];
 
     if (authType) {
       if (authType === 'OAUTH') {

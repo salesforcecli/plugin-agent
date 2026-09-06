@@ -77,7 +77,7 @@ export default class ApiCatalogMcpServerCreate extends SfCommand<McpServerCreate
     const { flags } = await this.parse(ApiCatalogMcpServerCreate);
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
-    const authType = flags['auth-type'] as McpAuthType;
+    const authType = flags['auth-type'];
 
     if (authType === 'OAUTH') {
       if (!flags['identity-provider'] || !flags['client-id'] || !flags['client-secret'] || !flags.scope) {
