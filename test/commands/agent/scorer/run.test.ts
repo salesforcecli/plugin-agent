@@ -214,20 +214,27 @@ describe('agent scorer run', () => {
     expect(connection).to.not.be.undefined;
   });
 
-  it('surfaces an engine error result', async () => {
+  it('exits non-zero (throws) on an engine error result, with the result attached as error data', async () => {
     const { Command } = await loadMockedCommand({
       runScorerResult: { ok: false, error: 'no engine for Manual' },
     });
 
-    const result = await Command.run([
-      '--target-org', testOrg.username,
-      '--api-name', 'Sentiment_Scorer',
-      '--file', SESSION_FILE,
-      '--json',
-    ]);
-
-    expect(result.ok).to.equal(false);
-    expect(result.error).to.equal('no engine for Manual');
+    try {
+      await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Sentiment_Scorer',
+        '--file', SESSION_FILE,
+        '--json',
+      ]);
+      expect.fail('should have thrown');
+    } catch (err: unknown) {
+      const error = err as { message: string; data?: any };
+      expect(error.message).to.include('did not produce a valid score');
+      expect(error.message).to.include('no engine for Manual');
+      // The full result is preserved for scripted consumers on the error's data field.
+      expect(error.data?.ok).to.equal(false);
+      expect(error.data?.scorerApiName).to.equal('Sentiment_Scorer');
+    }
   });
 
   it('surfaces the error when the scorer is not found in the project', async () => {
@@ -335,18 +342,23 @@ describe('agent scorer run', () => {
       expect(logLines).to.include('Output:      42');
     });
 
-    it('renders explanation and error lines', async () => {
+    it('renders the outcome/output/explanation lines before throwing on a failed result', async () => {
       const { Command } = await loadMockedCommand({
         runScorerResult: { ok: false, output: 'Negative', explanation: 'Tone was hostile.', error: 'no engine for Manual' },
       });
 
-      await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+      try {
+        await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('no engine for Manual');
+      }
 
+      // The human-readable summary is still printed before the command fails.
       const logLines = sfCommandStubs.log.args.map((a) => a[0]);
       expect(logLines).to.include('Outcome:     error');
       expect(logLines).to.include('Output:      Negative');
       expect(logLines).to.include('Explanation: Tone was hostile.');
-      expect(logLines).to.include('Error:       no engine for Manual');
     });
   });
 

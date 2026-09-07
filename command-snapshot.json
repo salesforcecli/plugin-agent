@@ -632,7 +632,6 @@
             "agent-api-name",
             "api-name",
             "api-version",
-            "archive-version",
             "description",
             "engine-type",
             "flags-dir",
@@ -642,11 +641,28 @@
             "new-version",
             "output-dir",
             "preview",
-            "promote-version",
             "spec",
             "spec-schema",
             "status",
             "target-org"
+        ],
+        "plugin": "@salesforce/plugin-agent"
+    },
+    {
+        "alias": [],
+        "command": "agent:scorer:edit",
+        "flagAliases": [],
+        "flagChars": [],
+        "flags": [
+            "activate",
+            "api-name",
+            "deactivate",
+            "flags-dir",
+            "json",
+            "output-dir",
+            "preview",
+            "status",
+            "version"
         ],
         "plugin": "@salesforce/plugin-agent"
     },

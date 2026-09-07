@@ -22,7 +22,6 @@ import {
   type ScorerSpec,
   createScorerDefinition,
   addScorerVersion,
-  setScorerVersionStatus,
   labelToApiName,
   scorerSpecJsonSchema,
   type SupportedLightningType,
@@ -180,16 +179,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       summary: messages.getMessage('flags.new-version.summary'),
       default: false,
     }),
-    // eslint-disable-next-line sf-plugin/flag-min-max-default
-    'promote-version': Flags.integer({
-      summary: messages.getMessage('flags.promote-version.summary'),
-      min: 1,
-    }),
-    // eslint-disable-next-line sf-plugin/flag-min-max-default
-    'archive-version': Flags.integer({
-      summary: messages.getMessage('flags.archive-version.summary'),
-      min: 1,
-    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       default: join('force-app', 'main', 'default'),
@@ -210,20 +199,30 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     const outputDir = resolve(flags['output-dir']);
 
-    // Pure status transitions (promote/archive) edit an existing scorer version in place — no content
-    // authoring, no interview.
-    if (flags['promote-version'] != null || flags['archive-version'] != null) {
-      return this.applyStatusTransitions(flags, outputDir);
-    }
-
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
     const spec: ScorerSpec = flags.spec
       ? this.parseSpec(readFileSync(resolve(flags.spec), 'utf8'))
       : await this.runInteractiveInterview(flags, connection);
 
+    const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
+    const scorerPath = join(outputDir, 'aiAgentScorerDefinitions', scorerFileName);
+    const exists = existsSync(scorerPath);
+
+    // An existing scorer is never overwritten: refine it by adding a new version, which keeps the API name
+    // stable and the version history intact. Require --new-version so a re-run can't silently add a version
+    // (versions can't be deleted once deployed). This gate applies to --preview too, so a preview reflects
+    // the artifact the same flags would actually write.
+    if (exists && !flags['new-version']) {
+      throw messages.createError('error.scorerExists', [spec.apiName]);
+    }
+
     if (flags.preview) {
-      const result = await createScorerDefinition(spec, { outputDir, write: false });
+      // Preview the exact artifact these flags would write: an appended version when the scorer already
+      // exists (--new-version), otherwise a fresh definition.
+      const result = exists
+        ? await addScorerVersion(spec, { outputDir, write: false })
+        : await createScorerDefinition(spec, { outputDir, write: false });
       this.log('\n--- Scorer Definition (preview) ---\n');
       this.log(result.contents);
       if (result.promptTemplateContents) {
@@ -233,16 +232,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
     }
 
-    const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
-    const scorerPath = join(outputDir, 'aiAgentScorerDefinitions', scorerFileName);
-
-    if (existsSync(scorerPath)) {
-      // An existing scorer is never overwritten: refine it by adding a new version, which keeps the API name
-      // stable and the version history intact. Require --new-version so a re-run can't silently add a version
-      // (versions can't be deleted once deployed).
-      if (!flags['new-version']) {
-        throw messages.createError('error.scorerExists', [spec.apiName]);
-      }
+    if (exists) {
       const added = await addScorerVersion(spec, { outputDir });
       this.log(`\nAdded version ${added.versionNumber} to scorer: ${added.path}`);
       if (added.promptTemplatePath) {
@@ -277,41 +267,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       throw messages.createError('error.invalidSpecShape', [typeof parsed]);
     }
     return parsed as ScorerSpec;
-  }
-
-  /** Promote and/or archive specific versions of an existing scorer, without authoring any content. */
-  private async applyStatusTransitions(
-    flags: { 'api-name'?: string; 'promote-version'?: number; 'archive-version'?: number },
-    outputDir: string
-  ): Promise<AgentScorerCreateResult> {
-    const apiName = flags['api-name'];
-    if (!apiName) {
-      throw messages.createError('error.transitionNeedsApiName');
-    }
-
-    let path = '';
-    if (flags['promote-version'] != null) {
-      const result = await setScorerVersionStatus({
-        apiName,
-        outputDir,
-        versionNumber: flags['promote-version'],
-        status: 'Available',
-      });
-      this.log(`Promoted version ${result.versionNumber} of ${apiName} to Available: ${result.path}`);
-      path = result.path;
-    }
-    if (flags['archive-version'] != null) {
-      const result = await setScorerVersionStatus({
-        apiName,
-        outputDir,
-        versionNumber: flags['archive-version'],
-        status: 'Archived',
-      });
-      this.log(`Archived version ${result.versionNumber} of ${apiName}: ${result.path}`);
-      path = result.path;
-    }
-
-    return { path, apiName, contents: '' };
   }
 
   private async runInteractiveInterview(

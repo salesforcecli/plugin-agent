@@ -98,7 +98,15 @@ export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
         this.log(`Output:      ${Array.isArray(result.output) ? result.output.join(', ') : String(result.output)}`);
       }
       if (result.explanation) this.log(`Explanation: ${result.explanation}`);
-      if (result.error) this.log(`Error:       ${result.error}`);
+    }
+
+    // A scorer that didn't produce a valid score (engine failure, or a session the platform rejected) comes back
+    // with ok:false. Surface it as a command failure — non-zero exit, standard SfError envelope in --json — so a
+    // scripted loop can't mistake a failed evaluation for a passing one. The full result is attached as error data.
+    if (!result.ok) {
+      const error = messages.createError('error.scorerRunFailed', [spec.apiName, result.error ?? 'unknown error']);
+      error.data = { scorerApiName: spec.apiName, ...result };
+      throw error;
     }
 
     return { scorerApiName: spec.apiName, ...result };

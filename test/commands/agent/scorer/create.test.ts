@@ -730,11 +730,9 @@ describe('agent scorer create', () => {
       const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
       expect(scorerFile).to.not.be.undefined;
     });
-  });
 
-  describe('status transitions', () => {
-    it('promotes a version to Available with --promote-version', async () => {
-      const spec = makeLabeledSpec({ status: 'Draft' });
+    it('previews the appended version (not a fresh v1) with --new-version --preview, writing nothing', async () => {
+      const spec = makeLabeledSpec();
       const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
       const { Command, writtenFiles } = await loadMockedCommand(spec, {
         existsSync: () => true,
@@ -743,51 +741,17 @@ describe('agent scorer create', () => {
 
       const result = await Command.run([
         '--target-org', testOrg.username,
-        '--api-name', 'Test_Scorer',
-        '--promote-version', '1',
+        '--spec', 'test.yaml',
         '--output-dir', '/tmp/out',
+        '--new-version',
+        '--preview',
         '--json',
       ]);
 
-      expect(result.apiName).to.equal('Test_Scorer');
-      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
-      expect(scorerFile!.content).to.include('<status>Available</status>');
-    });
-
-    it('archives a version with --archive-version', async () => {
-      const spec = makeLabeledSpec({ status: 'Available' });
-      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
-      const { Command, writtenFiles } = await loadMockedCommand(spec, {
-        existsSync: () => true,
-        existingScorerXml,
-      });
-
-      await Command.run([
-        '--target-org', testOrg.username,
-        '--api-name', 'Test_Scorer',
-        '--archive-version', '1',
-        '--output-dir', '/tmp/out',
-        '--json',
-      ]);
-
-      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
-      expect(scorerFile!.content).to.include('<status>Archived</status>');
-    });
-
-    it('errors when --promote-version is used without --api-name', async () => {
-      const { Command } = await loadMockedCommand(makeLabeledSpec());
-
-      try {
-        await Command.run([
-          '--target-org', testOrg.username,
-          '--promote-version', '1',
-          '--output-dir', '/tmp/out',
-          '--json',
-        ]);
-        expect.fail('should have thrown');
-      } catch (err: unknown) {
-        expect((err as Error).message).to.include('--api-name');
-      }
+      // Preview reflects the artifact --new-version would write: v1 preserved, v2 appended — not a fresh v1.
+      expect(result.contents).to.include('<versionNumber>1</versionNumber>');
+      expect(result.contents).to.include('<versionNumber>2</versionNumber>');
+      expect(writtenFiles).to.have.length(0);
     });
   });
 

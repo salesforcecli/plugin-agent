@@ -52,14 +52,6 @@ Output the JSON Schema for the --spec YAML file and exit.
 
 Add a new version to an existing scorer instead of erroring. The new version is numbered one higher than the current highest; if a new prompt rubric is supplied, the prompt template's active version is updated too.
 
-# flags.promote-version.summary
-
-Promote the given version number of an existing scorer to Available (its rubric is served on the next run). Requires --api-name; authors no content.
-
-# flags.archive-version.summary
-
-Archive the given version number of an existing scorer so it can no longer be run. Requires --api-name; authors no content.
-
 # flags.output-dir.summary
 
 Output directory for the generated metadata XML files (scorer definition and prompt template).
@@ -112,8 +104,4 @@ No agents found in the org. Deploy an agent first, or specify one with --agent-a
 
 # error.scorerExists
 
-A scorer named '%s' already exists in this project. To refine it, add a new version with --new-version; to change a version's status use --promote-version or --archive-version; or use --preview to see the generated XML without writing.
-
-# error.transitionNeedsApiName
-
---promote-version and --archive-version require --api-name to identify which scorer to update.
+A scorer named '%s' already exists in this project. To refine it, add a new version with --new-version; to change a version's status use `sf agent scorer edit`; or use --preview to see the generated XML without writing.

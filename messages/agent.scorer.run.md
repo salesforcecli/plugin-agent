@@ -53,3 +53,7 @@ Could not parse the STDM session as JSON: %s
 # error.invalidSessionShape
 
 The STDM session must be a JSON object matching the session schema (see --help). Received: %s
+
+# error.scorerRunFailed
+
+Scorer '%s' did not produce a valid score: %s. The command exits non-zero so a scripted loop won't treat a failed evaluation as a passing one; the full result (including any explanation) is in the error's "data" field when run with --json.
