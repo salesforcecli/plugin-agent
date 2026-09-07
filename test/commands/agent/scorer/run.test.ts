@@ -47,6 +47,7 @@ async function loadMockedCommand(opts?: {
   runScorerResult?: any;
   runScorerError?: Error;
   loadScorerSpecError?: Error;
+  specOverride?: any;
   schema?: unknown;
 }): Promise<{ Command: any; runScorer: sinon.SinonStub; loadScorerSpec: sinon.SinonStub }> {
   const runScorer = sinon.stub();
@@ -55,7 +56,7 @@ async function loadMockedCommand(opts?: {
 
   const loadScorerSpec = sinon.stub();
   if (opts?.loadScorerSpecError) loadScorerSpec.rejects(opts.loadScorerSpecError);
-  else loadScorerSpec.resolves(SPEC);
+  else loadScorerSpec.resolves(opts?.specOverride ?? SPEC);
 
   const readFileSync = (path: unknown): string => {
     const p = String(path);
@@ -182,6 +183,63 @@ describe('agent scorer run', () => {
     ]);
 
     expect(loadScorerSpec.firstCall.firstArg.scorerVersion).to.be.undefined;
+  });
+
+  describe('resolved-version reporting', () => {
+    it('reports the resolved scorerVersion in the JSON result', async () => {
+      const { Command } = await loadMockedCommand({ specOverride: { ...SPEC, scorerVersion: 2 } });
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Sentiment_Scorer',
+        '--file', SESSION_FILE,
+        '--json',
+      ]);
+
+      expect(result.scorerVersion).to.equal(2);
+    });
+
+    it('prints the resolved version in human-readable output', async () => {
+      const { Command } = await loadMockedCommand({ specOverride: { ...SPEC, scorerVersion: 2 } });
+
+      await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+
+      const logLines = sfCommandStubs.log.args.map((a) => a[0]);
+      expect(logLines).to.include('Version:     2');
+    });
+
+    it('omits scorerVersion (and the Version line) when the spec has no resolved version', async () => {
+      const { Command } = await loadMockedCommand();
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Sentiment_Scorer',
+        '--file', SESSION_FILE,
+        '--json',
+      ]);
+
+      expect(result.scorerVersion).to.be.undefined;
+    });
+
+    it('includes the resolved scorerVersion in error.data on a failed result', async () => {
+      const { Command } = await loadMockedCommand({
+        specOverride: { ...SPEC, scorerVersion: 2 },
+        runScorerResult: { ok: false, error: 'no engine for Manual' },
+      });
+
+      try {
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--api-name', 'Sentiment_Scorer',
+          '--file', SESSION_FILE,
+          '--json',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        const error = err as { data?: any };
+        expect(error.data?.scorerVersion).to.equal(2);
+      }
+    });
   });
 
   it('runs a scorer against inline session JSON', async () => {

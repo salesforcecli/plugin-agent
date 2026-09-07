@@ -42,6 +42,8 @@ const DATA_SCHEMA_HELP = `${messages.getMessage('flags.data.description')}\n\n${
 
 export type AgentScorerRunResult = ScorerResult & {
   scorerApiName: string;
+  /** The version number that was actually run (highest Available by default, or the requested --scorer-version). */
+  scorerVersion?: number;
 };
 
 export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
@@ -93,6 +95,7 @@ export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
 
     if (!this.jsonEnabled()) {
       this.styledHeader(`Scorer: ${spec.apiName}`);
+      if (spec.scorerVersion) this.log(`Version:     ${spec.scorerVersion}`);
       this.log(`Outcome:     ${result.ok ? 'ok' : 'error'}`);
       if (result.output !== undefined) {
         this.log(`Output:      ${Array.isArray(result.output) ? result.output.join(', ') : String(result.output)}`);
@@ -105,11 +108,11 @@ export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
     // scripted loop can't mistake a failed evaluation for a passing one. The full result is attached as error data.
     if (!result.ok) {
       const error = messages.createError('error.scorerRunFailed', [spec.apiName, result.error ?? 'unknown error']);
-      error.data = { scorerApiName: spec.apiName, ...result };
+      error.data = { scorerApiName: spec.apiName, scorerVersion: spec.scorerVersion, ...result };
       throw error;
     }
 
-    return { scorerApiName: spec.apiName, ...result };
+    return { scorerApiName: spec.apiName, scorerVersion: spec.scorerVersion, ...result };
   }
 
   // eslint-disable-next-line class-methods-use-this
