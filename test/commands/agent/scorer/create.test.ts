@@ -37,9 +37,9 @@ import YAML from 'yaml';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
 import * as agentsModule from '@salesforce/agents';
-import type { ScorerSpecFile } from '../../../../src/commands/agent/scorer/create.js';
+import type { ScorerSpec } from '@salesforce/agents';
 
-function makeLabeledSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
+function makeLabeledSpec(overrides: Partial<ScorerSpec> = {}): ScorerSpec {
   return {
     apiName: 'Test_Scorer',
     lightningType: 'lightning__textType',
@@ -61,7 +61,7 @@ function makeLabeledSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFil
   };
 }
 
-function makeOpenSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
+function makeOpenSpec(overrides: Partial<ScorerSpec> = {}): ScorerSpec {
   return {
     apiName: 'Open_Scorer',
     lightningType: 'lightning__textType',
@@ -79,7 +79,7 @@ function makeOpenSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
   };
 }
 
-function makePromptTemplateSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
+function makePromptTemplateSpec(overrides: Partial<ScorerSpec> = {}): ScorerSpec {
   return {
     apiName: 'Prompt_Scorer',
     lightningType: 'lightning__textType',
@@ -104,7 +104,7 @@ function makePromptTemplateSpec(overrides: Partial<ScorerSpecFile> = {}): Scorer
 type WrittenFile = { path: string; content: string };
 
 async function loadMockedCommand(
-  yamlSpec: ScorerSpecFile,
+  yamlSpec: ScorerSpec,
   opts?: {
     existsSync?: () => boolean;
     confirmResult?: boolean;
@@ -955,7 +955,7 @@ describe('agent scorer create', () => {
 
   describe('edge cases', () => {
     it('should handle LightningType with no outputEnumValues', async () => {
-      const spec: ScorerSpecFile = {
+      const spec: ScorerSpec = {
         apiName: 'Lightning_Scorer',
         lightningType: 'lightning__numberType',
         inputScope: 'Session',

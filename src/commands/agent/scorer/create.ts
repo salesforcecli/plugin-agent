@@ -48,9 +48,6 @@ export type AgentScorerCreateResult = {
   promptTemplatePath?: string;
 };
 
-/** @deprecated Use ScorerSpec from @salesforce/agents directly. */
-export type ScorerSpecFile = ScorerSpec;
-
 const FLAGGABLE_PROMPTS = {
   label: {
     message: messages.getMessage('flags.label.summary'),
