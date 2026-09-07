@@ -22,11 +22,9 @@ import {
   type ScorerSpec,
   createScorerDefinition,
   labelToApiName,
-  scorerEnumValueCount,
   scorerSpecJsonSchema,
   type SupportedLightningType,
   SUPPORTED_LIGHTNING_TYPES,
-  MAX_ENUM_VALUES,
   SCORER_API_NAME_MAX_LENGTH,
   SCORER_API_NAME_PATTERN,
   SCORER_ENGINE_TYPES,
@@ -52,11 +50,6 @@ export type AgentScorerCreateResult = {
 /** @deprecated Use ScorerSpec from @salesforce/agents directly. */
 export type ScorerSpecFile = ScorerSpec;
 
-// The CLI presents "OpenEnded" as a data-type choice; it maps to core dataType 'LightningType' +
-// scorerType 'OpenEnded' (see runInteractiveInterview). This is a UI-level set, distinct from the
-// core SCORER_DATA_TYPES union, so it is defined locally.
-const UI_SCORER_DATA_TYPES = ['OpenEnded', 'Text', 'Number'] as const;
-
 const FLAGGABLE_PROMPTS = {
   label: {
     message: messages.getMessage('flags.label.summary'),
@@ -75,12 +68,12 @@ const FLAGGABLE_PROMPTS = {
     },
     required: true,
   },
-  'data-type': {
-    message: messages.getMessage('flags.data-type.summary'),
-    promptMessage: 'What data type does this scorer produce?',
-    options: UI_SCORER_DATA_TYPES,
+  'lightning-type': {
+    message: messages.getMessage('flags.lightning-type.summary'),
+    promptMessage: 'Select the lightning type this scorer produces',
+    options: SUPPORTED_LIGHTNING_TYPES,
     validate: (d: string): boolean | string =>
-      (UI_SCORER_DATA_TYPES as readonly string[]).includes(d) || 'Invalid data type',
+      (SUPPORTED_LIGHTNING_TYPES as readonly string[]).includes(d) || 'Invalid lightning type',
     required: true,
   },
   description: {
@@ -154,67 +147,6 @@ async function promptForOutputEnumValues(): Promise<OutputEnumValueInput[]> {
   }
 
   return values;
-}
-
-async function promptForNumberSpecification(): Promise<{ min: number; max: number; step: number; threshold?: number }> {
-  const minStr = await inquirerInput({
-    message: 'Minimum value',
-    default: '0',
-    validate: (d: string): boolean | string => !isNaN(parseFloat(d)) || 'Must be a number',
-    theme,
-  });
-
-  const maxStr = await inquirerInput({
-    message: 'Maximum value',
-    default: '5',
-    validate: (d: string): boolean | string => !isNaN(parseFloat(d)) || 'Must be a number',
-    theme,
-  });
-
-  const min = parseFloat(minStr);
-  const max = parseFloat(maxStr);
-
-  if (min >= max) {
-    throw new Error(`Minimum value (${min}) must be less than maximum value (${max})`);
-  }
-
-  const stepStr = await inquirerInput({
-    message: 'Step size',
-    default: '1',
-    validate: (d: string): boolean | string => {
-      const n = parseFloat(d);
-      if (isNaN(n) || n <= 0) return 'Step must be a positive number';
-      const numValues = scorerEnumValueCount(min, max, n);
-      if (numValues > MAX_ENUM_VALUES) return `Step too small: would generate ${numValues} values (max ${MAX_ENUM_VALUES})`;
-      return true;
-    },
-    theme,
-  });
-
-  const step = parseFloat(stepStr);
-
-  const addThreshold = await confirm({
-    message: `Add a threshold value? (${scorerEnumValueCount(min, max, step)} output values will be generated from ${min} to ${max})`,
-    default: false,
-    theme,
-  });
-
-  let threshold: number | undefined;
-  if (addThreshold) {
-    const thresholdStr = await inquirerInput({
-      message: `Threshold (must be between ${min} and ${max})`,
-      validate: (d: string): boolean | string => {
-        const n = parseFloat(d);
-        if (isNaN(n)) return 'Must be a number';
-        if (n < min || n > max) return `Must be between ${min} and ${max}`;
-        return true;
-      },
-      theme,
-    });
-    threshold = parseFloat(thresholdStr);
-  }
-
-  return { min, max, step, threshold };
 }
 
 export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult> {
@@ -332,19 +264,17 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     const description = (flags.description as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.description));
     const status = (flags.status as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.status));
-    const dataType = (flags['data-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['data-type']));
+    const lightningType = ((flags['lightning-type'] as SupportedLightningType) ??
+      (await promptForFlag(FLAGGABLE_PROMPTS['lightning-type']))) as SupportedLightningType;
 
-    const dataTypeDetails = await this.promptForDataTypeDetails(dataType);
-
-    const semanticType = await select<string>({
-      message: 'Semantic type (how this scorer is used in analytics)',
-      choices: [
-        { name: 'None', value: '' },
-        { name: 'Dimension (categorical grouping)', value: 'Dimension' },
-        { name: 'Measurement (numeric aggregation)', value: 'Measurement' },
-      ],
+    this.log();
+    this.styledHeader('Output Labels');
+    const addLabels = await confirm({
+      message: 'Add predefined output labels? (leave off for fully open-ended output)',
+      default: false,
       theme,
     });
+    const outputEnumValues = addLabels ? await promptForOutputEnumValues() : undefined;
 
     const engineType = (flags['engine-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['engine-type']));
     const engineConfig = await this.promptForEngineConfig(engineType);
@@ -352,14 +282,9 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       connection, engineType, flags['agent-api-name'] as string | undefined
     );
 
-    const resolvedDataType = dataType === 'OpenEnded' ? 'LightningType' : dataType;
-
     return {
       apiName,
-      dataType: resolvedDataType as ScorerSpec['dataType'],
-      scorerType: dataTypeDetails.scorerType,
-      lightningType: dataTypeDetails.lightningType,
-      semanticType: (semanticType || undefined) as ScorerSpec['semanticType'],
+      lightningType,
       inputScope: 'Session',
       label,
       description: description || undefined,
@@ -367,49 +292,9 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       promptContent: engineConfig.promptContent,
       promptTemplateName: engineConfig.promptTemplateName,
       status: status as ScorerSpec['status'],
-      outputEnumValues: dataTypeDetails.outputEnumValues as ScorerSpec['outputEnumValues'],
-      specification: dataTypeDetails.specification,
+      outputEnumValues: outputEnumValues as ScorerSpec['outputEnumValues'],
       agentAssociation,
     };
-  }
-
-  private async promptForDataTypeDetails(dataType: string): Promise<{
-    outputEnumValues?: OutputEnumValueInput[];
-    specification?: ScorerSpec['specification'];
-    lightningType?: SupportedLightningType;
-    scorerType?: ScorerSpec['scorerType'];
-  }> {
-    if (dataType === 'Number') {
-      this.log();
-      this.styledHeader('Number Scale');
-      const numSpec = await promptForNumberSpecification();
-      return { specification: { valueSpecification: numSpec } };
-    }
-
-    if (dataType === 'OpenEnded') {
-      this.log();
-      this.styledHeader('Open Scorer Configuration');
-
-      const lightningType = await select<SupportedLightningType>({
-        message: 'Select the lightning type for open-ended values',
-        choices: SUPPORTED_LIGHTNING_TYPES.map((t) => ({ name: t, value: t })),
-        theme,
-      });
-
-      const addEnumValues = await confirm({
-        message: 'Add output enum values?',
-        default: false,
-        theme,
-      });
-      const outputEnumValues = addEnumValues ? await promptForOutputEnumValues() : undefined;
-      return { scorerType: 'OpenEnded', lightningType, outputEnumValues };
-    }
-
-    // Text
-    this.log();
-    this.styledHeader('Output Values');
-    const outputEnumValues = await promptForOutputEnumValues();
-    return { outputEnumValues };
   }
 
   private async promptForEngineConfig(engineType: string): Promise<{ promptContent?: string; promptTemplateName?: string }> {

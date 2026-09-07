@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentScorerRunResult",
+  "definitions": {
+    "AgentScorerRunResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scorerApiName": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "output": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "The score: one or more labels, or a typed value matching the scorer's lightning type."
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "raw": {
+          "type": "string",
+          "description": "Raw engine output (for debugging / loose formats)."
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ok",
+        "scorerApiName"
+      ]
+    }
+  }
+}

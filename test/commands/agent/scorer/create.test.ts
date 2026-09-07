@@ -37,10 +37,10 @@ import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
 import type { ScorerSpecFile } from '../../../../src/commands/agent/scorer/create.js';
 
-function makeTextSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
+function makeLabeledSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
   return {
     apiName: 'Test_Scorer',
-    dataType: 'Text',
+    lightningType: 'lightning__textType',
     inputScope: 'Session',
     label: 'Test Scorer',
     description: 'A test scorer',
@@ -59,34 +59,9 @@ function makeTextSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
   };
 }
 
-function makeNumberSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
-  return {
-    apiName: 'Numeric_Scorer',
-    dataType: 'Number',
-    inputScope: 'Session',
-    label: 'Numeric Scorer',
-    engineType: 'Manual',
-    status: 'Available',
-    agentAssociation: {
-      agentApiName: 'My_Agent',
-      isActive: false,
-    },
-    specification: {
-      valueSpecification: {
-        min: 0,
-        max: 5,
-        step: 1,
-      },
-    },
-    ...overrides,
-  };
-}
-
 function makeOpenSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
   return {
     apiName: 'Open_Scorer',
-    dataType: 'LightningType',
-    scorerType: 'OpenEnded',
     lightningType: 'lightning__textType',
     inputScope: 'Session',
     label: 'Open Scorer',
@@ -105,7 +80,7 @@ function makeOpenSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
 function makePromptTemplateSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
   return {
     apiName: 'Prompt_Scorer',
-    dataType: 'Text',
+    lightningType: 'lightning__textType',
     inputScope: 'Session',
     label: 'Prompt Scorer',
     engineType: 'PromptTemplate',
@@ -166,7 +141,7 @@ async function loadMockedCommand(
   if (opts?.confirmResult !== undefined) {
     mocks['@inquirer/prompts'] = {
       confirm: sinon.stub().resolves(opts.confirmResult),
-      select: sinon.stub().resolves('Text'),
+      select: sinon.stub().resolves('lightning__textType'),
       input: sinon.stub().resolves(''),
     };
   }
@@ -183,8 +158,6 @@ async function loadMockedCommand(
 const SPEC_FILENAMES = [
   'test.yaml',
   'test-scorer.yaml',
-  'numeric-scorer.yaml',
-  'threshold-scorer.yaml',
   'open-scorer.yaml',
   'prompt-scorer.yaml',
   'manual-scorer.yaml',
@@ -236,8 +209,8 @@ describe('agent scorer create', () => {
   });
 
   describe('--spec flag (YAML-driven) with --preview', () => {
-    it('should create a Text scorer from a YAML spec', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+    it('should create a labeled scorer from a YAML spec', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -248,7 +221,9 @@ describe('agent scorer create', () => {
 
       expect(result.apiName).to.equal('Test_Scorer');
       expect(result.contents).to.include('AiAgentScorerDefinition');
-      expect(result.contents).to.include('<dataType>Text</dataType>');
+      expect(result.contents).to.include('<dataType>LightningType</dataType>');
+      expect(result.contents).to.include('<lightningType>lightning__textType</lightningType>');
+      expect(result.contents).to.include('<scorerType>OpenEnded</scorerType>');
       expect(result.contents).to.include('<inputScope>Session</inputScope>');
       expect(result.contents).to.include('<engineType>Manual</engineType>');
       expect(result.contents).to.include('<status>Draft</status>');
@@ -256,42 +231,6 @@ describe('agent scorer create', () => {
       expect(result.contents).to.include('<value>Positive</value>');
       expect(result.contents).to.include('<value>Negative</value>');
       expect(result.contents).to.include('<value>Neutral</value>');
-    });
-
-    it('should create a Number scorer with specification', async () => {
-      const { Command } = await loadMockedCommand(makeNumberSpec());
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'numeric-scorer.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.apiName).to.equal('Numeric_Scorer');
-      expect(result.contents).to.include('<dataType>Number</dataType>');
-      expect(result.contents).to.include('<min>0</min>');
-      expect(result.contents).to.include('<max>5</max>');
-      expect(result.contents).to.include('<step>1</step>');
-      expect(result.contents).to.include('<status>Available</status>');
-    });
-
-    it('should create a Number scorer with threshold', async () => {
-      const spec = makeNumberSpec({
-        specification: { valueSpecification: { min: 1, max: 10, step: 1, threshold: 7 } },
-      });
-      const { Command } = await loadMockedCommand(spec);
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'threshold-scorer.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<threshold>7</threshold>');
-      expect(result.contents).to.include('<min>1</min>');
-      expect(result.contents).to.include('<max>10</max>');
     });
 
     it('should create an OpenEnded (LightningType) scorer', async () => {
@@ -328,7 +267,7 @@ describe('agent scorer create', () => {
       expect(agentAssocBlock).to.include('<inputScope>Intent</inputScope>');
     });
 
-    it('should include outputEnumValues for OpenEnded scorer when provided', async () => {
+    it('should include outputEnumValues when provided', async () => {
       const spec = makeOpenSpec({
         outputEnumValues: [
           { value: 'GOOD', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
@@ -356,7 +295,7 @@ describe('agent scorer create', () => {
       expect(result.contents).to.include('<isFallback>true</isFallback>');
     });
 
-    it('should not include outputEnumValue for OpenEnded scorer when none provided', async () => {
+    it('should not include outputEnumValue when none provided', async () => {
       const { Command } = await loadMockedCommand(makeOpenSpec());
 
       const result = await Command.run([
@@ -388,7 +327,7 @@ describe('agent scorer create', () => {
     });
 
     it('should not generate prompt template for Manual engine', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ engineType: 'Manual' }));
+      const { Command } = await loadMockedCommand(makeLabeledSpec({ engineType: 'Manual' }));
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -422,7 +361,7 @@ describe('agent scorer create', () => {
     });
 
     it('should omit inputScope from agent association XML when not specified', async () => {
-      const spec = makeTextSpec();
+      const spec = makeLabeledSpec();
       spec.agentAssociation.inputScope = undefined;
       const { Command } = await loadMockedCommand(spec);
 
@@ -441,21 +380,8 @@ describe('agent scorer create', () => {
       expect(agentAssocBlock).not.to.include('<inputScope>');
     });
 
-    it('should include semanticType when set', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ semanticType: 'Dimension' }));
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<semanticType>Dimension</semanticType>');
-    });
-
     it('should include description when provided', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ description: 'Evaluates politeness' }));
+      const { Command } = await loadMockedCommand(makeLabeledSpec({ description: 'Evaluates politeness' }));
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -468,7 +394,7 @@ describe('agent scorer create', () => {
     });
 
     it('should omit description when not provided', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ description: undefined }));
+      const { Command } = await loadMockedCommand(makeLabeledSpec({ description: undefined }));
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -481,7 +407,7 @@ describe('agent scorer create', () => {
     });
 
     it('should default samplingRate to 1.0', async () => {
-      const spec = makeTextSpec();
+      const spec = makeLabeledSpec();
       spec.agentAssociation.samplingRate = undefined;
       const { Command } = await loadMockedCommand(spec);
 
@@ -496,7 +422,7 @@ describe('agent scorer create', () => {
     });
 
     it('should use custom samplingRate', async () => {
-      const spec = makeTextSpec();
+      const spec = makeLabeledSpec();
       spec.agentAssociation.samplingRate = 0.25;
       const { Command } = await loadMockedCommand(spec);
 
@@ -511,7 +437,7 @@ describe('agent scorer create', () => {
     });
 
     it('should set versionNumber to 1', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -524,8 +450,8 @@ describe('agent scorer create', () => {
     });
   });
 
-  describe('prompt template type selection', () => {
-    it('should use scorerOpenEnded type for OpenEnded scorerType', async () => {
+  describe('prompt template type', () => {
+    it('should always use scorerOpenEnded type', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeOpenSpec());
 
       await Command.run([
@@ -539,42 +465,7 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('agentforce_session_tracing__scorerOpenEnded');
     });
 
-    it('should use scorerMeasurement type for Number scorers', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(
-        makeNumberSpec({ engineType: 'PromptTemplate' })
-      );
-
-      await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
-        '--json',
-      ]);
-
-      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
-      expect(promptFile!.content).to.include('agentforce_session_tracing__scorerMeasurement');
-    });
-
-    it('should use AllowedRange input for scorerMeasurement type', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(
-        makeNumberSpec({ engineType: 'PromptTemplate' })
-      );
-
-      await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
-        '--json',
-      ]);
-
-      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
-      expect(promptFile!.content).to.include('<apiName>AllowedRange</apiName>');
-      expect(promptFile!.content).to.include('<referenceName>Input:AllowedRange</referenceName>');
-      expect(promptFile!.content).not.to.include('<apiName>AllowedLabels</apiName>');
-      expect(promptFile!.content).not.to.include('<apiName>FallbackLabel</apiName>');
-    });
-
-    it('should use scorerMultilabel type for default Text scorers', async () => {
+    it('should use scorerOpenEnded type even when labels are defined', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
@@ -585,18 +476,15 @@ describe('agent scorer create', () => {
       ]);
 
       const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
-      expect(promptFile!.content).to.include('agentforce_session_tracing__scorerMultilabel');
+      expect(promptFile!.content).to.include('agentforce_session_tracing__scorerOpenEnded');
+      expect(promptFile!.content).to.include('<apiName>AllowedLabels</apiName>');
+      expect(promptFile!.content).to.include('<apiName>FallbackLabel</apiName>');
     });
   });
 
-  // NOTE: number scorers no longer expand min/max/step into enumerated <value> entries; the
-  // generateNumberEnumValues helper was removed (they now emit a compact <valueSpecification>,
-  // covered by 'should create a Number scorer with specification'). The former
-  // 'number enum value generation' suite tested that removed behavior and was deleted.
-
   describe('XML structure', () => {
     it('should include XML declaration and namespace', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -610,7 +498,7 @@ describe('agent scorer create', () => {
     });
 
     it('should include isActive in agent association', async () => {
-      const spec = makeTextSpec();
+      const spec = makeLabeledSpec();
       spec.agentAssociation.isActive = true;
       const { Command } = await loadMockedCommand(spec);
 
@@ -625,7 +513,7 @@ describe('agent scorer create', () => {
     });
 
     it('should include isFallback and isSystemFallback', async () => {
-      const spec = makeTextSpec({
+      const spec = makeLabeledSpec({
         outputEnumValues: [
           { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
           { value: 'Bad', outcomeType: 'Fail', isFallback: true, isSystemFallback: false },
@@ -646,7 +534,7 @@ describe('agent scorer create', () => {
     });
 
     it('should include label in scorerVersion', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ label: 'My Custom Label' }));
+      const { Command } = await loadMockedCommand(makeLabeledSpec({ label: 'My Custom Label' }));
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -661,7 +549,7 @@ describe('agent scorer create', () => {
 
   describe('file writing', () => {
     it('should write scorer XML to correct path', async () => {
-      const { Command, writtenFiles, createdDirs } = await loadMockedCommand(makeTextSpec());
+      const { Command, writtenFiles, createdDirs } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -699,7 +587,7 @@ describe('agent scorer create', () => {
     });
 
     it('should not write files with --preview', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(makeTextSpec());
+      const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec());
 
       await Command.run([
         '--target-org', testOrg.username,
@@ -729,7 +617,7 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('{!$Input:FallbackLabel}');
     });
 
-    it('should use OpenEnded default prompt for OpenEnded type', async () => {
+    it('should omit label guidance from default prompt when no labels are defined', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeOpenSpec());
 
       await Command.run([
@@ -743,29 +631,11 @@ describe('agent scorer create', () => {
       expect(promptFile!.content).to.include('{!$Input:Session}');
       expect(promptFile!.content).not.to.include('{!$Input:AllowedLabels}');
     });
-
-    it('should use Measurement default prompt with AllowedRange', async () => {
-      const spec = makeNumberSpec({ engineType: 'PromptTemplate' });
-      const { Command, writtenFiles } = await loadMockedCommand(spec);
-
-      await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
-        '--json',
-      ]);
-
-      const promptFile = writtenFiles.find((f) => f.path.includes('genAiPromptTemplates'));
-      expect(promptFile!.content).to.include('{!$Input:Session}');
-      expect(promptFile!.content).to.include('{!$Input:AllowedRange}');
-      expect(promptFile!.content).not.to.include('{!$Input:AllowedLabels}');
-      expect(promptFile!.content).not.to.include('{!$Input:FallbackLabel}');
-    });
   });
 
   describe('output directory', () => {
     it('should default to force-app/main/default', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -778,7 +648,7 @@ describe('agent scorer create', () => {
     });
 
     it('should use custom --output-dir', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
         '--target-org', testOrg.username,
@@ -794,7 +664,7 @@ describe('agent scorer create', () => {
 
   describe('overwrite behavior', () => {
     it('should cancel when user declines overwrite', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(makeTextSpec(), {
+      const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec(), {
         existsSync: () => true,
         confirmResult: false,
       });
@@ -811,7 +681,7 @@ describe('agent scorer create', () => {
     });
 
     it('should skip overwrite prompt in --json mode', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(makeTextSpec(), {
+      const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec(), {
         existsSync: () => true,
       });
 
@@ -915,7 +785,7 @@ describe('agent scorer create', () => {
 
   describe('--json mode error handling', () => {
     it('should throw when required flags are missing', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       try {
         await Command.run(['--target-org', testOrg.username, '--json']);
@@ -927,7 +797,7 @@ describe('agent scorer create', () => {
     });
 
     it('should list all missing required flags', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec());
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       try {
         await Command.run(['--target-org', testOrg.username, '--label', 'Foo', '--json']);
@@ -935,14 +805,14 @@ describe('agent scorer create', () => {
       } catch (err: unknown) {
         const error = err as { message: string };
         expect(error.message).to.include('api-name');
-        expect(error.message).to.include('data-type');
+        expect(error.message).to.include('lightning-type');
         expect(error.message).to.include('engine-type');
         expect(error.message).to.include('agent-api-name');
       }
     });
   });
 
-  describe('Text scorer fallback validation', () => {
+  describe('output label validation', () => {
     let tmpDir: string;
     let specFile: string;
 
@@ -956,33 +826,8 @@ describe('agent scorer create', () => {
       rmSync(tmpDir, { recursive: true, force: true });
     });
 
-    it('should throw when Text scorer has no fallback value', async () => {
-      const spec = makeTextSpec({
-        outputEnumValues: [
-          { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
-          { value: 'Bad', outcomeType: 'Fail', isFallback: false, isSystemFallback: false },
-        ],
-      });
-      writeFileSync(specFile, YAML.stringify(spec));
-      const { Command } = await loadMockedCommand(spec);
-
-      try {
-        await Command.run([
-          '--target-org', testOrg.username,
-          '--spec', specFile,
-          '--preview',
-          '--json',
-        ]);
-        expect.fail('should have thrown');
-      } catch (err: unknown) {
-        const error = err as { message: string };
-        expect(error.message).to.include('exactly 1 fallback value');
-        expect(error.message).to.include('found 0');
-      }
-    });
-
-    it('should throw when Text scorer has multiple fallback values', async () => {
-      const spec = makeTextSpec({
+    it('should throw when more than one output value is the fallback', async () => {
+      const spec = makeLabeledSpec({
         outputEnumValues: [
           { value: 'Good', outcomeType: 'Pass', isFallback: true, isSystemFallback: false },
           { value: 'Bad', outcomeType: 'Fail', isFallback: true, isSystemFallback: false },
@@ -1001,13 +846,34 @@ describe('agent scorer create', () => {
         expect.fail('should have thrown');
       } catch (err: unknown) {
         const error = err as { message: string };
-        expect(error.message).to.include('exactly 1 fallback value');
+        expect(error.message).to.include('At most one outputEnumValue can be the fallback');
         expect(error.message).to.include('found 2');
       }
     });
 
-    it('should pass when Text scorer has exactly 1 fallback value', async () => {
-      const spec = makeTextSpec({
+    it('should pass with zero fallback values', async () => {
+      const spec = makeLabeledSpec({
+        outputEnumValues: [
+          { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
+          { value: 'Bad', outcomeType: 'Fail', isFallback: false, isSystemFallback: false },
+        ],
+      });
+      writeFileSync(specFile, YAML.stringify(spec));
+      const { Command } = await loadMockedCommand(spec);
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--spec', specFile,
+        '--preview',
+        '--json',
+      ]);
+
+      expect(result.apiName).to.equal('Test_Scorer');
+      expect(result.contents).to.include('<value>Good</value>');
+    });
+
+    it('should pass with exactly one fallback value', async () => {
+      const spec = makeLabeledSpec({
         outputEnumValues: [
           { value: 'Good', outcomeType: 'Pass', isFallback: false, isSystemFallback: false },
           { value: 'Bad', outcomeType: 'Fail', isFallback: false, isSystemFallback: false },
@@ -1033,8 +899,6 @@ describe('agent scorer create', () => {
     it('should handle LightningType with no outputEnumValues', async () => {
       const spec: ScorerSpecFile = {
         apiName: 'Lightning_Scorer',
-        dataType: 'LightningType',
-        scorerType: 'OpenEnded',
         lightningType: 'lightning__numberType',
         inputScope: 'Session',
         label: 'Lightning Scorer',
@@ -1055,7 +919,7 @@ describe('agent scorer create', () => {
     });
 
     it('should handle single output enum value', async () => {
-      const spec = makeTextSpec({
+      const spec = makeLabeledSpec({
         outputEnumValues: [
           { value: 'Only', outcomeType: 'NotApplicable', isFallback: true, isSystemFallback: false },
         ],
@@ -1072,32 +936,6 @@ describe('agent scorer create', () => {
       expect(result.contents).to.include('<value>Only</value>');
       expect(result.contents).to.include('<outcomeType>NotApplicable</outcomeType>');
       expect(result.contents).to.include('<isFallback>true</isFallback>');
-    });
-
-    it('should include scorerType Predefined when set', async () => {
-      const { Command } = await loadMockedCommand(makeTextSpec({ scorerType: 'Predefined' }));
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<scorerType>Predefined</scorerType>');
-    });
-
-    it('should include Measurement semanticType in XML', async () => {
-      const { Command } = await loadMockedCommand(makeNumberSpec({ semanticType: 'Measurement' }));
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
-
-      expect(result.contents).to.include('<semanticType>Measurement</semanticType>');
     });
   });
 });

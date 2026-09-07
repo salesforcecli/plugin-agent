@@ -6,7 +6,7 @@ Create an agent scorer definition using an interactive interview or a spec file.
 
 Creates an AiAgentScorerDefinition metadata XML file either interactively (prompting for each field) or from a YAML spec file.
 
-Run with no flags to start the interactive interview. The command prompts you for the scorer's data type, input scope, engine type, output values, and agent associations.
+Run with no flags to start the interactive interview. The command prompts you for the scorer's lightning type, optional output labels, engine type, and agent associations.
 
 Alternatively, provide a --spec flag pointing to a YAML file that defines the scorer. This is useful for repeatable automation or when the scorer has many output values.
 
@@ -20,9 +20,9 @@ API name of the scorer definition.
 
 API name of the agent to associate with this scorer.
 
-# flags.data-type.summary
+# flags.lightning-type.summary
 
-Data type produced by the scorer (Text, Number, or OpenEnded).
+Lightning type the scorer's value conforms to (for example, lightning__textType or lightning__numberType).
 
 # flags.label.summary
 
@@ -76,11 +76,11 @@ Preview the generated XML without writing to disk.
 
 - Create a manual scorer with flags (non-interactive):
 
-  <%= config.bin %> <%= command.id %> --api-name Expert_Analysis --data-type Text --engine-type Manual --label Expert_Analysis --agent-api-name My_Agent --status Available
+  <%= config.bin %> <%= command.id %> --api-name Expert_Analysis --lightning-type lightning__textType --engine-type Manual --label Expert_Analysis --agent-api-name My_Agent --status Available
 
 - Create a prompt-based scorer (generates both scorer definition and prompt template):
 
-  <%= config.bin %> <%= command.id %> --api-name sentiment_analysis --data-type Text --engine-type PromptTemplate --label sentiment_analysis --agent-api-name My_Agent
+  <%= config.bin %> <%= command.id %> --api-name sentiment_analysis --lightning-type lightning__textType --engine-type PromptTemplate --label sentiment_analysis --agent-api-name My_Agent
 
 # error.missingRequiredFlags
 
