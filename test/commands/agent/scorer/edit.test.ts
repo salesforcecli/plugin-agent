@@ -49,15 +49,18 @@ function scorerXmlWithVersions(versions: number, spec: any = SPEC): string {
 // The edit command reads/writes the scorer XML via node:fs/promises. esmock swaps that module for the command
 // only, so reads return a fixture and writes are captured — no disk I/O and no reliance on core-module stubbing.
 async function loadMockedCommand(
-  existingScorerXml: string | null
+  existingScorerXml: string | null,
+  readError?: NodeJS.ErrnoException
 ): Promise<{ Command: any; writtenFiles: WrittenFile[] }> {
   const writtenFiles: WrittenFile[] = [];
 
-  const readFile = (): Promise<string> =>
-    // null models a missing scorer file (readFile rejects).
-    existingScorerXml == null
+  const readFile = (): Promise<string> => {
+    // readError models a non-ENOENT read failure (EACCES, EISDIR, …); null models a missing file (ENOENT).
+    if (readError) return Promise.reject(readError);
+    return existingScorerXml == null
       ? Promise.reject(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
       : Promise.resolve(existingScorerXml);
+  };
 
   const writeFile = (path: unknown, content: unknown): Promise<void> => {
     writtenFiles.push({ path: String(path), content: String(content) });
@@ -217,6 +220,27 @@ describe('agent scorer edit', () => {
       expect.fail('should have thrown');
     } catch (err: unknown) {
       expect((err as Error).message).to.include('was found at');
+    }
+    expect(writtenFiles).to.have.length(0);
+  });
+
+  it('rethrows a non-ENOENT read error instead of reporting "scorer not found"', async () => {
+    const eacces = Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' });
+    const { Command, writtenFiles } = await loadMockedCommand('unused', eacces);
+
+    try {
+      await Command.run([
+        '--api-name', 'Test_Scorer',
+        '--version', '1',
+        '--status', 'Available',
+        '--output-dir', '/tmp/out',
+        '--json',
+      ]);
+      expect.fail('should have thrown');
+    } catch (err: unknown) {
+      // the raw fs error propagates; the user is NOT wrongly told the scorer was not found
+      expect((err as Error).message).to.include('EACCES');
+      expect((err as Error).message).to.not.include('was found at');
     }
     expect(writtenFiles).to.have.length(0);
   });

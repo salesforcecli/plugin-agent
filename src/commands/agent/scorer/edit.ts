@@ -97,8 +97,13 @@ export default class AgentScorerEdit extends SfCommand<AgentScorerEditResult> {
     let existingXml: string;
     try {
       existingXml = await readFile(scorerPath, 'utf8');
-    } catch {
-      throw messages.createError('error.scorerNotFound', [apiName, scorerPath]);
+    } catch (err) {
+      // Only a missing file means "not authored yet"; surface any other read failure (EACCES, EISDIR, …)
+      // as-is so the user isn't wrongly told to `create` a scorer that already exists.
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        throw messages.createError('error.scorerNotFound', [apiName, scorerPath]);
+      }
+      throw err;
     }
 
     // Apply every requested change in memory against a single load, then write once, so a combined status +
