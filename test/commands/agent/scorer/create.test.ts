@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -31,10 +31,12 @@ import sinon from 'sinon';
 const fsPromises = createRequire(import.meta.url)('node:fs/promises') as {
   writeFile: (...args: any[]) => Promise<void>;
   mkdir: (...args: any[]) => Promise<unknown>;
+  readFile: (...args: any[]) => Promise<string | Buffer>;
 };
 import YAML from 'yaml';
 import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
+import * as agentsModule from '@salesforce/agents';
 import type { ScorerSpecFile } from '../../../../src/commands/agent/scorer/create.js';
 
 function makeLabeledSpec(overrides: Partial<ScorerSpecFile> = {}): ScorerSpecFile {
@@ -103,7 +105,12 @@ type WrittenFile = { path: string; content: string };
 
 async function loadMockedCommand(
   yamlSpec: ScorerSpecFile,
-  opts?: { existsSync?: () => boolean; confirmResult?: boolean }
+  opts?: {
+    existsSync?: () => boolean;
+    confirmResult?: boolean;
+    existingScorerXml?: string;
+    existingTemplateXml?: string;
+  }
 ): Promise<{ Command: any; writtenFiles: WrittenFile[]; createdDirs: string[] }> {
   const yamlContent = YAML.stringify(yamlSpec);
   const writtenFiles: WrittenFile[] = [];
@@ -123,6 +130,22 @@ async function loadMockedCommand(
     typeof p === 'string' && (p.includes('aiAgentScorerDefinitions') || p.includes('genAiPromptTemplates'));
   const origWriteFile = fsPromises.writeFile;
   const origMkdir = fsPromises.mkdir;
+  const origReadFile = fsPromises.readFile;
+
+  // addScorerVersion / setScorerVersionStatus read existing metadata via node:fs/promises.readFile.
+  // Serve the supplied fixture XML for those paths so the version/transition logic runs without disk.
+  if (opts?.existingScorerXml !== undefined || opts?.existingTemplateXml !== undefined) {
+    sinon.stub(fsPromises, 'readFile').callsFake((path: unknown, ...rest: any[]) => {
+      const p = String(path);
+      if (p.includes('genAiPromptTemplates') && opts.existingTemplateXml !== undefined) {
+        return Promise.resolve(opts.existingTemplateXml);
+      }
+      if (p.includes('aiAgentScorerDefinitions') && opts.existingScorerXml !== undefined) {
+        return Promise.resolve(opts.existingScorerXml);
+      }
+      return origReadFile(path, ...rest);
+    });
+  }
   sinon.stub(fsPromises, 'writeFile').callsFake((path: unknown, content: unknown, options: unknown) => {
     if (isScorerOutput(path)) {
       writtenFiles.push({ path: String(path), content: String(content) });
@@ -168,6 +191,7 @@ describe('agent scorer create', () => {
   let testOrg: MockTestOrgData;
   let originalCwd: string;
   let specDir: string;
+  let sfCommandStubs: ReturnType<typeof stubSfCommandUx>;
 
   before(async function () {
     // Warm up esmock to check it can load the module
@@ -198,7 +222,7 @@ describe('agent scorer create', () => {
   });
 
   beforeEach(async () => {
-    stubSfCommandUx($$.SANDBOX);
+    sfCommandStubs = stubSfCommandUx($$.SANDBOX);
     testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
   });
@@ -662,38 +686,108 @@ describe('agent scorer create', () => {
     });
   });
 
-  describe('overwrite behavior', () => {
-    it('should cancel when user declines overwrite', async () => {
+  describe('existing scorer behavior', () => {
+    it('errors when the scorer already exists and --new-version is not passed', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec(), {
         existsSync: () => true,
-        confirmResult: false,
+      });
+
+      try {
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--spec', 'test.yaml',
+          '--output-dir', '/tmp/out',
+          '--json',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('already exists');
+        expect((err as Error).message).to.include('--new-version');
+      }
+      expect(writtenFiles).to.have.length(0);
+    });
+
+    it('adds a new version when the scorer exists and --new-version is passed', async () => {
+      const spec = makeLabeledSpec();
+      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
+      const { Command, writtenFiles } = await loadMockedCommand(spec, {
+        existsSync: () => true,
+        existingScorerXml,
       });
 
       const result = await Command.run([
         '--target-org', testOrg.username,
         '--spec', 'test.yaml',
         '--output-dir', '/tmp/out',
+        '--new-version',
+        '--json',
       ]);
 
-      expect(result.path).to.equal('');
-      expect(result.contents).to.equal('');
-      expect(writtenFiles).to.have.length(0);
+      expect(result.apiName).to.equal('Test_Scorer');
+      // v1 is preserved and v2 is appended.
+      expect(result.contents).to.include('<versionNumber>1</versionNumber>');
+      expect(result.contents).to.include('<versionNumber>2</versionNumber>');
+      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
+      expect(scorerFile).to.not.be.undefined;
     });
+  });
 
-    it('should skip overwrite prompt in --json mode', async () => {
-      const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec(), {
+  describe('status transitions', () => {
+    it('promotes a version to Available with --promote-version', async () => {
+      const spec = makeLabeledSpec({ status: 'Draft' });
+      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
+      const { Command, writtenFiles } = await loadMockedCommand(spec, {
         existsSync: () => true,
+        existingScorerXml,
       });
 
       const result = await Command.run([
         '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--api-name', 'Test_Scorer',
+        '--promote-version', '1',
         '--output-dir', '/tmp/out',
         '--json',
       ]);
 
-      expect(result.path).to.not.equal('');
-      expect(writtenFiles).to.have.length(1);
+      expect(result.apiName).to.equal('Test_Scorer');
+      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
+      expect(scorerFile!.content).to.include('<status>Available</status>');
+    });
+
+    it('archives a version with --archive-version', async () => {
+      const spec = makeLabeledSpec({ status: 'Available' });
+      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
+      const { Command, writtenFiles } = await loadMockedCommand(spec, {
+        existsSync: () => true,
+        existingScorerXml,
+      });
+
+      await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Test_Scorer',
+        '--archive-version', '1',
+        '--output-dir', '/tmp/out',
+        '--json',
+      ]);
+
+      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
+      expect(scorerFile!.content).to.include('<status>Archived</status>');
+    });
+
+    it('errors when --promote-version is used without --api-name', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
+
+      try {
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--promote-version', '1',
+          '--output-dir', '/tmp/out',
+          '--json',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('--api-name');
+      }
     });
   });
 
@@ -936,6 +1030,111 @@ describe('agent scorer create', () => {
       expect(result.contents).to.include('<value>Only</value>');
       expect(result.contents).to.include('<outcomeType>NotApplicable</outcomeType>');
       expect(result.contents).to.include('<isFallback>true</isFallback>');
+    });
+  });
+
+  describe('--json without --spec (flag-only path)', () => {
+    it('completes without prompting when all required flags are supplied', async () => {
+      const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec());
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--label', 'My Scorer',
+        '--api-name', 'My_Scorer',
+        '--lightning-type', 'lightning__textType',
+        '--engine-type', 'Manual',
+        '--agent-api-name', 'My_Agent',
+        '--output-dir', '/tmp/out-json-flags',
+        '--json',
+      ]);
+
+      expect(result.apiName).to.equal('My_Scorer');
+      // The status flag's default ('Draft') must be honored without prompting.
+      expect(result.contents).to.include('<status>Draft</status>');
+      expect(writtenFiles).to.have.length(1);
+    });
+  });
+
+  describe('--spec YAML parsing', () => {
+    it('throws a clear error when the spec file is not valid YAML', async () => {
+      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', {
+        'node:fs': { readFileSync: () => 'foo: [1, 2', existsSync: () => false },
+      });
+      const Command = mod.default;
+
+      try {
+        await Command.run(['--target-org', testOrg.username, '--spec', 'test.yaml']);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('Could not parse the --spec file as YAML');
+      }
+    });
+
+    it('throws a clear error when the spec file is not a YAML object', async () => {
+      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', {
+        'node:fs': { readFileSync: () => '- 1\n- 2\n', existsSync: () => false },
+      });
+      const Command = mod.default;
+
+      try {
+        await Command.run(['--target-org', testOrg.username, '--spec', 'test.yaml']);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('must define a YAML object');
+      }
+    });
+  });
+
+  describe('--spec-schema', () => {
+    it('prints the schema JSON and skips org/spec resolution', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
+
+      // Deliberately omit --spec and every other required flag: --spec-schema must short-circuit
+      // before the required-flags gate or spec/org resolution ever runs.
+      const result = await Command.run(['--target-org', testOrg.username, '--spec-schema']);
+
+      expect(result).to.deep.equal({ path: '', apiName: '', contents: '' });
+      expect(sfCommandStubs.styledJSON.calledOnce).to.be.true;
+      const printed = sfCommandStubs.styledJSON.firstCall.args[0] as Record<string, unknown>;
+      expect(printed).to.have.property('$ref', '#/definitions/ScorerSpec');
+      expect(printed).to.have.property('definitions');
+    });
+  });
+
+  describe('interactive interview (no --spec, no --json)', () => {
+    it('throws a clear error when the org has no agents to associate', async () => {
+      const mocks: Record<string, unknown> = {
+        'node:fs': { readFileSync: () => '', existsSync: () => false },
+        '@inquirer/prompts': {
+          input: sinon.stub().resolves(''),
+          confirm: sinon.stub().resolves(false),
+          select: sinon.stub().resolves(''),
+        },
+        '@salesforce/agents': {
+          ...agentsModule,
+          Agent: { listRemote: sinon.stub().resolves([]) },
+        },
+      };
+      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', mocks);
+      const Command = mod.default;
+
+      try {
+        // Supply every FLAGGABLE_PROMPTS-backed flag (including --description and --status, which
+        // are otherwise resolved via promptForFlag() in ../../../flags.js — a module esmock does not
+        // remock here, so any prompt routed through it would hit the real @inquirer/prompts and hang).
+        await Command.run([
+          '--target-org', testOrg.username,
+          '--label', 'My Scorer',
+          '--api-name', 'My_Scorer',
+          '--lightning-type', 'lightning__textType',
+          '--engine-type', 'Manual',
+          '--description', 'A test description',
+          '--status', 'Draft',
+        ]);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include('No agents found in the org');
+      }
     });
   });
 });

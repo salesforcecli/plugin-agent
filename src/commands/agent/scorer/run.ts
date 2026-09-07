@@ -59,6 +59,11 @@ export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
       summary: messages.getMessage('flags.api-name.summary'),
       required: true,
     }),
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
+    'scorer-version': Flags.integer({
+      summary: messages.getMessage('flags.scorer-version.summary'),
+      min: 1,
+    }),
     data: Flags.string({
       summary: messages.getMessage('flags.data.summary'),
       description: DATA_SCHEMA_HELP,
@@ -79,7 +84,7 @@ export default class AgentScorerRun extends SfCommand<AgentScorerRunResult> {
     // Resolve the scorer from local project metadata by API name — the business logic throws a clear error
     // if no scorer with this API name is authored in the project.
     const directories = this.project!.getUniquePackageDirectories().map((pkgDir) => pkgDir.fullPath);
-    const spec = await loadScorerSpec({ apiName, directories });
+    const spec = await loadScorerSpec({ apiName, directories, scorerVersion: flags['scorer-version'] });
 
     const session = this.parseSession(flags.file ? readFileSync(resolve(flags.file), 'utf8') : flags.data!);
 

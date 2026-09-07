@@ -47,6 +47,7 @@ async function loadMockedCommand(opts?: {
   runScorerResult?: any;
   runScorerError?: Error;
   loadScorerSpecError?: Error;
+  schema?: unknown;
 }): Promise<{ Command: any; runScorer: sinon.SinonStub; loadScorerSpec: sinon.SinonStub }> {
   const runScorer = sinon.stub();
   if (opts?.runScorerError) runScorer.rejects(opts.runScorerError);
@@ -67,7 +68,7 @@ async function loadMockedCommand(opts?: {
     '@salesforce/agents': {
       runScorer,
       loadScorerSpec,
-      sessionViewJsonSchema: () => ({ $schema: 'http://json-schema.org/draft-07/schema#' }),
+      sessionViewJsonSchema: () => opts?.schema ?? { $schema: 'http://json-schema.org/draft-07/schema#' },
     },
   };
 
@@ -80,6 +81,7 @@ describe('agent scorer run', () => {
   let testOrg: MockTestOrgData;
   let originalCwd: string;
   let workDir: string;
+  let sfCommandStubs: ReturnType<typeof stubSfCommandUx>;
 
   before(async function () {
     try {
@@ -110,7 +112,7 @@ describe('agent scorer run', () => {
   });
 
   beforeEach(async () => {
-    stubSfCommandUx($$.SANDBOX);
+    sfCommandStubs = stubSfCommandUx($$.SANDBOX);
     testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);
 
@@ -152,6 +154,34 @@ describe('agent scorer run', () => {
     const [passedSpec, passedSession] = runScorer.firstCall.args;
     expect(passedSpec.apiName).to.equal('Sentiment_Scorer');
     expect(passedSession.sessionState.sessionId).to.equal('S1');
+  });
+
+  it('plumbs --scorer-version through to loadScorerSpec', async () => {
+    const { Command, loadScorerSpec } = await loadMockedCommand();
+
+    await Command.run([
+      '--target-org', testOrg.username,
+      '--api-name', 'Sentiment_Scorer',
+      '--scorer-version', '3',
+      '--file', SESSION_FILE,
+      '--json',
+    ]);
+
+    expect(loadScorerSpec.calledOnce).to.be.true;
+    expect(loadScorerSpec.firstCall.firstArg.scorerVersion).to.equal(3);
+  });
+
+  it('leaves scorerVersion undefined when --scorer-version is omitted', async () => {
+    const { Command, loadScorerSpec } = await loadMockedCommand();
+
+    await Command.run([
+      '--target-org', testOrg.username,
+      '--api-name', 'Sentiment_Scorer',
+      '--file', SESSION_FILE,
+      '--json',
+    ]);
+
+    expect(loadScorerSpec.firstCall.firstArg.scorerVersion).to.be.undefined;
   });
 
   it('runs a scorer against inline session JSON', async () => {
@@ -280,5 +310,92 @@ describe('agent scorer run', () => {
     } catch (err: unknown) {
       expect((err as Error).message).to.include('must be a JSON object');
     }
+  });
+
+  describe('human-readable output (non --json)', () => {
+    it('renders an array output joined by commas', async () => {
+      const { Command } = await loadMockedCommand({
+        runScorerResult: { ok: true, output: ['A', 'B'] },
+      });
+
+      await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+
+      const logLines = sfCommandStubs.log.args.map((a) => a[0]);
+      expect(logLines).to.include('Output:      A, B');
+    });
+
+    it('renders a numeric output', async () => {
+      const { Command } = await loadMockedCommand({
+        runScorerResult: { ok: true, output: 42 },
+      });
+
+      await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+
+      const logLines = sfCommandStubs.log.args.map((a) => a[0]);
+      expect(logLines).to.include('Output:      42');
+    });
+
+    it('renders explanation and error lines', async () => {
+      const { Command } = await loadMockedCommand({
+        runScorerResult: { ok: false, output: 'Negative', explanation: 'Tone was hostile.', error: 'no engine for Manual' },
+      });
+
+      await Command.run(['--target-org', testOrg.username, '--api-name', 'Sentiment_Scorer', '--file', SESSION_FILE]);
+
+      const logLines = sfCommandStubs.log.args.map((a) => a[0]);
+      expect(logLines).to.include('Outcome:     error');
+      expect(logLines).to.include('Output:      Negative');
+      expect(logLines).to.include('Explanation: Tone was hostile.');
+      expect(logLines).to.include('Error:       no engine for Manual');
+    });
+  });
+
+  describe('--json with array/number output', () => {
+    it('returns array output as-is in the JSON result', async () => {
+      const { Command } = await loadMockedCommand({
+        runScorerResult: { ok: true, output: ['A', 'B'] },
+      });
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Sentiment_Scorer',
+        '--file', SESSION_FILE,
+        '--json',
+      ]);
+
+      expect(result.output).to.deep.equal(['A', 'B']);
+    });
+
+    it('returns numeric output as-is in the JSON result', async () => {
+      const { Command } = await loadMockedCommand({
+        runScorerResult: { ok: true, output: 7 },
+      });
+
+      const result = await Command.run([
+        '--target-org', testOrg.username,
+        '--api-name', 'Sentiment_Scorer',
+        '--file', SESSION_FILE,
+        '--json',
+      ]);
+
+      expect(result.output).to.equal(7);
+    });
+  });
+
+  describe('--data schema help formatting', () => {
+    it('preserves JSON nesting through the ZWSP/NBSP indent markers', async () => {
+      const schema = { type: 'object', properties: { foo: { type: 'string' }, bar: { type: 'number' } } };
+      const { Command } = await loadMockedCommand({ schema });
+
+      const description = Command.flags.data.description as string;
+      const separatorIndex = description.indexOf('\n\n');
+      expect(separatorIndex).to.be.greaterThan(-1);
+      const jsonPart = description.slice(separatorIndex + 2);
+
+      // Strip the zero-width-space + no-break-space indent markers (see run.ts) before parsing.
+      const stripped = jsonPart.replace(/\u200B/g, '').replace(/\u00A0/g, ' ');
+      const parsed = JSON.parse(stripped);
+      expect(parsed).to.deep.equal(schema);
+    });
   });
 });

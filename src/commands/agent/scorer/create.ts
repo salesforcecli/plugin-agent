@@ -21,6 +21,8 @@ import {
   Agent,
   type ScorerSpec,
   createScorerDefinition,
+  addScorerVersion,
+  setScorerVersionStatus,
   labelToApiName,
   scorerSpecJsonSchema,
   type SupportedLightningType,
@@ -174,6 +176,20 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       summary: messages.getMessage('flags.spec-schema.summary'),
       default: false,
     }),
+    'new-version': Flags.boolean({
+      summary: messages.getMessage('flags.new-version.summary'),
+      default: false,
+    }),
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
+    'promote-version': Flags.integer({
+      summary: messages.getMessage('flags.promote-version.summary'),
+      min: 1,
+    }),
+    // eslint-disable-next-line sf-plugin/flag-min-max-default
+    'archive-version': Flags.integer({
+      summary: messages.getMessage('flags.archive-version.summary'),
+      min: 1,
+    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       default: join('force-app', 'main', 'default'),
@@ -192,13 +208,19 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       return { path: '', apiName: '', contents: '' };
     }
 
+    const outputDir = resolve(flags['output-dir']);
+
+    // Pure status transitions (promote/archive) edit an existing scorer version in place — no content
+    // authoring, no interview.
+    if (flags['promote-version'] != null || flags['archive-version'] != null) {
+      return this.applyStatusTransitions(flags, outputDir);
+    }
+
     const connection = flags['target-org'].getConnection(flags['api-version']);
 
     const spec: ScorerSpec = flags.spec
-      ? (YAML.parse(readFileSync(resolve(flags.spec), 'utf8')) as ScorerSpec)
+      ? this.parseSpec(readFileSync(resolve(flags.spec), 'utf8'))
       : await this.runInteractiveInterview(flags, connection);
-
-    const outputDir = resolve(flags['output-dir']);
 
     if (flags.preview) {
       const result = await createScorerDefinition(spec, { outputDir, write: false });
@@ -214,16 +236,24 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     const scorerFileName = `${spec.apiName}.aiAgentScorerDefinition-meta.xml`;
     const scorerPath = join(outputDir, 'aiAgentScorerDefinitions', scorerFileName);
 
-    if (existsSync(scorerPath) && !this.jsonEnabled()) {
-      const overwrite = await confirm({
-        message: `${scorerFileName} already exists. Overwrite?`,
-        default: false,
-        theme,
-      });
-      if (!overwrite) {
-        this.log('Operation canceled.');
-        return { path: '', apiName: spec.apiName, contents: '' };
+    if (existsSync(scorerPath)) {
+      // An existing scorer is never overwritten: refine it by adding a new version, which keeps the API name
+      // stable and the version history intact. Require --new-version so a re-run can't silently add a version
+      // (versions can't be deleted once deployed).
+      if (!flags['new-version']) {
+        throw messages.createError('error.scorerExists', [spec.apiName]);
       }
+      const added = await addScorerVersion(spec, { outputDir });
+      this.log(`\nAdded version ${added.versionNumber} to scorer: ${added.path}`);
+      if (added.promptTemplatePath) {
+        this.log(`Updated prompt template: ${added.promptTemplatePath}`);
+      }
+      return {
+        path: added.path,
+        apiName: added.apiName,
+        contents: added.contents,
+        promptTemplatePath: added.promptTemplatePath,
+      };
     }
 
     const result = await createScorerDefinition(spec, { outputDir });
@@ -233,6 +263,55 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     }
 
     return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private parseSpec(raw: string): ScorerSpec {
+    let parsed: unknown;
+    try {
+      parsed = YAML.parse(raw);
+    } catch (e) {
+      throw messages.createError('error.invalidSpecYaml', [(e as Error).message]);
+    }
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw messages.createError('error.invalidSpecShape', [typeof parsed]);
+    }
+    return parsed as ScorerSpec;
+  }
+
+  /** Promote and/or archive specific versions of an existing scorer, without authoring any content. */
+  private async applyStatusTransitions(
+    flags: { 'api-name'?: string; 'promote-version'?: number; 'archive-version'?: number },
+    outputDir: string
+  ): Promise<AgentScorerCreateResult> {
+    const apiName = flags['api-name'];
+    if (!apiName) {
+      throw messages.createError('error.transitionNeedsApiName');
+    }
+
+    let path = '';
+    if (flags['promote-version'] != null) {
+      const result = await setScorerVersionStatus({
+        apiName,
+        outputDir,
+        versionNumber: flags['promote-version'],
+        status: 'Available',
+      });
+      this.log(`Promoted version ${result.versionNumber} of ${apiName} to Available: ${result.path}`);
+      path = result.path;
+    }
+    if (flags['archive-version'] != null) {
+      const result = await setScorerVersionStatus({
+        apiName,
+        outputDir,
+        versionNumber: flags['archive-version'],
+        status: 'Archived',
+      });
+      this.log(`Archived version ${result.versionNumber} of ${apiName}: ${result.path}`);
+      path = result.path;
+    }
+
+    return { path, apiName, contents: '' };
   }
 
   private async runInteractiveInterview(
@@ -262,18 +341,24 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       theme,
     }));
 
-    const description = (flags.description as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.description));
-    const status = (flags.status as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.status));
+    const description =
+      (flags.description as string) ??
+      (this.jsonEnabled() ? undefined : await promptForFlag(FLAGGABLE_PROMPTS.description));
+    const status =
+      (flags.status as string) ??
+      (this.jsonEnabled() ? FLAGGABLE_PROMPTS.status.default : await promptForFlag(FLAGGABLE_PROMPTS.status));
     const lightningType = ((flags['lightning-type'] as SupportedLightningType) ??
       (await promptForFlag(FLAGGABLE_PROMPTS['lightning-type']))) as SupportedLightningType;
 
     this.log();
     this.styledHeader('Output Labels');
-    const addLabels = await confirm({
-      message: 'Add predefined output labels? (leave off for fully open-ended output)',
-      default: false,
-      theme,
-    });
+    const addLabels = this.jsonEnabled()
+      ? false
+      : await confirm({
+          message: 'Add predefined output labels? (leave off for fully open-ended output)',
+          default: false,
+          theme,
+        });
     const outputEnumValues = addLabels ? await promptForOutputEnumValues() : undefined;
 
     const engineType = (flags['engine-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['engine-type']));
@@ -299,6 +384,9 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
   private async promptForEngineConfig(engineType: string): Promise<{ promptContent?: string; promptTemplateName?: string }> {
     if (engineType !== 'PromptTemplate') return {};
+    // No flag exists yet for referencing an existing prompt template by name, so in --json/
+    // non-interactive mode we always generate a new default prompt template.
+    if (this.jsonEnabled()) return {};
 
     this.log();
     this.styledHeader('Prompt Template');
@@ -324,7 +412,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     return {};
   }
 
-  // eslint-disable-next-line class-methods-use-this
   private async promptForAgentAssociationDetails(
     connection: ReturnType<import('@salesforce/core').Org['getConnection']>,
     engineType: string,
@@ -336,7 +423,7 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     } else {
       const agentsInOrg = await Agent.listRemote(connection);
       if (!agentsInOrg.length) {
-        throw new Error('No agents found in the org.');
+        throw messages.createError('error.noAgentsInOrg');
       }
       const agentApiName = await select<string>({
         message: 'Select the agent to associate with this scorer',
@@ -349,20 +436,24 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       agentAssociation = { agentApiName, isActive: false };
     }
 
-    const associationInputScope = await select<string>({
-      message: 'Input scope for this agent association',
-      choices: SCORER_INPUT_SCOPES.map((s) => ({ name: s, value: s })),
-      default: 'Session',
-      theme,
-    });
+    const associationInputScope = this.jsonEnabled()
+      ? 'Session'
+      : await select<string>({
+          message: 'Input scope for this agent association',
+          choices: SCORER_INPUT_SCOPES.map((s) => ({ name: s, value: s })),
+          default: 'Session',
+          theme,
+        });
     agentAssociation.inputScope = associationInputScope as 'Session' | 'Intent';
 
     if (engineType === 'PromptTemplate') {
-      const isActive = await confirm({
-        message: 'Activate scoring for this agent?',
-        default: false,
-        theme,
-      });
+      const isActive = this.jsonEnabled()
+        ? false
+        : await confirm({
+            message: 'Activate scoring for this agent?',
+            default: false,
+            theme,
+          });
       agentAssociation.isActive = isActive;
 
       if (isActive) {

@@ -16,6 +16,10 @@ To help you hand-construct a valid session, run this command with --help: the fu
 
 API name of the scorer to run. Must match a scorer authored in this project's metadata.
 
+# flags.scorer-version.summary
+
+Version number of the scorer to run. Omit to run the highest-numbered Available version; the command errors if none is Available. A Draft version must be selected explicitly; an Archived version cannot be run.
+
 # flags.data.summary
 
 Inline STDM session JSON to score.
