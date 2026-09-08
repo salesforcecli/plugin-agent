@@ -5,10 +5,10 @@
     "rootDir": "src",
     "jsx": "react",
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "@salesforce/core": ["node_modules/@salesforce/core"]
-    }
+      "@salesforce/core": ["./node_modules/@salesforce/core"]
+    },
+    "types": ["mocha"]
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

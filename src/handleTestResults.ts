@@ -187,7 +187,7 @@ export function humanFormatAgentforceStudio(results: AgentforceStudioTestResults
   const tables: string[] = [];
 
   for (const testCase of results.testCases) {
-    const inputs = getTestCaseInputs(testCase as AgentforceStudioTestCaseResultWithInputs);
+    const inputs = getTestCaseInputs(testCase);
     const parsedSubjectResponse = parseSubjectResponse(testCase.subjectResponse);
 
     const titleLines = [ansis.bold(`Test Case #${testCase.testNumber}`)];
@@ -344,7 +344,7 @@ export function humanFormat(results: AgentTestResultsResponse, verbose = false):
       data: testCase.testResults
         // this is the table for topics/action/output validation (actual v expected)
         // filter out other metrics from it
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+
         .filter((f) => !metric.includes(f.name as (typeof metric)[number]))
         .map((r) => ({
           test: humanFriendlyName(r.name),
@@ -357,7 +357,6 @@ export function humanFormat(results: AgentTestResultsResponse, verbose = false):
     });
     tables.push(table);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
     const metrics = testCase.testResults.filter((f) => metric.includes(f.name as (typeof metric)[number]));
 
     if (metrics.length > 0) {
@@ -384,7 +383,7 @@ export function humanFormat(results: AgentTestResultsResponse, verbose = false):
         width: '100%',
       });
       tables.push(table);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
       metricResults.push(...metrics);
     }
     // it's not a real string[], more like just a string  "[&#39;IdentifyRecordByName&#39;]", so >2 means more than "[]"
@@ -434,7 +433,6 @@ export function humanFormat(results: AgentTestResultsResponse, verbose = false):
   }, 0);
   const outcomePassPercent = (outcomePassCount / results.testCases.length) * 100;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const metricPassCount = metricResults.filter(
     (f) => f.result === 'PASS' || f.name === 'output_latency_milliseconds'
   ).length;

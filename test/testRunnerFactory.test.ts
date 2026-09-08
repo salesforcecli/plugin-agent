@@ -31,15 +31,12 @@ describe('testRunnerFactory', () => {
 
   beforeEach(async () => {
     createAgentTesterStub = sinon.stub();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const { createTestRunner: fn } = await esmock('../src/testRunnerFactory.js', {
       '@salesforce/agents': {
         createAgentTester: createAgentTesterStub,
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     createTestRunner = fn as typeof CreateTestRunnerFn;
   });
 

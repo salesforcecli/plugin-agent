@@ -96,7 +96,7 @@ export type AgentTraceReadResult = {
 };
 
 const isFunctionStep = (s: PlanStep): s is FunctionStep => s.type === 'FunctionStep';
-const asFunctionWithErrors = (s: FunctionStep): FunctionStepWithErrors => s as FunctionStepWithErrors;
+const asFunctionWithErrors = (s: FunctionStep): FunctionStepWithErrors => s;
 
 function summarizeTurn(turn: number, planId: string, trace: PlannerResponse): TurnSummary {
   const plan = trace.plan;

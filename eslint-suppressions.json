@@ -1,0 +1,76 @@
+{
+  "src/agentActivation.ts": {
+    "no-useless-assignment": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/adl/create.ts": {
+    "sf-plugin/flag-min-max-default": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/adl/upload.ts": {
+    "sf-plugin/flag-min-max-default": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/generate/agent-spec.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/generate/test-spec.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 2
+    }
+  },
+  "src/commands/agent/publish/authoring-bundle.ts": {
+    "@typescript-eslint/explicit-function-return-type": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/test/create.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/commands/agent/test/run.ts": {
+    "sf-plugin/flag-min-max-default": {
+      "count": 1
+    }
+  },
+  "src/components/agent-preview-react.tsx": {
+    "@typescript-eslint/explicit-function-return-type": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "src/flags.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "test/nuts/agent.activate.nut.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    }
+  },
+  "test/nuts/shared-setup.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    },
+    "@typescript-eslint/prefer-promise-reject-errors": {
+      "count": 1
+    }
+  },
+  "test/nuts/z2.agent.publish.nut.ts": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    },
+    "@typescript-eslint/prefer-promise-reject-errors": {
+      "count": 1
+    }
+  }
+}
