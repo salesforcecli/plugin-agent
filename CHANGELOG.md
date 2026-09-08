@@ -1,3 +1,11 @@
+## [2.1.2](https://github.com/salesforcecli/plugin-agent/compare/2.1.1...2.1.2) (2026-09-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 9.1.8 to 9.1.9 ([#493](https://github.com/salesforcecli/plugin-agent/issues/493)) ([99a5c72](https://github.com/salesforcecli/plugin-agent/commit/99a5c728b812a661864ad165fc0b5f0da3c559b5))
+- **deps:** bump browserslist from 4.28.2 to 4.28.8 ([#490](https://github.com/salesforcecli/plugin-agent/issues/490)) ([bff9d60](https://github.com/salesforcecli/plugin-agent/commit/bff9d60f979bd0412c82e284d5b9ac4b40d760ba))
+- **deps:** bump fast-uri from 3.1.2 to 3.1.7 ([#491](https://github.com/salesforcecli/plugin-agent/issues/491)) ([9c9d231](https://github.com/salesforcecli/plugin-agent/commit/9c9d231bdfd190376f64721ea799c83a86770b15))
+
 ## [2.1.1](https://github.com/salesforcecli/plugin-agent/compare/2.1.0...2.1.1) (2026-09-01)
 
 ### Bug Fixes
