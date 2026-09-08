@@ -1,3 +1,9 @@
+# [2.2.0](https://github.com/salesforcecli/plugin-agent/compare/2.1.2...2.2.0) (2026-09-08)
+
+### Features
+
+- add --context-variables-json for typed preview context variables @W-24014400@ ([#483](https://github.com/salesforcecli/plugin-agent/issues/483)) ([10b12f4](https://github.com/salesforcecli/plugin-agent/commit/10b12f4856b9f52db135bfa309e5dd9b9f82c388)), closes [#356](https://github.com/salesforcecli/plugin-agent/issues/356) [#356](https://github.com/salesforcecli/plugin-agent/issues/356)
+
 ## [2.1.2](https://github.com/salesforcecli/plugin-agent/compare/2.1.1...2.1.2) (2026-09-08)
 
 ### Bug Fixes
