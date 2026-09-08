@@ -1,3 +1,31 @@
+## [2.1.2](https://github.com/salesforcecli/plugin-agent/compare/2.1.1...2.1.2) (2026-09-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 9.1.8 to 9.1.9 ([#493](https://github.com/salesforcecli/plugin-agent/issues/493)) ([99a5c72](https://github.com/salesforcecli/plugin-agent/commit/99a5c728b812a661864ad165fc0b5f0da3c559b5))
+- **deps:** bump browserslist from 4.28.2 to 4.28.8 ([#490](https://github.com/salesforcecli/plugin-agent/issues/490)) ([bff9d60](https://github.com/salesforcecli/plugin-agent/commit/bff9d60f979bd0412c82e284d5b9ac4b40d760ba))
+- **deps:** bump fast-uri from 3.1.2 to 3.1.7 ([#491](https://github.com/salesforcecli/plugin-agent/issues/491)) ([9c9d231](https://github.com/salesforcecli/plugin-agent/commit/9c9d231bdfd190376f64721ea799c83a86770b15))
+
+## [2.1.1](https://github.com/salesforcecli/plugin-agent/compare/2.1.0...2.1.1) (2026-09-01)
+
+### Bug Fixes
+
+- upgrade @oclif/core to v5 @W-23512455@ ([#489](https://github.com/salesforcecli/plugin-agent/issues/489)) ([953096e](https://github.com/salesforcecli/plugin-agent/commit/953096e9cfd6bb40f30eeadb111bd10c6310c447))
+
+# [2.1.0](https://github.com/salesforcecli/plugin-agent/compare/2.0.5...2.1.0) (2026-09-01)
+
+### Bug Fixes
+
+- address PR review findings on input handling and terminal sanitization ([85fa0ff](https://github.com/salesforcecli/plugin-agent/commit/85fa0ff64d90eb6751696a9225fd95862ae6e2be))
+- show raw input field name in Inputs line, not a capitalized label ([8f84496](https://github.com/salesforcecli/plugin-agent/commit/8f84496acdc0dc091cecd3cea7ccf8ad25af04f7))
+- strip bare C0 control characters in sanitizeForDisplay ([748a54a](https://github.com/salesforcecli/plugin-agent/commit/748a54ae743da634b97d8698a16d5e0ae88e703d))
+
+### Features
+
+- hide empty Expected/Actual scorer columns per test case ([83ea1da](https://github.com/salesforcecli/plugin-agent/commit/83ea1dac8ee9f12407a5bbec82d0e60c717ac488))
+- render latency and token usage in agent test results human format ([739dfe7](https://github.com/salesforcecli/plugin-agent/commit/739dfe77a42b3392bf07c2185bd609c4aa74fb66))
+- render test-case inputs in agent test results human format ([31f8a63](https://github.com/salesforcecli/plugin-agent/commit/31f8a633ace138f72516f1897f3bcfc30ae61729))
+
 ## [2.0.5](https://github.com/salesforcecli/plugin-agent/compare/2.0.4...2.0.5) (2026-08-24)
 
 ## [2.0.4](https://github.com/salesforcecli/plugin-agent/compare/2.0.3...2.0.4) (2026-08-19)

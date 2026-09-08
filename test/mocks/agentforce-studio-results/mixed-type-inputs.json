@@ -1,0 +1,20 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 3,
+      "inputs": [
+        { "name": "account", "value": "Acme" },
+        { "name": "priority", "value": 5 },
+        { "name": "active", "value": true }
+      ],
+      "subjectResponse": "{\"text\":\"Mixed input types response.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.5,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

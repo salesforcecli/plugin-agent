@@ -1,0 +1,25 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 9,
+      "subjectResponse": "{\"text\":\"Test case with expected/actual.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Output Validation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":5,\"reasoning\":\"Matches.\",\"expectedValue\":\"Expected text\",\"actualValue\":\"Actual text\"}"
+        }
+      ]
+    },
+    {
+      "testNumber": 10,
+      "subjectResponse": "{\"text\":\"Test case without expected/actual.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.0,\"reasoning\":\"Coherent response.\"}"
+        }
+      ]
+    }
+  ]
+}

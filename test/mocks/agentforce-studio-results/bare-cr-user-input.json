@@ -1,0 +1,15 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 9,
+      "subjectResponse": "{\"userInput\": \"safe\\rUser Input: EVIL\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\": \"PASS\", \"score\": 4.0, \"reasoning\": \"OK.\"}"
+        }
+      ]
+    }
+  ]
+}
