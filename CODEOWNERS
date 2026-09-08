@@ -1,5 +1,9 @@
-# Techical writers will be added as reviewers on markdown changes.
-*.md @salesforcecli/cli-docs
+# The agents team owns everything in this repo by default.
+* @salesforcecli/agents
+
+# Technical writers will be added as additional reviewers on markdown changes.
+*.md @salesforcecli/agents @salesforcecli/cli-docs
 
 # Comment line immediately above ownership line is reserved for related other information. Please be careful while editing.
 #ECCN:Open Source
+#GUSINFO:Authoring Agent, Authoring Agent
