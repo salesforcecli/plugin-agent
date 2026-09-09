@@ -6,7 +6,7 @@ Run an agent scorer against an STDM session and print its score.
 
 Runs a scorer that is already authored in your project metadata, referenced by its API name, against a single STDM (Session Trace Data Model) session, then prints the resulting score, outcome labels, and explanation.
 
-The scorer is resolved from your project's package directories by API name. If no scorer with that API name exists locally, the command errors — author it first with `sf agent scorer create`.
+The scorer is resolved from your project's package directories by API name. If no scorer with that API name exists locally, the command errors — author it first with `sf agent scorer generate-metadata-file`.
 
 Provide the session either inline as a JSON string with --data, or as a path to a local JSON file with --file. Exactly one of the two is required.
 

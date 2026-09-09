@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentScorerGenerateMetadataFileResult",
+  "definitions": {
+    "AgentScorerGenerateMetadataFileResult": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        },
+        "contents": {
+          "type": "string"
+        },
+        "promptTemplatePath": {
+          "type": "string"
+        },
+        "guidance": {
+          "type": "string",
+          "description": "Guidance surfaced to a caller running with --json (where `this.log` output is suppressed): a written scorer's metadata XML is the source of truth, so any further change is made directly in the XML."
+        }
+      },
+      "required": ["path", "apiName", "contents"],
+      "additionalProperties": false
+    }
+  }
+}

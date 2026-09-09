@@ -108,8 +108,6 @@ async function loadMockedCommand(
   opts?: {
     existsSync?: () => boolean;
     confirmResult?: boolean;
-    existingScorerXml?: string;
-    existingTemplateXml?: string;
   }
 ): Promise<{ Command: any; writtenFiles: WrittenFile[]; createdDirs: string[] }> {
   const yamlContent = YAML.stringify(yamlSpec);
@@ -130,22 +128,7 @@ async function loadMockedCommand(
     typeof p === 'string' && (p.includes('aiAgentScorerDefinitions') || p.includes('genAiPromptTemplates'));
   const origWriteFile = fsPromises.writeFile;
   const origMkdir = fsPromises.mkdir;
-  const origReadFile = fsPromises.readFile;
 
-  // addScorerVersion / setScorerVersionStatus read existing metadata via node:fs/promises.readFile.
-  // Serve the supplied fixture XML for those paths so the version/transition logic runs without disk.
-  if (opts?.existingScorerXml !== undefined || opts?.existingTemplateXml !== undefined) {
-    sinon.stub(fsPromises, 'readFile').callsFake((path: unknown, ...rest: any[]) => {
-      const p = String(path);
-      if (p.includes('genAiPromptTemplates') && opts.existingTemplateXml !== undefined) {
-        return Promise.resolve(opts.existingTemplateXml);
-      }
-      if (p.includes('aiAgentScorerDefinitions') && opts.existingScorerXml !== undefined) {
-        return Promise.resolve(opts.existingScorerXml);
-      }
-      return origReadFile(path, ...rest);
-    });
-  }
   sinon.stub(fsPromises, 'writeFile').callsFake((path: unknown, content: unknown, options: unknown) => {
     if (isScorerOutput(path)) {
       writtenFiles.push({ path: String(path), content: String(content) });
@@ -169,7 +152,7 @@ async function loadMockedCommand(
     };
   }
 
-  const mod = await esmock('../../../../src/commands/agent/scorer/create.js', mocks);
+  const mod = await esmock('../../../../src/commands/agent/scorer/generate-metadata-file.js', mocks);
   return { Command: mod.default, writtenFiles, createdDirs };
 }
 
@@ -186,7 +169,7 @@ const SPEC_FILENAMES = [
   'manual-scorer.yaml',
 ];
 
-describe('agent scorer create', () => {
+describe('agent scorer generate-metadata-file', () => {
   const $$ = new TestContext();
   let testOrg: MockTestOrgData;
   let originalCwd: string;
@@ -196,7 +179,7 @@ describe('agent scorer create', () => {
   before(async function () {
     // Warm up esmock to check it can load the module
     try {
-      await esmock('../../../../src/commands/agent/scorer/create.js', {
+      await esmock('../../../../src/commands/agent/scorer/generate-metadata-file.js', {
         'node:fs': {
           readFileSync: () => '',
           writeFileSync: () => {},
@@ -237,8 +220,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -261,8 +246,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeOpenSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'open-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'open-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -278,8 +265,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeOpenSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'open-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'open-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -302,8 +291,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'open-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'open-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -323,8 +314,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeOpenSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'open-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'open-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -337,8 +330,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makePromptTemplateSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'prompt-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'prompt-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -354,8 +349,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec({ engineType: 'Manual' }));
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'manual-scorer.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'manual-scorer.yaml',
         '--preview',
         '--json',
       ]);
@@ -370,9 +367,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -390,8 +390,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -408,8 +410,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec({ description: 'Evaluates politeness' }));
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -421,8 +425,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec({ description: undefined }));
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -436,8 +442,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -451,8 +459,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -464,8 +474,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -479,9 +491,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeOpenSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -493,9 +508,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -511,8 +529,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -527,8 +547,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -546,8 +568,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -561,8 +585,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec({ label: 'My Custom Label' }));
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -576,9 +602,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles, createdDirs } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -594,9 +623,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -613,12 +645,7 @@ describe('agent scorer create', () => {
     it('should not write files with --preview', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec());
 
-      await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--preview',
-        '--json',
-      ]);
+      await Command.run(['--target-org', testOrg.username, '--spec', 'test.yaml', '--preview', '--json']);
 
       expect(writtenFiles).to.have.length(0);
     });
@@ -629,9 +656,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(spec);
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -645,9 +675,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeOpenSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -662,8 +695,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -675,9 +710,12 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/custom/path',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/custom/path',
         '--preview',
         '--json',
       ]);
@@ -687,71 +725,49 @@ describe('agent scorer create', () => {
   });
 
   describe('existing scorer behavior', () => {
-    it('errors when the scorer already exists and --new-version is not passed', async () => {
+    // `create` is a one-shot scaffolder: once the XML exists it is the source of truth, so a re-run must not
+    // overwrite it or silently mutate it. It errors and points the user at editing the metadata XML directly.
+    it('errors and writes nothing when the scorer already exists', async () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec(), {
         existsSync: () => true,
       });
 
       try {
         await Command.run([
-          '--target-org', testOrg.username,
-          '--spec', 'test.yaml',
-          '--output-dir', '/tmp/out',
+          '--target-org',
+          testOrg.username,
+          '--spec',
+          'test.yaml',
+          '--output-dir',
+          '/tmp/out',
           '--json',
         ]);
         expect.fail('should have thrown');
       } catch (err: unknown) {
         expect((err as Error).message).to.include('already exists');
-        expect((err as Error).message).to.include('--new-version');
+        // Directs the user to hand-edit the metadata XML rather than re-scaffolding via the CLI.
+        expect((err as Error).message).to.include('metadata XML');
       }
       expect(writtenFiles).to.have.length(0);
     });
 
-    it('adds a new version when the scorer exists and --new-version is passed', async () => {
-      const spec = makeLabeledSpec();
-      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
-      const { Command, writtenFiles } = await loadMockedCommand(spec, {
-        existsSync: () => true,
-        existingScorerXml,
-      });
+    // `this.log` is suppressed under --json, so an agent caller only sees the returned payload. The
+    // scaffold-once guidance rides along in `result.guidance` so it still reaches that caller.
+    it('returns scaffold-once guidance in the --json result on a fresh create', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
-        '--new-version',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
-      expect(result.apiName).to.equal('Test_Scorer');
-      // v1 is preserved and v2 is appended.
-      expect(result.contents).to.include('<versionNumber>1</versionNumber>');
-      expect(result.contents).to.include('<versionNumber>2</versionNumber>');
-      const scorerFile = writtenFiles.find((f) => f.path.includes('aiAgentScorerDefinitions'));
-      expect(scorerFile).to.not.be.undefined;
-    });
-
-    it('previews the appended version (not a fresh v1) with --new-version --preview, writing nothing', async () => {
-      const spec = makeLabeledSpec();
-      const existingScorerXml = (agentsModule as any).buildScorerXml(spec);
-      const { Command, writtenFiles } = await loadMockedCommand(spec, {
-        existsSync: () => true,
-        existingScorerXml,
-      });
-
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
-        '--new-version',
-        '--preview',
-        '--json',
-      ]);
-
-      // Preview reflects the artifact --new-version would write: v1 preserved, v2 appended — not a fresh v1.
-      expect(result.contents).to.include('<versionNumber>1</versionNumber>');
-      expect(result.contents).to.include('<versionNumber>2</versionNumber>');
-      expect(writtenFiles).to.have.length(0);
+      expect(result.guidance).to.be.a('string');
+      expect(result.guidance).to.include('source of truth');
     });
   });
 
@@ -762,9 +778,12 @@ describe('agent scorer create', () => {
       );
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -777,9 +796,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -792,9 +814,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -807,9 +832,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -827,9 +855,12 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makePromptTemplateSpec());
 
       await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
-        '--output-dir', '/tmp/out',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
+        '--output-dir',
+        '/tmp/out',
         '--json',
       ]);
 
@@ -895,12 +926,7 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       try {
-        await Command.run([
-          '--target-org', testOrg.username,
-          '--spec', specFile,
-          '--preview',
-          '--json',
-        ]);
+        await Command.run(['--target-org', testOrg.username, '--spec', specFile, '--preview', '--json']);
         expect.fail('should have thrown');
       } catch (err: unknown) {
         const error = err as { message: string };
@@ -919,12 +945,7 @@ describe('agent scorer create', () => {
       writeFileSync(specFile, YAML.stringify(spec));
       const { Command } = await loadMockedCommand(spec);
 
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', specFile,
-        '--preview',
-        '--json',
-      ]);
+      const result = await Command.run(['--target-org', testOrg.username, '--spec', specFile, '--preview', '--json']);
 
       expect(result.apiName).to.equal('Test_Scorer');
       expect(result.contents).to.include('<value>Good</value>');
@@ -941,12 +962,7 @@ describe('agent scorer create', () => {
       writeFileSync(specFile, YAML.stringify(spec));
       const { Command } = await loadMockedCommand(spec);
 
-      const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', specFile,
-        '--preview',
-        '--json',
-      ]);
+      const result = await Command.run(['--target-org', testOrg.username, '--spec', specFile, '--preview', '--json']);
 
       expect(result.apiName).to.equal('Test_Scorer');
       expect(result.contents).to.include('<value>N/A</value>');
@@ -966,8 +982,10 @@ describe('agent scorer create', () => {
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -978,15 +996,15 @@ describe('agent scorer create', () => {
 
     it('should handle single output enum value', async () => {
       const spec = makeLabeledSpec({
-        outputEnumValues: [
-          { value: 'Only', outcomeType: 'NotApplicable', isFallback: true, isSystemFallback: false },
-        ],
+        outputEnumValues: [{ value: 'Only', outcomeType: 'NotApplicable', isFallback: true, isSystemFallback: false }],
       });
       const { Command } = await loadMockedCommand(spec);
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--spec', 'test.yaml',
+        '--target-org',
+        testOrg.username,
+        '--spec',
+        'test.yaml',
         '--preview',
         '--json',
       ]);
@@ -1002,13 +1020,20 @@ describe('agent scorer create', () => {
       const { Command, writtenFiles } = await loadMockedCommand(makeLabeledSpec());
 
       const result = await Command.run([
-        '--target-org', testOrg.username,
-        '--label', 'My Scorer',
-        '--api-name', 'My_Scorer',
-        '--lightning-type', 'lightning__textType',
-        '--engine-type', 'Manual',
-        '--agent-api-name', 'My_Agent',
-        '--output-dir', '/tmp/out-json-flags',
+        '--target-org',
+        testOrg.username,
+        '--label',
+        'My Scorer',
+        '--api-name',
+        'My_Scorer',
+        '--lightning-type',
+        'lightning__textType',
+        '--engine-type',
+        'Manual',
+        '--agent-api-name',
+        'My_Agent',
+        '--output-dir',
+        '/tmp/out-json-flags',
         '--json',
       ]);
 
@@ -1021,7 +1046,7 @@ describe('agent scorer create', () => {
 
   describe('--spec YAML parsing', () => {
     it('throws a clear error when the spec file is not valid YAML', async () => {
-      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', {
+      const mod = await esmock('../../../../src/commands/agent/scorer/generate-metadata-file.js', {
         'node:fs': { readFileSync: () => 'foo: [1, 2', existsSync: () => false },
       });
       const Command = mod.default;
@@ -1035,7 +1060,7 @@ describe('agent scorer create', () => {
     });
 
     it('throws a clear error when the spec file is not a YAML object', async () => {
-      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', {
+      const mod = await esmock('../../../../src/commands/agent/scorer/generate-metadata-file.js', {
         'node:fs': { readFileSync: () => '- 1\n- 2\n', existsSync: () => false },
       });
       const Command = mod.default;
@@ -1079,7 +1104,7 @@ describe('agent scorer create', () => {
           Agent: { listRemote: sinon.stub().resolves([]) },
         },
       };
-      const mod = await esmock('../../../../src/commands/agent/scorer/create.js', mocks);
+      const mod = await esmock('../../../../src/commands/agent/scorer/generate-metadata-file.js', mocks);
       const Command = mod.default;
 
       try {
@@ -1087,13 +1112,20 @@ describe('agent scorer create', () => {
         // are otherwise resolved via promptForFlag() in ../../../flags.js — a module esmock does not
         // remock here, so any prompt routed through it would hit the real @inquirer/prompts and hang).
         await Command.run([
-          '--target-org', testOrg.username,
-          '--label', 'My Scorer',
-          '--api-name', 'My_Scorer',
-          '--lightning-type', 'lightning__textType',
-          '--engine-type', 'Manual',
-          '--description', 'A test description',
-          '--status', 'Draft',
+          '--target-org',
+          testOrg.username,
+          '--label',
+          'My Scorer',
+          '--api-name',
+          'My_Scorer',
+          '--lightning-type',
+          'lightning__textType',
+          '--engine-type',
+          'Manual',
+          '--description',
+          'A test description',
+          '--status',
+          'Draft',
         ]);
         expect.fail('should have thrown');
       } catch (err: unknown) {

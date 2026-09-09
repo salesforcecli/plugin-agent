@@ -18,12 +18,12 @@ import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { expect } from 'chai';
 import { TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
 import { parseScorerVersions } from '@salesforce/agents';
-import type { AgentScorerCreateResult } from '../../src/commands/agent/scorer/create.js';
+import type { AgentScorerGenerateMetadataFileResult } from '../../src/commands/agent/scorer/generate-metadata-file.js';
 
-// `agent scorer create` writes local metadata only, but its `--target-org` is a required flag that resolves at
+// `agent scorer generate-metadata-file` writes local metadata only, but its `--target-org` is a required flag that resolves at
 // parse time, so this NUT needs a default org. It uses a lightweight scratch org (devhub only — no Einstein
 // provisioning or metadata deploy, which create doesn't need) rather than the shared heavyweight session.
-describe('agent scorer create NUTs', function () {
+describe('agent scorer generate-metadata-file NUTs', function () {
   this.timeout(15 * 60 * 1000);
 
   const API_NAME = 'Nut_Create_Scorer';
@@ -45,7 +45,7 @@ describe('agent scorer create NUTs', function () {
 
   before(async () => {
     session = await TestSession.create({
-      project: { name: 'scorerCreateNut' },
+      project: { name: 'scorerGenerateMetadataFileNut' },
       devhubAuthStrategy: 'AUTO',
       scratchOrgs: [{ setDefault: true, config: join('config', 'project-scratch-def.json') }],
     });
@@ -60,14 +60,14 @@ describe('agent scorer create NUTs', function () {
   });
 
   it('prints the spec JSON Schema with --spec-schema', () => {
-    const { stdout } = execCmd('agent scorer create --spec-schema', { ensureExitCode: 0 }).shellOutput;
+    const { stdout } = execCmd('agent scorer generate-metadata-file --spec-schema', { ensureExitCode: 0 }).shellOutput;
     expect(stdout).to.include('ScorerSpec');
     expect(stdout).to.include('apiName');
   });
 
   it('authors a scorer definition from a --spec file', () => {
-    const result = execCmd<AgentScorerCreateResult>(
-      `agent scorer create --spec "${specPath}" --output-dir "${outputDir}" --json`,
+    const result = execCmd<AgentScorerGenerateMetadataFileResult>(
+      `agent scorer generate-metadata-file --spec "${specPath}" --output-dir "${outputDir}" --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 
@@ -77,25 +77,15 @@ describe('agent scorer create NUTs', function () {
     expect(parseScorerVersions(readFileSync(scorerPath, 'utf8'))).to.have.length(1);
   });
 
-  it('appends a new version with --new-version', () => {
-    execCmd<AgentScorerCreateResult>(
-      `agent scorer create --spec "${specPath}" --output-dir "${outputDir}" --new-version --json`,
-      { ensureExitCode: 0 }
-    );
-
-    const versions = parseScorerVersions(readFileSync(scorerPath, 'utf8'));
-    expect(versions.map((v) => v.versionNumber)).to.deep.equal([1, 2]);
-  });
-
-  it('refuses to overwrite an existing scorer without --new-version', () => {
-    const output = execCmd<AgentScorerCreateResult>(
-      `agent scorer create --spec "${specPath}" --output-dir "${outputDir}" --json`,
+  it('refuses to overwrite an existing scorer (scaffold-once; edit the XML directly instead)', () => {
+    const output = execCmd<AgentScorerGenerateMetadataFileResult>(
+      `agent scorer generate-metadata-file --spec "${specPath}" --output-dir "${outputDir}" --json`,
       { ensureExitCode: 1 }
     ).jsonOutput;
 
     expect(output?.message).to.match(new RegExp(API_NAME));
-    // the existing file is left untouched (still two versions from the prior test)
-    expect(parseScorerVersions(readFileSync(scorerPath, 'utf8'))).to.have.length(2);
+    // the existing file is left untouched (still the single scaffolded version)
+    expect(parseScorerVersions(readFileSync(scorerPath, 'utf8'))).to.have.length(1);
   });
 
   it('writes nothing with --preview', () => {
@@ -104,8 +94,8 @@ describe('agent scorer create NUTs', function () {
     writeFileSync(previewSpec, JSON.stringify(makeSpec(previewName, 'NUT Preview Scorer')));
     const previewPath = join(outputDir, 'aiAgentScorerDefinitions', `${previewName}.aiAgentScorerDefinition-meta.xml`);
 
-    const result = execCmd<AgentScorerCreateResult>(
-      `agent scorer create --spec "${previewSpec}" --output-dir "${outputDir}" --preview --json`,
+    const result = execCmd<AgentScorerGenerateMetadataFileResult>(
+      `agent scorer generate-metadata-file --spec "${previewSpec}" --output-dir "${outputDir}" --preview --json`,
       { ensureExitCode: 0 }
     ).jsonOutput?.result;
 

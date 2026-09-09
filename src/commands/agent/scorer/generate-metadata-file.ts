@@ -21,7 +21,6 @@ import {
   Agent,
   type ScorerSpec,
   createScorerDefinition,
-  addScorerVersion,
   labelToApiName,
   scorerSpecJsonSchema,
   type SupportedLightningType,
@@ -39,13 +38,18 @@ import { FlaggablePrompt, makeFlags, promptForFlag } from '../../../flags.js';
 import { theme } from '../../../inquirer-theme.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.scorer.create');
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.scorer.generate-metadata-file');
 
-export type AgentScorerCreateResult = {
+export type AgentScorerGenerateMetadataFileResult = {
   path: string;
   apiName: string;
   contents: string;
   promptTemplatePath?: string;
+  /**
+   * Guidance surfaced to a caller running with --json (where `this.log` output is suppressed): a written
+   * scorer's metadata XML is the source of truth, so any further change is made directly in the XML.
+   */
+  guidance?: string;
 };
 
 const FLAGGABLE_PROMPTS = {
@@ -60,7 +64,8 @@ const FLAGGABLE_PROMPTS = {
     promptMessage: 'Scorer API name',
     validate: (d: string): boolean | string => {
       if (!d.length) return 'API name cannot be empty';
-      if (d.length > SCORER_API_NAME_MAX_LENGTH) return `API name cannot exceed ${SCORER_API_NAME_MAX_LENGTH} characters`;
+      if (d.length > SCORER_API_NAME_MAX_LENGTH)
+        return `API name cannot exceed ${SCORER_API_NAME_MAX_LENGTH} characters`;
       if (!SCORER_API_NAME_PATTERN.test(d)) return 'Must start with letter, only alphanumerics and underscores';
       return true;
     },
@@ -114,8 +119,7 @@ async function promptForSingleEnumValue(index: number): Promise<OutputEnumValueI
     message: 'Outcome type',
     promptMessage: 'Outcome type for this value',
     options: SCORER_OUTCOME_TYPES,
-    validate: (d: string): boolean | string =>
-      (SCORER_OUTCOME_TYPES as readonly string[]).includes(d) || 'Invalid',
+    validate: (d: string): boolean | string => (SCORER_OUTCOME_TYPES as readonly string[]).includes(d) || 'Invalid',
   });
 
   const isFallback = await confirm({
@@ -141,13 +145,18 @@ async function promptForOutputEnumValues(): Promise<OutputEnumValueInput[]> {
     // eslint-disable-next-line no-await-in-loop
     const result = await promptForSingleEnumValue(values.length);
     addMore = result.addMore;
-    values.push({ value: result.value, outcomeType: result.outcomeType, isFallback: result.isFallback, isSystemFallback: result.isSystemFallback });
+    values.push({
+      value: result.value,
+      outcomeType: result.outcomeType,
+      isFallback: result.isFallback,
+      isSystemFallback: result.isSystemFallback,
+    });
   }
 
   return values;
 }
 
-export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult> {
+export default class AgentScorerGenerateMetadataFile extends SfCommand<AgentScorerGenerateMetadataFileResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -172,10 +181,6 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       summary: messages.getMessage('flags.spec-schema.summary'),
       default: false,
     }),
-    'new-version': Flags.boolean({
-      summary: messages.getMessage('flags.new-version.summary'),
-      default: false,
-    }),
     'output-dir': Flags.directory({
       summary: messages.getMessage('flags.output-dir.summary'),
       default: join('force-app', 'main', 'default'),
@@ -186,8 +191,8 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
   };
 
   // eslint-disable-next-line complexity
-  public async run(): Promise<AgentScorerCreateResult> {
-    const { flags } = await this.parse(AgentScorerCreate);
+  public async run(): Promise<AgentScorerGenerateMetadataFileResult> {
+    const { flags } = await this.parse(AgentScorerGenerateMetadataFile);
 
     if (flags['spec-schema']) {
       this.styledJSON(scorerSpecJsonSchema() as unknown as import('@salesforce/ts-types').AnyJson);
@@ -206,40 +211,26 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     const scorerPath = join(outputDir, 'aiAgentScorerDefinitions', scorerFileName);
     const exists = existsSync(scorerPath);
 
-    // An existing scorer is never overwritten: refine it by adding a new version, which keeps the API name
-    // stable and the version history intact. Require --new-version so a re-run can't silently add a version
-    // (versions can't be deleted once deployed). This gate applies to --preview too, so a preview reflects
-    // the artifact the same flags would actually write.
-    if (exists && !flags['new-version']) {
-      throw messages.createError('error.scorerExists', [spec.apiName]);
+    // `generate-metadata-file` only scaffolds a brand-new scorer — it never overwrites an existing one. Once the metadata XML
+    // exists it has lost its connection to the spec, so every further change (new versions, status, activation,
+    // rubric edits) is authored directly in the XML. Error out and point the user there rather than re-scaffold.
+    if (exists) {
+      throw messages.createError('error.scorerExists', [spec.apiName, scorerPath]);
     }
 
     if (flags.preview) {
-      // Preview the exact artifact these flags would write: an appended version when the scorer already
-      // exists (--new-version), otherwise a fresh definition.
-      const result = exists
-        ? await addScorerVersion(spec, { outputDir, write: false })
-        : await createScorerDefinition(spec, { outputDir, write: false });
+      const result = await createScorerDefinition(spec, { outputDir, write: false });
       this.log('\n--- Scorer Definition (preview) ---\n');
       this.log(result.contents);
       if (result.promptTemplateContents) {
         this.log('\n--- Prompt Template (preview) ---\n');
         this.log(result.promptTemplateContents);
       }
-      return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
-    }
-
-    if (exists) {
-      const added = await addScorerVersion(spec, { outputDir });
-      this.log(`\nAdded version ${added.versionNumber} to scorer: ${added.path}`);
-      if (added.promptTemplatePath) {
-        this.log(`Updated prompt template: ${added.promptTemplatePath}`);
-      }
       return {
-        path: added.path,
-        apiName: added.apiName,
-        contents: added.contents,
-        promptTemplatePath: added.promptTemplatePath,
+        path: result.path,
+        apiName: result.apiName,
+        contents: result.contents,
+        promptTemplatePath: result.promptTemplatePath,
       };
     }
 
@@ -248,8 +239,18 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     if (result.promptTemplatePath) {
       this.log(`Prompt template written to: ${result.promptTemplatePath}`);
     }
+    // Make the scaffold-once model explicit: from here on the XML is the source of truth, not the spec. `this.log`
+    // is suppressed under --json, so the same guidance also rides along in the returned result for agent callers.
+    const guidance = messages.getMessage('info.editXmlDirectly');
+    this.log(`\n${guidance}`);
 
-    return { path: result.path, apiName: result.apiName, contents: result.contents, promptTemplatePath: result.promptTemplatePath };
+    return {
+      path: result.path,
+      apiName: result.apiName,
+      contents: result.contents,
+      promptTemplatePath: result.promptTemplatePath,
+      guidance,
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -280,18 +281,26 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
       }
     }
 
+    // Set expectations up front for the human doing the interview: this only scaffolds the XML, which becomes
+    // the source of truth. (Suppressed under --json, which drives the flow from flags rather than prompts.)
+    if (!this.jsonEnabled()) {
+      this.log(`\n${messages.getMessage('info.scaffoldIntro')}`);
+    }
+
     this.log();
     this.styledHeader('Scorer Definition');
 
     const label = (flags.label as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS.label));
 
     const defaultApiName = labelToApiName(label);
-    const apiName = (flags['api-name'] as string) ?? (await inquirerInput({
-      message: 'Scorer API name',
-      default: defaultApiName,
-      validate: FLAGGABLE_PROMPTS['api-name'].validate,
-      theme,
-    }));
+    const apiName =
+      (flags['api-name'] as string) ??
+      (await inquirerInput({
+        message: 'Scorer API name',
+        default: defaultApiName,
+        validate: FLAGGABLE_PROMPTS['api-name'].validate,
+        theme,
+      }));
 
     const description =
       (flags.description as string) ??
@@ -316,7 +325,9 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     const engineType = (flags['engine-type'] as string) ?? (await promptForFlag(FLAGGABLE_PROMPTS['engine-type']));
     const engineConfig = await this.promptForEngineConfig(engineType);
     const agentAssociation = await this.promptForAgentAssociationDetails(
-      connection, engineType, flags['agent-api-name'] as string | undefined
+      connection,
+      engineType,
+      flags['agent-api-name'] as string | undefined
     );
 
     return {
@@ -334,7 +345,9 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
     };
   }
 
-  private async promptForEngineConfig(engineType: string): Promise<{ promptContent?: string; promptTemplateName?: string }> {
+  private async promptForEngineConfig(
+    engineType: string
+  ): Promise<{ promptContent?: string; promptTemplateName?: string }> {
     if (engineType !== 'PromptTemplate') return {};
     // No flag exists yet for referencing an existing prompt template by name, so in --json/
     // non-interactive mode we always generate a new default prompt template.
@@ -425,5 +438,4 @@ export default class AgentScorerCreate extends SfCommand<AgentScorerCreateResult
 
     return agentAssociation;
   }
-
 }

@@ -96,7 +96,7 @@
             "external": true
           },
           "scorer": {
-            "description": "Commands to create and manage agent scorers.",
+            "description": "Commands to scaffold and run agent scorers.",
             "external": true
           },
           "adl": {
