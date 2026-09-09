@@ -15,13 +15,13 @@
  */
 
 import { join } from 'node:path';
-import { readdirSync, statSync } from 'node:fs';
+import { appendFileSync, readdirSync, statSync } from 'node:fs';
 import { expect } from 'chai';
 import { genUniqueString, TestSession } from '@salesforce/cli-plugins-testkit';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { AgentCreateSpecResult } from '../../src/commands/agent/generate/agent-spec.js';
 import type { AgentCreateResult } from '../../src/commands/agent/create.js';
-import { getTestSession, getUsername } from './shared-setup.js';
+import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js';
 
 /* eslint-disable no-console */
 
@@ -68,6 +68,18 @@ describe('agent create', function () {
     const expectedFilePath = join(session.project.dir, 'specs', specFileName);
     const name = 'Plugin Agent Test';
     const apiName = 'Plugin_Agent_Test';
+
+    // Reuse the Bot User pre-provisioned in shared setup (via `org create agent-user`) instead of
+    // letting core auto-create one during the save. The 'customer' agentType maps to core's
+    // EinsteinServiceAgent, which requires a licensed Bot User; when no user is supplied, core creates
+    // that user in the SAME transaction as the BotDefinition save, and the pre-save validation trigger
+    // intermittently cannot see the just-created license/permset assignment, failing with "User
+    // doesn't have access to agent." `agent create` sets agentSettings.userId from the spec's
+    // `agentUser`, so writing the already-committed agent user into the spec removes that race.
+    const agentUser = getAgentUsername();
+    expect(agentUser, 'agent user should have been provisioned in shared setup').to.be.a('string');
+    appendFileSync(expectedFilePath, `\nagentUser: "${agentUser!}"\n`);
+
     const command = `agent create --spec ${expectedFilePath} --target-org ${username} --name "${name}" --api-name ${apiName} --json`;
     const result = execCmd<AgentCreateResult>(command, { ensureExitCode: 0 }).jsonOutput?.result;
     expect(result).to.be.ok;
