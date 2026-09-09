@@ -286,3 +286,58 @@ describe('humanFormatAgentforceStudio - Expected/Actual columns', () => {
     expect(testCase10Section).to.not.include('Actual');
   });
 });
+
+describe('humanFormatAgentforceStudio - scorer status casing (W-24087944)', () => {
+  it('renders a scorer as Pass when the API returns a differently-cased status ("Pass"/"pass"), not just "PASS"', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-case-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    // between "Test Case #2" and "Test Case #3": the lower-case ("pass") test case,
+    // where both scorers pass and neither should render as Fail
+    const [, , testCase2Section] = output.split(/Test Case #\d/);
+
+    expect(testCase2Section).to.include(ansis.green('Pass'));
+    expect(testCase2Section).to.not.include(ansis.red('Fail'));
+  });
+
+  it('counts a test case as passing only when every scorer status is PASS, case-insensitively', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-case-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input)).replace(/\s+/g, ' ');
+
+    // test case 1 (Title-case, one Fail) and test case 3 (upper-case, one FAIL) genuinely fail;
+    // test case 2 (lower-case, all pass) genuinely passes
+    expect(output).to.include('Total Test Cases 3');
+    expect(output).to.include('Passing Test Cases 1');
+    expect(output).to.include('Failing Test Cases 2');
+  });
+
+  it('treats a null or missing scorer status as Fail, without throwing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/null-or-missing-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+
+    let output = '';
+    expect(() => {
+      output = humanFormatAgentforceStudio(input);
+    }).to.not.throw();
+
+    expect(output).to.include(ansis.red('Fail'));
+    expect(output).to.not.include(ansis.green('Pass'));
+
+    const singleLine = stripVTControlCharacters(output).replace(/\s+/g, ' ');
+    expect(singleLine).to.include('Passing Test Cases 0');
+    expect(singleLine).to.include('Failing Test Cases 1');
+  });
+});
+
+describe('humanFormatAgentforceStudio - empty scorer results (W-24087944)', () => {
+  it('counts a test case with no scorer results as failing, not passing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/empty-scorer-results.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input)).replace(/\s+/g, ' ');
+
+    expect(output).to.include('Total Test Cases 2');
+    expect(output).to.include('Passing Test Cases 1');
+    expect(output).to.include('Failing Test Cases 1');
+  });
+});
