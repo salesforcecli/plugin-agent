@@ -1,3 +1,9 @@
+## [2.2.1](https://github.com/salesforcecli/plugin-agent/compare/2.2.0...2.2.1) (2026-09-09)
+
+### Bug Fixes
+
+- compare Agentforce Studio scorer status case-insensitively @W-24087944@ ([#492](https://github.com/salesforcecli/plugin-agent/issues/492)) ([7db62af](https://github.com/salesforcecli/plugin-agent/commit/7db62af5a320d32d1eafc59c81e5f21741df68bc))
+
 # [2.2.0](https://github.com/salesforcecli/plugin-agent/compare/2.1.2...2.2.0) (2026-09-08)
 
 ### Features
