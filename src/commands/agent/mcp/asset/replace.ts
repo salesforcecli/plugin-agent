@@ -53,6 +53,10 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
       exists: true,
       exclusive: ['assets'],
     }),
+    'server-fingerprint': Flags.string({
+      summary: messages.getMessage('flags.server-fingerprint.summary'),
+      char: 'f',
+    }),
   };
 
   public async run(): Promise<ApiCatalogMcpServerAssetReplaceResult> {
@@ -81,6 +85,9 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
     }
 
     const input: McpServerAssetReplaceInput = { assets };
+    if (flags['server-fingerprint']) {
+      input.serverFingerprint = flags['server-fingerprint'];
+    }
 
     let result: McpServerAssetCollection;
     try {
