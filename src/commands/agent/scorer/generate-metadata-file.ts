@@ -52,6 +52,18 @@ export type AgentScorerGenerateMetadataFileResult = {
   guidance?: string;
 };
 
+/**
+ * The scorer spec JSON Schema payload. Under `--spec-schema --json` (where `styledJSON` is suppressed) it is
+ * returned as the command result so the schema still rides in the standard {status, result} envelope for
+ * machine consumers, matching what `--spec-schema` prints without `--json`.
+ */
+export type ScorerSpecSchemaResult = Record<string, unknown>;
+
+/** Everything `run` can resolve to: a scaffolded/previewed scorer, or (under `--spec-schema --json`) the schema. */
+export type AgentScorerGenerateMetadataFileCommandResult =
+  | AgentScorerGenerateMetadataFileResult
+  | ScorerSpecSchemaResult;
+
 const FLAGGABLE_PROMPTS = {
   label: {
     message: messages.getMessage('flags.label.summary'),
@@ -156,7 +168,7 @@ async function promptForOutputEnumValues(): Promise<OutputEnumValueInput[]> {
   return values;
 }
 
-export default class AgentScorerGenerateMetadataFile extends SfCommand<AgentScorerGenerateMetadataFileResult> {
+export default class AgentScorerGenerateMetadataFile extends SfCommand<AgentScorerGenerateMetadataFileCommandResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -191,11 +203,18 @@ export default class AgentScorerGenerateMetadataFile extends SfCommand<AgentScor
   };
 
   // eslint-disable-next-line complexity
-  public async run(): Promise<AgentScorerGenerateMetadataFileResult> {
+  public async run(): Promise<AgentScorerGenerateMetadataFileCommandResult> {
     const { flags } = await this.parse(AgentScorerGenerateMetadataFile);
 
     if (flags['spec-schema']) {
-      this.styledJSON(scorerSpecJsonSchema() as unknown as import('@salesforce/ts-types').AnyJson);
+      const schema = scorerSpecJsonSchema();
+      // Under --json, styledJSON is a no-op (output is suppressed), so return the schema as the command result
+      // — it then rides in the standard {status, result} envelope for machine consumers. Otherwise pretty-print
+      // it to the terminal as before.
+      if (this.jsonEnabled()) {
+        return schema;
+      }
+      this.styledJSON(schema as unknown as import('@salesforce/ts-types').AnyJson);
       return { path: '', apiName: '', contents: '' };
     }
 

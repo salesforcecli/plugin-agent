@@ -1074,6 +1074,37 @@ describe('agent scorer generate-metadata-file', () => {
     });
   });
 
+  describe('--spec validation errors', () => {
+    // The --spec path hands the parsed YAML to createScorerDefinition → validateScorerSpec. These assert the
+    // command surfaces a clear, actionable message rather than a raw TypeError / silently-broken metadata.
+    it('surfaces a clear error (not a TypeError) when agentAssociation is missing', async () => {
+      const spec = makeLabeledSpec();
+      delete (spec as any).agentAssociation;
+      const { Command, writtenFiles } = await loadMockedCommand(spec);
+
+      try {
+        await Command.run(['--target-org', testOrg.username, '--spec', 'test.yaml', '--preview', '--json']);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        const message = (err as Error).message;
+        expect(message).to.include('agentAssociation is required.');
+        expect(message).to.not.match(/cannot read properties of undefined/i);
+      }
+      expect(writtenFiles).to.have.length(0);
+    });
+
+    it('surfaces a clear error when engineType is not a supported engine', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec({ engineType: 'prompttemplate' as any }));
+
+      try {
+        await Command.run(['--target-org', testOrg.username, '--spec', 'test.yaml', '--preview', '--json']);
+        expect.fail('should have thrown');
+      } catch (err: unknown) {
+        expect((err as Error).message).to.include("Unsupported engineType 'prompttemplate'.");
+      }
+    });
+  });
+
   describe('--spec-schema', () => {
     it('prints the schema JSON and skips org/spec resolution', async () => {
       const { Command } = await loadMockedCommand(makeLabeledSpec());
@@ -1087,6 +1118,18 @@ describe('agent scorer generate-metadata-file', () => {
       const printed = sfCommandStubs.styledJSON.firstCall.args[0] as Record<string, unknown>;
       expect(printed).to.have.property('$ref', '#/definitions/ScorerSpec');
       expect(printed).to.have.property('definitions');
+    });
+
+    it('returns the schema as the --json result instead of the empty payload', async () => {
+      const { Command } = await loadMockedCommand(makeLabeledSpec());
+
+      // Under --json, styledJSON is suppressed, so the schema must be the command result — it then rides in
+      // the standard {status, result} envelope rather than being dropped for the machine consumer --json serves.
+      const result = await Command.run(['--target-org', testOrg.username, '--spec-schema', '--json']);
+
+      expect(result).to.have.property('$ref', '#/definitions/ScorerSpec');
+      expect(result).to.have.property('definitions');
+      expect(sfCommandStubs.styledJSON.called).to.be.false;
     });
   });
 
