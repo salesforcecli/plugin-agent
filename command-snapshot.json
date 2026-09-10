@@ -380,6 +380,38 @@
   },
   {
     "alias": [],
+    "command": "agent:scorer:generate-metadata-file",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": [
+      "agent-api-name",
+      "api-name",
+      "api-version",
+      "description",
+      "engine-type",
+      "flags-dir",
+      "json",
+      "label",
+      "lightning-type",
+      "output-dir",
+      "preview",
+      "spec",
+      "spec-schema",
+      "status",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:scorer:run",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-name", "api-version", "data", "file", "flags-dir", "json", "scorer-version", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:test:create",
     "flagAliases": [],
     "flagChars": ["o"],
