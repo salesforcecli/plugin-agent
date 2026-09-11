@@ -113,7 +113,10 @@ export class TestStages {
         this.stop('async');
         this.ux.log(`Client timed out after ${wait.minutes} minutes.`);
         this.ux.log(`Run ${colorize('dim', `sf agent test resume --job-id ${id}`)} to resuming watching this test.`);
-        return { completed: true };
+        // The client stopped watching, but the run is still going server-side — it did NOT
+        // complete. Report completed:false so the caller preserves the cache entry (for
+        // `agent test resume`) and does not mask the timeout as a COMPLETED result.
+        return { completed: false };
       } else {
         this.error();
         throw e;

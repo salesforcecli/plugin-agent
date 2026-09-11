@@ -1,0 +1,19 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 4,
+      "inputs": [
+        { "name": "priority", "value": 5 },
+        { "name": "active", "value": true }
+      ],
+      "subjectResponse": "{\"text\":\"All non-string input types response.\",\"userInput\":\"What is the priority?\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":4.0,\"reasoning\":\"OK.\"}"
+        }
+      ]
+    }
+  ]
+}

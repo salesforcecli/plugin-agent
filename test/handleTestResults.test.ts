@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 import { readFile } from 'node:fs/promises';
+import { stripVTControlCharacters } from 'node:util';
 import { expect, config } from 'chai';
-import { AgentTestResultsResponse } from '@salesforce/agents';
-import { humanFormat, readableTime, truncate } from '../src/handleTestResults.js';
+import { AgentTestResultsResponse, AgentforceStudioTestResultsResponse } from '@salesforce/agents';
+import ansis from 'ansis';
+import { humanFormat, humanFormatAgentforceStudio, readableTime, truncate } from '../src/handleTestResults.js';
 
 config.truncateThreshold = 0;
 
@@ -110,5 +112,232 @@ describe('metric calculations', () => {
     const input = JSON.parse(raw) as AgentTestResultsResponse;
     const output = humanFormat(input);
     expect(output).to.include('Metric Pass %   0.00%');
+  });
+});
+
+describe('humanFormatAgentforceStudio - inputs line', () => {
+  it('renders Inputs line from testCase.inputs, using the raw field name as-is', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: account = "Acme", notes = "what is kafka"');
+  });
+
+  it('falls back to User Input when testCase.inputs is absent but subjectResponse.userInput exists', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/legacy-user-input-fallback.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('User Input: What is the account status?');
+    expect(output).to.not.include('Inputs:');
+  });
+
+  it('omits the inputs line entirely when neither inputs nor userInput is present', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/no-inputs-no-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Inputs:');
+    expect(output).to.not.include('User Input:');
+  });
+
+  it('truncates to the first 3 inputs and appends a "+N more" suffix', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/many-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: account = "Acme", region = "ANZ", tier = "Gold"  (+2 more)');
+  });
+
+  it('renders all inputs when values are a mix of string and non-string primitives', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-type-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs: account = "Acme", priority = "5", active = "true"');
+    expect(output).to.not.include('more)');
+  });
+
+  it('renders an Inputs line (not a User Input fallback) when every input value is non-string', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/all-non-string-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Inputs:');
+    expect(output).to.not.include('User Input:');
+  });
+});
+
+describe('humanFormatAgentforceStudio - sanitizing untrusted display data', () => {
+  it('strips ANSI escape sequences from input values before rendering, leaving ansis coloring intact', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/ansi-escape-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    expect(output).to.not.include('[31m');
+    expect(output).to.not.include('[0m');
+    expect(output).to.include('account = "Acme"');
+    expect(output).to.include(ansis.bold('Test Case #5'));
+  });
+
+  it('collapses embedded newlines in input values to a single space', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/newline-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('notes = "line one line two"');
+    expect(output).to.not.include('line one\nline two');
+  });
+
+  it('strips ANSI escape sequences from the User Input fallback before rendering', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/user-input-with-escapes.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    expect(output).to.not.include('[31m');
+    expect(output).to.not.include('[0m');
+    expect(output).to.include(ansis.dim('User Input'));
+    expect(stripVTControlCharacters(output)).to.include('User Input: What is the account status?');
+  });
+
+  it('collapses a bare carriage return (no newline) in an input value instead of letting it through raw', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/bare-cr-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\r');
+    expect(output).to.include('notes = "safe Inputs: EVIL"');
+  });
+
+  it('collapses a bare carriage return (no newline) in the User Input fallback instead of letting it through raw', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/bare-cr-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\r');
+    expect(output).to.include('User Input: safe User Input: EVIL');
+  });
+
+  it('strips stray BEL and backspace control characters from an input value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/control-chars-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('\x07');
+    expect(output).to.not.include('\x08');
+    expect(output).to.include('notes = "badvalue"');
+  });
+});
+
+describe('humanFormatAgentforceStudio - latency/tokens line', () => {
+  it('renders combined Latency and Tokens line', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Latency: 842ms  |  Tokens: 156 in / 89 out / 245 total');
+  });
+
+  it('renders Latency alone when tokenUsage is missing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/latency-only.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Latency: 500ms');
+    expect(output).to.not.include('Tokens:');
+  });
+
+  it('renders Tokens alone when performance is missing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/tokens-only.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Tokens: 30 in / 20 out / 50 total');
+    expect(output).to.not.include('Latency:');
+  });
+
+  it('omits the metrics line entirely when neither performance nor tokenUsage is present', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/no-inputs-no-user-input.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Latency:');
+    expect(output).to.not.include('Tokens:');
+  });
+});
+
+describe('humanFormatAgentforceStudio - Expected/Actual columns', () => {
+  it('omits the Expected and Actual columns when no scorer row has either value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-inputs.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.not.include('Expected');
+    expect(output).to.not.include('Actual');
+    expect(output).to.include('Scorer');
+    expect(output).to.include('Result');
+    expect(output).to.include('Reasoning');
+  });
+
+  it('shows both the Expected and Actual columns when a scorer row has either value', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/with-expected-actual.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    expect(output).to.include('Expected');
+    expect(output).to.include('Actual');
+  });
+
+  it('decides Expected/Actual visibility independently per test case', async () => {
+    const raw = await readFile(
+      './test/mocks/agentforce-studio-results/mixed-expected-actual-per-test-case.json',
+      'utf8'
+    );
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input));
+    const [testCase9Section, testCase10Section] = output.split('Test Case #10');
+
+    expect(testCase9Section).to.include('Expected');
+    expect(testCase9Section).to.include('Actual');
+    expect(testCase10Section).to.not.include('Expected');
+    expect(testCase10Section).to.not.include('Actual');
+  });
+});
+
+describe('humanFormatAgentforceStudio - scorer status casing (W-24087944)', () => {
+  it('renders a scorer as Pass when the API returns a differently-cased status ("Pass"/"pass"), not just "PASS"', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-case-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = humanFormatAgentforceStudio(input);
+    // between "Test Case #2" and "Test Case #3": the lower-case ("pass") test case,
+    // where both scorers pass and neither should render as Fail
+    const [, , testCase2Section] = output.split(/Test Case #\d/);
+
+    expect(testCase2Section).to.include(ansis.green('Pass'));
+    expect(testCase2Section).to.not.include(ansis.red('Fail'));
+  });
+
+  it('counts a test case as passing only when every scorer status is PASS, case-insensitively', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/mixed-case-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input)).replace(/\s+/g, ' ');
+
+    // test case 1 (Title-case, one Fail) and test case 3 (upper-case, one FAIL) genuinely fail;
+    // test case 2 (lower-case, all pass) genuinely passes
+    expect(output).to.include('Total Test Cases 3');
+    expect(output).to.include('Passing Test Cases 1');
+    expect(output).to.include('Failing Test Cases 2');
+  });
+
+  it('treats a null or missing scorer status as Fail, without throwing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/null-or-missing-status.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+
+    let output = '';
+    expect(() => {
+      output = humanFormatAgentforceStudio(input);
+    }).to.not.throw();
+
+    expect(output).to.include(ansis.red('Fail'));
+    expect(output).to.not.include(ansis.green('Pass'));
+
+    const singleLine = stripVTControlCharacters(output).replace(/\s+/g, ' ');
+    expect(singleLine).to.include('Passing Test Cases 0');
+    expect(singleLine).to.include('Failing Test Cases 1');
+  });
+});
+
+describe('humanFormatAgentforceStudio - empty scorer results (W-24087944)', () => {
+  it('counts a test case with no scorer results as failing, not passing', async () => {
+    const raw = await readFile('./test/mocks/agentforce-studio-results/empty-scorer-results.json', 'utf8');
+    const input = JSON.parse(raw) as AgentforceStudioTestResultsResponse;
+    const output = stripVTControlCharacters(humanFormatAgentforceStudio(input)).replace(/\s+/g, ' ');
+
+    expect(output).to.include('Total Test Cases 2');
+    expect(output).to.include('Passing Test Cases 1');
+    expect(output).to.include('Failing Test Cases 1');
   });
 });

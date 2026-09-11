@@ -1,0 +1,51 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "subjectResponse": "{\"text\":\"Title-case status from the API.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Factuality Evaluation",
+          "scorerResponse": "{\"status\":\"Fail\",\"score\":1.0,\"reasoning\":\"Not factual.\"}"
+        },
+        {
+          "scorerName": "Conciseness Evaluation",
+          "scorerResponse": "{\"status\":\"Pass\",\"score\":5.0,\"reasoning\":\"Concise.\"}"
+        },
+        {
+          "scorerName": "Coherence Evaluation",
+          "scorerResponse": "{\"status\":\"Pass\",\"score\":5.0,\"reasoning\":\"Coherent.\"}"
+        }
+      ]
+    },
+    {
+      "testNumber": 2,
+      "subjectResponse": "{\"text\":\"Lower-case status from the API.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Factuality Evaluation",
+          "scorerResponse": "{\"status\":\"pass\",\"score\":5.0,\"reasoning\":\"Factual.\"}"
+        },
+        {
+          "scorerName": "Conciseness Evaluation",
+          "scorerResponse": "{\"status\":\"pass\",\"score\":5.0,\"reasoning\":\"Concise.\"}"
+        }
+      ]
+    },
+    {
+      "testNumber": 3,
+      "subjectResponse": "{\"text\":\"Upper-case status from the API, unaffected by the fix.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Factuality Evaluation",
+          "scorerResponse": "{\"status\":\"PASS\",\"score\":5.0,\"reasoning\":\"Factual.\"}"
+        },
+        {
+          "scorerName": "Conciseness Evaluation",
+          "scorerResponse": "{\"status\":\"FAIL\",\"score\":1.0,\"reasoning\":\"Not concise.\"}"
+        }
+      ]
+    }
+  ]
+}

@@ -25,6 +25,21 @@ variables:
         description: "This variable may also be referred to as MessagingSession EndUserLanguage"
     VerifiedCustomerId: mutable string
         description: "This variable may also be referred to as VerifiedCustomerId"
+    NutProbeText: mutable string = ""
+        description: "Test-only External var: a Text value injected via preview context variables."
+        visibility: "External"
+    NutProbeBool: mutable boolean = False
+        description: "Test-only External var: a Boolean value injected via preview context variables."
+        visibility: "External"
+    NutProbeNum: mutable number = 0
+        description: "Test-only External var: a Number value injected via preview context variables."
+        visibility: "External"
+    NutProbeObj: mutable object = {}
+        description: "Test-only External var: a JSON object injected via preview context variables."
+        visibility: "External"
+    NutProbeList: mutable list[string] = []
+        description: "Test-only External var: a List value injected via preview context variables."
+        visibility: "External"
 
 language:
     default_locale: "en_US"

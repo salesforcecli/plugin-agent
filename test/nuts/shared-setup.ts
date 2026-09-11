@@ -26,6 +26,17 @@ import { sleep, ensureArray } from '@salesforce/kit';
 let testSession: TestSession | undefined;
 let testSessionPromise: Promise<TestSession> | undefined;
 let agentUsername: string | undefined;
+// Non-sensitive scratch-org identifiers captured at setup for CI failure correlation.
+let orgId: string | undefined;
+let orgPod: string | undefined;
+
+// Format a UTC timestamp as MM/DD/YYYY:HH:mm:ss for CI log correlation (Splunk-friendly).
+function fmtUtc(d: Date): string {
+  const p = (n: number): string => String(n).padStart(2, '0');
+  return `${p(d.getUTCMonth() + 1)}/${p(d.getUTCDate())}/${d.getUTCFullYear()}:${p(d.getUTCHours())}:${p(
+    d.getUTCMinutes()
+  )}:${p(d.getUTCSeconds())}`;
+}
 
 // Helper function to wait for Einstein AI services to be ready
 async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): Promise<void> {
@@ -102,6 +113,14 @@ export async function getTestSession(): Promise<TestSession> {
           console.log(`Using scratch org: ${defaultOrg.username}`);
           const org = await Org.create({ aliasOrUsername: defaultOrg.username });
           const connection = org.getConnection();
+
+          // Capture non-sensitive org identifiers for CI failure correlation (orgId + pod + UTC timestamp).
+          orgId = org.getOrgId();
+          const orgInfo = await connection.singleRecordQuery<{ InstanceName: string }>(
+            'SELECT InstanceName FROM Organization'
+          );
+          orgPod = orgInfo.InstanceName;
+          console.log(`[NUT-CONTEXT] utc=${fmtUtc(new Date())} orgId=${orgId} pod=${orgPod}`);
 
           // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
           const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
@@ -272,3 +291,18 @@ export function getAgentUsername(): string | undefined {
   }
   return agentUsername;
 }
+
+// Root-level hook: on any failing test that used the shared scratch org, emit orgId + pod +
+// UTC timestamp + error so CI logs can be correlated in Splunk. Registered once when this shared
+// module is first imported by the z-series NUTs. (A failing before-all hook is not caught here, but
+// the [NUT-CONTEXT] line logged at setup still records that run's orgId + pod + time.)
+afterEach(function (this: Mocha.Context) {
+  if (this.currentTest?.state === 'failed' && orgId) {
+    const err = this.currentTest.err;
+    console.log(
+      `[NUT-FAILURE] utc=${fmtUtc(new Date())} orgId=${orgId} pod=${
+        orgPod ?? 'unknown'
+      } test="${this.currentTest.fullTitle()}" error=${err?.message ?? String(err)}`
+    );
+  }
+});

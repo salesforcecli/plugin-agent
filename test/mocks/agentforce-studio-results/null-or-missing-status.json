@@ -1,0 +1,19 @@
+{
+  "status": "SUCCESS",
+  "testCases": [
+    {
+      "testNumber": 1,
+      "subjectResponse": "{\"text\":\"Null or missing status should be treated as Fail, not throw.\"}",
+      "testScorerResults": [
+        {
+          "scorerName": "Null Status Scorer",
+          "scorerResponse": "{\"status\":null,\"score\":0,\"reasoning\":\"Status was null.\"}"
+        },
+        {
+          "scorerName": "Missing Status Scorer",
+          "scorerResponse": "{\"score\":0,\"reasoning\":\"Status field is absent.\"}"
+        }
+      ]
+    }
+  ]
+}

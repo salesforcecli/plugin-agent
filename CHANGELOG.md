@@ -1,3 +1,78 @@
+## [2.2.1](https://github.com/salesforcecli/plugin-agent/compare/2.2.0...2.2.1) (2026-09-09)
+
+### Bug Fixes
+
+- compare Agentforce Studio scorer status case-insensitively @W-24087944@ ([#492](https://github.com/salesforcecli/plugin-agent/issues/492)) ([7db62af](https://github.com/salesforcecli/plugin-agent/commit/7db62af5a320d32d1eafc59c81e5f21741df68bc))
+
+# [2.2.0](https://github.com/salesforcecli/plugin-agent/compare/2.1.2...2.2.0) (2026-09-08)
+
+### Features
+
+- add --context-variables-json for typed preview context variables @W-24014400@ ([#483](https://github.com/salesforcecli/plugin-agent/issues/483)) ([10b12f4](https://github.com/salesforcecli/plugin-agent/commit/10b12f4856b9f52db135bfa309e5dd9b9f82c388)), closes [#356](https://github.com/salesforcecli/plugin-agent/issues/356) [#356](https://github.com/salesforcecli/plugin-agent/issues/356)
+
+## [2.1.2](https://github.com/salesforcecli/plugin-agent/compare/2.1.1...2.1.2) (2026-09-08)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 9.1.8 to 9.1.9 ([#493](https://github.com/salesforcecli/plugin-agent/issues/493)) ([99a5c72](https://github.com/salesforcecli/plugin-agent/commit/99a5c728b812a661864ad165fc0b5f0da3c559b5))
+- **deps:** bump browserslist from 4.28.2 to 4.28.8 ([#490](https://github.com/salesforcecli/plugin-agent/issues/490)) ([bff9d60](https://github.com/salesforcecli/plugin-agent/commit/bff9d60f979bd0412c82e284d5b9ac4b40d760ba))
+- **deps:** bump fast-uri from 3.1.2 to 3.1.7 ([#491](https://github.com/salesforcecli/plugin-agent/issues/491)) ([9c9d231](https://github.com/salesforcecli/plugin-agent/commit/9c9d231bdfd190376f64721ea799c83a86770b15))
+
+## [2.1.1](https://github.com/salesforcecli/plugin-agent/compare/2.1.0...2.1.1) (2026-09-01)
+
+### Bug Fixes
+
+- upgrade @oclif/core to v5 @W-23512455@ ([#489](https://github.com/salesforcecli/plugin-agent/issues/489)) ([953096e](https://github.com/salesforcecli/plugin-agent/commit/953096e9cfd6bb40f30eeadb111bd10c6310c447))
+
+# [2.1.0](https://github.com/salesforcecli/plugin-agent/compare/2.0.5...2.1.0) (2026-09-01)
+
+### Bug Fixes
+
+- address PR review findings on input handling and terminal sanitization ([85fa0ff](https://github.com/salesforcecli/plugin-agent/commit/85fa0ff64d90eb6751696a9225fd95862ae6e2be))
+- show raw input field name in Inputs line, not a capitalized label ([8f84496](https://github.com/salesforcecli/plugin-agent/commit/8f84496acdc0dc091cecd3cea7ccf8ad25af04f7))
+- strip bare C0 control characters in sanitizeForDisplay ([748a54a](https://github.com/salesforcecli/plugin-agent/commit/748a54ae743da634b97d8698a16d5e0ae88e703d))
+
+### Features
+
+- hide empty Expected/Actual scorer columns per test case ([83ea1da](https://github.com/salesforcecli/plugin-agent/commit/83ea1dac8ee9f12407a5bbec82d0e60c717ac488))
+- render latency and token usage in agent test results human format ([739dfe7](https://github.com/salesforcecli/plugin-agent/commit/739dfe77a42b3392bf07c2185bd609c4aa74fb66))
+- render test-case inputs in agent test results human format ([31f8a63](https://github.com/salesforcecli/plugin-agent/commit/31f8a633ace138f72516f1897f3bcfc30ae61729))
+
+## [2.0.5](https://github.com/salesforcecli/plugin-agent/compare/2.0.4...2.0.5) (2026-08-24)
+
+## [2.0.4](https://github.com/salesforcecli/plugin-agent/compare/2.0.3...2.0.4) (2026-08-19)
+
+### Bug Fixes
+
+- report IN_PROGRESS on resume timeout and make AFS NUT tolerant @W-23915028@ ([c858714](https://github.com/salesforcecli/plugin-agent/commit/c85871423e44471666e5a1cbf1f6b3daf543c037))
+- report in-progress status when agent test run --wait times out ([74ca7d6](https://github.com/salesforcecli/plugin-agent/commit/74ca7d650dad9be5bc811ac4a97d767c02907d35))
+
+## [2.0.3](https://github.com/salesforcecli/plugin-agent/compare/2.0.2...2.0.3) (2026-08-18)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.0.4 ([f15b828](https://github.com/salesforcecli/plugin-agent/commit/f15b828d511e707592cb01732b380f7bba3be787))
+
+## [2.0.2](https://github.com/salesforcecli/plugin-agent/compare/2.0.1...2.0.2) (2026-08-14)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.0.2 ([7e9306f](https://github.com/salesforcecli/plugin-agent/commit/7e9306fb1479e1276fc261cafd559d61c1fab413))
+
+## [2.0.1](https://github.com/salesforcecli/plugin-agent/compare/2.0.0...2.0.1) (2026-08-11)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.0.1 ([1980fb5](https://github.com/salesforcecli/plugin-agent/commit/1980fb5b179a9013194ee172f735906114ffec14))
+
+# [2.0.0](https://github.com/salesforcecli/plugin-agent/compare/1.45.0...2.0.0) (2026-07-30)
+
+- feat!: require Node >=22, drop EOL Node versions @W-23480655@ ([a411c7b](https://github.com/salesforcecli/plugin-agent/commit/a411c7b0f84cb339650a0a372217b32f726c0a85))
+
+### BREAKING CHANGES
+
+- engines.node raised to >=22.0.0, dropping support for Node 18 and 20
+
 # [1.45.0](https://github.com/salesforcecli/plugin-agent/compare/1.44.5...1.45.0) (2026-07-28)
 
 ### Features
