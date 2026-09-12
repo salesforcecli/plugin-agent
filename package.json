@@ -32,7 +32,7 @@
     "@oclif/test": "^5.0.0",
     "@salesforce/cli-plugins-testkit": "^5.3.66",
     "@salesforce/dev-scripts": "^11.0.4",
-    "@salesforce/plugin-command-reference": "^3.1.132",
+    "@salesforce/plugin-command-reference": "^3.1.133",
     "@types/inquirer": "^9.0.10",
     "@types/react": "^18.3.31",
     "eslint-config-xo": "^0.50.0",
