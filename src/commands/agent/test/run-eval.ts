@@ -190,10 +190,10 @@ export default class AgentTestRunEval extends SfCommand<RunEvalResult> {
       );
     });
 
-    const mergedResponse: EvalApiResponse = { results: allResults as EvalApiResponse['results'] };
+    const mergedResponse: EvalApiResponse = { results: allResults };
 
     // 7. Format output
-    this.log(formatResults(mergedResponse, (flags['result-format'] ?? 'human') as ResultFormat));
+    this.log(formatResults(mergedResponse, (flags['result-format'] ?? 'human')));
 
     // 8. Build structured result for --json
     const { summary, testSummaries } = buildResultSummary(mergedResponse);
