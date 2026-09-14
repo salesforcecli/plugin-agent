@@ -18,56 +18,6 @@
     ansi-styles "^6.2.1"
     is-fullwidth-code-point "^5.0.0"
 
-"@aws-crypto/crc32@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/crc32/-/crc32-5.2.0.tgz#cfcc22570949c98c6689cfcbd2d693d36cdae2e1"
-  integrity sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==
-  dependencies:
-    "@aws-crypto/util" "^5.2.0"
-    "@aws-sdk/types" "^3.222.0"
-    tslib "^2.6.2"
-
-"@aws-crypto/crc32c@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/crc32c/-/crc32c-5.2.0.tgz#4e34aab7f419307821509a98b9b08e84e0c1917e"
-  integrity sha512-+iWb8qaHLYKrNvGRbiYRHSdKRWhto5XlZUEBwDjYNf+ly5SVYG6zEoYIdxvf5R3zyeP16w4PLBn3rH1xc74Rag==
-  dependencies:
-    "@aws-crypto/util" "^5.2.0"
-    "@aws-sdk/types" "^3.222.0"
-    tslib "^2.6.2"
-
-"@aws-crypto/sha1-browser@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/sha1-browser/-/sha1-browser-5.2.0.tgz#b0ee2d2821d3861f017e965ef3b4cb38e3b6a0f4"
-  integrity sha512-OH6lveCFfcDjX4dbAvCFSYUjJZjDr/3XJ3xHtjn3Oj5b9RjojQo8npoLeA/bNwkOkrSQ0wgrHzXk4tDRxGKJeg==
-  dependencies:
-    "@aws-crypto/supports-web-crypto" "^5.2.0"
-    "@aws-crypto/util" "^5.2.0"
-    "@aws-sdk/types" "^3.222.0"
-    "@aws-sdk/util-locate-window" "^3.0.0"
-    "@smithy/util-utf8" "^2.0.0"
-    tslib "^2.6.2"
-
-"@aws-crypto/sha256-browser@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/sha256-browser/-/sha256-browser-5.2.0.tgz#153895ef1dba6f9fce38af550e0ef58988eb649e"
-  integrity sha512-AXfN/lGotSQwu6HNcEsIASo7kWXZ5HYWvfOmSNKDsEqC4OashTp8alTmaz+F7TC2L083SFv5RdB+qU3Vs1kZqw==
-  dependencies:
-    "@aws-crypto/sha256-js" "^5.2.0"
-    "@aws-crypto/supports-web-crypto" "^5.2.0"
-    "@aws-crypto/util" "^5.2.0"
-    "@aws-sdk/types" "^3.222.0"
-    "@aws-sdk/util-locate-window" "^3.0.0"
-    "@smithy/util-utf8" "^2.0.0"
-    tslib "^2.6.2"
-
-"@aws-crypto/sha256-js@5.2.0", "@aws-crypto/sha256-js@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@aws-crypto/sha256-js/-/sha256-js-5.2.0.tgz#c4fdb773fdbed9a664fc1a95724e206cf3860042"
-  integrity sha512-FFQQyu7edu4ufvIZ+OadFpHHOt+eSTBaYaki44c+akjg7qZg9oOQeLlk77F6tSYqjDAFClrHJk9tMf0HdVyOvA==
-  dependencies:
-    "@aws-crypto/util" "^5.2.0"
-    "@aws-sdk/types" "^3.222.0"
 "@aws-sdk/checksums@^3.1000.29":
   version "3.1000.29"
   resolved "https://registry.yarnpkg.com/@aws-sdk/checksums/-/checksums-3.1000.29.tgz#f12a6926eb3789057f5f16582fc226fe533c87fa"
@@ -1423,6 +1373,31 @@
     ts-retry-promise "^0.8.1"
     zod "^4.1.12"
 
+"@salesforce/core@^9.1.11":
+  version "9.1.11"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-9.1.11.tgz#dd2226ac1d67434575aac92eaa3ad9c1a12dcc2e"
+  integrity sha512-EE4oGYsoKThank4dQ1mVIzJjS9yP6C6s7JzKDx+ki8AFAxgpposzLc6GYwZZq1tS0XaOfBL2x+8RrgEgZvXwnw==
+  dependencies:
+    "@jsforce/jsforce-node" "^3.10.24"
+    "@salesforce/kit" "^4.0.0"
+    "@salesforce/ts-types" "^3.2.0"
+    ajv "^8.18.0"
+    change-case "^4.1.2"
+    fast-levenshtein "^3.0.0"
+    faye "^1.4.1"
+    form-data "^4.0.5"
+    js2xmlparser "^4.0.1"
+    jsonwebtoken "9.0.3"
+    jszip "3.10.1"
+    memfs "4.38.1"
+    pino "^9.7.0"
+    pino-abstract-transport "^1.2.0"
+    pino-pretty "^11.3.0"
+    proper-lockfile "^4.1.2"
+    semver "^7.8.0"
+    ts-retry-promise "^0.8.1"
+    zod "^4.1.12"
+
 "@salesforce/dev-config@^4.3.1":
   version "4.3.3"
   resolved "https://registry.yarnpkg.com/@salesforce/dev-config/-/dev-config-4.3.3.tgz#65650087baa542a905ad4e8b38a5c5302f7f009a"
@@ -1509,7 +1484,7 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/sf-plugins-core@^13.0.4":
+"@salesforce/sf-plugins-core@^13.0.0":
   version "13.0.4"
   resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-13.0.4.tgz#cd0fe99fdebe8b481a49eb41705c20c603afeb3b"
   integrity sha512-AChjRg6dx2/njPjvGTa+leY4i1oBfQb6pIgLaP0EXVNKA1aByAzLZIhcnMS0Z2mr38vFzD4IySBMcYg3fupunA==
@@ -1525,7 +1500,27 @@
     cli-progress "^3.12.0"
     terminal-link "^3.0.0"
 
-"@salesforce/source-deploy-retrieve@^13.1.1", "@salesforce/source-deploy-retrieve@^13.3.0":
+"@salesforce/source-deploy-retrieve@^13.0.0":
+  version "13.3.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-13.3.2.tgz#be1478703525f11adae1929087bb6628b4fcf82f"
+  integrity sha512-BJ9YcCAG8NJ19GtJ0PvftTwJ36/M0MPxBw3yewvZlmNYq841uya8JeYjxNGvLD9VBaabXgE1gGVwdcO+QzbDxg==
+  dependencies:
+    "@salesforce/core" "^9.1.11"
+    "@salesforce/kit" "^4.0.0"
+    "@salesforce/ts-types" "^3.2.0"
+    "@salesforce/types" "^1.6.0"
+    fast-levenshtein "^3.0.0"
+    fast-xml-parser "^5.7.3"
+    got "^11.8.6"
+    graceful-fs "^4.2.11"
+    ignore "^5.3.2"
+    jszip "^3.10.1"
+    mime "2.6.0"
+    minimatch "^9.0.9"
+    proxy-agent "^6.5.0"
+    yaml "^2.9.0"
+
+"@salesforce/source-deploy-retrieve@^13.1.1":
   version "13.3.0"
   resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-13.3.0.tgz#2d1164233243ff40d7e760a5ceaeb837c77b9182"
   integrity sha512-mwiffD4Z2VnmU9OqCZr/E7SjhkVhgRv8SkVcG3AneRiMZI2nb9DHyJZhqDm/yzDuoCCBZnxEXTBj8h6onX0QqQ==
@@ -1554,6 +1549,11 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.0.0.tgz#375b13e92f594bc9d0a09716d77fc753bd31e6a6"
   integrity sha512-lTCoI1NtQWiMDyn7B9N/CfWK9WmSpRnbYWqKTZYstn3mZ2DWSYwJXTh5Oh2wAAS9LAD/vaoU3F/TrV3q7wfnYw==
+
+"@salesforce/ts-types@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/ts-types/-/ts-types-3.2.0.tgz#9e0393cab10d763b89562f0f94515e3cf1efbbe7"
+  integrity sha512-3xdKt4nlthDC8nCHVWpVDwM5mmPlk8kDyJ1E3dWMk7FLRdQqhLgaHZgS+AMqcowWiKUC1l1d5YIhGhQM7dw3Bw==
 
 "@salesforce/types@1.8.0", "@salesforce/types@^1.8.0":
   version "1.8.0"
@@ -1927,12 +1927,6 @@
   resolved "https://registry.yarnpkg.com/@types/react/-/react-19.3.0.tgz#3b3ce8d8c1627fb5ccd4dadd57ef445c5a153b77"
   integrity sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==
   dependencies:
-"@types/react@^18.3.31":
-  version "18.3.31"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.31.tgz#b5e95e28ffcceab8d982f33f2eb076e17653c2a4"
-  integrity sha512-vfEqpXTvwT91yhmwdfouStN2hSKwTvyRs8qpLfADyrq/kxDw0hZM7Wk9Ug1FELj8hIby+S/+kQCSRFF32nv2Qw==
-  dependencies:
-    "@types/prop-types" "*"
     csstype "^3.2.2"
 
 "@types/responselike@^1.0.0":
@@ -5054,6 +5048,7 @@ is-in-ci@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-in-ci/-/is-in-ci-2.0.0.tgz#e4b3471c555b47509a8311869c377c234967079f"
   integrity sha512-cFeerHriAnhrQSbpAxL37W1wcJKUUX07HyLWZCW1URJT/ra3GyUTzBgUnh24TMVfNTV2Hij2HLxkPHFZfOZy5w==
+
 is-inside-container@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-inside-container/-/is-inside-container-1.0.0.tgz#e81fba699662eb31dbdaf26766a61d4814717ea4"
@@ -8560,6 +8555,7 @@ ws@^8.20.0:
   version "8.21.3"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.3.tgz#660b4faddb6a3e575c86e078126919961f4de4fc"
   integrity sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==
+
 wsl-utils@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/wsl-utils/-/wsl-utils-0.4.0.tgz#58334dda6892a81d7acc80417cd6f141a8074958"

@@ -1,3 +1,9 @@
+## [2.2.2](https://github.com/salesforcecli/plugin-agent/compare/2.2.1...2.2.2) (2026-09-14)
+
+### Bug Fixes
+
+- **deps:** bump ink to v7 and react to v19 @W-17608377@ ([#496](https://github.com/salesforcecli/plugin-agent/issues/496)) ([006aa56](https://github.com/salesforcecli/plugin-agent/commit/006aa56f111d23be9df743d1977c38c4b965ce71)), closes [ink#692](https://github.com/ink/issues/692)
+
 ## [2.2.1](https://github.com/salesforcecli/plugin-agent/compare/2.2.0...2.2.1) (2026-09-09)
 
 ### Bug Fixes
