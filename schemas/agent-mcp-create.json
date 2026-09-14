@@ -15,10 +15,7 @@
           }
         }
       },
-      "required": [
-        "server",
-        "assets"
-      ],
+      "required": ["server", "assets"],
       "additionalProperties": false
     },
     "McpServerOutput": {
@@ -61,12 +58,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "id",
-        "name",
-        "type",
-        "status"
-      ],
+      "required": ["id", "name", "type", "status"],
       "additionalProperties": false
     },
     "McpServerType": {
@@ -86,17 +78,12 @@
           "type": "string"
         }
       },
-      "required": [
-        "authType"
-      ],
+      "required": ["authType"],
       "additionalProperties": false
     },
     "McpAuthType": {
       "type": "string",
-      "enum": [
-        "OAUTH",
-        "NO_AUTH"
-      ]
+      "enum": ["OAUTH", "NO_AUTH"]
     },
     "McpFetchedAsset": {
       "type": "object",
@@ -129,19 +116,12 @@
           "type": "string"
         }
       },
-      "required": [
-        "name",
-        "kind"
-      ],
+      "required": ["name", "kind"],
       "additionalProperties": false
     },
     "McpAssetKind": {
       "type": "string",
-      "enum": [
-        "MCP_TOOL",
-        "MCP_PROMPT",
-        "MCP_RESOURCE"
-      ]
+      "enum": ["MCP_TOOL", "MCP_PROMPT", "MCP_RESOURCE"]
     }
   }
 }
