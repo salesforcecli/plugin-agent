@@ -23,12 +23,9 @@ import { Connection, Messages, SfError, SfProject } from '@salesforce/core';
 import { camelCaseToTitleCase } from '@salesforce/kit';
 import { select, input as inquirerInput } from '@inquirer/prompts';
 import autocomplete from 'inquirer-autocomplete-standalone';
-import {
-  AgentTest,
-  AgentTestResultsResponse,
-  type ContextVariable,
-  type ContextVariableType,
-} from '@salesforce/agents';
+import { AgentTest, AgentTestResultsResponse, type ContextVariable } from '@salesforce/agents';
+
+type ContextVariableType = ContextVariable['type'] | 'Date' | 'Json';
 import { theme } from './inquirer-theme.js';
 import { AgentTestResultsResult } from './commands/agent/test/results.js';
 
