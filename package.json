@@ -91,6 +91,10 @@
             "description": "Commands to generate agent artifacts, such as the agent spec YAML file, authoring bundle, and test spec file.",
             "external": true
           },
+          "optimize": {
+            "description": "Commands to optimize agents.",
+            "external": true
+          },
           "validate": {
             "description": "Command to validate an Agent Script file.",
             "external": true
