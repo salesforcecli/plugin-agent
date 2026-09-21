@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/OptimizeRunResult",
+  "definitions": {
+    "OptimizeRunResult": {
+      "type": "object",
+      "properties": {
+        "baselineScore": {
+          "type": "number"
+        },
+        "bestScore": {
+          "type": "number"
+        },
+        "iterations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "iteration": {
+                "type": "number"
+              },
+              "mutation": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "passCount": {
+                "type": "number"
+              },
+              "totalCount": {
+                "type": "number"
+              },
+              "decision": {
+                "type": "string",
+                "enum": ["KEEP", "REJECT"]
+              }
+            },
+            "required": ["iteration", "mutation", "score", "passCount", "totalCount", "decision"],
+            "additionalProperties": false
+          }
+        },
+        "agentFile": {
+          "type": "string"
+        }
+      },
+      "required": ["baselineScore", "bestScore", "iterations", "agentFile"],
+      "additionalProperties": false
+    }
+  }
+}

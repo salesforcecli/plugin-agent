@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentOptimizeStatusResult",
+  "definitions": {
+    "AgentOptimizeStatusResult": {
+      "$ref": "#/definitions/OptimizationStatus"
+    },
+    "OptimizationStatus": {
+      "type": "object",
+      "properties": {
+        "executionId": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/OptimizationStatusEnum"
+        },
+        "currentIteration": {
+          "type": "number"
+        },
+        "maxIterations": {
+          "type": "number"
+        },
+        "baselineScore": {
+          "type": "number"
+        },
+        "currentScore": {
+          "type": "number"
+        },
+        "bestScore": {
+          "type": "number"
+        },
+        "bestIteration": {
+          "type": "number"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "executionId",
+        "status",
+        "currentIteration",
+        "maxIterations",
+        "baselineScore",
+        "currentScore",
+        "bestScore",
+        "bestIteration",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "OptimizationStatusEnum": {
+      "type": "string",
+      "enum": ["RUNNING", "COMPLETED", "FAILED", "STOPPED_EARLY"]
+    }
+  }
+}

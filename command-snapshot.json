@@ -289,6 +289,57 @@
   },
   {
     "alias": [],
+    "command": "agent:optimize:accept",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "execution-id", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:optimize:results",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "execution-id", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:optimize:run",
+    "flagAliases": [],
+    "flagChars": ["i", "o", "s"],
+    "flags": ["api-version", "authoring-bundle", "flags-dir", "iterations", "json", "spec", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:optimize:start",
+    "flagAliases": [],
+    "flagChars": ["b", "c", "o", "w"],
+    "flags": [
+      "api-version",
+      "authoring-bundle",
+      "criteria",
+      "flags-dir",
+      "json",
+      "max-iterations",
+      "target-org",
+      "target-score",
+      "test-cases",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:optimize:status",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "execution-id", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:preview",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "x"],
