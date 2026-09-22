@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentOptimizeResultsResult",
+  "definitions": {
+    "AgentOptimizeResultsResult": {
+      "$ref": "#/definitions/OptimizationResults"
+    },
+    "OptimizationResults": {
+      "type": "object",
+      "properties": {
+        "executionId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "iterationsRun": {
+          "type": "number"
+        },
+        "baselineScore": {
+          "type": "number"
+        },
+        "finalScore": {
+          "type": "number"
+        },
+        "bestScore": {
+          "type": "number"
+        },
+        "bestIteration": {
+          "type": "number"
+        },
+        "iterationHistory": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IterationEntry"
+          }
+        }
+      },
+      "required": [
+        "executionId",
+        "status",
+        "iterationsRun",
+        "baselineScore",
+        "finalScore",
+        "bestScore",
+        "bestIteration",
+        "iterationHistory"
+      ],
+      "additionalProperties": false
+    },
+    "IterationEntry": {
+      "type": "object",
+      "properties": {
+        "iteration": {
+          "type": "number"
+        },
+        "compositeScore": {
+          "type": "number"
+        },
+        "gatesPassed": {
+          "type": "boolean"
+        }
+      },
+      "required": ["iteration", "compositeScore", "gatesPassed"],
+      "additionalProperties": false
+    }
+  }
+}
