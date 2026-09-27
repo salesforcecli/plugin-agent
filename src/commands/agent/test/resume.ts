@@ -169,7 +169,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       process.exitCode = 1;
     }
 
-    return { ...response, runId, status: 'COMPLETED' } as AgentTestRunResult;
+    return { ...response, runId, status: 'COMPLETED' };
   }
 
   protected catch(error: Error | SfError | CLIError): Promise<never> {
