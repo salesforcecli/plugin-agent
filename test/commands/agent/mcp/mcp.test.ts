@@ -360,6 +360,19 @@ describe('agent mcp commands', () => {
     }
   });
 
+  it('asset replace throws InvalidShape for null JSON', async () => {
+    const testOrg = new MockTestOrgData();
+    await $$.stubAuths(testOrg);
+    $$.fakeConnectionRequest = () => Promise.resolve({} as any);
+
+    try {
+      await AgentMcpAssetReplace.run(['--target-org', testOrg.username, '--mcp-server-id', '0XS1', '--assets', 'null']);
+      expect.fail('should have thrown');
+    } catch (err) {
+      expect((err as { name: string }).name).to.equal('InvalidShape');
+    }
+  });
+
   it('get returns the server and strips the secret on read', async () => {
     const testOrg = new MockTestOrgData();
     await $$.stubAuths(testOrg);

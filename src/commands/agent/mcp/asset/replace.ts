@@ -73,9 +73,9 @@ export default class ApiCatalogMcpServerAssetReplace extends SfCommand<ApiCatalo
       throw new SfError(messages.getMessage('error.invalidJson'), 'InvalidJson', [], 1);
     }
 
-    const assets = (Array.isArray(parsed) ? parsed : (parsed as { assets?: McpServerAssetReplaceItem[] }).assets) as
-      | McpServerAssetReplaceItem[]
-      | undefined;
+    const assets = (
+      Array.isArray(parsed) ? parsed : (parsed as { assets?: McpServerAssetReplaceItem[] } | null)?.assets
+    ) as McpServerAssetReplaceItem[] | undefined;
     if (!assets || !Array.isArray(assets)) {
       throw new SfError(messages.getMessage('error.invalidShape'), 'InvalidShape', [], 1);
     }
