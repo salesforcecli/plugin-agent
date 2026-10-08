@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentExpressContextStatusResult",
+  "definitions": {
+    "AgentExpressContextStatusResult": {
+      "$ref": "#/definitions/ExpressContextStatusResponse"
+    },
+    "ExpressContextStatusResponse": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "developerName": {
+          "type": "string"
+        },
+        "masterLabel": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "retriever": {
+          "$ref": "#/definitions/ExpressContextRetrieverDetail"
+        },
+        "retrieverAction": {
+          "$ref": "#/definitions/ExpressContextRetrieverDetail"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExpressContextFileRef"
+          },
+          "description": "Per-file indexing status (e.g. INDEXING, INDEXED). Verified live v68."
+        },
+        "filesTotal": {
+          "type": "number"
+        },
+        "filesIndexed": {
+          "type": "number"
+        },
+        "filesFailed": {
+          "type": "number"
+        },
+        "lastIndexedAt": {
+          "type": "string"
+        }
+      },
+      "required": ["libraryId", "status"],
+      "additionalProperties": false,
+      "description": "Richer indexing status from GET /aec-libraries/{id}/status. Returns more than /files — adds the retriever/retriever-action wiring and per-run indexing counts."
+    },
+    "ExpressContextRetrieverDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "description": "Types for the Agentforce Express Context (AEC) Connect API.\n\nAEC is a realtime BM25 index/retrieval service that bypasses the Data Cloud DLO/DMO/SearchIndex pipeline used by Agentforce Data Libraries (ADL). Because of that, AEC libraries are lighter-weight than ADL libraries: there is no data-space scope, no downstream DMO/SearchIndex assets, and indexing is (near-)realtime rather than a multi-stage provisioning pipeline.\n\nConnect API base: /services/data/v{version}/einstein/aec-libraries"
+    },
+    "ExpressContextFileRef": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        }
+      },
+      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "additionalProperties": false,
+      "description": "Metadata for a file indexed into an AEC library, from GET /aec-libraries/{id}/files.\n\nThe AEC Connect API returns file METADATA only — there is no presigned download endpoint. `filePath` is the logical SFDrive path (e.g. `$agentforce_express_context$/...`), not a fetchable URL."
+    }
+  }
+}
