@@ -22,7 +22,7 @@ import type { AgentTestResultsResult } from '../../src/commands/agent/test/resul
 import type { AgentTestRunResult } from '../../src/flags.js';
 import { getTestSession, getUsername } from './shared-setup.js';
 
-/* eslint-disable no-console */
+ 
 
 describe('agent test', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments

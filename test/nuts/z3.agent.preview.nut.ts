@@ -26,7 +26,7 @@ import type { AgentPreviewStartResult } from '../../src/commands/agent/preview/s
 import type { AgentPreviewSendResult } from '../../src/commands/agent/preview/send.js';
 import type { AgentPreviewEndResult, EndedSession } from '../../src/commands/agent/preview/end.js';
 import { getTestSession, getUsername } from './shared-setup.js';
-/* eslint-disable no-console */
+ 
 
 describe('agent preview', function () {
   // Increase timeout for setup since shared setup includes long waits and deployments
