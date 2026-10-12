@@ -74,7 +74,7 @@ describe('agent activate/deactivate NUTs', function () {
       execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, {
         ensureExitCode: 0,
       });
-    } catch (err) {
+    } catch {
       execCmd(`agent activate --api-name ${botApiName} --target-org ${username} --json`, {
         ensureExitCode: 0,
       });

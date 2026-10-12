@@ -88,16 +88,16 @@ describe('AgentTestCache', () => {
     });
   });
 
-  describe('useIdOrMostRecent', () => {
+  describe('resolveIdOrMostRecent', () => {
     it('should return the provided runId', () => {
-      const result = cache.useIdOrMostRecent('123', false);
+      const result = cache.resolveIdOrMostRecent('123', false);
       expect(result).to.deep.equal({ runId: '123' });
     });
 
     it('should return the provided runId', () => {
       sinon.stub(cache, 'has').returns(true);
       sinon.stub(cache, 'get').returns({ runId: '123', name: 'testName', outputDir: 'myCachedOutput' });
-      const result = cache.useIdOrMostRecent('123', false);
+      const result = cache.resolveIdOrMostRecent('123', false);
       expect(result).to.deep.equal({
         name: 'testName',
         outputDir: 'myCachedOutput',
@@ -107,13 +107,13 @@ describe('AgentTestCache', () => {
 
     it('should return the most recent cache entry', async () => {
       sinon.stub(cache, 'resolveFromCache').returns({ runId: '123', name: 'testName' });
-      const result = cache.useIdOrMostRecent(undefined, true);
+      const result = cache.resolveIdOrMostRecent(undefined, true);
       expect(result).to.deep.equal({ runId: '123', name: 'testName' });
     });
 
     it('should throw an error if both runId and useMostRecent are provided', () => {
       try {
-        cache.useIdOrMostRecent('123', true);
+        cache.resolveIdOrMostRecent('123', true);
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
         expect((e as SfError).message).to.equal('Cannot specify both a runId and use most recent flag');
@@ -122,7 +122,7 @@ describe('AgentTestCache', () => {
 
     it('should throw an error if neither runId nor useMostRecent are provided', () => {
       try {
-        cache.useIdOrMostRecent(undefined, false);
+        cache.resolveIdOrMostRecent(undefined, false);
       } catch (e) {
         expect(e).to.be.instanceOf(SfError);
         expect((e as SfError).message).to.equal('Must specify either a runId or use most recent flag');

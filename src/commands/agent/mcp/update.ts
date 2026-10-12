@@ -20,7 +20,6 @@ import {
   type McpServerOutput,
   type McpServerUpdateInput,
   type McpServerAuthorizationInput,
-  type McpAuthType,
 } from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -89,16 +88,11 @@ export default class ApiCatalogMcpServerUpdate extends SfCommand<ApiCatalogMcpSe
       input.serverUrl = flags['server-url'];
     }
 
-    const authType = flags['auth-type'] as McpAuthType | undefined;
+    const authType = flags['auth-type'];
 
     if (authType) {
       if (authType === 'OAUTH') {
-        if (
-          !flags['identity-provider'] ||
-          !flags['client-id'] ||
-          !flags['client-secret'] ||
-          !flags.scope
-        ) {
+        if (!flags['identity-provider'] || !flags['client-id'] || !flags['client-secret'] || !flags.scope) {
           throw new SfError(messages.getMessage('error.missingOauthFields'), 'MissingOauthFields', [], 1);
         }
 

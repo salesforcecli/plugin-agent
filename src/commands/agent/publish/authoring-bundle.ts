@@ -114,7 +114,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
         {
           label: 'Agent Name',
           type: 'static-key-value',
-          get: (data) => data?.agentName,
+          get: (data): string | undefined => data?.agentName,
           bold: true,
           color: 'cyan',
         },

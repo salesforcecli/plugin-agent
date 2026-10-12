@@ -64,7 +64,7 @@ const FLAGGABLE_PROMPTS = {
   },
 };
 
-async function promptUntilUniqueName(connection: Connection, name?: string | undefined): Promise<string | undefined> {
+async function promptUntilUniqueName(connection: Connection, name?: string): Promise<string | undefined> {
   const apiName = name ?? (await promptForFlag(FLAGGABLE_PROMPTS['api-name']));
   const existingDefinitions = await AgentTest.list(connection);
   if (existingDefinitions.some((d) => d.fullName === apiName)) {
@@ -82,6 +82,27 @@ async function promptUntilUniqueName(connection: Connection, name?: string | und
   }
   return apiName;
 }
+
+const toCreateError = (error: unknown, spec: string): SfError => {
+  const wrapped = SfError.wrap(error);
+
+  if (wrapped.code === 'ENOENT' || wrapped.name === 'ENOENT') {
+    return new SfError(`Test spec file not found: ${spec}`, 'SpecFileNotFound', [], 2, wrapped);
+  }
+
+  // NGT validateNgtSpec errors are user-fixable spec issues — exit 1, not deploy/network.
+  if (wrapped.name?.startsWith('ngt')) {
+    return wrapped;
+  }
+
+  // Deploy failures from the lib are bare SfErrors with the componentFailures text as message
+  // and no structured code, so message substring is the only available signal.
+  if (wrapped.message.toLowerCase().includes('deploy') || wrapped.message.toLowerCase().includes('api')) {
+    return new SfError(`Deployment failed: ${wrapped.message}`, 'DeploymentFailed', [wrapped.message], 4, wrapped);
+  }
+
+  return wrapped;
+};
 
 export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -190,24 +211,7 @@ export default class AgentTestCreate extends SfCommand<AgentTestCreateResult> {
       path = result.path;
       contents = result.contents;
     } catch (error) {
-      const wrapped = SfError.wrap(error);
-
-      if (wrapped.code === 'ENOENT' || wrapped.name === 'ENOENT') {
-        throw new SfError(`Test spec file not found: ${spec}`, 'SpecFileNotFound', [], 2, wrapped);
-      }
-
-      // NGT validateNgtSpec errors are user-fixable spec issues — exit 1, not deploy/network.
-      if (wrapped.name?.startsWith('ngt')) {
-        throw wrapped;
-      }
-
-      // Deploy failures from the lib are bare SfErrors with the componentFailures text as message
-      // and no structured code, so message substring is the only available signal.
-      if (wrapped.message.toLowerCase().includes('deploy') || wrapped.message.toLowerCase().includes('api')) {
-        throw new SfError(`Deployment failed: ${wrapped.message}`, 'DeploymentFailed', [wrapped.message], 4, wrapped);
-      }
-
-      throw wrapped;
+      throw toCreateError(error, spec);
     }
 
     if (flags.preview) {

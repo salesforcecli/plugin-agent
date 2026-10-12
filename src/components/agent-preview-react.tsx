@@ -36,7 +36,7 @@ function Typing(): React.ReactNode {
       setFrame((prev) => (prev + 1) % 4);
     }, 350);
 
-    return () => clearInterval(timer);
+    return (): void => clearInterval(timer);
   }, []);
 
   const colors = ['grey', 'grey', 'grey'];
@@ -70,6 +70,7 @@ export function AgentPreviewReact(props: {
   const [sessionId, setSessionId] = React.useState('');
   const [query, setQuery] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(true);
+  const [typingSince, setTypingSince] = React.useState(() => new Date());
   const [sessionEnded, setSessionEnded] = React.useState(false);
   const [exitRequested, setExitRequested] = React.useState(false);
   const [showSavePrompt, setShowSavePrompt] = React.useState(false);
@@ -129,7 +130,7 @@ export function AgentPreviewReact(props: {
             await agent.end('UserRequest');
           }
           process.exit(0);
-        } catch (e) {
+        } catch {
           // in case the agent session never started, calling agent.end will throw an error, but we've already shown the error to the user
           process.exit(0);
         }
@@ -268,7 +269,7 @@ export function AgentPreviewReact(props: {
           <Box alignItems="flex-start" flexDirection="column">
             <Box flexDirection="row" columnGap={1}>
               <Text>{name}</Text>
-              <Text color="grey">{new Date().toLocaleString()}</Text>
+              <Text color="grey">{typingSince.toLocaleString()}</Text>
             </Box>
             <Box width={7} borderStyle="round" paddingLeft={1} paddingRight={1}>
               <Typing />
@@ -348,6 +349,7 @@ export function AgentPreviewReact(props: {
               try {
                 // Add the most recent user message to the chat window
                 setMessages((prev) => [...prev, { role: 'user', content, timestamp: new Date() }]);
+                setTypingSince(new Date());
                 setIsTyping(true);
                 // send() only takes the message, not sessionId
                 const response = await agent.send(content);

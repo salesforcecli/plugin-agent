@@ -42,9 +42,9 @@ const verifyPublishedAgent = async (
     );
     const botVersion = botDefinition.BotVersions.records[0].DeveloperName;
     expect(botVersion).to.equal(expectedVersion);
-  } catch (error) {
+  } catch {
     // bot not found
-    void Promise.reject('Bot not published');
+    void Promise.reject(new Error('Bot not published'));
   }
 };
 
