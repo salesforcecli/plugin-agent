@@ -40,7 +40,6 @@ function fmtUtc(d: Date): string {
 
 // Helper function to wait for Einstein AI services to be ready
 async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): Promise<void> {
-  // eslint-disable-next-line no-await-in-loop
   for (let i = 0; i < maxAttempts; i++) {
     try {
       // Check Agent API status using direct HTTP call
@@ -56,7 +55,7 @@ async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): P
       if (statusResponse.status === 'UP') {
         return;
       }
-    } catch (error) {
+    } catch {
       // do nothing
     }
     // Wait 10 seconds between checks
@@ -257,7 +256,7 @@ export async function getTestSession(): Promise<TestSession> {
     } catch (e) {
       console.log('XXXXXX ERROR XXXXXXX');
       console.dir(SfError.wrap(e).toObject());
-      void Promise.reject(e);
+      void Promise.reject(SfError.wrap(e));
     }
   })();
 

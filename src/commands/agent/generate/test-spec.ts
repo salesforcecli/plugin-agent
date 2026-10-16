@@ -345,7 +345,7 @@ export async function getPluginsAndFunctions(
       }),
       {}
     );
-  } catch (e) {
+  } catch {
     // do nothing, we were trying to read the old genAiPlanner
   }
 
@@ -399,7 +399,7 @@ export async function getPluginsAndFunctions(
         {}
       );
     }
-  } catch (e) {
+  } catch {
     throw new SfError(
       `Error parsing GenAiPlannerBundle: ${
         parsedBotVersion.BotVersion.conversationDefinitionPlanners.genAiPlannerName ?? subjectName
