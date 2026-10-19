@@ -29,55 +29,65 @@ describe('agent test run-eval', function () {
   const yamlSpecPath = join(mockProjectDir, 'eval-test-spec.yaml');
   const yamlWithContextPath = join(mockProjectDir, 'eval-with-context.yaml');
 
+  // The JSON-payload run-eval is expensive (~18 min) and hammers the shared admin user's
+  // OAuth refresh rate limit when invoked repeatedly. Run it exactly once here and share the
+  // parsed result across every test that asserts against it, so a rate-limit failure surfaces
+  // once rather than per-test.
+  let jsonResult: RunEvalResult;
+
   before(async function () {
     this.timeout(30 * 60 * 1000); // 30 minutes for setup
     await getTestSession();
+
+    const jsonCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
+    const jsonExec = execCmd<RunEvalResult>(jsonCommand, { ensureExitCode: 0 });
+    expect(jsonExec.jsonOutput?.result).to.be.ok;
+    jsonResult = jsonExec.jsonOutput!.result;
   });
 
   describe('run-eval with JSON file', () => {
     it('should run evaluation with JSON payload file', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
-
-      expect(result.jsonOutput?.result).to.be.ok;
-      expect(result.jsonOutput?.result.tests).to.be.an('array');
-      expect(result.jsonOutput?.result.tests.length).to.be.greaterThan(0);
-      expect(result.jsonOutput?.result.summary).to.be.ok;
-      expect(result.jsonOutput?.result.summary.passed).to.be.a('number');
-      expect(result.jsonOutput?.result.summary.failed).to.be.a('number');
-      expect(result.jsonOutput?.result.summary.scored).to.be.a('number');
-      expect(result.jsonOutput?.result.summary.errors).to.be.a('number');
+      expect(jsonResult).to.be.ok;
+      expect(jsonResult.tests).to.be.an('array');
+      expect(jsonResult.tests.length).to.be.greaterThan(0);
+      expect(jsonResult.summary).to.be.ok;
+      expect(jsonResult.summary.passed).to.be.a('number');
+      expect(jsonResult.summary.failed).to.be.a('number');
+      expect(jsonResult.summary.scored).to.be.a('number');
+      expect(jsonResult.summary.errors).to.be.a('number');
     });
 
     it('should run evaluation with normalized payload', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
-
-      expect(result.jsonOutput?.result.tests[0]).to.be.ok;
-      expect(result.jsonOutput?.result.tests[0].id).to.equal('test-topic-routing');
-      expect(result.jsonOutput?.result.tests[0].status).to.be.oneOf(['passed', 'failed']);
-      expect(result.jsonOutput?.result.tests[0].evaluations).to.be.an('array');
+      expect(jsonResult.tests[0]).to.be.ok;
+      expect(jsonResult.tests[0].id).to.equal('test-topic-routing');
+      expect(jsonResult.tests[0].status).to.be.oneOf(['passed', 'failed']);
+      expect(jsonResult.tests[0].evaluations).to.be.an('array');
     });
   });
 
   describe('run-eval with YAML file', () => {
-    it('should run evaluation with YAML test spec file', async () => {
-      const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
+    // The YAML-spec run-eval is run once and shared across the two tests that assert against it,
+    // for the same OAuth-rate-limit reason as the JSON-payload run above.
+    let yamlResult: RunEvalResult;
 
-      expect(result.jsonOutput?.result).to.be.ok;
-      expect(result.jsonOutput?.result.tests).to.be.an('array');
-      expect(result.jsonOutput?.result.tests.length).to.be.greaterThan(0);
-      expect(result.jsonOutput?.result.summary).to.be.ok;
+    before(() => {
+      const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
+      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
+      expect(output.jsonOutput?.result).to.be.ok;
+      yamlResult = output.jsonOutput!.result;
+    });
+
+    it('should run evaluation with YAML test spec file', async () => {
+      expect(yamlResult).to.be.ok;
+      expect(yamlResult.tests).to.be.an('array');
+      expect(yamlResult.tests.length).to.be.greaterThan(0);
+      expect(yamlResult.summary).to.be.ok;
     });
 
     it('should auto-infer agent name from YAML subjectName', async () => {
-      const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
-
       // Should succeed without explicit --api-name flag
-      expect(result.jsonOutput?.result).to.be.ok;
-      expect(result.jsonOutput?.result.tests).to.be.an('array');
+      expect(yamlResult).to.be.ok;
+      expect(yamlResult.tests).to.be.an('array');
     });
 
     it('should handle YAML spec with contextVariables', async () => {
@@ -173,11 +183,8 @@ describe('agent test run-eval', function () {
 
   describe('run-eval output structure', () => {
     it('should include test summaries with correct structure', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
-
-      expect(result.jsonOutput?.result.tests).to.be.an('array');
-      const firstTest = result.jsonOutput?.result.tests[0];
+      expect(jsonResult.tests).to.be.an('array');
+      const firstTest = jsonResult.tests[0];
       expect(firstTest).to.have.property('id');
       expect(firstTest).to.have.property('status');
       expect(firstTest).to.have.property('evaluations');
@@ -187,10 +194,7 @@ describe('agent test run-eval', function () {
     });
 
     it('should include summary with all metrics', async () => {
-      const command = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-      const result = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
-
-      const summary = result.jsonOutput?.result.summary;
+      const summary = jsonResult.summary;
       expect(summary).to.have.property('passed');
       expect(summary).to.have.property('failed');
       expect(summary).to.have.property('scored');
