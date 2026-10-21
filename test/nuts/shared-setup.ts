@@ -305,7 +305,7 @@ export function dumpCliAuthTrace(label: string): void {
     return;
   }
   // The testkit child shares HOME with the session; sf writes its log under <HOME>/.sf.
-  const homes = Array.from(new Set([testSession.homeDir, testSession.dir].filter(Boolean))) as string[];
+  const homes = [...new Set([testSession.homeDir, testSession.dir].filter((d): d is string => Boolean(d)))];
   const keyword = /(oauth2\/token|login rate|retry-after|invalid_grant|statusCode|refresh token|services\/oauth2)/i;
   let printedAny = false;
   for (const home of homes) {
