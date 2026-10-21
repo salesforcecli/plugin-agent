@@ -15,9 +15,10 @@
  */
 
 import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { Duration, TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
-import { Org, SfError, User, DefaultUserFields, Lifecycle, Connection } from '@salesforce/core';
+import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
 
 /* eslint-disable no-console */
@@ -26,9 +27,6 @@ import { sleep, ensureArray } from '@salesforce/kit';
 let testSession: TestSession | undefined;
 let testSessionPromise: Promise<TestSession> | undefined;
 let agentUsername: string | undefined;
-// Dedicated user for the `agent test run-eval` NUT, isolating its OAuth grant/session churn
-// from the shared admin so the full suite's load doesn't trip the per-user login-rate cap.
-let runEvalUsername: string | undefined;
 // Non-sensitive scratch-org identifiers captured at setup for CI failure correlation.
 let orgId: string | undefined;
 let orgPod: string | undefined;
@@ -131,30 +129,6 @@ export async function getTestSession(): Promise<TestSession> {
           const user = await User.create({ org });
           await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
           console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
-
-          // Create a dedicated user (in this same scratch org) for the `agent test run-eval` NUT.
-          // Running that heavy NUT's commands against a separate user isolates its OAuth
-          // grant/session churn from the shared admin, so the full suite's load no longer evicts
-          // the admin's sessions and trips the per-user login-rate cap. Mirror the admin's access:
-          // System Administrator profile + the same permission set, so run-eval behaves identically.
-          console.log('Creating dedicated run-eval user...');
-          const adminUsername = defaultOrg.username;
-          const runEvalFields = (await DefaultUserFields.create({ templateUser: adminUsername })).getFields();
-          // DefaultUserFields defaults to the Standard User profile; override to System Administrator
-          // so the dedicated user has admin-equivalent access for run-eval.
-          const sysAdminProfile = await connection.singleRecordQuery<{ Id: string }>(
-            "SELECT Id FROM Profile WHERE Name='System Administrator'"
-          );
-          runEvalFields.profileId = sysAdminProfile.Id;
-          const runEvalUser = await User.create({ org });
-          const runEvalAuthInfo = await runEvalUser.createUser(runEvalFields);
-          runEvalUsername = runEvalAuthInfo.getUsername();
-          const runEvalUserId = runEvalAuthInfo.getFields().userId;
-          if (!runEvalUsername || !runEvalUserId) {
-            throw new Error('Failed to create run-eval user: no username/id returned');
-          }
-          await runEvalUser.assignPermissionSets(runEvalUserId, ['EinsteinGPTPromptTemplateManager']);
-          console.log(`[NUT-CONTEXT] runEvalUsername=${runEvalUsername}`);
 
           // Create agent user using the new CLI command
           console.log('Creating agent user...');
@@ -308,22 +282,6 @@ export function getUsername(): string {
 }
 
 /**
- * Gets the dedicated run-eval user's username. This user lives in the same shared scratch org
- * and is created once during getTestSession(), so that `agent test run-eval`'s OAuth grant/session
- * churn is isolated from the shared admin user.
- * Throws an error if the session (and thus the user) hasn't been created yet.
- */
-export function getRunEvalUsername(): string {
-  if (!testSession) {
-    throw new Error('Test session not available. Call getTestSession() first.');
-  }
-  if (!runEvalUsername) {
-    throw new Error('Run-eval user not available. Call getTestSession() first.');
-  }
-  return runEvalUsername;
-}
-
-/**
  * Gets the agent user, username, from the shared test session.
  * Throws an error if the session hasn't been created yet.
  */
@@ -332,6 +290,52 @@ export function getAgentUsername(): string | undefined {
     throw new Error('Test session not available. Call getTestSession() first.');
   }
   return agentUsername;
+}
+
+/**
+ * DIAGNOSTIC (do-not-merge): dump the token-redacted lines of the sf CLI's own trace log that
+ * relate to the OAuth token exchange / login-rate response, so CI can show the HTTP status,
+ * endpoint, and any Retry-After for a `login rate exceeded` failure — settling whether the cap
+ * is per-org or per-IP. Uses SF_LOG_LEVEL=trace's log file (which @salesforce/core redacts of
+ * access/refresh tokens), NOT jsforce DEBUG (which would leak raw tokens into public CI logs).
+ */
+export function dumpCliAuthTrace(label: string): void {
+  if (!testSession) {
+    console.log(`[AUTH-TRACE ${label}] no test session; nothing to dump`);
+    return;
+  }
+  // The testkit child shares HOME with the session; sf writes its log under <HOME>/.sf.
+  const homes = Array.from(new Set([testSession.homeDir, testSession.dir].filter(Boolean))) as string[];
+  const keyword = /(oauth2\/token|login rate|retry-after|invalid_grant|statusCode|refresh token|services\/oauth2)/i;
+  let printedAny = false;
+  for (const home of homes) {
+    const sfDir = join(home, '.sf');
+    if (!existsSync(sfDir)) {
+      continue;
+    }
+    for (const logFile of readdirSync(sfDir).filter((f) => f.endsWith('.log'))) {
+      const full = join(sfDir, logFile);
+      try {
+        const matches = readFileSync(full, 'utf8')
+          .split('\n')
+          .filter((l) => keyword.test(l));
+        if (matches.length) {
+          printedAny = true;
+          console.log(`[AUTH-TRACE ${label}] ${full}: ${matches.length} matching line(s), last 40:`);
+          matches.slice(-40).forEach((l) => console.log(`[AUTH-TRACE] ${l}`));
+        }
+      } catch {
+        // ignore unreadable/rotated log files
+      }
+    }
+  }
+  if (!printedAny) {
+    console.log(
+      `[AUTH-TRACE ${label}] no matching trace lines found under ${homes
+        .map((h) => join(h, '.sf'))
+        .join(', ')} (log path may differ; checked *.log)`
+    );
+  }
 }
 
 // Root-level hook: on any failing test that used the shared scratch org, emit orgId + pod +
