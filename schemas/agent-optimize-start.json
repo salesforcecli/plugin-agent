@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentOptimizeStartResult",
+  "definitions": {
+    "AgentOptimizeStartResult": {
+      "type": "object",
+      "properties": {
+        "executionId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "baselineScore": {
+          "type": "number"
+        },
+        "bestScore": {
+          "type": "number"
+        },
+        "iterationsRun": {
+          "type": "number"
+        }
+      },
+      "required": ["executionId", "status"],
+      "additionalProperties": false
+    }
+  }
+}
