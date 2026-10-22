@@ -15,8 +15,7 @@
  */
 
 import { join } from 'node:path';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { Duration, TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
+import { Duration, TestSession, execCmd, type ExecCmdResult } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
 import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
@@ -292,50 +291,50 @@ export function getAgentUsername(): string | undefined {
   return agentUsername;
 }
 
+/** Matches the transient Salesforce OAuth "login rate exceeded" error returned during a token grant. */
+const LOGIN_RATE_RE = /login rate exceeded/i;
+
 /**
- * DIAGNOSTIC (do-not-merge): dump the token-redacted lines of the sf CLI's own trace log that
- * relate to the OAuth token exchange / login-rate response, so CI can show the HTTP status,
- * endpoint, and any Retry-After for a `login rate exceeded` failure — settling whether the cap
- * is per-org or per-IP. Uses SF_LOG_LEVEL=trace's log file (which @salesforce/core redacts of
- * access/refresh tokens), NOT jsforce DEBUG (which would leak raw tokens into public CI logs).
+ * Execute a command that is prone to the transient `login rate exceeded` OAuth error, retrying
+ * with backoff to ride out the (short) rate-limit window. Each attempt runs a fresh `execCmd`;
+ * on a login-rate failure we wait and retry, on a clean exit we return the result, and on any
+ * other non-zero exit we fail fast with the command output. Throws once `maxAttempts` login-rate
+ * failures are exhausted.
+ *
+ * This exists because the single shared scratch org's per-org/per-runner login-rate budget is
+ * spent by suite setup + the other NUTs before the run-eval describe runs; retrying lets the
+ * window recover (nothing else runs during these serial waits) instead of failing the describe.
  */
-export function dumpCliAuthTrace(label: string): void {
-  if (!testSession) {
-    console.log(`[AUTH-TRACE ${label}] no test session; nothing to dump`);
-    return;
-  }
-  // The testkit child shares HOME with the session; sf writes its log under <HOME>/.sf.
-  const homes = [...new Set([testSession.homeDir, testSession.dir].filter((d): d is string => Boolean(d)))];
-  const keyword = /(oauth2\/token|login rate|retry-after|invalid_grant|statusCode|refresh token|services\/oauth2)/i;
-  let printedAny = false;
-  for (const home of homes) {
-    const sfDir = join(home, '.sf');
-    if (!existsSync(sfDir)) {
-      continue;
-    }
-    for (const logFile of readdirSync(sfDir).filter((f) => f.endsWith('.log'))) {
-      const full = join(sfDir, logFile);
-      try {
-        const matches = readFileSync(full, 'utf8')
-          .split('\n')
-          .filter((l) => keyword.test(l));
-        if (matches.length) {
-          printedAny = true;
-          console.log(`[AUTH-TRACE ${label}] ${full}: ${matches.length} matching line(s), last 40:`);
-          matches.slice(-40).forEach((l) => console.log(`[AUTH-TRACE] ${l}`));
-        }
-      } catch {
-        // ignore unreadable/rotated log files
+export async function execCmdWithLoginRateBackoff<T>(command: string, maxAttempts = 4): Promise<ExecCmdResult<T>> {
+  // Waits between attempts (attempt 1->2, 2->3, 3->4); worst case ~6 min of waiting total.
+  const delays = [Duration.seconds(60), Duration.seconds(120), Duration.seconds(180)];
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const exec = execCmd<T>(command);
+    if (exec.shellOutput.code === 0) {
+      if (attempt > 1) {
+        console.log(`[LOGIN-RATE-BACKOFF] succeeded on attempt ${attempt}/${maxAttempts}: ${command}`);
       }
+      return exec;
     }
-  }
-  if (!printedAny) {
+    const output = `${exec.shellOutput.stdout ?? ''}\n${exec.shellOutput.stderr ?? ''}\n${JSON.stringify(
+      exec.jsonOutput ?? {}
+    )}`;
+    const isLoginRate = LOGIN_RATE_RE.test(output);
+    if (!isLoginRate || attempt === maxAttempts) {
+      throw new Error(
+        `Command failed (exit ${exec.shellOutput.code}) after ${attempt} attempt(s)${
+          isLoginRate ? ' — login rate exceeded never cleared' : ''
+        }: ${command}\n${output}`
+      );
+    }
+    const delay = delays[Math.min(attempt - 1, delays.length - 1)];
     console.log(
-      `[AUTH-TRACE ${label}] no matching trace lines found under ${homes
-        .map((h) => join(h, '.sf'))
-        .join(', ')} (log path may differ; checked *.log)`
+      `[LOGIN-RATE-BACKOFF] login rate exceeded on attempt ${attempt}/${maxAttempts}; waiting ${delay.seconds}s before retry: ${command}`
     );
+    await sleep(delay); // eslint-disable-line no-await-in-loop
   }
+  // Unreachable: the loop either returns on success or throws on the final attempt.
+  throw new Error(`Command failed after ${maxAttempts} attempts: ${command}`);
 }
 
 // Root-level hook: on any failing test that used the shared scratch org, emit orgId + pod +

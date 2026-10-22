@@ -18,11 +18,13 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import { execCmd } from '@salesforce/cli-plugins-testkit';
 import type { RunEvalResult } from '../../src/commands/agent/test/run-eval.js';
-import { getTestSession, getUsername, dumpCliAuthTrace } from './shared-setup.js';
+import { getTestSession, getUsername, execCmdWithLoginRateBackoff } from './shared-setup.js';
 
 describe('agent test run-eval', function () {
-  // Increase timeout for setup since shared setup includes long waits and deployments
-  this.timeout(30 * 60 * 1000); // 30 minutes
+  // Increase timeout for setup since shared setup includes long waits and deployments, plus the
+  // run-eval before-hook rides out the `login rate exceeded` window with backoff (up to ~6 min of
+  // waiting) before an ~18-min eval run.
+  this.timeout(60 * 60 * 1000); // 60 minutes
 
   const mockProjectDir = join(process.cwd(), 'test', 'mock-projects', 'agent-generate-template', 'specs');
   const jsonPayloadPath = join(mockProjectDir, 'eval-payload.json');
@@ -36,23 +38,15 @@ describe('agent test run-eval', function () {
   let jsonResult: RunEvalResult;
 
   before(async function () {
-    this.timeout(30 * 60 * 1000); // 30 minutes for setup
+    this.timeout(60 * 60 * 1000); // 60 minutes: setup + login-rate backoff + the eval run
     await getTestSession();
 
     const jsonCommand = `agent test run-eval --spec ${jsonPayloadPath} --api-name Local_Info_Agent --target-org ${getUsername()} --json`;
-    // DIAGNOSTIC (do-not-merge): run under SF_LOG_LEVEL=trace so the CLI's own (token-redacted)
-    // log records the OAuth token exchange; dump the relevant lines regardless of pass/fail so CI
-    // shows the `login rate exceeded` response's HTTP status/endpoint/Retry-After (per-org vs per-IP).
-    try {
-      const jsonExec = execCmd<RunEvalResult>(jsonCommand, {
-        ensureExitCode: 0,
-        env: { ...process.env, SF_LOG_LEVEL: 'trace' },
-      });
-      expect(jsonExec.jsonOutput?.result).to.be.ok;
-      jsonResult = jsonExec.jsonOutput!.result;
-    } finally {
-      dumpCliAuthTrace('run-eval-json-before');
-    }
+    // Retry with backoff to ride out the transient `login rate exceeded` window that the shared
+    // org's auth budget trips when run-eval's first grant fires after suite setup.
+    const jsonExec = await execCmdWithLoginRateBackoff<RunEvalResult>(jsonCommand);
+    expect(jsonExec.jsonOutput?.result).to.be.ok;
+    jsonResult = jsonExec.jsonOutput!.result;
   });
 
   describe('run-eval with JSON file', () => {
@@ -80,9 +74,10 @@ describe('agent test run-eval', function () {
     // for the same OAuth-rate-limit reason as the JSON-payload run above.
     let yamlResult: RunEvalResult;
 
-    before(() => {
+    before(async function () {
+      this.timeout(30 * 60 * 1000); // 30 minutes: login-rate backoff + the eval run
       const command = `agent test run-eval --spec ${yamlSpecPath} --target-org ${getUsername()} --json`;
-      const output = execCmd<RunEvalResult>(command, { ensureExitCode: 0 });
+      const output = await execCmdWithLoginRateBackoff<RunEvalResult>(command);
       expect(output.jsonOutput?.result).to.be.ok;
       yamlResult = output.jsonOutput!.result;
     });
