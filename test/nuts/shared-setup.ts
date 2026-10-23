@@ -30,18 +30,23 @@ let agentUsername: string | undefined;
 let orgId: string | undefined;
 let orgPod: string | undefined;
 
-// A DEDICATED TestSession + its own scratch org for the `agent test run-eval` NUTs.
-// PER-ORG ISOLATION EXPERIMENT: run-eval's first OAuth token grant trips `login rate
-// exceeded` because the shared org's (or the CI runner IP's) login-rate budget is already
-// spent by the rest of the suite before run-eval runs. A dedicated USER in the SAME org did
-// not help (the cap is not per-user). Giving run-eval its OWN scratch org tests whether the
-// cap is per-ORG (a fresh org has its own budget → run-eval succeeds) or per-IP (all orgs
+// A DEDICATED SECOND scratch org (alias `runeval`) in the SAME TestSession for the
+// `agent test run-eval` NUTs. PER-ORG ISOLATION EXPERIMENT: run-eval's first OAuth token grant
+// trips `login rate exceeded` because the shared org's (or the CI runner IP's) login-rate budget
+// is already spent by the rest of the suite before run-eval runs. A dedicated USER in the SAME
+// org did not help (the cap is not per-user). Giving run-eval its OWN scratch org tests whether
+// the cap is per-ORG (a fresh org has its own budget → run-eval succeeds) or per-IP (all orgs
 // share the runner IP → still fails).
-let runEvalSession: TestSession | undefined;
-let runEvalSessionPromise: Promise<TestSession> | undefined;
+//
+// NOTE: this must be a second ORG in the one TestSession, NOT a second TestSession — testkit wraps
+// process.cwd() globally and a second TestSession.create() throws "Attempted to wrap cwd which is
+// already wrapped" and corrupts the first session.
+const RUN_EVAL_ORG_ALIAS = 'runeval';
+let runEvalUsername: string | undefined;
+let runEvalProvisionPromise: Promise<void> | undefined;
 
 // The deploy progress listeners attach to the global Lifecycle singleton, so register them
-// exactly once even though two sessions get provisioned.
+// exactly once even though two orgs get provisioned.
 let deployListenersRegistered = false;
 
 // Format a UTC timestamp as MM/DD/YYYY:HH:mm:ss for CI log correlation (Splunk-friendly).
@@ -165,14 +170,15 @@ function registerDeployListeners(): void {
  * targets a different org.
  */
 async function provisionEvalOrg(
-  session: TestSession
+  session: TestSession,
+  alias = 'default'
 ): Promise<{ username: string; agentUser: string; orgId: string; pod: string }> {
-  const defaultOrg = session.orgs.get('default');
-  if (!defaultOrg?.username) {
-    throw new Error('No default scratch org found in the test session.');
+  const scratchOrg = session.orgs.get(alias);
+  if (!scratchOrg?.username) {
+    throw new Error(`No '${alias}' scratch org found in the test session.`);
   }
-  const username = defaultOrg.username;
-  console.log(`Using scratch org: ${username}`);
+  const username = scratchOrg.username;
+  console.log(`Using scratch org (${alias}): ${username}`);
 
   const org = await Org.create({ aliasOrUsername: username });
   const connection = org.getConnection();
@@ -274,6 +280,13 @@ export async function getTestSession(): Promise<TestSession> {
             setDefault: true,
             config: 'config/project-scratch-def.json',
           },
+          {
+            // Dedicated org for the run-eval NUTs (per-org login-rate isolation experiment).
+            // Created here, provisioned lazily in getRunEvalTestSession().
+            alias: RUN_EVAL_ORG_ALIAS,
+            setDefault: false,
+            config: 'config/project-scratch-def.json',
+          },
         ],
       });
 
@@ -325,70 +338,42 @@ export function getAgentUsername(): string | undefined {
 }
 
 /**
- * Gets the DEDICATED run-eval TestSession, creating its own separate scratch org (isolated from
- * the shared org used by the rest of the suite). See the per-org isolation experiment note above.
- * After provisioning, restores `process.env.AGENT_USER_USERNAME` to the shared org's agent user so
- * later shared-org deploys (e.g. z2 publish of Willie_Resort_Manager.agent) are not contaminated
- * with this org's agent user.
+ * Ensures the DEDICATED run-eval scratch org (alias `runeval`, created alongside the shared org in
+ * the one TestSession) is provisioned and ready. Provisioned lazily and exactly once. See the
+ * per-org isolation experiment note above. After provisioning, restores
+ * `process.env.AGENT_USER_USERNAME` to the shared org's agent user so later shared-org deploys
+ * (e.g. z2 publish of Willie_Resort_Manager.agent) are not contaminated with this org's agent user.
  */
 export async function getRunEvalTestSession(): Promise<TestSession> {
-  if (runEvalSession) {
-    return runEvalSession;
-  }
-  if (runEvalSessionPromise) {
-    return runEvalSessionPromise;
-  }
+  // Ensure the shared session (which also created the `runeval` org) exists first.
+  const session = await getTestSession();
 
-  // @ts-expect-error it can throw an error
-  runEvalSessionPromise = (async (): Promise<TestSession> => {
-    try {
-      console.log('Creating DEDICATED run-eval TestSession with its own scratch org...');
-      const session = await TestSession.create({
-        project: {
-          sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
-        },
-        devhubAuthStrategy: 'AUTO',
-        scratchOrgs: [
-          {
-            alias: 'default',
-            setDefault: true,
-            config: 'config/project-scratch-def.json',
-          },
-        ],
-      });
+  runEvalProvisionPromise ??= (async (): Promise<void> => {
+    console.log('Provisioning DEDICATED run-eval scratch org...');
+    const provisioned = await provisionEvalOrg(session, RUN_EVAL_ORG_ALIAS);
+    runEvalUsername = provisioned.username;
+    console.log(`[NUT-CONTEXT] run-eval dedicated org username=${provisioned.username} orgId=${provisioned.orgId}`);
 
-      runEvalSession = session;
-      console.log('run-eval TestSession created successfully');
-
-      const provisioned = await provisionEvalOrg(session);
-      console.log(`[NUT-CONTEXT] run-eval dedicated org username=${provisioned.username} orgId=${provisioned.orgId}`);
-
-      // Restore the SDR replacement env var to the shared org's agent user, so later shared-org
-      // deploys are not contaminated by the run-eval org's agent user.
-      if (agentUsername) {
-        process.env.AGENT_USER_USERNAME = agentUsername;
-      }
-
-      return session;
-    } catch (e) {
-      console.log('XXXXXX RUN-EVAL SESSION ERROR XXXXXXX');
-      console.dir(SfError.wrap(e).toObject());
-      void Promise.reject(SfError.wrap(e));
+    // Restore the SDR replacement env var to the shared org's agent user, so later shared-org
+    // deploys are not contaminated by the run-eval org's agent user.
+    if (agentUsername) {
+      process.env.AGENT_USER_USERNAME = agentUsername;
     }
   })();
+  await runEvalProvisionPromise;
 
-  return runEvalSessionPromise;
+  return session;
 }
 
 /**
- * Gets the scratch org username from the dedicated run-eval test session.
- * Throws an error if the session hasn't been created yet.
+ * Gets the username of the dedicated run-eval scratch org.
+ * Throws an error if it hasn't been provisioned yet.
  */
 export function getRunEvalUsername(): string {
-  if (!runEvalSession) {
-    throw new Error('Run-eval test session not available. Call getRunEvalTestSession() first.');
+  if (!runEvalUsername) {
+    throw new Error('Run-eval org not provisioned. Call getRunEvalTestSession() first.');
   }
-  return runEvalSession.orgs.get('default')!.username!;
+  return runEvalUsername;
 }
 
 // Root-level hook: on any failing test that used the shared scratch org, emit orgId + pod +
