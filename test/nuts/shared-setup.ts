@@ -306,8 +306,11 @@ const LOGIN_RATE_RE = /login rate exceeded/i;
  * window recover (nothing else runs during these serial waits) instead of failing the describe.
  */
 export async function execCmdWithLoginRateBackoff<T>(command: string, maxAttempts = 4): Promise<ExecCmdResult<T>> {
-  // Waits between attempts (attempt 1->2, 2->3, 3->4); worst case ~6 min of waiting total.
-  const delays = [Duration.seconds(60), Duration.seconds(120), Duration.seconds(180)];
+  // Wait (in ms) between attempts (attempt 1->2, 2->3, 3->4); worst case ~6 min of waiting total.
+  // NOTE: pass a plain number to `sleep`, NOT a `Duration` — the `Duration` re-exported by testkit
+  // is a different class instance than @salesforce/kit's, so `sleep`'s `instanceof Duration` check
+  // misses, yielding a NaN timeout that resolves instantly (the bug that made the first run not wait).
+  const delaysMs = [60_000, 120_000, 180_000];
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const exec = execCmd<T>(command);
     if (exec.shellOutput.code === 0) {
@@ -327,11 +330,13 @@ export async function execCmdWithLoginRateBackoff<T>(command: string, maxAttempt
         }: ${command}\n${output}`
       );
     }
-    const delay = delays[Math.min(attempt - 1, delays.length - 1)];
+    const delayMs = delaysMs[Math.min(attempt - 1, delaysMs.length - 1)];
     console.log(
-      `[LOGIN-RATE-BACKOFF] login rate exceeded on attempt ${attempt}/${maxAttempts}; waiting ${delay.seconds}s before retry: ${command}`
+      `[LOGIN-RATE-BACKOFF] login rate exceeded on attempt ${attempt}/${maxAttempts}; waiting ${
+        delayMs / 1000
+      }s before retry: ${command}`
     );
-    await sleep(delay); // eslint-disable-line no-await-in-loop
+    await sleep(delayMs); // eslint-disable-line no-await-in-loop
   }
   // Unreachable: the loop either returns on success or throws on the final attempt.
   throw new Error(`Command failed after ${maxAttempts} attempts: ${command}`);
