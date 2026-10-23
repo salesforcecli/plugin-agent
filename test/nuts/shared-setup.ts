@@ -15,20 +15,34 @@
  */
 
 import { join } from 'node:path';
-import { Duration, TestSession, execCmd, type ExecCmdResult } from '@salesforce/cli-plugins-testkit';
+import { Duration, TestSession, execCmd } from '@salesforce/cli-plugins-testkit';
 import { ComponentSetBuilder, RequestStatus, type ScopedPostDeploy } from '@salesforce/source-deploy-retrieve';
 import { Org, SfError, User, Lifecycle, Connection } from '@salesforce/core';
 import { sleep, ensureArray } from '@salesforce/kit';
 
 /* eslint-disable no-console */
 
-// Module-level variables to ensure only one TestSession is created
+// The shared TestSession + one scratch org used by the bulk of the suite.
 let testSession: TestSession | undefined;
 let testSessionPromise: Promise<TestSession> | undefined;
 let agentUsername: string | undefined;
 // Non-sensitive scratch-org identifiers captured at setup for CI failure correlation.
 let orgId: string | undefined;
 let orgPod: string | undefined;
+
+// A DEDICATED TestSession + its own scratch org for the `agent test run-eval` NUTs.
+// PER-ORG ISOLATION EXPERIMENT: run-eval's first OAuth token grant trips `login rate
+// exceeded` because the shared org's (or the CI runner IP's) login-rate budget is already
+// spent by the rest of the suite before run-eval runs. A dedicated USER in the SAME org did
+// not help (the cap is not per-user). Giving run-eval its OWN scratch org tests whether the
+// cap is per-ORG (a fresh org has its own budget → run-eval succeeds) or per-IP (all orgs
+// share the runner IP → still fails).
+let runEvalSession: TestSession | undefined;
+let runEvalSessionPromise: Promise<TestSession> | undefined;
+
+// The deploy progress listeners attach to the global Lifecycle singleton, so register them
+// exactly once even though two sessions get provisioned.
+let deployListenersRegistered = false;
 
 // Format a UTC timestamp as MM/DD/YYYY:HH:mm:ss for CI log correlation (Splunk-friendly).
 function fmtUtc(d: Date): string {
@@ -63,6 +77,169 @@ async function waitForEinsteinReady(connection: Connection, maxAttempts = 30): P
   }
   const timeoutSeconds = maxAttempts * 10;
   throw new Error(`Einstein AI did not become ready within ${timeoutSeconds} seconds timeout`);
+}
+
+// Register the deploy progress logging once against the global Lifecycle singleton. The
+// listeners reset their own progress counters on each `scopedPreDeploy`, so a single
+// registration correctly handles the deploys of both the shared and the run-eval sessions.
+function registerDeployListeners(): void {
+  if (deployListenersRegistered) {
+    return;
+  }
+  deployListenersRegistered = true;
+
+  const lifecycle = Lifecycle.getInstance();
+  let lastDeployed = 0;
+  let lastTotal = 0;
+
+  lifecycle.on('scopedPreDeploy', () => {
+    console.log('[DEPLOY] Starting deployment...');
+    // Reset progress tracking for new deployment
+    lastDeployed = 0;
+    lastTotal = 0;
+    return Promise.resolve();
+  });
+
+  lifecycle.on('scopedPostDeploy', (result: ScopedPostDeploy) => {
+    const deployResult = result.deployResult.response;
+    const status = deployResult.status;
+    const numberComponentErrors = deployResult.numberComponentErrors ?? 0;
+    const numberComponentsDeployed = deployResult.numberComponentsDeployed ?? 0;
+    const numberComponentsTotal = deployResult.numberComponentsTotal ?? 0;
+    const numberTestErrors = deployResult.numberTestErrors ?? 0;
+    const numberTestsCompleted = deployResult.numberTestsCompleted ?? 0;
+    const numberTestsTotal = deployResult.numberTestsTotal ?? 0;
+
+    // Log progress during polling (only if changed)
+    if (
+      (numberComponentsDeployed !== lastDeployed || numberComponentsTotal !== lastTotal) &&
+      numberComponentsTotal > 0
+    ) {
+      console.log(
+        `[DEPLOY] Progress: ${numberComponentsDeployed}/${numberComponentsTotal} components deployed${
+          numberComponentErrors > 0 ? `, ${numberComponentErrors} errors` : ''
+        }`
+      );
+      lastDeployed = numberComponentsDeployed;
+      lastTotal = numberComponentsTotal;
+    }
+
+    // Log final status when deployment is complete
+    const isComplete =
+      status === RequestStatus.Succeeded || status === RequestStatus.Failed || status === RequestStatus.Canceled;
+    if (isComplete) {
+      console.log(`[DEPLOY] Deployment completed - Status: ${status}`);
+      console.log(
+        `[DEPLOY] Components: ${numberComponentsDeployed}/${numberComponentsTotal} deployed, ${numberComponentErrors} errors`
+      );
+      if (numberTestsTotal > 0) {
+        console.log(
+          `[DEPLOY] Tests: ${numberTestsCompleted}/${numberTestsTotal} completed, ${numberTestErrors} errors`
+        );
+      }
+      const componentFailures = ensureArray(deployResult.details?.componentFailures);
+      if (componentFailures.length > 0) {
+        console.log(`[DEPLOY] Component failures: ${componentFailures.length}`);
+        componentFailures.slice(0, 5).forEach((failure, idx) => {
+          console.log(
+            `[DEPLOY]   Failure ${idx + 1}: ${failure.fullName ?? 'unknown'} - ${failure.problemType ?? 'unknown'}: ${
+              failure.problem ?? 'unknown'
+            }`
+          );
+        });
+      }
+    }
+    return Promise.resolve();
+  });
+}
+
+/**
+ * Provision a freshly-created scratch org so it can run agent evaluations: assign the Einstein
+ * perm set to the admin, create the agent runtime user, wait for Einstein AI to come up, and
+ * deploy the agent metadata (first without, then with the AiEvaluationDefinition). Used for BOTH
+ * the shared session and the dedicated run-eval session.
+ *
+ * Side effect: sets `process.env.AGENT_USER_USERNAME` to THIS org's agent user, because the
+ * metadata deploys use it as an SDR `replaceWithEnv` token (see mock project sfdx-project.json).
+ * Any caller that provisions a second org must restore the env var afterward if a later deploy
+ * targets a different org.
+ */
+async function provisionEvalOrg(
+  session: TestSession
+): Promise<{ username: string; agentUser: string; orgId: string; pod: string }> {
+  const defaultOrg = session.orgs.get('default');
+  if (!defaultOrg?.username) {
+    throw new Error('No default scratch org found in the test session.');
+  }
+  const username = defaultOrg.username;
+  console.log(`Using scratch org: ${username}`);
+
+  const org = await Org.create({ aliasOrUsername: username });
+  const connection = org.getConnection();
+
+  // Capture non-sensitive org identifiers for CI failure correlation (orgId + pod + UTC timestamp).
+  const resolvedOrgId = org.getOrgId();
+  const orgInfo = await connection.singleRecordQuery<{ InstanceName: string }>('SELECT InstanceName FROM Organization');
+  const pod = orgInfo.InstanceName;
+  console.log(`[NUT-CONTEXT] utc=${fmtUtc(new Date())} orgId=${resolvedOrgId} pod=${pod}`);
+
+  // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
+  const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
+    `SELECT Id, Name FROM User WHERE Username='${username}'`
+  );
+  const user = await User.create({ org });
+  await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
+  console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
+
+  // Create agent user using the new CLI command
+  console.log('Creating agent user...');
+  const agentUserResult = execCmd<{ username: string }>(`org create agent-user --target-org ${username} --json`, {
+    ensureExitCode: 0,
+    cli: 'sf',
+  });
+  const agentUser = agentUserResult.jsonOutput?.result?.username;
+  if (!agentUser) {
+    throw new Error('Failed to create agent user: no username returned');
+  }
+  console.log(`Agent user created: ${agentUser}`);
+
+  // Wait for Einstein AI services to be ready
+  console.log('Waiting for Einstein AI services to be ready...');
+  await waitForEinsteinReady(connection);
+  console.log('Einstein AI services are ready');
+
+  // Set environment variable for string replacement (SDR `replaceWithEnv`) used by the deploys.
+  process.env.AGENT_USER_USERNAME = agentUser;
+  process.env.SF_AAB_COMPILATION = 'false';
+
+  registerDeployListeners();
+
+  console.log('deploying metadata (no AiEvaluationDefinition)');
+  const cs1 = await ComponentSetBuilder.build({
+    manifest: {
+      manifestPath: join(session.project.dir, 'noTest.xml'),
+      directoryPaths: [session.homeDir],
+    },
+  });
+  const deploy1 = await cs1.deploy({ usernameOrConnection: username });
+  // pollStatus waits until deployment completes - will throw if deployment fails
+  await deploy1.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
+  console.log('[DEPLOY] First deployment completed successfully');
+
+  console.log('deploying metadata (AiEvaluationDefinition)');
+  const cs2 = await ComponentSetBuilder.build({
+    manifest: {
+      manifestPath: join(session.project.dir, 'test.xml'),
+      directoryPaths: [session.homeDir],
+    },
+  });
+  const deploy2 = await cs2.deploy({ usernameOrConnection: username });
+  // pollStatus waits until deployment completes - will throw if deployment fails
+  await deploy2.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
+  console.log('[DEPLOY] Second deployment completed successfully');
+  console.log('[DEPLOY] All deployments complete, tests can now run');
+
+  return { username, agentUser, orgId: resolvedOrgId, pod };
 }
 
 /**
@@ -103,154 +280,10 @@ export async function getTestSession(): Promise<TestSession> {
       testSession = session;
       console.log('TestSession created successfully');
 
-      // Get the scratch org username and assign permission set
-      const orgs = session.orgs;
-      const defaultOrg = orgs.get('default');
-
-      if (orgs && orgs.size > 0) {
-        if (defaultOrg?.username) {
-          console.log(`Using scratch org: ${defaultOrg.username}`);
-          const org = await Org.create({ aliasOrUsername: defaultOrg.username });
-          const connection = org.getConnection();
-
-          // Capture non-sensitive org identifiers for CI failure correlation (orgId + pod + UTC timestamp).
-          orgId = org.getOrgId();
-          const orgInfo = await connection.singleRecordQuery<{ InstanceName: string }>(
-            'SELECT InstanceName FROM Organization'
-          );
-          orgPod = orgInfo.InstanceName;
-          console.log(`[NUT-CONTEXT] utc=${fmtUtc(new Date())} orgId=${orgId} pod=${orgPod}`);
-
-          // assign the EinsteinGPTPromptTemplateManager to the scratch org admin user
-          const queryResult = await connection.singleRecordQuery<{ Id: string; Name: string }>(
-            `SELECT Id, Name FROM User WHERE Username='${defaultOrg.username}'`
-          );
-          const user = await User.create({ org });
-          await user.assignPermissionSets(queryResult.Id, ['EinsteinGPTPromptTemplateManager']);
-          console.log(`Permission set assigned to scratch org user: ${queryResult.Name}`);
-
-          // Create agent user using the new CLI command
-          console.log('Creating agent user...');
-          const agentUserResult = execCmd<{ username: string }>(
-            `org create agent-user --target-org ${defaultOrg.username} --json`,
-            { ensureExitCode: 0, cli: 'sf' }
-          );
-
-          if (!agentUserResult.jsonOutput?.result?.username) {
-            throw new Error('Failed to create agent user: no username returned');
-          }
-
-          agentUsername = agentUserResult.jsonOutput.result.username;
-          console.log(`Agent user created: ${agentUsername}`);
-
-          // Wait for Einstein AI services to be ready
-          console.log('Waiting for Einstein AI services to be ready...');
-          await waitForEinsteinReady(connection);
-          console.log('Einstein AI services are ready');
-
-          // Set environment variable for string replacement
-          process.env.AGENT_USER_USERNAME = agentUsername;
-          process.env.SF_AAB_COMPILATION = 'false';
-
-          // Set up deploy event listeners to log progress
-          const lifecycle = Lifecycle.getInstance();
-          let lastDeployed = 0;
-          let lastTotal = 0;
-
-          lifecycle.on('scopedPreDeploy', () => {
-            console.log('[DEPLOY] Starting deployment...');
-            // Reset progress tracking for new deployment
-            lastDeployed = 0;
-            lastTotal = 0;
-            return Promise.resolve();
-          });
-
-          lifecycle.on('scopedPostDeploy', (result: ScopedPostDeploy) => {
-            const deployResult = result.deployResult.response;
-            const status = deployResult.status;
-            const numberComponentErrors = deployResult.numberComponentErrors ?? 0;
-            const numberComponentsDeployed = deployResult.numberComponentsDeployed ?? 0;
-            const numberComponentsTotal = deployResult.numberComponentsTotal ?? 0;
-            const numberTestErrors = deployResult.numberTestErrors ?? 0;
-            const numberTestsCompleted = deployResult.numberTestsCompleted ?? 0;
-            const numberTestsTotal = deployResult.numberTestsTotal ?? 0;
-
-            // Log progress during polling (only if changed)
-            if (
-              (numberComponentsDeployed !== lastDeployed || numberComponentsTotal !== lastTotal) &&
-              numberComponentsTotal > 0
-            ) {
-              console.log(
-                `[DEPLOY] Progress: ${numberComponentsDeployed}/${numberComponentsTotal} components deployed${
-                  numberComponentErrors > 0 ? `, ${numberComponentErrors} errors` : ''
-                }`
-              );
-              lastDeployed = numberComponentsDeployed;
-              lastTotal = numberComponentsTotal;
-            }
-
-            // Log final status when deployment is complete
-            const isComplete =
-              status === RequestStatus.Succeeded ||
-              status === RequestStatus.Failed ||
-              status === RequestStatus.Canceled;
-            if (isComplete) {
-              console.log(`[DEPLOY] Deployment completed - Status: ${status}`);
-              console.log(
-                `[DEPLOY] Components: ${numberComponentsDeployed}/${numberComponentsTotal} deployed, ${numberComponentErrors} errors`
-              );
-              if (numberTestsTotal > 0) {
-                console.log(
-                  `[DEPLOY] Tests: ${numberTestsCompleted}/${numberTestsTotal} completed, ${numberTestErrors} errors`
-                );
-              }
-              const componentFailures = ensureArray(deployResult.details?.componentFailures);
-              if (componentFailures.length > 0) {
-                console.log(`[DEPLOY] Component failures: ${componentFailures.length}`);
-                componentFailures.slice(0, 5).forEach((failure, idx) => {
-                  console.log(
-                    `[DEPLOY]   Failure ${idx + 1}: ${failure.fullName ?? 'unknown'} - ${
-                      failure.problemType ?? 'unknown'
-                    }: ${failure.problem ?? 'unknown'}`
-                  );
-                });
-              }
-            }
-            return Promise.resolve();
-          });
-
-          console.log('deploying metadata (no AiEvaluationDefinition)');
-
-          const cs1 = await ComponentSetBuilder.build({
-            manifest: {
-              manifestPath: join(testSession.project.dir, 'noTest.xml'),
-              directoryPaths: [testSession.homeDir],
-            },
-          });
-          const deploy1 = await cs1.deploy({ usernameOrConnection: defaultOrg.username });
-          // pollStatus waits until deployment completes - will throw if deployment fails
-          await deploy1.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
-          console.log('[DEPLOY] First deployment completed successfully');
-
-          // Reset for second deployment
-          lastDeployed = 0;
-          lastTotal = 0;
-
-          console.log('deploying metadata (AiEvaluationDefinition)');
-
-          const cs2 = await ComponentSetBuilder.build({
-            manifest: {
-              manifestPath: join(testSession.project.dir, 'test.xml'),
-              directoryPaths: [testSession.homeDir],
-            },
-          });
-          const deploy2 = await cs2.deploy({ usernameOrConnection: defaultOrg.username });
-          // pollStatus waits until deployment completes - will throw if deployment fails
-          await deploy2.pollStatus({ frequency: Duration.seconds(10), timeout: Duration.minutes(30) });
-          console.log('[DEPLOY] Second deployment completed successfully');
-          console.log('[DEPLOY] All deployments complete, tests can now run');
-        }
-      }
+      const provisioned = await provisionEvalOrg(session);
+      agentUsername = provisioned.agentUser;
+      orgId = provisioned.orgId;
+      orgPod = provisioned.pod;
 
       return session;
     } catch (e) {
@@ -291,55 +324,71 @@ export function getAgentUsername(): string | undefined {
   return agentUsername;
 }
 
-/** Matches the transient Salesforce OAuth "login rate exceeded" error returned during a token grant. */
-const LOGIN_RATE_RE = /login rate exceeded/i;
+/**
+ * Gets the DEDICATED run-eval TestSession, creating its own separate scratch org (isolated from
+ * the shared org used by the rest of the suite). See the per-org isolation experiment note above.
+ * After provisioning, restores `process.env.AGENT_USER_USERNAME` to the shared org's agent user so
+ * later shared-org deploys (e.g. z2 publish of Willie_Resort_Manager.agent) are not contaminated
+ * with this org's agent user.
+ */
+export async function getRunEvalTestSession(): Promise<TestSession> {
+  if (runEvalSession) {
+    return runEvalSession;
+  }
+  if (runEvalSessionPromise) {
+    return runEvalSessionPromise;
+  }
+
+  // @ts-expect-error it can throw an error
+  runEvalSessionPromise = (async (): Promise<TestSession> => {
+    try {
+      console.log('Creating DEDICATED run-eval TestSession with its own scratch org...');
+      const session = await TestSession.create({
+        project: {
+          sourceDir: join('test', 'mock-projects', 'agent-generate-template'),
+        },
+        devhubAuthStrategy: 'AUTO',
+        scratchOrgs: [
+          {
+            alias: 'default',
+            setDefault: true,
+            config: 'config/project-scratch-def.json',
+          },
+        ],
+      });
+
+      runEvalSession = session;
+      console.log('run-eval TestSession created successfully');
+
+      const provisioned = await provisionEvalOrg(session);
+      console.log(`[NUT-CONTEXT] run-eval dedicated org username=${provisioned.username} orgId=${provisioned.orgId}`);
+
+      // Restore the SDR replacement env var to the shared org's agent user, so later shared-org
+      // deploys are not contaminated by the run-eval org's agent user.
+      if (agentUsername) {
+        process.env.AGENT_USER_USERNAME = agentUsername;
+      }
+
+      return session;
+    } catch (e) {
+      console.log('XXXXXX RUN-EVAL SESSION ERROR XXXXXXX');
+      console.dir(SfError.wrap(e).toObject());
+      void Promise.reject(SfError.wrap(e));
+    }
+  })();
+
+  return runEvalSessionPromise;
+}
 
 /**
- * Execute a command that is prone to the transient `login rate exceeded` OAuth error, retrying
- * with backoff to ride out the (short) rate-limit window. Each attempt runs a fresh `execCmd`;
- * on a login-rate failure we wait and retry, on a clean exit we return the result, and on any
- * other non-zero exit we fail fast with the command output. Throws once `maxAttempts` login-rate
- * failures are exhausted.
- *
- * This exists because the single shared scratch org's per-org/per-runner login-rate budget is
- * spent by suite setup + the other NUTs before the run-eval describe runs; retrying lets the
- * window recover (nothing else runs during these serial waits) instead of failing the describe.
+ * Gets the scratch org username from the dedicated run-eval test session.
+ * Throws an error if the session hasn't been created yet.
  */
-export async function execCmdWithLoginRateBackoff<T>(command: string, maxAttempts = 4): Promise<ExecCmdResult<T>> {
-  // Wait (in ms) between attempts (attempt 1->2, 2->3, 3->4); worst case ~6 min of waiting total.
-  // NOTE: pass a plain number to `sleep`, NOT a `Duration` — the `Duration` re-exported by testkit
-  // is a different class instance than @salesforce/kit's, so `sleep`'s `instanceof Duration` check
-  // misses, yielding a NaN timeout that resolves instantly (the bug that made the first run not wait).
-  const delaysMs = [60_000, 120_000, 180_000];
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const exec = execCmd<T>(command);
-    if (exec.shellOutput.code === 0) {
-      if (attempt > 1) {
-        console.log(`[LOGIN-RATE-BACKOFF] succeeded on attempt ${attempt}/${maxAttempts}: ${command}`);
-      }
-      return exec;
-    }
-    const output = `${exec.shellOutput.stdout ?? ''}\n${exec.shellOutput.stderr ?? ''}\n${JSON.stringify(
-      exec.jsonOutput ?? {}
-    )}`;
-    const isLoginRate = LOGIN_RATE_RE.test(output);
-    if (!isLoginRate || attempt === maxAttempts) {
-      throw new Error(
-        `Command failed (exit ${exec.shellOutput.code}) after ${attempt} attempt(s)${
-          isLoginRate ? ' — login rate exceeded never cleared' : ''
-        }: ${command}\n${output}`
-      );
-    }
-    const delayMs = delaysMs[Math.min(attempt - 1, delaysMs.length - 1)];
-    console.log(
-      `[LOGIN-RATE-BACKOFF] login rate exceeded on attempt ${attempt}/${maxAttempts}; waiting ${
-        delayMs / 1000
-      }s before retry: ${command}`
-    );
-    await sleep(delayMs); // eslint-disable-line no-await-in-loop
+export function getRunEvalUsername(): string {
+  if (!runEvalSession) {
+    throw new Error('Run-eval test session not available. Call getRunEvalTestSession() first.');
   }
-  // Unreachable: the loop either returns on success or throws on the final attempt.
-  throw new Error(`Command failed after ${maxAttempts} attempts: ${command}`);
+  return runEvalSession.orgs.get('default')!.username!;
 }
 
 // Root-level hook: on any failing test that used the shared scratch org, emit orgId + pod +
