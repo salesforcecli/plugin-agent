@@ -2498,3 +2498,5 @@ EXAMPLES
 _See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.2.3/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
+
+<!-- CI trigger: verifying NUT failure-log output ([NUT-CONTEXT] / [NUT-FAILURE]). Do not merge. -->
