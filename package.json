@@ -139,6 +139,11 @@
     "prepare": "sf-install",
     "test": "wireit",
     "test:nuts": "nyc mocha \"test/nuts/**/*.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
+    "test:nuts:run-eval": "nyc mocha \"test/nuts/agent.test.run-eval.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
+    "test:nuts:test": "nyc mocha \"test/nuts/agent.test.nut.ts\" \"test/nuts/agent.test.create.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
+    "test:nuts:generate": "nyc mocha \"test/nuts/agent.activate.nut.ts\" \"test/nuts/agent.generate.*.nut.ts\" \"test/nuts/template.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
+    "test:nuts:z": "nyc mocha \"test/nuts/z*.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
+    "test:nuts:adl-mcp": "nyc mocha \"test/nuts/agent.adl.nut.ts\" \"test/nuts/agent.mcp.nut.ts\" --slow 4500 --timeout 600000 --reporter-options maxDiffSize=15000 --exit",
     "test:only": "wireit",
     "version": "oclif readme"
   },
