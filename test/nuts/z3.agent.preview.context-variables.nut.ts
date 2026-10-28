@@ -37,8 +37,7 @@ import { getTestSession, getUsername } from './shared-setup.js';
  *
  * Fixture: Willie_Resort_Manager declares test-only External vars NutProbeText (Text),
  * NutProbeBool (Boolean), NutProbeNum (Number), NutProbeObj (Json object), NutProbeList
- * (List), plus the pre-existing Internal var VerifiedCustomerId (no visibility) used by the
- * server-rejection case.
+ * (List).
  */
 describe('agent preview --context-variables-json', function () {
   this.timeout(30 * 60 * 1000); // 30 minutes (shared setup deploys + waits on Einstein)
@@ -148,15 +147,12 @@ describe('agent preview --context-variables-json', function () {
     expect(JSON.stringify(result.shellOutput)).to.include('Expected Name=Value');
   });
 
-  it('CV5: the server rejects an Internal variable', () => {
-    // VerifiedCustomerId has no visibility -> Internal -> not settable via preview.
-    const result = execCmd(
-      `agent preview start --authoring-bundle ${bundle} --simulate-actions --context-variables-json '[{"name":"VerifiedCustomerId","type":"Text","value":"x"}]' --target-org ${getUsername()} --json`,
-      { cwd: session.project.dir }
-    );
-    expect(result.shellOutput.code, 'command should fail').to.not.equal(0);
-    expect(JSON.stringify(result.shellOutput)).to.include('Internal');
-  });
+  // Removed CV5 ("the server rejects an Internal variable"): it asserted a server-side
+  // rejection of the no-visibility Internal var VerifiedCustomerId, but that is purely server
+  // behavior — neither the plugin (flags.ts validates only name/type/value-type) nor the SDK
+  // (scriptAgent passes `variables` straight through) enforces visibility. The server stopped
+  // rejecting it (confirmed e2e: command exits 0 and returns a session), so the test pinned a
+  // server contract the plugin doesn't own. CV1–CV4/CV6 still cover the plugin's own handling.
 
   it('CV6: a value whose JSON type mismatches its declared type is rejected client-side', () => {
     const result = execCmd(
