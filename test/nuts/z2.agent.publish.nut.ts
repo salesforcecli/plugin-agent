@@ -119,7 +119,11 @@ describe('agent publish authoring-bundle NUTs', function () {
     execCmd(specCommand, { ensureExitCode: 0 });
 
     // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()} --json`;
+    // --force-overwrite so a retry (this.retries(2)) re-generates over the bundle dir left on
+    // disk by a failed first attempt, instead of dying immediately with JsonAabExistsError. Without
+    // it, the retries are poisoned: they never reach the publish step, so the real first-attempt
+    // publish failure never surfaces in CI.
+    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()} --force-overwrite --json`;
     const generateResult = execCmd<AgentGenerateAuthoringBundleResult>(generateCommand, {
       ensureExitCode: 0,
     }).jsonOutput?.result;
