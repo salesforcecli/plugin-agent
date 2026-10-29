@@ -26,51 +26,52 @@ import { getAgentUsername, getTestSession, getUsername } from './shared-setup.js
 type BotDefinitionWithVersions = {
   Id: string;
   BotVersions: {
-    records: Array<{ DeveloperName: string }>;
+    records: Array<{ VersionNumber: number }>;
   };
 };
 
 const verifyPublishedAgent = async (
   botApiName: string,
-  expectedVersion: string,
+  minVersionCount: number,
   connection: Connection
 ): Promise<void> => {
-  let botDefinition;
-  try {
-    botDefinition = await connection.singleRecordQuery<BotDefinitionWithVersions>(
-      `SELECT SELECT Id, (SELECT DeveloperName FROM BotVersions LIMIT 10) FROM BotDefinition WHERE DeveloperName = '${botApiName}' LIMIT 1`
-    );
-    const botVersion = botDefinition.BotVersions.records[0].DeveloperName;
-    expect(botVersion).to.equal(expectedVersion);
-  } catch {
-    // bot not found
-    void Promise.reject(new Error('Bot not published'));
-  }
+  // singleRecordQuery throws if the agent was never published (0 records), which correctly fails
+  // the test. The old `SELECT SELECT ... DeveloperName` query was malformed, checked the wrong
+  // field (BotVersion.DeveloperName is an unrelated string like "Test_v1", not the version), and
+  // swallowed every failure via `void Promise.reject(...)`, so this check never actually ran.
+  // Each publish of the bundle adds a BotVersion, so after the Nth publish there should be at
+  // least N versions. We assert the COUNT (>=) rather than a specific VersionNumber because
+  // VersionNumber indexing isn't guaranteed to start at 1, and a --force-overwrite retry can add
+  // an extra version — both of which an exact check would get wrong.
+  const botDefinition = await connection.singleRecordQuery<BotDefinitionWithVersions>(
+    `SELECT Id, (SELECT VersionNumber FROM BotVersions ORDER BY VersionNumber) FROM BotDefinition WHERE DeveloperName = '${botApiName}' LIMIT 1`
+  );
+  expect(
+    botDefinition.BotVersions.records.length,
+    `agent "${botApiName}" should have at least ${minVersionCount} published version(s)`
+  ).to.be.at.least(minVersionCount);
 };
 
-async function verifyGenAiPlannerBundleExistsOrNot(
-  projectDir: string,
-  expectedBundleName: string,
-  expectedVersion: string,
-  shouldExist: boolean
-): Promise<void> {
-  const genAiPlannerBundleDir = join(
-    projectDir,
-    'force-app',
-    'main',
-    'default',
-    'genAiPlannerBundles',
-    `${expectedBundleName}_${expectedVersion}`
-  );
-
-  // Verify the genAiPlannerBundles directory exists
-  expect(existsSync(genAiPlannerBundleDir)).to.equal(shouldExist);
-
-  if (shouldExist) {
-    // Verify the directory contains files
-    const files = readdirSync(genAiPlannerBundleDir);
-    expect(files.length).to.be.greaterThan(0);
-  }
+/**
+ * After a successful publish the agent metadata is retrieved into the project. On modern orgs
+ * (API 68+) that is an `AiAgentDefinition` (dir `aiAgents`) plus an `AiAgentDefinitionVersion`
+ * (dir `aiAgentDefinitionVersions`); older orgs fall back to the legacy `Bot` (dir `bots`). The
+ * publish no longer produces the `genAiPlannerBundles/<name>_vN` directory the old assertion
+ * looked for (removed with the move off the `_vN` suffix convention, forcedotcom/agents#310). We
+ * check for any artifact whose name starts with the agent api name, so the assertion is robust to
+ * the retrieve format and the exact file suffix.
+ */
+function verifyAgentMetadataRetrieved(projectDir: string, botApiName: string, shouldExist: boolean): void {
+  const defaultDir = join(projectDir, 'force-app', 'main', 'default');
+  const hasEntry = (subDir: string): boolean => {
+    const dir = join(defaultDir, subDir);
+    return existsSync(dir) && readdirSync(dir).some((entry) => entry.startsWith(botApiName));
+  };
+  const retrieved = hasEntry('aiAgents') || hasEntry('aiAgentDefinitionVersions') || hasEntry('bots');
+  expect(
+    retrieved,
+    `expected agent "${botApiName}" metadata ${shouldExist ? 'to' : 'not to'} be retrieved into the project`
+  ).to.equal(shouldExist);
 }
 
 describe('agent publish authoring-bundle NUTs', function () {
@@ -119,7 +120,11 @@ describe('agent publish authoring-bundle NUTs', function () {
     execCmd(specCommand, { ensureExitCode: 0 });
 
     // Step 2: Generate the authoring bundle from the spec
-    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()} --json`;
+    // --force-overwrite so a retry (this.retries(2)) re-generates over the bundle dir left on
+    // disk by a failed first attempt, instead of dying immediately with JsonAabExistsError. Without
+    // it, the retries are poisoned: they never reach the publish step, so the real first-attempt
+    // publish failure never surfaces in CI.
+    const generateCommand = `agent generate authoring-bundle --spec ${specPath} --name "${bundleApiName}" --api-name ${bundleApiName} --target-org ${getUsername()} --force-overwrite --json`;
     const generateResult = execCmd<AgentGenerateAuthoringBundleResult>(generateCommand, {
       ensureExitCode: 0,
     }).jsonOutput?.result;
@@ -146,8 +151,8 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(publishResult?.success).to.be.true;
     expect(publishResult?.botDeveloperName).to.be.a('string');
     expect(publishResult?.errors).to.be.undefined;
-    await verifyPublishedAgent(bundleApiName, 'v1', connection);
-    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v1', true);
+    await verifyPublishedAgent(bundleApiName, 1, connection);
+    verifyAgentMetadataRetrieved(session.project.dir, bundleApiName, true);
   });
 
   it('should publish a new version of an existing agent', async function () {
@@ -165,8 +170,8 @@ describe('agent publish authoring-bundle NUTs', function () {
     expect(result?.success).to.be.true;
     expect(result?.botDeveloperName).to.be.a('string');
     expect(result?.errors).to.be.undefined;
-    await verifyPublishedAgent(bundleApiName, 'v2', connection);
-    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v2', true);
+    await verifyPublishedAgent(bundleApiName, 2, connection);
+    verifyAgentMetadataRetrieved(session.project.dir, bundleApiName, true);
   });
 
   it('should publish agent with skip-retrieve flag', async function () {
@@ -183,10 +188,11 @@ describe('agent publish authoring-bundle NUTs', function () {
     );
 
     const output = result.shellOutput.stdout;
+    // "Retrieve Metadata - Skipped" in stdout is the authoritative signal that --skip-retrieve
+    // suppressed the retrieve. A disk check can't prove v3 specifically wasn't retrieved, because
+    // the agent-level AiAgentDefinition from the earlier versions is already on disk.
     expect(output).to.include('Retrieve Metadata - Skipped');
-    await verifyPublishedAgent(bundleApiName, 'v3', connection);
-    // skip-retrieve should not create a new version of the genAiPlannerBundle
-    await verifyGenAiPlannerBundleExistsOrNot(session.project.dir, bundleApiName, 'v3', false);
+    await verifyPublishedAgent(bundleApiName, 3, connection);
   });
 
   it('should fail for invalid bundle api-name', async () => {

@@ -37,9 +37,19 @@ import { getTestSession, getUsername } from './shared-setup.js';
  *
  * Fixture: Willie_Resort_Manager declares test-only External vars NutProbeText (Text),
  * NutProbeBool (Boolean), NutProbeNum (Number), NutProbeObj (Json object), NutProbeList
- * (List), plus the pre-existing Internal var VerifiedCustomerId (no visibility) used by the
- * server-rejection case.
+ * (List).
  */
+
+/**
+ * Quote a JSON value for the `--context-variables-json` flag so it survives the shell that
+ * execCmd runs the command through. shelljs uses bash on Unix (where single quotes keep the
+ * JSON's inner double quotes literal) but cmd.exe on Windows (where single quotes are NOT
+ * special and would reach the flag verbatim, breaking JSON.parse). Double-quoting the arg and
+ * escaping every inner double quote as \" delivers byte-identical clean JSON on both shells.
+ */
+const jsonFlag = (value: unknown): string =>
+  process.platform === 'win32' ? `"${JSON.stringify(value).replace(/"/g, '\\"')}"` : `'${JSON.stringify(value)}'`;
+
 describe('agent preview --context-variables-json', function () {
   this.timeout(30 * 60 * 1000); // 30 minutes (shared setup deploys + waits on Einstein)
 
@@ -91,15 +101,15 @@ describe('agent preview --context-variables-json', function () {
     const NUM = 8_675_309;
     const JSON_TAG = 'NUTCV-JSON-4d21c8';
     const LIST_ELEM = 'NUTCV-LIST-b58c1e';
-    const payload = JSON.stringify([
+    const payload = [
       { name: 'NutProbeText', type: 'Text', value: TEXT },
       { name: 'NutProbeNum', type: 'Number', value: NUM },
       { name: 'NutProbeBool', type: 'Boolean', value: true },
       { name: 'NutProbeObj', type: 'Json', value: { tag: JSON_TAG } },
       { name: 'NutProbeList', type: 'List', value: [LIST_ELEM] },
-    ]);
+    ];
 
-    const sessionId = startSession(`--context-variables-json '${payload}'`);
+    const sessionId = startSession(`--context-variables-json ${jsonFlag(payload)}`);
     const haystack = await sendAndCollectTraces(sessionId);
 
     expect(haystack, 'Text value should reach the session').to.include(TEXT);
@@ -116,7 +126,9 @@ describe('agent preview --context-variables-json', function () {
     const OLD = 'NUTCV-OLD-LOSES';
     const NEW = 'NUTCV-NEW-WINS';
     const sessionId = startSession(
-      `--context-variables "NutProbeText=${OLD}" --context-variables-json '[{"name":"NutProbeText","type":"Text","value":"${NEW}"}]'`
+      `--context-variables "NutProbeText=${OLD}" --context-variables-json ${jsonFlag([
+        { name: 'NutProbeText', type: 'Text', value: NEW },
+      ])}`
     );
     const haystack = await sendAndCollectTraces(sessionId);
 
@@ -130,7 +142,7 @@ describe('agent preview --context-variables-json', function () {
     this.timeout(5 * 60 * 1000);
     const COMMA_VALUE = 'c0,c1,c2';
     const sessionId = startSession(
-      `--context-variables-json '[{"name":"NutProbeText","type":"Text","value":"${COMMA_VALUE}"}]'`
+      `--context-variables-json ${jsonFlag([{ name: 'NutProbeText', type: 'Text', value: COMMA_VALUE }])}`
     );
     const haystack = await sendAndCollectTraces(sessionId);
 
@@ -148,19 +160,18 @@ describe('agent preview --context-variables-json', function () {
     expect(JSON.stringify(result.shellOutput)).to.include('Expected Name=Value');
   });
 
-  it('CV5: the server rejects an Internal variable', () => {
-    // VerifiedCustomerId has no visibility -> Internal -> not settable via preview.
-    const result = execCmd(
-      `agent preview start --authoring-bundle ${bundle} --simulate-actions --context-variables-json '[{"name":"VerifiedCustomerId","type":"Text","value":"x"}]' --target-org ${getUsername()} --json`,
-      { cwd: session.project.dir }
-    );
-    expect(result.shellOutput.code, 'command should fail').to.not.equal(0);
-    expect(JSON.stringify(result.shellOutput)).to.include('Internal');
-  });
+  // Removed CV5 ("the server rejects an Internal variable"): it asserted a server-side
+  // rejection of the no-visibility Internal var VerifiedCustomerId, but that is purely server
+  // behavior — neither the plugin (flags.ts validates only name/type/value-type) nor the SDK
+  // (scriptAgent passes `variables` straight through) enforces visibility. The server stopped
+  // rejecting it (confirmed e2e: command exits 0 and returns a session), so the test pinned a
+  // server contract the plugin doesn't own. CV1–CV4/CV6 still cover the plugin's own handling.
 
   it('CV6: a value whose JSON type mismatches its declared type is rejected client-side', () => {
     const result = execCmd(
-      `agent preview start --authoring-bundle ${bundle} --simulate-actions --context-variables-json '[{"name":"NutProbeBool","type":"Boolean","value":"true"}]' --target-org ${getUsername()} --json`,
+      `agent preview start --authoring-bundle ${bundle} --simulate-actions --context-variables-json ${jsonFlag([
+        { name: 'NutProbeBool', type: 'Boolean', value: 'true' },
+      ])} --target-org ${getUsername()} --json`,
       { ensureExitCode: 1, cwd: session.project.dir }
     );
     expect(JSON.stringify(result.shellOutput)).to.include('expects a boolean value');

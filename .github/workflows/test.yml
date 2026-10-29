@@ -21,6 +21,18 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        # Split the NUTs across jobs so each group runs on its own runner (its own
+        # egress IP). The `login rate exceeded` OAuth cap is per-IP, and running the
+        # whole suite serially on one IP exhausts the budget before run-eval. run-eval
+        # is isolated on its own job for maximum headroom; the z0-z5 pipeline stays in
+        # one job because its tests share one org in create->...->trace order.
+        command:
+          - 'yarn test:nuts:run-eval'
+          - 'yarn test:nuts:test'
+          - 'yarn test:nuts:generate'
+          - 'yarn test:nuts:z'
+          - 'yarn test:nuts:adl-mcp'
       fail-fast: false
     with:
       os: ${{ matrix.os }}
+      command: ${{ matrix.command }}
