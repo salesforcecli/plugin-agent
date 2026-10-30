@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentExpressContextCreateResult",
+  "definitions": {
+    "AgentExpressContextCreateResult": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "developerName": {
+          "type": "string"
+        },
+        "masterLabel": {
+          "type": "string"
+        },
+        "retriever": {
+          "type": "string"
+        },
+        "retrieverAction": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["INDEXED", "PARTIAL"]
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileName": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": ["fileName"],
+            "additionalProperties": false
+          }
+        },
+        "agentAction": {
+          "type": "object",
+          "properties": {
+            "authoringBundle": {
+              "type": "string"
+            },
+            "subagent": {
+              "type": "string"
+            },
+            "actionName": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "filePath": {
+              "type": "string"
+            }
+          },
+          "required": ["authoringBundle", "subagent", "actionName", "label", "filePath"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "libraryId",
+        "developerName",
+        "masterLabel",
+        "retriever",
+        "retrieverAction",
+        "outcome",
+        "files",
+        "agentAction"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
