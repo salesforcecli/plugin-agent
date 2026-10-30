@@ -1431,7 +1431,7 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@salesforce/agents@2.3.3":
+"@salesforce/agents@^2.3.3":
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-2.3.3.tgz#6cc7b9dec25169a79eb60f5f8337f615203a6702"
   integrity sha512-moionxUYXDGpeOInExfVQQwg+//raRRRnHLRelx8ryVrU2fjwrt7wHbombAH2LmrT/tFdkBWWDmSI/V5uPKTwA==

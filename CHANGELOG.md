@@ -1,3 +1,9 @@
+## [2.2.4](https://github.com/salesforcecli/plugin-agent/compare/2.2.3...2.2.4) (2026-10-30)
+
+### Bug Fixes
+
+- resolve recurring NUT failures (run-eval login-rate, publish, cross-platform context-vars) @W-24530265@ ([#511](https://github.com/salesforcecli/plugin-agent/issues/511)) ([345fe7b](https://github.com/salesforcecli/plugin-agent/commit/345fe7b0ec19400d75439d8fe2e856d63ad509f1)), closes [#382](https://github.com/salesforcecli/plugin-agent/issues/382)
+
 ## [2.2.3](https://github.com/salesforcecli/plugin-agent/compare/2.2.2...2.2.3) (2026-10-16)
 
 ### Bug Fixes
