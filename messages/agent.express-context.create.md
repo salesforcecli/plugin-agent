@@ -150,3 +150,20 @@ Library %s has no retriever, so a retriever action can't be added.
 # error.notIndexed
 
 Not all files were indexed.
+
+# error.emptyFlag
+
+The --%s flag can't be empty.
+
+# error.bundleEdit
+
+The authoring bundle can't be edited: %s Fix the bundle and rerun. Nothing was created in the org.
+
+# error.bundleEditAfterIndex
+
+Library "%s" (%s) was created and its files indexed, but the authoring bundle couldn't be edited: %s The library was kept.
+
+# error.bundleEditAfterIndex.actions
+
+- Fix the bundle, then add a "%s" retriever action to subagent "%s" in %s by hand.
+- Or delete the library with "sf agent express-context delete" and rerun this command.

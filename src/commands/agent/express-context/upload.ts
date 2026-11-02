@@ -67,7 +67,7 @@ export default class AgentExpressContextUpload extends SfCommand<AgentExpressCon
     const libraryId = flags['library-id'];
     const interactive = !this.jsonEnabled();
 
-    validateLocalFiles(flags.file, (p) => statSync(p).size);
+    validateLocalFiles(flags.file, (p) => statSync(p));
 
     const ui: FlowUi = {
       log: (m) => this.log(m),

@@ -301,9 +301,21 @@ export const withInterruptFlag = async <T>(fn: (isInterrupted: () => boolean) =>
   }
 };
 
-/** Validate local files against AEC limits before any org call. */
-export const validateLocalFiles = (paths: string[], sizeOf: (path: string) => number): void => {
+/**
+ * Validate local files against AEC limits before any org call: count, regular files only, unique
+ * basenames (the service keys uploads by file name), and size.
+ */
+export const validateLocalFiles = (
+  paths: string[],
+  statOf: (path: string) => { size: number; isFile(): boolean }
+): void => {
   if (paths.length > MAX_FILES) throw messages.createError('error.tooManyFiles', [paths.length, MAX_FILES]);
-  const tooLarge = paths.filter((p) => sizeOf(p) > MAX_FILE_SIZE);
+  const stats = new Map(paths.map((p) => [p, statOf(p)]));
+  const notFiles = paths.filter((p) => !stats.get(p)!.isFile());
+  if (notFiles.length) throw messages.createError('error.notAFile', [notFiles.join(', ')]);
+  const fileNames = paths.map((p) => basename(p));
+  const duplicates = [...new Set(fileNames.filter((n, i) => fileNames.indexOf(n) !== i))];
+  if (duplicates.length) throw messages.createError('error.duplicateFileName', [duplicates.join(', ')]);
+  const tooLarge = paths.filter((p) => stats.get(p)!.size > MAX_FILE_SIZE);
   if (tooLarge.length) throw messages.createError('error.fileTooLarge', [tooLarge.map((p) => basename(p)).join(', ')]);
 };

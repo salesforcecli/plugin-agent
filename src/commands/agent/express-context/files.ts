@@ -37,6 +37,17 @@ export default class AgentExpressContextFiles extends SfCommand<AgentExpressCont
       char: 'i',
       required: true,
     }),
+    'page-size': Flags.integer({
+      summary: messages.getMessage('flags.page-size.summary'),
+      min: 1,
+      max: 200,
+      default: 50,
+    }),
+    offset: Flags.integer({
+      summary: messages.getMessage('flags.offset.summary'),
+      min: 0,
+      default: 0,
+    }),
   };
 
   public async run(): Promise<AgentExpressContextFilesResult> {
@@ -45,7 +56,10 @@ export default class AgentExpressContextFiles extends SfCommand<AgentExpressCont
 
     let result: ExpressContextFileListResponse;
     try {
-      result = await AgentExpressContext.listFiles(connection, flags['library-id']);
+      result = await AgentExpressContext.listFiles(connection, flags['library-id'], {
+        pageSize: flags['page-size'],
+        offset: flags.offset,
+      });
     } catch (error) {
       const wrapped = SfError.wrap(error);
       const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
@@ -62,6 +76,15 @@ export default class AgentExpressContextFiles extends SfCommand<AgentExpressCont
           { key: 'status', name: 'Status' },
         ],
       });
+      if (result.nextPageUrl) {
+        this.log(
+          messages.getMessage('morePages', [
+            result.files.length,
+            result.totalSize ?? 'more',
+            flags.offset + result.files.length,
+          ])
+        );
+      }
     }
 
     return result;

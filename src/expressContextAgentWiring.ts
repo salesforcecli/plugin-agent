@@ -39,7 +39,8 @@ const SUBAGENT_HEADER = /^subagent\s+([A-Za-z][A-Za-z0-9_]*)\s*:\s*$/;
 
 const indentOf = (line: string): number => line.length - line.trimStart().length;
 const isBlank = (line: string): boolean => line.trim().length === 0;
-const quote = (value: string): string => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+// Collapse line breaks and other whitespace runs so a value always stays a single-line quoted scalar.
+const quote = (value: string): string => `"${value.replace(/\s+/g, ' ').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
 /**
  * Find the child block of `lines[parent.start]` whose header is `<key>:` at `indent`.

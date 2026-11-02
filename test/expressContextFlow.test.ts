@@ -380,19 +380,31 @@ describe('expressContextFlow', () => {
   });
 
   describe('validateLocalFiles', () => {
+    const fileOf = (size: number) => ({ size, isFile: () => true });
+
     it('accepts files within limits', () => {
-      expect(() => validateLocalFiles(['a', 'b'], () => 10)).to.not.throw();
+      expect(() => validateLocalFiles(['a', 'b'], () => fileOf(10))).to.not.throw();
     });
 
     it('rejects too many files', () => {
       const paths = Array.from({ length: MAX_FILES + 1 }, (_, i) => `f${i}`);
-      expect(() => validateLocalFiles(paths, () => 1)).to.throw(String(MAX_FILES));
+      expect(() => validateLocalFiles(paths, () => fileOf(1))).to.throw(String(MAX_FILES));
     });
 
     it('rejects files over the size limit, naming them', () => {
       expect(() =>
-        validateLocalFiles(['/x/big.pdf', '/x/ok.pdf'], (p) => (p.includes('big') ? MAX_FILE_SIZE + 1 : 1))
+        validateLocalFiles(['/x/big.pdf', '/x/ok.pdf'], (p) => fileOf(p.includes('big') ? MAX_FILE_SIZE + 1 : 1))
       ).to.throw('big.pdf');
+    });
+
+    it('rejects paths that are not regular files', () => {
+      expect(() =>
+        validateLocalFiles(['/x/docs', '/x/ok.pdf'], (p) => ({ size: 64, isFile: () => !p.endsWith('docs') }))
+      ).to.throw('/x/docs');
+    });
+
+    it('rejects two paths with the same file name', () => {
+      expect(() => validateLocalFiles(['/a/faq.md', '/b/faq.md', '/c/x.md'], () => fileOf(1))).to.throw('faq.md');
     });
   });
 });

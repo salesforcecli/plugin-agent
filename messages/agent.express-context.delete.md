@@ -4,7 +4,7 @@ Delete an Agentforce Express Context library.
 
 # description
 
-Permanently deletes an Express Context library and its indexed files. This cannot be undone. You are prompted to confirm unless you pass --no-prompt.
+Permanently deletes an Express Context library, its indexed files, and the org-level retriever action (GenAiFunctionDefinition) that was generated for it. This cannot be undone. You are prompted to confirm unless you pass --no-prompt.
 
 # examples
 
@@ -31,3 +31,11 @@ Delete Express Context library %s and all its indexed files? This cannot be undo
 # success
 
 Deleted Express Context library %s.
+
+# retrieverActionDeleted
+
+Deleted retriever action %s.
+
+# retrieverActionNotDeleted
+
+Couldn't delete retriever action %s: %s Remove the GenAiFunctionDefinition manually; agents that reference it will fail.
