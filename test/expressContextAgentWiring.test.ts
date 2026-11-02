@@ -227,6 +227,22 @@ describe('expressContextAgentWiring', () => {
       );
     });
 
+    it('matches tab indentation without mixing in spaces', () => {
+      const tabbed = 'subagent faq:\n\tlabel: "FAQ"\n\treasoning:\n\t\tactions:\n\t\t\ta: @utils.escalate\n';
+      const out = addRetrieverAction(tabbed, { ...INPUT, subagent: 'faq' });
+      expect(out).to.include('\n\tactions:\n\t\tGeneral_FAQ_Express_RetrieverAction:\n\t\t\tdescription:');
+      expect(out).to.include(
+        '\n\t\t\ta: @utils.escalate\n\t\t\tGeneral_FAQ_Express_RetrieverAction: @actions.General_FAQ_Express_RetrieverAction\n\t\t\t\twith searchText = ...'
+      );
+      const leadingWhitespace = out.split('\n').map((l) => l.slice(0, l.length - l.trimStart().length));
+      expect(leadingWhitespace.filter((ws) => ws.includes(' '))).to.be.empty;
+    });
+
+    it('refuses a subagent that mixes tabs and spaces instead of corrupting it', () => {
+      const mixed = 'subagent faq:\n\tlabel: "FAQ"\n    reasoning:\n\t\tactions:\n';
+      expect(() => addRetrieverAction(mixed, { ...INPUT, subagent: 'faq' })).to.throw('mixes tabs and spaces');
+    });
+
     it('throws for an unknown subagent', () => {
       expect(() => addRetrieverAction(SCRIPT, { ...INPUT, subagent: 'nope' })).to.throw(
         'Subagent "nope" was not found'

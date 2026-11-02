@@ -137,7 +137,7 @@ export const uploadAndWait = async (
       ui.log(messages.getMessage('uploading', [toUpload.length, libraryId]));
       // eslint-disable-next-line no-await-in-loop
       const uploaded = await AgentExpressContext.upload(connection, libraryId, toUpload);
-      uploaded.filePaths.forEach((sfPath, i) => localBySfPath.set(sfPath, toUpload[i]));
+      uploaded.files.forEach((f) => localBySfPath.set(f.filePath, f.localPath));
       options.onUploaded?.(uploaded.filePaths);
     }
 

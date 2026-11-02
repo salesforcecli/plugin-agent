@@ -63,15 +63,19 @@ const lastContentLine = (lines: string[], block: Block): number => {
   return i;
 };
 
-/** Locate a top-level `subagent <name>:` block and the file's indent unit inside it. */
-const findSubagent = (lines: string[], name: string): { block: Block; unit: number } | undefined => {
+/**
+ * Locate a top-level `subagent <name>:` block and the file's indent unit inside it. `unit` is the
+ * unit's width in characters (used for comparisons); `indent` is the unit itself, so inserted lines
+ * reuse the bundle's own whitespace (generated bundles use 4 spaces; hand-written ones may use tabs).
+ */
+const findSubagent = (lines: string[], name: string): { block: Block; unit: number; indent: string } | undefined => {
   const start = lines.findIndex((line) => SUBAGENT_HEADER.exec(line)?.[1] === name);
   if (start === -1) return undefined;
   let end = start + 1;
   while (end < lines.length && (isBlank(lines[end]) || indentOf(lines[end]) > 0)) end++;
-  // Match the file's indent unit (generated bundles use 4 spaces).
   const firstChild = lines.slice(start + 1, end).find((line) => !isBlank(line));
-  return { block: { start, end }, unit: firstChild ? indentOf(firstChild) : 4 };
+  const indent = firstChild ? firstChild.slice(0, indentOf(firstChild)) : '    ';
+  return { block: { start, end }, unit: indent.length, indent };
 };
 
 const unquote = (value: string): string =>
@@ -129,8 +133,17 @@ export const addRetrieverAction = (script: string, input: RetrieverActionInput):
   if (!found) {
     throw new Error(`Subagent "${input.subagent}" was not found in the authoring bundle.`);
   }
-  const { block: subagent, unit } = found;
-  const pad = (level: number): string => ' '.repeat(unit * level);
+  const { block: subagent, unit, indent } = found;
+  // Width-based block matching can't line up a mix of tabs and spaces, so refuse rather than corrupt the file.
+  const mixedIndent = lines
+    .slice(subagent.start + 1, subagent.end)
+    .some((l) => !isBlank(l) && l.slice(0, indentOf(l)).split(indent[0]).join('') !== '');
+  if (mixedIndent) {
+    throw new Error(
+      `Subagent "${input.subagent}" mixes tabs and spaces in its indentation. Indent it with only spaces or only tabs, then rerun.`
+    );
+  }
+  const pad = (level: number): string => indent.repeat(level);
 
   if (definesAction(lines, subagent, unit, input.actionName)) {
     throw new Error(`Subagent "${input.subagent}" already has an action named "${input.actionName}".`);
@@ -196,6 +209,7 @@ export const addRetrieverAction = (script: string, input: RetrieverActionInput):
     `${pad(5)}is_displayable: False`,
     `${pad(5)}filter_from_agent: False`,
   ];
+  // `with <input> = ...` is Agent Script's slot-fill syntax: the planner supplies the value at run time.
   const reference = [`${pad(3)}${input.actionName}: @actions.${input.actionName}`, `${pad(4)}with searchText = ...`];
 
   // Collect insertions as (afterLineIndex, newLines) and apply bottom-up so indices stay valid.
