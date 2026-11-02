@@ -70,7 +70,7 @@ export class AgentTestCache extends TTLConfig<TTLConfig.Options, CacheContents> 
     return this.get(key);
   }
 
-  public useIdOrMostRecent(
+  public resolveIdOrMostRecent(
     runId: string | undefined,
     useMostRecent: boolean
   ): { runId: string; name?: string; outputDir?: string; resultFormat?: ResultFormat; runnerType?: TestRunnerType } {

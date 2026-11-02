@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
-
 import { expect } from 'chai';
 import type { TestCase } from '@salesforce/agents';
 import { isYamlTestSpec, parseTestSpec, translateTestCase, translateTestSpec } from '@salesforce/agents';

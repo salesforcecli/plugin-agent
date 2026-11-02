@@ -88,7 +88,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
     let cachedRunnerType;
 
     try {
-      const cacheEntry = agentTestCache.useIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
+      const cacheEntry = agentTestCache.resolveIdOrMostRecent(flags['job-id'], flags['use-most-recent']);
       name = cacheEntry.name;
       runId = cacheEntry.runId;
       outputDir = cacheEntry.outputDir;
@@ -169,7 +169,7 @@ export default class AgentTestResume extends SfCommand<AgentTestRunResult> {
       process.exitCode = 1;
     }
 
-    return { ...response, runId, status: 'COMPLETED' } as AgentTestRunResult;
+    return { ...response, runId, status: 'COMPLETED' };
   }
 
   protected catch(error: Error | SfError | CLIError): Promise<never> {

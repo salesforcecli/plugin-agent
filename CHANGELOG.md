@@ -1,3 +1,15 @@
+## [2.2.4](https://github.com/salesforcecli/plugin-agent/compare/2.2.3...2.2.4) (2026-10-30)
+
+### Bug Fixes
+
+- resolve recurring NUT failures (run-eval login-rate, publish, cross-platform context-vars) @W-24530265@ ([#511](https://github.com/salesforcecli/plugin-agent/issues/511)) ([345fe7b](https://github.com/salesforcecli/plugin-agent/commit/345fe7b0ec19400d75439d8fe2e856d63ad509f1)), closes [#382](https://github.com/salesforcecli/plugin-agent/issues/382)
+
+## [2.2.3](https://github.com/salesforcecli/plugin-agent/compare/2.2.2...2.2.3) (2026-10-16)
+
+### Bug Fixes
+
+- **deps:** bump fast-copy from 3.0.2 to 3.1.0 ([#505](https://github.com/salesforcecli/plugin-agent/issues/505)) ([9100a57](https://github.com/salesforcecli/plugin-agent/commit/9100a57852d032ce3b2092fb7e4ca97f21ea011c)), closes [#137](https://github.com/salesforcecli/plugin-agent/issues/137) [#138](https://github.com/salesforcecli/plugin-agent/issues/138) [#101](https://github.com/salesforcecli/plugin-agent/issues/101) [#137](https://github.com/salesforcecli/plugin-agent/issues/137) [#138](https://github.com/salesforcecli/plugin-agent/issues/138) [#101](https://github.com/salesforcecli/plugin-agent/issues/101)
+
 ## [2.2.2](https://github.com/salesforcecli/plugin-agent/compare/2.2.1...2.2.2) (2026-09-14)
 
 ### Bug Fixes

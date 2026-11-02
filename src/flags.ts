@@ -254,7 +254,7 @@ export async function getHiddenDirs(projectRoot?: string): Promise<string[]> {
   try {
     const files = await readdir(rootDir, { withFileTypes: true });
     return files.filter((file) => file.isDirectory() && file.name.startsWith('.')).map((file) => file.name);
-  } catch (error) {
+  } catch {
     return [];
   }
 }

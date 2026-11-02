@@ -94,7 +94,7 @@ export const getAgentForActivation = async (config: {
 }): Promise<ProductionAgent> => {
   const { targetOrg, status, apiNameFlag } = config;
 
-  let agentsInOrg: BotMetadata[] = [];
+  let agentsInOrg: BotMetadata[];
   try {
     agentsInOrg = await Agent.listRemote(targetOrg.getConnection());
   } catch (error) {
