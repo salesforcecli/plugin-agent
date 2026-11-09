@@ -34,6 +34,14 @@ const errorKind = (error: unknown): 'badRequest' | 'forbidden' | 'notFound' | 'o
   return 'other';
 };
 
+// Agentforce Builder places action blocks at 8 spaces (subagent actions:) and reasoning entries at 12
+// (subagent reasoning: actions:). The API returns them flush left; --json keeps the raw strings.
+const indent = (text: string, n: number): string =>
+  text
+    .split('\n')
+    .map((line) => (line.trim() ? ' '.repeat(n) + line : line))
+    .join('\n');
+
 export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatalogMcpServerAssetAfscriptResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -139,9 +147,9 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
       this.log(
         [
           '# subagent actions:',
-          ...result.actions.map((a) => a.actionBlock),
+          ...result.actions.map((a) => indent(a.actionBlock, 8)),
           '# reasoning actions:',
-          ...result.actions.map((a) => a.reasoningReference),
+          ...result.actions.map((a) => indent(a.reasoningReference, 12)),
         ].join('\n')
       );
     }

@@ -565,19 +565,17 @@ describe('agent mcp commands', () => {
       expect(result.actions.map((a) => a.toolId)).to.deep.equal(['1XO2', '1XO1']);
     });
 
-    it('prints the blocks byte-for-byte under the two headings', async () => {
+    it('prints the blocks under the two headings, indented for the .agent file (8 and 12 spaces)', async () => {
       const org = await setup();
       await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'add', '-t', 'hello_world']);
-      const a1 = action('1XO2', 'a1XO2');
-      const a2 = action('1XO1', 'a1XO1');
       expect(sfCommandStubs.log.firstCall.firstArg).to.equal(
         [
           '# subagent actions:',
-          a1.actionBlock,
-          a2.actionBlock,
+          '        a1XO2:\n            source: "a1XO2"\n            target: "mcpTool://nc/a1XO2"',
+          '        a1XO1:\n            source: "a1XO1"\n            target: "mcpTool://nc/a1XO1"',
           '# reasoning actions:',
-          a1.reasoningReference,
-          a2.reasoningReference,
+          '            a1XO2: @actions.a1XO2\n                with a = ...',
+          '            a1XO1: @actions.a1XO1\n                with a = ...',
         ].join('\n')
       );
     });
