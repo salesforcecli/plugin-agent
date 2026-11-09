@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ApiCatalogMcpServerAssetAfscriptResult",
+  "definitions": {
+    "ApiCatalogMcpServerAssetAfscriptResult": {
+      "$ref": "#/definitions/McpAgentScriptActionsOutput"
+    },
+    "McpAgentScriptActionsOutput": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/McpAgentScriptActionOutput"
+          }
+        }
+      },
+      "required": ["actions"],
+      "additionalProperties": false
+    },
+    "McpAgentScriptActionOutput": {
+      "type": "object",
+      "properties": {
+        "toolId": {
+          "type": "string"
+        },
+        "genAiFunctionId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "actionBlock": {
+          "type": "string"
+        },
+        "reasoningReference": {
+          "type": "string"
+        }
+      },
+      "required": ["toolId", "genAiFunctionId", "name", "source", "target", "actionBlock", "reasoningReference"],
+      "additionalProperties": false
+    }
+  }
+}

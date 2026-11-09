@@ -197,6 +197,14 @@
   },
   {
     "alias": [],
+    "command": "agent:mcp:asset:afscript",
+    "flagAliases": [],
+    "flagChars": ["i", "o", "t"],
+    "flags": ["api-version", "asset-id", "flags-dir", "json", "mcp-server-id", "target-org", "tool"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:mcp:asset:list",
     "flagAliases": [],
     "flagChars": ["i", "o"],

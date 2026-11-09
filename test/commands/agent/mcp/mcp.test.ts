@@ -30,6 +30,7 @@ import AgentMcpDelete from '../../../../src/commands/agent/mcp/delete.js';
 import AgentMcpFetch from '../../../../src/commands/agent/mcp/fetch.js';
 import AgentMcpAssetList from '../../../../src/commands/agent/mcp/asset/list.js';
 import AgentMcpAssetReplace from '../../../../src/commands/agent/mcp/asset/replace.js';
+import AgentMcpAssetAfscript from '../../../../src/commands/agent/mcp/asset/afscript.js';
 
 describe('agent mcp commands', () => {
   const $$ = new TestContext();
@@ -511,5 +512,255 @@ describe('agent mcp commands', () => {
     expect(keys).to.include('securityWarning');
     expect(tableArg.data[0].description).to.equal('Add two numbers');
     expect(tableArg.data[0].securityWarning).to.equal('Tool description was modified since last approval.');
+  });
+  describe('asset afscript', () => {
+    const assets = [
+      { id: '1XO1', name: 'McpTool__hello_world', kind: 'MCP_TOOL', active: true },
+      { id: '1XO2', name: 'McpTool__add', kind: 'MCP_TOOL', active: true },
+      { id: '1XO3', name: 'McpTool__off', kind: 'MCP_TOOL', active: false },
+      { id: '1XO4', name: 'some_prompt', kind: 'MCP_PROMPT', active: true },
+    ];
+    // Indentation as the Core service returns it: first line flush left, later lines 4 spaces.
+    const action = (toolId: string, name: string) => ({
+      toolId,
+      genAiFunctionId: `179${toolId}`,
+      name,
+      source: name,
+      target: `mcpTool://nc/${name}`,
+      actionBlock: `${name}:\n    source: "${name}"\n    target: "mcpTool://nc/${name}"`,
+      reasoningReference: `${name}: @actions.${name}\n    with a = ...`,
+    });
+    let posts: any[];
+
+    async function setup(postError?: Error): Promise<MockTestOrgData> {
+      const testOrg = new MockTestOrgData();
+      await $$.stubAuths(testOrg);
+      posts = [];
+      $$.fakeConnectionRequest = (req: any) => {
+        if (req.method === 'GET') return Promise.resolve({ assets });
+        posts.push(req);
+        if (postError) return Promise.reject(postError);
+        const ids = JSON.parse(req.body as string).toolIds as string[];
+        return Promise.resolve({ actions: ids.map((id) => action(id, `a${id}`)) });
+      };
+      return testOrg;
+    }
+
+    it('resolves --tool with and without the prefix, in order, with one API call', async () => {
+      const org = await setup();
+      const result = await AgentMcpAssetAfscript.run([
+        '--target-org',
+        org.username,
+        '-i',
+        '0XS1',
+        '-t',
+        'add',
+        '-t',
+        'McpTool__hello_world',
+      ]);
+      expect(posts).to.have.length(1);
+      expect(posts[0].url).to.match(/\/connect\/genai-mcp\/agent-script\/actions$/);
+      expect(JSON.parse(posts[0].body as string)).to.deep.equal({ toolIds: ['1XO2', '1XO1'] });
+      expect(result.actions.map((a) => a.toolId)).to.deep.equal(['1XO2', '1XO1']);
+    });
+
+    it('prints the blocks byte-for-byte under the two headings', async () => {
+      const org = await setup();
+      await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'add', '-t', 'hello_world']);
+      const a1 = action('1XO2', 'a1XO2');
+      const a2 = action('1XO1', 'a1XO1');
+      expect(sfCommandStubs.log.firstCall.firstArg).to.equal(
+        [
+          '# subagent actions:',
+          a1.actionBlock,
+          a2.actionBlock,
+          '# reasoning actions:',
+          a1.reasoningReference,
+          a2.reasoningReference,
+        ].join('\n')
+      );
+    });
+
+    it('--asset-id sends the raw ids after the --tool ids', async () => {
+      const org = await setup();
+      await AgentMcpAssetAfscript.run([
+        '--target-org',
+        org.username,
+        '-i',
+        '0XS1',
+        '--asset-id',
+        '1XO2',
+        '--tool',
+        'hello_world',
+      ]);
+      expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XO1', '1XO2']);
+    });
+
+    it('--json returns {actions} and prints nothing', async () => {
+      const org = await setup();
+      const result = await AgentMcpAssetAfscript.run([
+        '--target-org',
+        org.username,
+        '-i',
+        '0XS1',
+        '-t',
+        'add',
+        '--json',
+      ]);
+      expect(result.actions).to.have.length(1);
+      expect(sfCommandStubs.log.called).to.equal(false);
+    });
+
+    it('lists every missing name and the available tools in one error, with no POST', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run([
+          '--target-org',
+          org.username,
+          '-i',
+          '0XS1',
+          '-t',
+          'nope',
+          '-t',
+          'McpTool__gone',
+          '-t',
+          'add',
+        ]);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.name).to.equal('ToolNotFound');
+        expect(e.message).to.include('nope, McpTool__gone');
+        expect(e.message).to.include('McpTool__hello_world, McpTool__add, McpTool__off');
+        expect(e.message).to.not.include('some_prompt');
+      }
+      expect(posts).to.have.length(0);
+    });
+
+    it('lists every inactive asset in one error, with no POST', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run([
+          '--target-org',
+          org.username,
+          '-i',
+          '0XS1',
+          '-t',
+          'off',
+          '--asset-id',
+          '1XO3',
+        ]);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.name).to.equal('AssetNotAllowlisted');
+        expect(e.message).to.include('McpTool__off');
+        expect(e.message).to.include('sf agent mcp asset replace');
+      }
+      expect(posts).to.have.length(0);
+    });
+
+    it('sends each id once when --tool and --asset-id name the same tool', async () => {
+      const org = await setup();
+      await AgentMcpAssetAfscript.run([
+        '--target-org',
+        org.username,
+        '-i',
+        '0XS1',
+        '-t',
+        'add',
+        '-t',
+        'add',
+        '--asset-id',
+        '1XO2',
+      ]);
+      expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XO2']);
+    });
+
+    it('treats an unknown id and a non-MCP_TOOL id as missing, once each', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run([
+          '--target-org',
+          org.username,
+          '-i',
+          '0XS1',
+          '--asset-id',
+          '1XOZ',
+          '--asset-id',
+          '1XO4',
+          '--asset-id',
+          '1XOZ',
+        ]);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.name).to.equal('ToolNotFound');
+        expect(e.message).to.include('1XOZ, 1XO4. Available');
+      }
+      expect(posts).to.have.length(0);
+    });
+
+    it('reports missing and inactive together in one error', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'nope', '-t', 'off']);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.message).to.include('Not found on the MCP server: nope');
+        expect(e.message).to.include('Not allowlisted: McpTool__off');
+        expect(e.oclif?.exit ?? e.exitCode).to.equal(1);
+      }
+    });
+
+    it('maps a jsforce-shaped 400 (name=BAD_REQUEST, Core message) and keeps the text', async () => {
+      const msg = 'These tool ids are not connected MCP tools: [1XO2]';
+      const err = Object.assign(new Error(msg), { name: 'BAD_REQUEST', errorCode: 'BAD_REQUEST' });
+      const org = await setup(err);
+      try {
+        await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'add']);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.message).to.include('(400)');
+        expect(e.message).to.include(msg);
+      }
+    });
+
+    it('says the org needs API 68.0 (release 264) on NOT_FOUND', async () => {
+      const err = Object.assign(new Error('The requested resource does not exist'), { name: 'NOT_FOUND' });
+      const org = await setup(err);
+      try {
+        await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'add']);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.message).to.include('68.0 (release 264)');
+        expect(e.message).to.include('The requested resource does not exist');
+      }
+    });
+
+    it('requires --tool or --asset-id', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1']);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.name).to.equal('NoToolSelected');
+      }
+    });
+
+    for (const [name, msg, expected] of [
+      ['BAD_REQUEST', 'These tool ids are not connected MCP tools: [1XO2]', 'API rejected the request (400)'],
+      ['FUNCTIONALITY_NOT_ENABLED', 'The MCP agent-script API is not enabled for this org.', 'denied access (403)'],
+    ]) {
+      it(`maps API ${name} to a clear error that keeps the API message`, async () => {
+        const err = new Error(msg);
+        err.name = name;
+        const org = await setup(err);
+        try {
+          await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'add']);
+          expect.fail('should throw');
+        } catch (e: any) {
+          expect(e.message).to.include(expected);
+          expect(e.message).to.include(msg);
+        }
+      });
+    }
   });
 });
