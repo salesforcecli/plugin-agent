@@ -519,6 +519,7 @@ describe('agent mcp commands', () => {
       { id: '1XO2', name: 'McpTool__add', kind: 'MCP_TOOL', active: true },
       { id: '1XO3', name: 'McpTool__off', kind: 'MCP_TOOL', active: false },
       { id: '1XO4', name: 'some_prompt', kind: 'MCP_PROMPT', active: true },
+      { id: '1XO5', name: 'McpTool__no_active_field', kind: 'MCP_TOOL' },
     ];
     // Indentation as the Core service returns it: first line flush left, later lines 4 spaces.
     const action = (toolId: string, name: string) => ({
@@ -594,6 +595,12 @@ describe('agent mcp commands', () => {
         'hello_world',
       ]);
       expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XO1', '1XO2']);
+    });
+
+    it('sends a tool whose asset has no active field (the API decides)', async () => {
+      const org = await setup();
+      await AgentMcpAssetAfscript.run(['--target-org', org.username, '-i', '0XS1', '-t', 'no_active_field']);
+      expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XO5']);
     });
 
     it('--json returns {actions} and prints nothing', async () => {

@@ -98,7 +98,8 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
       if (asset) selected.push(asset);
       else missing.add(id);
     }
-    const inactive = [...new Set(selected.filter((a) => !a.active).map((a) => a.name))];
+    // Some orgs omit `active` from asset list; only an explicit false blocks. The API rejects a tool with no GenAiFunction.
+    const inactive = [...new Set(selected.filter((a) => a.active === false).map((a) => a.name))];
     if (missing.size > 0 || inactive.length > 0) {
       const available = mcpTools.map((a) => a.name).join(', ');
       const key = ((): string => {
