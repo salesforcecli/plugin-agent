@@ -1,0 +1,150 @@
+/*
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { Messages, SfError } from '@salesforce/core';
+import { ApiCatalog, type McpAgentScriptActionsOutput, type McpServerAssetOutput } from '@salesforce/agents';
+
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
+const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.mcp.asset.afscript');
+
+export type ApiCatalogMcpServerAssetAfscriptResult = McpAgentScriptActionsOutput;
+
+const TOOL_PREFIX = 'McpTool__';
+
+// The Connect API reports failures through the error name (jsforce sets name to the error code;
+// SfError.wrap keeps it); the message always carries the API text.
+const errorKind = (error: unknown): 'badRequest' | 'forbidden' | 'notFound' | 'other' => {
+  const name = (error as { name?: string })?.name ?? '';
+  if (/FORBIDDEN|FUNCTIONALITY_NOT_ENABLED|INSUFFICIENT_ACCESS|ERROR_HTTP_403/i.test(name)) return 'forbidden';
+  if (/BAD_REQUEST|ERROR_HTTP_400/i.test(name)) return 'badRequest';
+  if (/NOT_FOUND|ERROR_HTTP_404/i.test(name)) return 'notFound';
+  return 'other';
+};
+
+export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatalogMcpServerAssetAfscriptResult> {
+  public static readonly summary = messages.getMessage('summary');
+  public static readonly description = messages.getMessage('description');
+  public static readonly examples = messages.getMessages('examples');
+  public static readonly enableJsonFlag = true;
+  public static readonly state = 'preview';
+
+  public static readonly flags = {
+    'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
+    'mcp-server-id': Flags.string({
+      summary: messages.getMessage('flags.mcp-server-id.summary'),
+      char: 'i',
+      required: true,
+    }),
+    tool: Flags.string({
+      summary: messages.getMessage('flags.tool.summary'),
+      char: 't',
+      multiple: true,
+    }),
+    'asset-id': Flags.string({
+      summary: messages.getMessage('flags.asset-id.summary'),
+      multiple: true,
+    }),
+  };
+
+  public async run(): Promise<ApiCatalogMcpServerAssetAfscriptResult> {
+    const { flags } = await this.parse(ApiCatalogMcpServerAssetAfscript);
+    const tools = flags.tool ?? [];
+    const assetIds = flags['asset-id'] ?? [];
+    if (tools.length === 0 && assetIds.length === 0) {
+      throw new SfError(messages.getMessage('error.noSelection'), 'NoToolSelected', [], 1);
+    }
+    const connection = flags['target-org'].getConnection(flags['api-version']);
+
+    let assets: McpServerAssetOutput[];
+    try {
+      assets = (await ApiCatalog.listMcpServerAssets(connection, flags['mcp-server-id'])).assets ?? [];
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+      throw new SfError(
+        messages.getMessage('error.listFailed', [wrapped.message]),
+        'ListMcpServerAssetsFailed',
+        [],
+        4,
+        wrapped
+      );
+    }
+
+    // Request order: every --tool in the order given, then every --asset-id in the order given.
+    const mcpTools = assets.filter((a) => a.kind === 'MCP_TOOL');
+    const selected: McpServerAssetOutput[] = [];
+    const missing = new Set<string>();
+    for (const tool of tools) {
+      const name = tool.startsWith(TOOL_PREFIX) ? tool : `${TOOL_PREFIX}${tool}`;
+      const asset = mcpTools.find((a) => a.name === name);
+      if (asset) selected.push(asset);
+      else missing.add(tool);
+    }
+    for (const id of assetIds) {
+      const asset = mcpTools.find((a) => a.id === id);
+      if (asset) selected.push(asset);
+      else missing.add(id);
+    }
+    const inactive = [...new Set(selected.filter((a) => !a.active).map((a) => a.name))];
+    if (missing.size > 0 || inactive.length > 0) {
+      const available = mcpTools.map((a) => a.name).join(', ');
+      const key = ((): string => {
+        if (missing.size > 0 && inactive.length > 0) return 'error.notFoundAndNotAllowlisted';
+        return missing.size > 0 ? 'error.toolsNotFound' : 'error.notAllowlisted';
+      })();
+      const tokens = {
+        'error.toolsNotFound': [[...missing].join(', '), available],
+        'error.notAllowlisted': [inactive.join(', ')],
+        'error.notFoundAndNotAllowlisted': [[...missing].join(', '), available, inactive.join(', ')],
+      }[key] as string[];
+      throw new SfError(
+        messages.getMessage(key, tokens),
+        missing.size > 0 ? 'ToolNotFound' : 'AssetNotAllowlisted',
+        [],
+        1
+      );
+    }
+    const toolIds = [...new Set(selected.map((a) => a.id))];
+
+    let result: McpAgentScriptActionsOutput;
+    try {
+      result = await ApiCatalog.generateMcpAgentScriptActions(connection, toolIds);
+    } catch (error) {
+      const wrapped = SfError.wrap(error);
+      const kind = errorKind(error);
+      const key = {
+        badRequest: 'error.badRequest',
+        forbidden: 'error.forbidden',
+        notFound: 'error.notFoundApi',
+        other: 'error.failed',
+      }[kind];
+      throw new SfError(messages.getMessage(key, [wrapped.message]), 'GenerateMcpAgentScriptFailed', [], 4, wrapped);
+    }
+
+    if (!this.jsonEnabled()) {
+      this.log(
+        [
+          '# subagent actions:',
+          ...result.actions.map((a) => a.actionBlock),
+          '# reasoning actions:',
+          ...result.actions.map((a) => a.reasoningReference),
+        ].join('\n')
+      );
+    }
+
+    return result;
+  }
+}
