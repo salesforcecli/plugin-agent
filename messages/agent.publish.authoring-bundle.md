@@ -40,6 +40,10 @@ API name of the authoring bundle to publish
 
 Don't retrieve the metadata associated with the agent to your DX project.
 
+# flags.source-type.summary
+
+Where the agent came from. Use "Bot" when the agent was converted from an Einstein Bot. Applied on the first publish only.
+
 # flags.verbose.summary
 
 Display detailed output showing all metadata components retrieved and deployed during the publish process.
