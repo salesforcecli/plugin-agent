@@ -1,3 +1,9 @@
+# [2.3.0](https://github.com/salesforcecli/plugin-agent/compare/2.2.4...2.3.0) (2026-11-10)
+
+### Features
+
+- add --source-type flag to agent publish authoring-bundle @W-24853026@ ([#516](https://github.com/salesforcecli/plugin-agent/issues/516)) ([02a4b96](https://github.com/salesforcecli/plugin-agent/commit/02a4b96790a392b4d58c930be97990e35280c9f2)), closes [forcedotcom/agents#391](https://github.com/forcedotcom/agents/issues/391) [forcedotcom/agents#391](https://github.com/forcedotcom/agents/issues/391)
+
 ## [2.2.4](https://github.com/salesforcecli/plugin-agent/compare/2.2.3...2.2.4) (2026-10-30)
 
 ### Bug Fixes
