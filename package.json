@@ -20,7 +20,7 @@
     "@salesforce/types": "1.8.0",
     "ansis": "^3.17.0",
     "fast-xml-parser": "^5.11.1",
-    "glob": "^11.1.0",
+    "glob": "^14.0.2",
     "ink": "^7.1.1",
     "ink-text-input": "^6.0.0",
     "inquirer-autocomplete-standalone": "^0.8.1",
