@@ -375,7 +375,17 @@
     "command": "agent:publish:authoring-bundle",
     "flagAliases": [],
     "flagChars": ["n", "o", "v"],
-    "flags": ["api-name", "api-version", "concise", "flags-dir", "json", "skip-retrieve", "target-org", "verbose"],
+    "flags": [
+      "api-name",
+      "api-version",
+      "concise",
+      "flags-dir",
+      "json",
+      "skip-retrieve",
+      "source-type",
+      "target-org",
+      "verbose"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {
