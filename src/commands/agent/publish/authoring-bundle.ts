@@ -59,6 +59,10 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
     'skip-retrieve': Flags.boolean({
       summary: messages.getMessage('flags.skip-retrieve.summary'),
     }),
+    'source-type': Flags.option({
+      summary: messages.getMessage('flags.source-type.summary'),
+      options: ['Bot'] as const,
+    })(),
     verbose: Flags.boolean({
       summary: messages.getMessage('flags.verbose.summary'),
       char: 'v',
@@ -212,7 +216,7 @@ export default class AgentPublishAuthoringBundle extends SfCommand<AgentPublishA
       return Promise.resolve();
     });
 
-    const result = await agent.publish(flags['skip-retrieve']);
+    const result = await agent.publish(flags['skip-retrieve'], { sourceType: flags['source-type'] });
     mso.stop();
 
     // Display final summary for normal mode
