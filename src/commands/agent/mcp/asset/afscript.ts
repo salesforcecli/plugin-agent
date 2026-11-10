@@ -24,6 +24,22 @@ export type ApiCatalogMcpServerAssetAfscriptResult = McpAgentScriptActionsOutput
 
 const TOOL_PREFIX = 'McpTool__';
 
+// An 18-char record id with a correct checksum names the same record as its first 15 chars, so both
+// forms key by the 15-char form. Any other value (a wrong checksum included) keys as is and matches nothing new.
+const CHECKSUM_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345';
+export const idKey = (id: string): string => {
+  if (!/^[a-zA-Z0-9]{18}$/.test(id)) return id;
+  const id15 = id.slice(0, 15);
+  const checksum = [0, 5, 10]
+    .map((start) => {
+      let bits = 0;
+      for (let i = 0; i < 5; i++) if (/[A-Z]/.test(id15[start + i])) bits |= 1 << i;
+      return CHECKSUM_CHARS[bits];
+    })
+    .join('');
+  return checksum === id.slice(15).toUpperCase() ? id15 : id;
+};
+
 // The Connect API reports failures through the error name (jsforce sets name to the error code;
 // SfError.wrap keeps it); the message always carries the API text.
 const errorKind = (error: unknown): 'badRequest' | 'forbidden' | 'notFound' | 'other' => {
@@ -102,7 +118,7 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
       else missing.add(tool);
     }
     for (const id of assetIds) {
-      const asset = mcpTools.find((a) => a.id === id);
+      const asset = mcpTools.find((a) => idKey(a.id) === idKey(id));
       if (asset) selected.push(asset);
       else missing.add(id);
     }

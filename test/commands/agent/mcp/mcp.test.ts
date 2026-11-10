@@ -520,6 +520,7 @@ describe('agent mcp commands', () => {
       { id: '1XO3', name: 'McpTool__off', kind: 'MCP_TOOL', active: false },
       { id: '1XO4', name: 'some_prompt', kind: 'MCP_PROMPT', active: true },
       { id: '1XO5', name: 'McpTool__no_active_field', kind: 'MCP_TOOL' },
+      { id: '1XOxx000000017P', name: 'McpTool__text_stats', kind: 'MCP_TOOL', active: true },
     ];
     // Indentation as the Core service returns it: first line flush left, later lines 4 spaces.
     const action = (toolId: string, name: string) => ({
@@ -678,6 +679,40 @@ describe('agent mcp commands', () => {
         '1XO2',
       ]);
       expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XO2']);
+    });
+
+    it('matches an 18-char id with a correct checksum to the 15-char asset id, and sends it once', async () => {
+      const org = await setup();
+      await AgentMcpAssetAfscript.run([
+        '--target-org',
+        org.username,
+        '-i',
+        '0XS1',
+        '--asset-id',
+        '1XOxx000000017PGAQ',
+        '--asset-id',
+        '1XOxx000000017P',
+      ]);
+      expect(JSON.parse(posts[0].body as string).toolIds).to.deep.equal(['1XOxx000000017P']);
+    });
+
+    it('treats an 18-char id with a wrong checksum as missing', async () => {
+      const org = await setup();
+      try {
+        await AgentMcpAssetAfscript.run([
+          '--target-org',
+          org.username,
+          '-i',
+          '0XS1',
+          '--asset-id',
+          '1XOxx000000017PAAA',
+        ]);
+        expect.fail('should throw');
+      } catch (e: any) {
+        expect(e.name).to.equal('ToolNotFound');
+        expect(e.message).to.include('1XOxx000000017PAAA');
+      }
+      expect(posts).to.have.length(0);
     });
 
     it('treats an unknown id and a non-MCP_TOOL id as missing, once each', async () => {
