@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentExpressContextGetResult",
+  "definitions": {
+    "AgentExpressContextGetResult": {
+      "$ref": "#/definitions/ExpressContextLibrarySummary"
+    },
+    "ExpressContextLibrarySummary": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "masterLabel": {
+          "type": "string"
+        },
+        "developerName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "retriever": {
+          "$ref": "#/definitions/ExpressContextRetrieverDetail"
+        },
+        "retrieverAction": {
+          "$ref": "#/definitions/ExpressContextRetrieverDetail"
+        },
+        "createdDate": {
+          "type": "string"
+        }
+      },
+      "required": ["libraryId", "masterLabel", "developerName", "status"],
+      "additionalProperties": false,
+      "description": "A single AEC library as returned by GET /aec-libraries.\n\nNOTE: `developerName` includes the 8-char hash suffix the platform appends on creation (e.g. `General_FAQ_Express_6def866f`). Path-style lookups by the plain, un-suffixed name 404; use the full developerName or the 18-char Id (key prefix 1JD)."
+    },
+    "ExpressContextRetrieverDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "description": "Types for the Agentforce Express Context (AEC) Connect API.\n\nAEC is a realtime BM25 index/retrieval service that bypasses the Data Cloud DLO/DMO/SearchIndex pipeline used by Agentforce Data Libraries (ADL). Because of that, AEC libraries are lighter-weight than ADL libraries: there is no data-space scope, no downstream DMO/SearchIndex assets, and indexing is (near-)realtime rather than a multi-stage provisioning pipeline.\n\nConnect API base: /services/data/v{version}/einstein/aec-libraries"
+    }
+  }
+}
