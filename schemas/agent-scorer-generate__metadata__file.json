@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentScorerGenerateMetadataFileCommandResult",
+  "definitions": {
+    "AgentScorerGenerateMetadataFileCommandResult": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/AgentScorerGenerateMetadataFileResult"
+        },
+        {
+          "$ref": "#/definitions/ScorerSpecSchemaResult"
+        }
+      ],
+      "description": "Everything `run` can resolve to: a scaffolded/previewed scorer, or (under `--spec-schema --json`) the schema."
+    },
+    "AgentScorerGenerateMetadataFileResult": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "apiName": {
+          "type": "string"
+        },
+        "contents": {
+          "type": "string"
+        },
+        "promptTemplatePath": {
+          "type": "string"
+        },
+        "guidance": {
+          "type": "string",
+          "description": "Guidance surfaced to a caller running with --json (where `this.log` output is suppressed): a written scorer's metadata XML is the source of truth, so any further change is made directly in the XML."
+        }
+      },
+      "required": ["path", "apiName", "contents"],
+      "additionalProperties": false
+    },
+    "ScorerSpecSchemaResult": {
+      "type": "object",
+      "additionalProperties": {},
+      "description": "The scorer spec JSON Schema payload. Under `--spec-schema --json` (where `styledJSON` is suppressed) it is returned as the command result so the schema still rides in the standard {status, result} envelope for machine consumers, matching what `--spec-schema` prints without `--json`."
+    }
+  }
+}
