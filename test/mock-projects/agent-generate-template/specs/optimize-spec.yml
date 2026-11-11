@@ -1,0 +1,18 @@
+test_cases:
+  - utterance: "What are the resort's check-in hours?"
+    expected_response_contains:
+      - check-in
+      - hours
+
+  - utterance: 'I need help with my employee schedule'
+    expected_response_contains:
+      - schedule
+
+  - utterance: 'I have a complaint about my room'
+    expected_response_contains:
+      - sorry
+      - help
+
+  - utterance: 'What is the weather like today?'
+    expected_response_contains:
+      - weather
