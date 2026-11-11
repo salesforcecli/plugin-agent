@@ -207,8 +207,17 @@
     "alias": [],
     "command": "agent:mcp:asset:replace",
     "flagAliases": [],
-    "flagChars": ["i", "o"],
-    "flags": ["api-version", "assets", "assets-file", "flags-dir", "json", "mcp-server-id", "target-org"],
+    "flagChars": ["f", "i", "o"],
+    "flags": [
+      "api-version",
+      "assets",
+      "assets-file",
+      "flags-dir",
+      "json",
+      "mcp-server-id",
+      "server-fingerprint",
+      "target-org"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {

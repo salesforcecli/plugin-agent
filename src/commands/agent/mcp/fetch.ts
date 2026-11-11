@@ -74,6 +74,9 @@ export default class ApiCatalogMcpServerFetch extends SfCommand<ApiCatalogMcpSer
           { key: 'securityWarning', name: 'Security Warning' },
         ],
       });
+      if (result.serverFingerprint) {
+        this.log(messages.getMessage('output.serverFingerprint', [result.serverFingerprint]));
+      }
     }
 
     return result;

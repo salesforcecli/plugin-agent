@@ -13,11 +13,12 @@
           "items": {
             "$ref": "#/definitions/McpFetchedAsset"
           }
+        },
+        "serverFingerprint": {
+          "type": "string"
         }
       },
-      "required": [
-        "assets"
-      ],
+      "required": ["assets"],
       "additionalProperties": false
     },
     "McpFetchedAsset": {
@@ -51,19 +52,12 @@
           "type": "string"
         }
       },
-      "required": [
-        "name",
-        "kind"
-      ],
+      "required": ["name", "kind"],
       "additionalProperties": false
     },
     "McpAssetKind": {
       "type": "string",
-      "enum": [
-        "MCP_TOOL",
-        "MCP_PROMPT",
-        "MCP_RESOURCE"
-      ]
+      "enum": ["MCP_TOOL", "MCP_PROMPT", "MCP_RESOURCE"]
     }
   }
 }
