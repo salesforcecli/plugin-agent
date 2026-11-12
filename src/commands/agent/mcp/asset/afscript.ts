@@ -15,7 +15,12 @@
  */
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
-import { ApiCatalog, type McpAgentScriptActionsOutput, type McpServerAssetOutput } from '@salesforce/agents';
+import {
+  ApiCatalog,
+  McpAgentScript,
+  type McpAgentScriptActionsOutput,
+  type McpServerAssetOutput,
+} from '@salesforce/agents';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.mcp.asset.afscript');
@@ -146,7 +151,7 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
 
     let result: McpAgentScriptActionsOutput;
     try {
-      result = await ApiCatalog.generateMcpAgentScriptActions(connection, toolIds);
+      result = await McpAgentScript.generateActions(connection, toolIds);
     } catch (error) {
       const wrapped = SfError.wrap(error);
       const kind = errorKind(error);
