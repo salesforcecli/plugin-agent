@@ -200,7 +200,17 @@
     "command": "agent:mcp:asset:afscript",
     "flagAliases": [],
     "flagChars": ["i", "o", "t"],
-    "flags": ["api-version", "asset-id", "flags-dir", "json", "mcp-server-id", "target-org", "tool"],
+    "flags": [
+      "api-version",
+      "asset-id",
+      "authoring-bundle",
+      "flags-dir",
+      "json",
+      "mcp-server-id",
+      "subagent",
+      "target-org",
+      "tool"
+    ],
     "plugin": "@salesforce/plugin-agent"
   },
   {

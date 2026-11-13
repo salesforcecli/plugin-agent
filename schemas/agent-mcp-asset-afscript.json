@@ -3,11 +3,28 @@
   "$ref": "#/definitions/ApiCatalogMcpServerAssetAfscriptResult",
   "definitions": {
     "ApiCatalogMcpServerAssetAfscriptResult": {
-      "$ref": "#/definitions/McpAgentScriptActionsOutput"
-    },
-    "McpAgentScriptActionsOutput": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "bundle": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "subagents": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SubagentUpdate"
+              }
+            }
+          },
+          "required": ["name", "file", "subagents"],
+          "additionalProperties": false
+        },
         "actions": {
           "type": "array",
           "items": {
@@ -15,7 +32,28 @@
           }
         }
       },
-      "required": ["actions"],
+      "required": ["actions"]
+    },
+    "SubagentUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "added": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["name", "added", "skipped"],
       "additionalProperties": false
     },
     "McpAgentScriptActionOutput": {

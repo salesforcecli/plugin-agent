@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { Messages, SfError } from '@salesforce/core';
+import { Messages, SfError, SfProject } from '@salesforce/core';
 import {
+  Agent,
   ApiCatalog,
+  findAuthoringBundle,
   McpAgentScript,
+  type McpAgentScriptActionOutput,
   type McpAgentScriptActionsOutput,
   type McpServerAssetOutput,
 } from '@salesforce/agents';
@@ -25,7 +30,11 @@ import {
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.mcp.asset.afscript');
 
-export type ApiCatalogMcpServerAssetAfscriptResult = McpAgentScriptActionsOutput;
+export type SubagentUpdate = { name: string; added: string[]; skipped: string[] };
+
+export type ApiCatalogMcpServerAssetAfscriptResult = McpAgentScriptActionsOutput & {
+  bundle?: { name: string; file: string; subagents: SubagentUpdate[] };
+};
 
 const TOOL_PREFIX = 'McpTool__';
 
@@ -63,6 +72,95 @@ const indent = (text: string, n: number): string =>
     .map((line) => (line.trim() ? ' '.repeat(n) + line : line))
     .join('\n');
 
+const leading = (line: string): number => line.length - line.trimStart().length;
+
+// End of the section that starts at `header`: the first later non-blank line at `depth` spaces or less (or `end`).
+const sectionEnd = (lines: string[], header: number, depth: number, end: number): number => {
+  for (let i = header + 1; i < end; i++) if (lines[i].trim() && leading(lines[i]) <= depth) return i;
+  return end;
+};
+
+// Index after the last non-blank line in [from, to), so new lines go before trailing blank lines.
+const afterLastContent = (lines: string[], from: number, to: number): number => {
+  let at = from;
+  for (let i = from; i < to; i++) if (lines[i].trim()) at = i + 1;
+  return at;
+};
+
+// Index of the line that is exactly `header` (trailing spaces ignored) in [from, to), or -1.
+const findHeader = (lines: string[], header: string, from: number, to: number): number => {
+  for (let i = from; i < to; i++) if (lines[i].trimEnd() === header) return i;
+  return -1;
+};
+
+const keyOf = (line: string): string => line.trim().match(/^(\S+):/)?.[1] ?? '';
+
+/**
+ * Adds each action block under the subagent's `actions:` (8 spaces) and each reasoning reference under its
+ * `reasoning:` > `actions:` (12 spaces), the places Agentforce Builder uses. Creates a missing section. Skips an
+ * action whose key is already in the subagent's actions, so a second run changes nothing.
+ */
+export const addToSubagent = (
+  content: string,
+  subagent: string,
+  actions: Array<Pick<McpAgentScriptActionOutput, 'name' | 'actionBlock' | 'reasoningReference'>>
+): { content: string; added: string[]; skipped: string[] } => {
+  const eol = content.includes('\r\n') ? '\r\n' : '\n';
+  const lines = content.split(/\r?\n/);
+  const start = lines.findIndex((l) => [`subagent ${subagent}:`, `start_agent ${subagent}:`].includes(l.trimEnd()));
+  if (start < 0) {
+    const names = lines.map((l) => l.trimEnd().match(/^(?:subagent|start_agent) (\S+):$/)?.[1]).filter(Boolean);
+    throw new SfError(
+      messages.getMessage('error.subagentNotFound', [subagent, names.join(', ')]),
+      'SubagentNotFound',
+      [],
+      1
+    );
+  }
+  const blockEnd = (): number => sectionEnd(lines, start, 0, lines.length);
+  const keysAt = (from: number, to: number, depth: number): Set<string> =>
+    new Set(
+      lines
+        .slice(from, to)
+        .filter((l) => l.trim() && leading(l) === depth)
+        .map(keyOf)
+    );
+
+  // Subagent actions: header at 4 spaces, blocks at 8.
+  let header = findHeader(lines, '    actions:', start + 1, blockEnd());
+  if (header < 0) {
+    header = afterLastContent(lines, start, blockEnd());
+    lines.splice(header, 0, '    actions:');
+  }
+  const existing = keysAt(header + 1, sectionEnd(lines, header, 4, blockEnd()), 8);
+  const added = actions.filter((a) => !existing.has(a.name));
+  const skipped = actions.filter((a) => existing.has(a.name)).map((a) => a.name);
+  if (added.length === 0) return { content, added: [], skipped };
+  const blocksAt = afterLastContent(lines, header, sectionEnd(lines, header, 4, blockEnd()));
+  lines.splice(blocksAt, 0, ...added.flatMap((a) => indent(a.actionBlock, 8).split('\n')));
+
+  // Reasoning actions: reasoning at 4 spaces, its actions at 8, references at 12.
+  let reasoning = findHeader(lines, '    reasoning:', start + 1, blockEnd());
+  if (reasoning < 0) {
+    reasoning = afterLastContent(lines, start, blockEnd());
+    lines.splice(reasoning, 0, '    reasoning:');
+  }
+  const reasoningEnd = (): number => sectionEnd(lines, reasoning, 4, blockEnd());
+  let refHeader = findHeader(lines, '        actions:', reasoning + 1, reasoningEnd());
+  if (refHeader < 0) {
+    refHeader = afterLastContent(lines, reasoning, reasoningEnd());
+    lines.splice(refHeader, 0, '        actions:');
+  }
+  const refs = keysAt(refHeader + 1, sectionEnd(lines, refHeader, 8, reasoningEnd()), 12);
+  const refsAt = afterLastContent(lines, refHeader, sectionEnd(lines, refHeader, 8, reasoningEnd()));
+  lines.splice(
+    refsAt,
+    0,
+    ...added.filter((a) => !refs.has(a.name)).flatMap((a) => indent(a.reasoningReference, 12).split('\n'))
+  );
+  return { content: lines.join(eol), added: added.map((a) => a.name), skipped };
+};
+
 export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatalogMcpServerAssetAfscriptResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -86,6 +184,15 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     'asset-id': Flags.string({
       summary: messages.getMessage('flags.asset-id.summary'),
       multiple: true,
+    }),
+    'authoring-bundle': Flags.string({
+      summary: messages.getMessage('flags.authoring-bundle.summary'),
+      dependsOn: ['subagent'],
+    }),
+    subagent: Flags.string({
+      summary: messages.getMessage('flags.subagent.summary'),
+      multiple: true,
+      dependsOn: ['authoring-bundle'],
     }),
   };
 
@@ -164,6 +271,14 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
       throw new SfError(messages.getMessage(key, [wrapped.message]), 'GenerateMcpAgentScriptFailed', [], 4, wrapped);
     }
 
+    const bundleName = flags['authoring-bundle'];
+    if (bundleName) {
+      return {
+        ...result,
+        bundle: await this.updateBundle(connection, bundleName, flags.subagent ?? [], result.actions),
+      };
+    }
+
     if (!this.jsonEnabled()) {
       this.log(
         [
@@ -176,5 +291,53 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     }
 
     return result;
+  }
+
+  /** Adds the actions to each subagent of the local bundle, then compiles it; restores the file if compile fails. */
+  private async updateBundle(
+    connection: Parameters<typeof McpAgentScript.generateActions>[0],
+    name: string,
+    subagents: string[],
+    actions: McpAgentScriptActionOutput[]
+  ): Promise<NonNullable<ApiCatalogMcpServerAssetAfscriptResult['bundle']>> {
+    let project: SfProject;
+    try {
+      project = this.project ?? (await SfProject.resolve());
+    } catch (error) {
+      throw new SfError(messages.getMessage('error.notInProject'), 'NotInProject', [], 1, SfError.wrap(error));
+    }
+    const dir = findAuthoringBundle(
+      project.getPackageDirectories().map((p) => p.fullPath),
+      name
+    );
+    if (!dir) throw new SfError(messages.getMessage('error.bundleNotFound', [name]), 'AuthoringBundleNotFound', [], 1);
+    const file = join(dir, `${name}.agent`);
+
+    const original = await readFile(file, 'utf8');
+    let content = original;
+    const updates: SubagentUpdate[] = [];
+    for (const subagent of [...new Set(subagents)]) {
+      const r = addToSubagent(content, subagent, actions);
+      content = r.content;
+      updates.push({ name: subagent, added: r.added, skipped: r.skipped });
+    }
+    for (const s of updates) {
+      this.log(
+        messages.getMessage('info.subagentUpdated', [s.name, s.added.join(', ') || '-', s.skipped.join(', ') || '-'])
+      );
+    }
+    if (content === original) return { name, file, subagents: updates };
+
+    await writeFile(file, content, 'utf8');
+    const compiled = await (await Agent.init({ connection, project, aabName: name })).compile();
+    if (compiled.status !== 'success') {
+      await writeFile(file, original, 'utf8');
+      const errors = compiled.errors
+        .map((e) => `${e.errorType}: ${e.description} [Ln ${e.lineStart}, Col ${e.colStart}]`)
+        .join('\n');
+      throw new SfError(messages.getMessage('error.compileFailed', [file, errors]), 'AgentScriptCompileFailed', [], 1);
+    }
+    this.log(messages.getMessage('info.bundleUpdated', [file]));
+    return { name, file, subagents: updates };
   }
 }
