@@ -201,47 +201,21 @@ describe('agent mcp asset afscript --authoring-bundle', () => {
       '--subagent',
       'escalation',
     ]);
-  const stubCompile = (compile: () => Promise<any>): void => {
-    $$.SANDBOX.stub(Agent, 'init').resolves({ compile } as any);
-  };
-
-  it('writes the blocks and returns what it added when the bundle compiles', async () => {
-    stubCompile(() => Promise.resolve({ status: 'success', errors: [] }));
+  it('writes the blocks into the bundle and returns what it added, without compiling', async () => {
+    const init = $$.SANDBOX.stub(Agent, 'init');
     const result = await run();
     expect(result.bundle.subagents).to.deep.equal([{ name: 'escalation', added: ['aadd'], skipped: [] }]);
+    expect(result.bundle.file).to.equal(agentFile);
     expect(readFileSync(agentFile, 'utf8')).to.include('        aadd:\n            source: "aadd"');
+    expect(readFileSync(agentFile, 'utf8')).to.include('            aadd: @actions.aadd');
+    expect(init.called).to.equal(false);
   });
 
-  it('restores the file and fails when the bundle does not compile', async () => {
-    stubCompile(() =>
-      Promise.resolve({
-        status: 'failure',
-        errors: [{ errorType: 'SyntaxError', description: 'bad', lineStart: 3, lineEnd: 3, colStart: 1, colEnd: 2 }],
-      })
-    );
-    try {
-      await run();
-      expect.fail('expected the command to fail');
-    } catch (e) {
-      expect((e as Error).name).to.equal('AgentScriptCompileFailed');
-      expect((e as Error).message).to.include('SyntaxError: bad [Ln 3, Col 1]');
-    }
-    expect(readFileSync(agentFile, 'utf8')).to.equal(FILE);
-  });
-
-  it('restores the file and fails when the compile service throws', async () => {
-    stubCompile(() =>
-      Promise.reject(
-        Object.assign(new Error('Unable to access the Salesforce Agent APIs.'), { name: 'AgentApiNotFound' })
-      )
-    );
-    try {
-      await run();
-      expect.fail('expected the command to fail');
-    } catch (e) {
-      expect((e as Error).name).to.equal('AgentScriptCompileUnavailable');
-      expect((e as Error).message).to.include('Unable to access the Salesforce Agent APIs.');
-    }
-    expect(readFileSync(agentFile, 'utf8')).to.equal(FILE);
+  it('leaves the file unchanged when the subagent already has every action', async () => {
+    await run();
+    const once = readFileSync(agentFile, 'utf8');
+    const result = await run();
+    expect(result.bundle.subagents).to.deep.equal([{ name: 'escalation', added: [], skipped: ['aadd'] }]);
+    expect(readFileSync(agentFile, 'utf8')).to.equal(once);
   });
 });

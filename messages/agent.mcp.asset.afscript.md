@@ -8,7 +8,7 @@ Prints the same Agent Script blocks that Agentforce Builder writes when you add 
 
 Select tools by name with --tool (with or without the `McpTool__` prefix) or by asset ID with --asset-id. You must use at least one of the two flags. Each tool must be allowlisted (active) on the MCP server; run "agent mcp asset replace" to allowlist a tool. The output follows the order of the flags: all --tool values first, then all --asset-id values. Duplicates are sent once.
 
-To add the blocks to a local authoring bundle instead of printing them, use --authoring-bundle with one or more --subagent flags. The command adds each action block under the subagent's `actions:` and each reasoning action under its `reasoning:` > `actions:`, and creates a missing section. It skips an action that the subagent already has, so you can run it again safely. Then it compiles the bundle in the org; if the compile fails, it restores the file. Run the command from a Salesforce DX project.
+To add the blocks to a local authoring bundle instead of printing them, use --authoring-bundle with one or more --subagent flags. The command adds each action block under the subagent's `actions:` and each reasoning action under its `reasoning:` > `actions:`, and creates a missing section. It skips an action that the subagent already has, so you can run it again safely. It does not compile the bundle; run "agent validate authoring-bundle" after it. Run the command from a Salesforce DX project.
 
 The API call also assigns the MCP runtime permissions that Agentforce Builder assigns, so it is not read-only.
 
@@ -56,7 +56,7 @@ Subagent %s: added %s; already present %s.
 
 # info.bundleUpdated
 
-Updated and compiled %s.
+Updated %s.
 
 # error.notInProject
 
@@ -69,15 +69,6 @@ Cannot find an authoring bundle named %s in the project's package directories.
 # error.subagentNotFound
 
 Cannot find subagent %s in the authoring bundle. Subagents in the file: %s
-
-# error.compileFailed
-
-The updated Agent Script did not compile, so %s is restored to its previous content:
-%s
-
-# error.compileUnavailable
-
-Could not compile the updated Agent Script, so %s is restored to its previous content: %s
 
 # error.noSelection
 

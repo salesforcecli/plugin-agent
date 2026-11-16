@@ -18,7 +18,6 @@ import { join } from 'node:path';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Messages, SfError, SfProject } from '@salesforce/core';
 import {
-  Agent,
   ApiCatalog,
   findAuthoringBundle,
   McpAgentScript,
@@ -275,7 +274,7 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     if (bundleName) {
       return {
         ...result,
-        bundle: await this.updateBundle(connection, bundleName, flags.subagent ?? [], result.actions),
+        bundle: await this.updateBundle(bundleName, flags.subagent ?? [], result.actions),
       };
     }
 
@@ -293,9 +292,8 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     return result;
   }
 
-  /** Adds the actions to each subagent of the local bundle, then compiles it; restores the file if compile fails. */
+  /** Adds the actions to each subagent of the local bundle. Validate or deploy the bundle separately. */
   private async updateBundle(
-    connection: Parameters<typeof McpAgentScript.generateActions>[0],
     name: string,
     subagents: string[],
     actions: McpAgentScriptActionOutput[]
@@ -329,27 +327,6 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     if (content === original) return { name, file, subagents: updates };
 
     await writeFile(file, content, 'utf8');
-    const compiled = await Agent.init({ connection, project, aabName: name })
-      .then((agent) => agent.compile())
-      .catch(async (error: unknown) => {
-        // The compile service itself failed (not a script error); never leave an unchecked edit behind.
-        await writeFile(file, original, 'utf8');
-        const wrapped = SfError.wrap(error);
-        throw new SfError(
-          messages.getMessage('error.compileUnavailable', [file, wrapped.message]),
-          'AgentScriptCompileUnavailable',
-          [],
-          1,
-          wrapped
-        );
-      });
-    if (compiled.status !== 'success') {
-      await writeFile(file, original, 'utf8');
-      const errors = compiled.errors
-        .map((e) => `${e.errorType}: ${e.description} [Ln ${e.lineStart}, Col ${e.colStart}]`)
-        .join('\n');
-      throw new SfError(messages.getMessage('error.compileFailed', [file, errors]), 'AgentScriptCompileFailed', [], 1);
-    }
     this.log(messages.getMessage('info.bundleUpdated', [file]));
     return { name, file, subagents: updates };
   }
