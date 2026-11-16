@@ -75,6 +75,10 @@ Cannot find subagent %s in the authoring bundle. Subagents in the file: %s
 The updated Agent Script did not compile, so %s is restored to its previous content:
 %s
 
+# error.compileUnavailable
+
+Could not compile the updated Agent Script, so %s is restored to its previous content: %s
+
 # error.noSelection
 
 Specify at least one tool with --tool or --asset-id.

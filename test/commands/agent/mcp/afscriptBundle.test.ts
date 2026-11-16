@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
+
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { expect } from 'chai';
-import { addToSubagent } from '../../../../src/commands/agent/mcp/asset/afscript.js';
+import { TestContext, MockTestOrgData } from '@salesforce/core/testSetup';
+import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
+import { SfProject } from '@salesforce/core';
+import { Agent } from '@salesforce/agents';
+import AgentMcpAssetAfscript, { addToSubagent } from '../../../../src/commands/agent/mcp/asset/afscript.js';
 
 // Same layout as an Agent Builder file: subagent at 0, sections at 4, action keys at 8, reasoning refs at 12.
 const FILE = [
@@ -140,5 +149,99 @@ describe('addToSubagent', () => {
     const r = addToSubagent(crlf, 'agent_router', [action('anew')]);
     expect(r.content.includes('\r\n        anew:\r\n')).to.equal(true);
     expect(r.content.replace(/\r\n/g, '').includes('\n')).to.equal(false);
+  });
+});
+
+describe('agent mcp asset afscript --authoring-bundle', () => {
+  const $$ = new TestContext();
+  const BUNDLE = 'My_Agent';
+  let agentFile: string;
+
+  beforeEach(async () => {
+    stubSfCommandUx($$.SANDBOX);
+    const dir = mkdtempSync(join(tmpdir(), 'afscript-bundle-'));
+    writeFileSync(
+      join(dir, 'sfdx-project.json'),
+      JSON.stringify({ packageDirectories: [{ path: 'force-app', default: true }], sourceApiVersion: '66.0' })
+    );
+    const bundleDir = join(dir, 'force-app', 'main', 'default', 'aiAuthoringBundles', BUNDLE);
+    mkdirSync(bundleDir, { recursive: true });
+    agentFile = join(bundleDir, `${BUNDLE}.agent`);
+    writeFileSync(agentFile, FILE);
+    writeFileSync(join(bundleDir, `${BUNDLE}.bundle-meta.xml`), '<AiAuthoringBundle/>');
+    $$.inProject(true);
+    const project = { getPath: () => dir, getPackageDirectories: () => [{ fullPath: join(dir, 'force-app') }] };
+    $$.SANDBOX.stub(SfProject, 'resolve').resolves(project as unknown as SfProject);
+    const org = new MockTestOrgData();
+    await $$.stubAuths(org);
+    $$.fakeConnectionRequest = (req: any) =>
+      req.method === 'GET'
+        ? Promise.resolve({ assets: [{ id: '1XO2', name: 'McpTool__add', kind: 'MCP_TOOL', active: true }] })
+        : Promise.resolve({
+            actions: [{ toolId: '1XO2', genAiFunctionId: '1791XO2', source: 'aadd', target: 't', ...action('aadd') }],
+          });
+    usernameRef.value = org.username;
+  });
+
+  afterEach(() => {
+    $$.restore();
+  });
+
+  const usernameRef = { value: '' };
+  const run = (): Promise<any> =>
+    AgentMcpAssetAfscript.run([
+      '--target-org',
+      usernameRef.value,
+      '-i',
+      '0XS1',
+      '-t',
+      'add',
+      '--authoring-bundle',
+      BUNDLE,
+      '--subagent',
+      'escalation',
+    ]);
+  const stubCompile = (compile: () => Promise<any>): void => {
+    $$.SANDBOX.stub(Agent, 'init').resolves({ compile } as any);
+  };
+
+  it('writes the blocks and returns what it added when the bundle compiles', async () => {
+    stubCompile(() => Promise.resolve({ status: 'success', errors: [] }));
+    const result = await run();
+    expect(result.bundle.subagents).to.deep.equal([{ name: 'escalation', added: ['aadd'], skipped: [] }]);
+    expect(readFileSync(agentFile, 'utf8')).to.include('        aadd:\n            source: "aadd"');
+  });
+
+  it('restores the file and fails when the bundle does not compile', async () => {
+    stubCompile(() =>
+      Promise.resolve({
+        status: 'failure',
+        errors: [{ errorType: 'SyntaxError', description: 'bad', lineStart: 3, lineEnd: 3, colStart: 1, colEnd: 2 }],
+      })
+    );
+    try {
+      await run();
+      expect.fail('expected the command to fail');
+    } catch (e) {
+      expect((e as Error).name).to.equal('AgentScriptCompileFailed');
+      expect((e as Error).message).to.include('SyntaxError: bad [Ln 3, Col 1]');
+    }
+    expect(readFileSync(agentFile, 'utf8')).to.equal(FILE);
+  });
+
+  it('restores the file and fails when the compile service throws', async () => {
+    stubCompile(() =>
+      Promise.reject(
+        Object.assign(new Error('Unable to access the Salesforce Agent APIs.'), { name: 'AgentApiNotFound' })
+      )
+    );
+    try {
+      await run();
+      expect.fail('expected the command to fail');
+    } catch (e) {
+      expect((e as Error).name).to.equal('AgentScriptCompileUnavailable');
+      expect((e as Error).message).to.include('Unable to access the Salesforce Agent APIs.');
+    }
+    expect(readFileSync(agentFile, 'utf8')).to.equal(FILE);
   });
 });

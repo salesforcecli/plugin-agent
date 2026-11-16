@@ -329,7 +329,20 @@ export default class ApiCatalogMcpServerAssetAfscript extends SfCommand<ApiCatal
     if (content === original) return { name, file, subagents: updates };
 
     await writeFile(file, content, 'utf8');
-    const compiled = await (await Agent.init({ connection, project, aabName: name })).compile();
+    const compiled = await Agent.init({ connection, project, aabName: name })
+      .then((agent) => agent.compile())
+      .catch(async (error: unknown) => {
+        // The compile service itself failed (not a script error); never leave an unchecked edit behind.
+        await writeFile(file, original, 'utf8');
+        const wrapped = SfError.wrap(error);
+        throw new SfError(
+          messages.getMessage('error.compileUnavailable', [file, wrapped.message]),
+          'AgentScriptCompileUnavailable',
+          [],
+          1,
+          wrapped
+        );
+      });
     if (compiled.status !== 'success') {
       await writeFile(file, original, 'utf8');
       const errors = compiled.errors
