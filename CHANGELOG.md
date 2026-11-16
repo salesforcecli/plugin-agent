@@ -1,3 +1,9 @@
+# [2.4.0](https://github.com/salesforcecli/plugin-agent/compare/2.3.0...2.4.0) (2026-11-16)
+
+### Features
+
+- add sf agent mcp asset afscript (W-24729191) ([#519](https://github.com/salesforcecli/plugin-agent/issues/519)) ([8910968](https://github.com/salesforcecli/plugin-agent/commit/8910968102102f997865a69ed04c9a4c8e10f237)), closes [#393](https://github.com/salesforcecli/plugin-agent/issues/393) [#515](https://github.com/salesforcecli/plugin-agent/issues/515) [#4572](https://github.com/salesforcecli/plugin-agent/issues/4572) [forcedotcom/agents#395](https://github.com/forcedotcom/agents/issues/395) [#4572](https://github.com/salesforcecli/plugin-agent/issues/4572)
+
 # [2.3.0](https://github.com/salesforcecli/plugin-agent/compare/2.2.4...2.3.0) (2026-11-10)
 
 ### Features

@@ -76,6 +76,7 @@ sf plugins
 - [`sf agent generate authoring-bundle`](#sf-agent-generate-authoring-bundle)
 - [`sf agent generate template`](#sf-agent-generate-template)
 - [`sf agent generate test-spec`](#sf-agent-generate-test-spec)
+- [`sf agent mcp asset afscript`](#sf-agent-mcp-asset-afscript)
 - [`sf agent mcp asset list`](#sf-agent-mcp-asset-list)
 - [`sf agent mcp asset replace`](#sf-agent-mcp-asset-replace)
 - [`sf agent mcp create`](#sf-agent-mcp-create)
@@ -148,7 +149,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --version 2 --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/activate.ts)_
 
 ## `sf agent adl create`
 
@@ -220,7 +221,7 @@ EXAMPLES
       --source-type retriever --retriever-id 0ppXX0000000001
 ```
 
-_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/create.ts)_
+_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/create.ts)_
 
 ## `sf agent adl delete`
 
@@ -251,7 +252,7 @@ EXAMPLES
     $ sf agent adl delete --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/delete.ts)_
+_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/delete.ts)_
 
 ## `sf agent adl file add`
 
@@ -293,7 +294,7 @@ EXAMPLES
     $ sf agent adl file add -i 1JDSG000007IbWX4A0 --path ./docs/guide.pdf --path ./docs/faq.txt --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/file/add.ts)_
+_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/add.ts)_
 
 ## `sf agent adl file delete`
 
@@ -326,7 +327,7 @@ EXAMPLES
     $ sf agent adl file delete --library-id 1JDSG000007IbWX4A0 --file-id a1B2C3D4E5F6G7H8I9 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/file/delete.ts)_
+_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/delete.ts)_
 
 ## `sf agent adl file list`
 
@@ -366,7 +367,7 @@ EXAMPLES
     $ sf agent adl file list --library-id 1JDSG000007IbWX4A0 --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/file/list.ts)_
+_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/list.ts)_
 
 ## `sf agent adl get`
 
@@ -397,7 +398,7 @@ EXAMPLES
     $ sf agent adl get --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/get.ts)_
+_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/get.ts)_
 
 ## `sf agent adl list`
 
@@ -434,7 +435,7 @@ EXAMPLES
     $ sf agent adl list --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/list.ts)_
+_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/list.ts)_
 
 ## `sf agent adl status`
 
@@ -469,7 +470,7 @@ EXAMPLES
     $ sf agent adl status --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/status.ts)_
+_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/status.ts)_
 
 ## `sf agent adl update`
 
@@ -524,7 +525,7 @@ EXAMPLES
     $ sf agent adl update --library-id 1JDSG000007IbWX4A0 --restrict-to-public-articles --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/update.ts)_
+_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/update.ts)_
 
 ## `sf agent adl upload`
 
@@ -571,7 +572,7 @@ EXAMPLES
     $ sf agent adl upload --library-id 1JDSG000007IbWX4A0 --file ./docs/guide.pdf --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/adl/upload.ts)_
+_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/upload.ts)_
 
 ## `sf agent create`
 
@@ -638,7 +639,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -679,7 +680,7 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/deactivate.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -786,7 +787,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -863,7 +864,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -925,7 +926,7 @@ EXAMPLES
       my-package --source-org my-scratch-org
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -1014,7 +1015,76 @@ FLAG DESCRIPTIONS
     metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/test-spec.ts)_
+
+## `sf agent mcp asset afscript`
+
+Print or add the Agent Script action blocks and reasoning actions for MCP tools of a server.
+
+```
+USAGE
+  $ sf agent mcp asset afscript -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [-t <value>...]
+    [--asset-id <value>...] [--authoring-bundle <value> --subagent <value>...]
+
+FLAGS
+  -i, --mcp-server-id=<value>     (required) The ID of the MCP server that owns the tools.
+  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
+                                  configuration variable is already set.
+  -t, --tool=<value>...           Name of a tool on the server, with or without the `McpTool__` prefix. Repeat the flag
+                                  for more tools.
+      --api-version=<value>       Override the api version used for api requests made by this command
+      --asset-id=<value>...       Asset ID (1XO...) of a tool on the server. Repeat the flag for more tools.
+      --authoring-bundle=<value>  API name of a local authoring bundle to update instead of printing the blocks.
+                                  Requires --subagent.
+      --subagent=<value>...       Name of a subagent (or the start agent) in the authoring bundle to add the tools to.
+                                  Repeat the flag for more subagents. Requires --authoring-bundle.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Print or add the Agent Script action blocks and reasoning actions for MCP tools of a server.
+
+  Prints the same Agent Script blocks that Agentforce Builder writes when you add the tool to an agent: one action block
+  for the subagent actions section and one reasoning action for the reasoning actions section, for each tool. The blocks
+  are indented for a subagent: action blocks at 8 spaces (under `actions:`) and reasoning actions at 12 spaces (under
+  `reasoning:` > `actions:`). Paste them as printed. With --json, the blocks are returned without indentation.
+
+  Select tools by name with --tool (with or without the `McpTool__` prefix) or by asset ID with --asset-id. You must use
+  at least one of the two flags. Each tool must be allowlisted (active) on the MCP server; run "agent mcp asset replace"
+  to allowlist a tool. The output follows the order of the flags: all --tool values first, then all --asset-id values.
+  Duplicates are sent once.
+
+  To add the blocks to a local authoring bundle instead of printing them, use --authoring-bundle with one or more
+  --subagent flags. The command adds each action block under the subagent's `actions:` and each reasoning action under
+  its `reasoning:` > `actions:`, and creates a missing section. It skips an action that the subagent already has, so you
+  can run it again safely. It does not compile the bundle; run "agent validate authoring-bundle" after it. Run the
+  command from a Salesforce DX project.
+
+  The API call also assigns the MCP runtime permissions that Agentforce Builder assigns, so it is not read-only.
+
+EXAMPLES
+  Print the Agent Script for one tool of an MCP server:
+
+    $ sf agent mcp asset afscript --target-org myOrg --mcp-server-id 0XSxx0000000001 --tool hello_world
+
+  Print the Agent Script for two tools:
+
+    $ sf agent mcp asset afscript --target-org myOrg --mcp-server-id 0XSxx0000000001 --tool hello_world --tool add
+
+  Select a tool by its asset ID and output as JSON:
+
+    $ sf agent mcp asset afscript --target-org myOrg --mcp-server-id 0XSxx0000000001 --asset-id 1XOxx0000000001 \
+      --json
+
+  Add two tools to the "order_status" and "returns" subagents of the "My_Agent" authoring bundle:
+
+    $ sf agent mcp asset afscript --target-org myOrg --mcp-server-id 0XSxx0000000001 --tool hello_world --tool add \
+      --authoring-bundle My_Agent --subagent order_status --subagent returns
+```
+
+_See code: [src/commands/agent/mcp/asset/afscript.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/afscript.ts)_
 
 ## `sf agent mcp asset list`
 
@@ -1050,7 +1120,7 @@ EXAMPLES
     $ sf agent mcp asset list --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/asset/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/asset/list.ts)_
+_See code: [src/commands/agent/mcp/asset/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/list.ts)_
 
 ## `sf agent mcp asset replace`
 
@@ -1099,7 +1169,7 @@ EXAMPLES
   cat assets.json | sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets - --target-org myOrg
 ```
 
-_See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/asset/replace.ts)_
+_See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/replace.ts)_
 
 ## `sf agent mcp create`
 
@@ -1147,7 +1217,7 @@ EXAMPLES
   cat secret.txt | sf agent mcp create --name myServer --server-url https://mcp.example.com --auth-type OAUTH --identity-provider myIdp --client-id abc123 --client-secret - --scope "read write" --target-org myOrg
 ```
 
-_See code: [src/commands/agent/mcp/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/create.ts)_
+_See code: [src/commands/agent/mcp/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/create.ts)_
 
 ## `sf agent mcp delete`
 
@@ -1185,7 +1255,7 @@ EXAMPLES
     $ sf agent mcp delete --mcp-server-id 0XSxx0000000001 --target-org myOrg --no-prompt
 ```
 
-_See code: [src/commands/agent/mcp/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/delete.ts)_
+_See code: [src/commands/agent/mcp/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/delete.ts)_
 
 ## `sf agent mcp fetch`
 
@@ -1222,7 +1292,7 @@ EXAMPLES
     $ sf agent mcp fetch --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/fetch.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/fetch.ts)_
+_See code: [src/commands/agent/mcp/fetch.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/fetch.ts)_
 
 ## `sf agent mcp get`
 
@@ -1258,7 +1328,7 @@ EXAMPLES
     $ sf agent mcp get --target-org myOrg --mcp-server-id 0Mx000000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/get.ts)_
+_See code: [src/commands/agent/mcp/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/get.ts)_
 
 ## `sf agent mcp list`
 
@@ -1300,7 +1370,7 @@ EXAMPLES
     $ sf agent mcp list --target-org myOrg --type EXTERNAL --status ACTIVE --json
 ```
 
-_See code: [src/commands/agent/mcp/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/list.ts)_
+_See code: [src/commands/agent/mcp/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/list.ts)_
 
 ## `sf agent mcp update`
 
@@ -1351,7 +1421,7 @@ EXAMPLES
   cat secret.txt | sf agent mcp update --mcp-server-id 0XSxx0000000001 --server-url https://mcp.example.com --auth-type OAUTH --identity-provider MyIdp --client-id abc --client-secret - --scope "read write" --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/mcp/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/mcp/update.ts)_
+_See code: [src/commands/agent/mcp/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/update.ts)_
 
 ## `sf agent preview`
 
@@ -1467,7 +1537,7 @@ FLAG DESCRIPTIONS
     and a bare name for state variables.
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview.ts)_
 
 ## `sf agent preview end`
 
@@ -1539,7 +1609,7 @@ EXAMPLES
     $ sf agent preview end --all --target-org <target_org>
 ```
 
-_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/preview/end.ts)_
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/end.ts)_
 
 ## `sf agent preview send`
 
@@ -1597,7 +1667,7 @@ EXAMPLES
     $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/preview/send.ts)_
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/send.ts)_
 
 ## `sf agent preview sessions`
 
@@ -1630,7 +1700,7 @@ EXAMPLES
     $ sf agent preview sessions
 ```
 
-_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/preview/sessions.ts)_
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/sessions.ts)_
 
 ## `sf agent preview start`
 
@@ -1739,7 +1809,7 @@ FLAG DESCRIPTIONS
     and a bare name for state variables.
 ```
 
-_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/preview/start.ts)_
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -1802,7 +1872,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --concise
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -1874,7 +1944,7 @@ FLAG DESCRIPTIONS
     metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -1909,7 +1979,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -1985,7 +2055,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -2069,7 +2139,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -2153,7 +2223,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/run.ts)_
 
 ## `sf agent test run-eval`
 
@@ -2229,7 +2299,7 @@ EXAMPLES
   $ echo '{"tests":[...]}' | sf agent test run-eval --spec --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/test/run-eval.ts)_
+_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/run-eval.ts)_
 
 ## `sf agent trace delete`
 
@@ -2293,7 +2363,7 @@ EXAMPLES
     $ sf agent trace delete --no-prompt
 ```
 
-_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/trace/delete.ts)_
+_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/delete.ts)_
 
 ## `sf agent trace list`
 
@@ -2363,7 +2433,7 @@ FLAG DESCRIPTIONS
     (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
 ```
 
-_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/trace/list.ts)_
+_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/list.ts)_
 
 ## `sf agent trace read`
 
@@ -2451,7 +2521,7 @@ EXAMPLES
     $ sf agent trace read --session-id <SESSION_ID> --json
 ```
 
-_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/trace/read.ts)_
+_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/read.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -2498,6 +2568,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.3.0/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
