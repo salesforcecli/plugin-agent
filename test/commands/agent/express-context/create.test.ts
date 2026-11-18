@@ -262,6 +262,30 @@ describe('agent express-context create', () => {
       expect(validate('x')).to.be.true;
     });
 
+    it('rejects a blank --action-label before any org call', async () => {
+      const flags = [...agentFlags];
+      flags[flags.indexOf('FAQ Search')] = '   ';
+      const err = await rejection(run('--json', ...flags));
+      expect(err.message).to.include('--action-label');
+      noOrgCalls();
+    });
+
+    it('rejects a bundle the action cannot be wired into before any org call', async () => {
+      writeFileSync(agentFile, SCRIPT.replace('    reasoning:', '\treasoning:'));
+      const err = await rejection(run('--json', ...agentFlags));
+      expect(err.message).to.include('mixes tabs and spaces').and.include('Nothing was created');
+      noOrgCalls();
+    });
+
+    it('rejects duplicate file names before any org call', async () => {
+      const { mkdirSync } = await import('node:fs');
+      mkdirSync(join(tmp, 'sub'));
+      writeFileSync(join(tmp, 'sub', 'doc.pdf'), 'other');
+      const err = await rejection(run('--file', join(tmp, 'sub', 'doc.pdf'), '--json', ...agentFlags));
+      expect(err.message).to.include('doc.pdf');
+      noOrgCalls();
+    });
+
     it('stops when the user declines the plan', async () => {
       confirm.resolves(false);
       expect((await rejection(run())).message).to.include('Nothing was created');
@@ -332,7 +356,7 @@ describe('agent express-context create', () => {
       expect(flow.deleteLibraryRecords.calledOnce).to.be.true;
     });
 
-    it('cleans up when the action already exists by the time indexing finishes', async () => {
+    it('keeps the indexed library when the bundle edit fails after indexing', async () => {
       flow.uploadAndWait.callsFake(async () => {
         writeFileSync(
           agentFile,
@@ -343,8 +367,9 @@ describe('agent express-context create', () => {
         );
         return INDEXED;
       });
-      await rejection(run('--json', ...agentFlags));
-      expect(flow.deleteLibraryRecords.calledOnce).to.be.true;
+      const err = await rejection(run('--json', ...agentFlags));
+      expect(err.message).to.include('was created and its files indexed').and.include('The library was kept');
+      expect(flow.deleteLibraryRecords.called).to.be.false;
     });
   });
 

@@ -71,6 +71,33 @@ const wrapApiError = (error: unknown, name: string): SfError => {
   return new SfError(extractApiError(wrapped) ?? wrapped.message, wrapped.name ?? name, [], 4, wrapped);
 };
 
+/**
+ * Validate the action label/description (flag values skip the prompt's validator) and dry-run the
+ * bundle edit, so a bundle problem (e.g. mixed indentation) fails before any org call rather than
+ * after the library is built and indexed.
+ */
+const preflightBundleEdit = async (
+  agentFile: string,
+  subagent: string,
+  developerName: string,
+  label: string,
+  description: string
+): Promise<void> => {
+  if (!label.trim()) throw messages.createError('error.emptyFlag', ['action-label']);
+  if (!description.trim()) throw messages.createError('error.emptyFlag', ['action-description']);
+  try {
+    addRetrieverAction(await readFile(agentFile, 'utf8'), {
+      subagent,
+      actionName: `${developerName}_RetrieverAction`,
+      label: label.trim(),
+      description: description.trim(),
+      retrieverApiName: 'preflight',
+    });
+  } catch (error) {
+    throw messages.createError('error.bundleEdit', [SfError.wrap(error).message]);
+  }
+};
+
 export default class AgentExpressContextCreate extends SfCommand<AgentExpressContextCreateResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -115,7 +142,7 @@ export default class AgentExpressContextCreate extends SfCommand<AgentExpressCon
       if (missing.length) throw messages.createError('error.missingFlags', [missing.join(', ')]);
     }
 
-    validateLocalFiles(flags.file, (p) => statSync(p).size);
+    validateLocalFiles(flags.file, (p) => statSync(p));
 
     let project: SfProject;
     try {
@@ -172,6 +199,7 @@ export default class AgentExpressContextCreate extends SfCommand<AgentExpressCon
     const description =
       flags['action-description'] ??
       (await inquirerInput({ message: messages.getMessage('prompt.actionDescription'), validate: required, theme }));
+    await preflightBundleEdit(agentFile, subagentName, developerName, label, description);
 
     if (interactive) {
       this.log(
@@ -224,17 +252,27 @@ export default class AgentExpressContextCreate extends SfCommand<AgentExpressCon
       this.log(messages.getMessage('created', [library.masterLabel, library.libraryId]));
 
       let retrieverActionId = library.retrieverAction?.id;
+      let retriever: { apiName: string };
+      let globalAction: { id: string; developerName: string };
+      let flow: Awaited<ReturnType<typeof uploadAndWait>>;
       try {
-        const retriever = library.retriever ?? (await AgentExpressContext.get(connection, library.libraryId)).retriever;
-        if (!retriever?.id || !retriever.apiName) throw messages.createError('error.noRetriever', [library.libraryId]);
+        const detail = library.retriever ?? (await AgentExpressContext.get(connection, library.libraryId)).retriever;
+        if (!detail?.id || !detail.apiName) throw messages.createError('error.noRetriever', [library.libraryId]);
+        retriever = { apiName: detail.apiName };
 
-        const globalAction = await findGlobalRetrieverAction(connection, retriever.id, { isInterrupted });
+        globalAction = await findGlobalRetrieverAction(connection, detail.id, { isInterrupted });
         retrieverActionId = globalAction.id;
 
-        const flow = await uploadAndWait(connection, library.libraryId, flags.file, ui, { isInterrupted });
+        flow = await uploadAndWait(connection, library.libraryId, flags.file, ui, { isInterrupted });
         if (flow.outcome === 'ABORTED') throw messages.createError('error.notIndexed');
+      } catch (error) {
+        await this.cleanUp(connection, library, retrieverActionId, error, interactive);
+        throw error instanceof SfError ? error : wrapApiError(error, 'CreateFailed');
+      }
 
-        // Re-read: the file may have been edited while files were indexing.
+      // The library is built and indexed at this point; a local bundle-edit failure keeps it rather than
+      // throwing that work away. Re-read: the file may have been edited while files were indexing.
+      try {
         const updated = addRetrieverAction(await readFile(agentFile, 'utf8'), {
           subagent: subagentName,
           actionName: globalAction.developerName,
@@ -243,32 +281,35 @@ export default class AgentExpressContextCreate extends SfCommand<AgentExpressCon
           retrieverApiName: retriever.apiName,
         });
         await writeFile(agentFile, updated, 'utf8');
-
-        this.logSuccess(
-          messages.getMessage('success', [globalAction.developerName, subagentName, relative(process.cwd(), agentFile)])
-        );
-        this.log(messages.getMessage('nextSteps', [authoringBundle]));
-
-        return {
-          libraryId: library.libraryId,
-          developerName: library.developerName,
-          masterLabel: library.masterLabel,
-          retriever: retriever.apiName,
-          retrieverAction: globalAction.developerName,
-          outcome: flow.outcome,
-          files: flow.files.map((f) => ({ fileName: f.fileName, status: f.status })),
-          agentAction: {
-            authoringBundle,
-            subagent: subagentName,
-            actionName: globalAction.developerName,
-            label: label.trim(),
-            filePath: agentFile,
-          },
-        };
       } catch (error) {
-        await this.cleanUp(connection, library, retrieverActionId, error, interactive);
-        throw error instanceof SfError ? error : wrapApiError(error, 'CreateFailed');
+        throw messages.createError(
+          'error.bundleEditAfterIndex',
+          [library.masterLabel, library.libraryId, SfError.wrap(error).message],
+          [globalAction.developerName, subagentName, agentFile]
+        );
       }
+
+      this.logSuccess(
+        messages.getMessage('success', [globalAction.developerName, subagentName, relative(process.cwd(), agentFile)])
+      );
+      this.log(messages.getMessage('nextSteps', [authoringBundle]));
+
+      return {
+        libraryId: library.libraryId,
+        developerName: library.developerName,
+        masterLabel: library.masterLabel,
+        retriever: retriever.apiName,
+        retrieverAction: globalAction.developerName,
+        outcome: flow.outcome,
+        files: flow.files.map((f) => ({ fileName: f.fileName, status: f.status })),
+        agentAction: {
+          authoringBundle,
+          subagent: subagentName,
+          actionName: globalAction.developerName,
+          label: label.trim(),
+          filePath: agentFile,
+        },
+      };
     });
   }
 

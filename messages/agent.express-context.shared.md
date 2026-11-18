@@ -61,3 +61,11 @@ Found more than one global retriever action (GenAiFunctionDefinition) for retrie
 # error.fileTooLarge
 
 These files exceed the 100 MB limit: %s
+
+# error.notAFile
+
+These paths aren't regular files: %s
+
+# error.duplicateFileName
+
+More than one file has the name %s. File names must be unique within an upload; rename one of them.

@@ -21,7 +21,12 @@ import { extractApiError } from '../../../adlUtils.js';
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.express-context.delete');
 
-export type AgentExpressContextDeleteResult = { libraryId: string; deleted: boolean };
+export type AgentExpressContextDeleteResult = {
+  libraryId: string;
+  deleted: boolean;
+  /** Developer name of the global retriever action removed with the library, if any. */
+  retrieverActionDeleted?: string;
+};
 
 export default class AgentExpressContextDelete extends SfCommand<AgentExpressContextDeleteResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -56,6 +61,15 @@ export default class AgentExpressContextDelete extends SfCommand<AgentExpressCon
       }
     }
 
+    // Library deletion doesn't cascade to the org-level retriever action (GenAiFunctionDefinition), so look
+    // it up first and remove it after. A failed lookup only means it can't be cleaned up here.
+    let retrieverAction: { id?: string; apiName?: string } | undefined;
+    try {
+      retrieverAction = (await AgentExpressContext.get(connection, libraryId)).retrieverAction;
+    } catch {
+      retrieverAction = undefined;
+    }
+
     try {
       await AgentExpressContext.delete(connection, libraryId);
     } catch (error) {
@@ -63,8 +77,19 @@ export default class AgentExpressContextDelete extends SfCommand<AgentExpressCon
       const cleanMessage = extractApiError(wrapped) ?? wrapped.message;
       throw new SfError(cleanMessage, wrapped.name ?? 'DeleteFailed', [], 4, wrapped);
     }
-
     this.logSuccess(messages.getMessage('success', [libraryId]));
-    return { libraryId, deleted: true };
+
+    let retrieverActionDeleted: string | undefined;
+    if (retrieverAction?.id) {
+      const name = retrieverAction.apiName ?? retrieverAction.id;
+      try {
+        await connection.sobject('GenAiFunctionDefinition').destroy(retrieverAction.id);
+        retrieverActionDeleted = name;
+        this.log(messages.getMessage('retrieverActionDeleted', [name]));
+      } catch (error) {
+        this.warn(messages.getMessage('retrieverActionNotDeleted', [name, SfError.wrap(error).message]));
+      }
+    }
+    return { libraryId, deleted: true, ...(retrieverActionDeleted && { retrieverActionDeleted }) };
   }
 }

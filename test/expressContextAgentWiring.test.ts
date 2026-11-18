@@ -243,6 +243,16 @@ describe('expressContextAgentWiring', () => {
       expect(() => addRetrieverAction(mixed, { ...INPUT, subagent: 'faq' })).to.throw('mixes tabs and spaces');
     });
 
+    it('keeps multi-line labels and descriptions on one quoted line', () => {
+      const out = addRetrieverAction(SCRIPT, {
+        ...INPUT,
+        label: 'FAQ\nSearch',
+        description: 'line one\r\n  line two\tend',
+      });
+      expect(out).to.include('label: "FAQ Search"');
+      expect(out).to.include('description: "line one line two end"');
+    });
+
     it('throws for an unknown subagent', () => {
       expect(() => addRetrieverAction(SCRIPT, { ...INPUT, subagent: 'nope' })).to.throw(
         'Subagent "nope" was not found'
