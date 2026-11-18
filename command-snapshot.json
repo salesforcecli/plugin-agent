@@ -134,6 +134,72 @@
   },
   {
     "alias": [],
+    "command": "agent:express-context:create",
+    "flagAliases": [],
+    "flagChars": ["b", "f", "o", "s"],
+    "flags": [
+      "action-description",
+      "action-label",
+      "api-version",
+      "authoring-bundle",
+      "file",
+      "flags-dir",
+      "json",
+      "subagent",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:delete",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "no-prompt", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:files",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:get",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:status",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "library-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
+    "command": "agent:express-context:upload",
+    "flagAliases": [],
+    "flagChars": ["f", "i", "o"],
+    "flags": ["api-version", "file", "flags-dir", "json", "library-id", "target-org"],
+    "plugin": "@salesforce/plugin-agent"
+  },
+  {
+    "alias": [],
     "command": "agent:generate:agent-spec",
     "flagAliases": [],
     "flagChars": ["o"],

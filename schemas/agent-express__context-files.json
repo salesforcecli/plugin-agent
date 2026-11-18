@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentExpressContextFilesResult",
+  "definitions": {
+    "AgentExpressContextFilesResult": {
+      "$ref": "#/definitions/ExpressContextFileListResponse"
+    },
+    "ExpressContextFileListResponse": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExpressContextFileRef"
+          }
+        },
+        "totalSize": {
+          "type": "number"
+        },
+        "currentPageUrl": {
+          "type": "string"
+        },
+        "nextPageUrl": {
+          "type": "string"
+        }
+      },
+      "required": ["files"],
+      "additionalProperties": false
+    },
+    "ExpressContextFileRef": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        }
+      },
+      "required": ["fileId", "fileName", "filePath", "fileSize"],
+      "additionalProperties": false,
+      "description": "Metadata for a file indexed into an AEC library, from GET /aec-libraries/{id}/files.\n\nThe AEC Connect API returns file METADATA only — there is no presigned download endpoint. `filePath` is the logical SFDrive path (e.g. `$agentforce_express_context$/...`), not a fetchable URL."
+    }
+  }
+}

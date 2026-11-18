@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AgentExpressContextUploadResult",
+  "definitions": {
+    "AgentExpressContextUploadResult": {
+      "type": "object",
+      "properties": {
+        "libraryId": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["INDEXED", "PARTIAL"]
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileName": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": ["fileName"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["libraryId", "outcome", "files"],
+      "additionalProperties": false
+    }
+  }
+}
