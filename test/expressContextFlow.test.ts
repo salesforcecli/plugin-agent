@@ -49,7 +49,7 @@ const uploadedAs = (...names: string[]) => ({
   libraryId: LIB,
   fileNames: names,
   filePaths: names.map(sfPath),
-  status: 'OK',
+  files: names.map((n) => ({ localPath: `./${n}`, fileName: n, filePath: sfPath(n) })),
 });
 
 const FAST = { intervalMs: 0 };
@@ -188,6 +188,23 @@ describe('expressContextFlow', () => {
       expect(onUploaded.callCount).to.equal(2);
       const secondChoices = ui.choose!.secondCall.args[1] as Array<{ value: PartialChoice }>;
       expect(secondChoices.map((c) => c.value)).to.deep.equal(['continue', 'abort']);
+    });
+
+    it('maps SFDrive paths to local files from the SDK pairing, not by position', async () => {
+      const upload = sandbox.stub(AgentExpressContext, 'upload');
+      // The SDK pairs each local file with its SFDrive path; the order differs from the input here.
+      upload.onCall(0).resolves(uploadedAs('b', 'a'));
+      upload.onCall(1).resolves(uploadedAs('b'));
+      sandbox.stub(AgentExpressContext, 'deleteFile').resolves();
+      const status = sandbox.stub(AgentExpressContext, 'status');
+      status.onCall(0).resolves(statusOf(file('a', 'INDEXED'), file('b', 'FAILED')));
+      status.onCall(1).resolves(statusOf(file('a', 'INDEXED'), file('b', 'INDEXED')));
+      ui.choose!.onCall(0).resolves('retry');
+
+      const result = await uploadAndWait(conn, LIB, ['./a', './b'], ui, FAST);
+
+      expect(result.outcome).to.equal('INDEXED');
+      expect(upload.secondCall.args[2]).to.deep.equal(['./b']);
     });
 
     it('retries pending files without re-uploading and reports a timeout', async () => {
