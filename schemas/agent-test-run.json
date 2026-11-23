@@ -1,7 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AgentTestRunResult",
+  "$ref": "#/definitions/AgentTestRunCommandResult",
   "definitions": {
+    "AgentTestRunCommandResult": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/AgentTestRunResult"
+        },
+        {
+          "$ref": "#/definitions/ConversationTestRunResult"
+        }
+      ],
+      "description": "`--api-name` starts (and with `--wait`, polls) a saved test; `--spec` runs a conversation-level spec without saving."
+    },
     "AgentTestRunResult": {
       "anyOf": [
         {
@@ -33,10 +44,7 @@
               }
             }
           },
-          "required": [
-            "runId",
-            "status"
-          ]
+          "required": ["runId", "status"]
         },
         {
           "type": "object",
@@ -67,13 +75,7 @@
               }
             }
           },
-          "required": [
-            "runId",
-            "startTime",
-            "status",
-            "subjectName",
-            "testCases"
-          ]
+          "required": ["runId", "startTime", "status", "subjectName", "testCases"]
         },
         {
           "type": "object",
@@ -93,23 +95,13 @@
               }
             }
           },
-          "required": [
-            "runId",
-            "status",
-            "testCases"
-          ]
+          "required": ["runId", "status", "testCases"]
         }
       ]
     },
     "TestStatus": {
       "type": "string",
-      "enum": [
-        "NEW",
-        "IN_PROGRESS",
-        "COMPLETED",
-        "ERROR",
-        "TERMINATED"
-      ]
+      "enum": ["NEW", "IN_PROGRESS", "COMPLETED", "ERROR", "TERMINATED"]
     },
     "TestCaseResult": {
       "type": "object",
@@ -130,9 +122,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "utterance"
-          ],
+          "required": ["utterance"],
           "additionalProperties": false
         },
         "generatedData": {
@@ -157,13 +147,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "actionsSequence",
-            "invokedActions",
-            "sessionId",
-            "outcome",
-            "topic"
-          ],
+          "required": ["actionsSequence", "invokedActions", "sessionId", "outcome", "topic"],
           "additionalProperties": false
         },
         "testResults": {
@@ -184,22 +168,12 @@
                 "type": "number"
               },
               "result": {
-                "type": [
-                  "null",
-                  "string"
-                ],
-                "enum": [
-                  null,
-                  "PASS",
-                  "FAILURE"
-                ]
+                "type": ["null", "string"],
+                "enum": [null, "PASS", "FAILURE"]
               },
               "metricLabel": {
                 "type": "string",
-                "enum": [
-                  "Accuracy",
-                  "Precision"
-                ]
+                "enum": ["Accuracy", "Precision"]
               },
               "metricExplainability": {
                 "type": "string"
@@ -238,14 +212,7 @@
           "type": "number"
         }
       },
-      "required": [
-        "status",
-        "startTime",
-        "inputs",
-        "generatedData",
-        "testResults",
-        "testNumber"
-      ],
+      "required": ["status", "startTime", "inputs", "generatedData", "testResults", "testNumber"],
       "additionalProperties": false
     },
     "AgentforceStudioTestCaseResult": {
@@ -264,11 +231,7 @@
           }
         }
       },
-      "required": [
-        "subjectResponse",
-        "testNumber",
-        "testScorerResults"
-      ],
+      "required": ["subjectResponse", "testNumber", "testScorerResults"],
       "additionalProperties": false
     },
     "TestScorerResult": {
@@ -281,10 +244,108 @@
           "type": "string"
         }
       },
-      "required": [
-        "scorerName",
-        "scorerResponse"
-      ],
+      "required": ["scorerName", "scorerResponse"],
+      "additionalProperties": false
+    },
+    "ConversationTestRunResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "COMPLETED"
+        },
+        "testScope": {
+          "type": "string",
+          "const": "CONVERSATION_LEVEL"
+        },
+        "runStatus": {
+          "type": "string",
+          "description": "The server's run status: `Completed` or `Failed`."
+        },
+        "errorRepresentation": {
+          "type": "object",
+          "properties": {
+            "errorCode": {
+              "type": "string"
+            },
+            "errorMessage": {
+              "type": "string"
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "not": {}
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "properties": {
+            "totalNumberOfTestCases": {
+              "type": "number"
+            },
+            "taskResolutionPassPercent": {
+              "type": "number"
+            },
+            "acceptanceCriteriaPassPercent": {
+              "type": "number"
+            }
+          },
+          "description": "Omitted until the run is complete."
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConversationTestCaseResult"
+          }
+        }
+      },
+      "required": ["runStatus", "status", "testCases", "testScope"],
+      "description": "`agent test run --spec` result: a conversation-level run without saving a suite."
+    },
+    "ConversationTestCaseResult": {
+      "type": "object",
+      "properties": {
+        "testNumber": {
+          "type": "number",
+          "description": "The 1-based `number` sent in the request."
+        },
+        "testCaseId": {
+          "type": "string",
+          "description": "Saved suites only."
+        },
+        "subjectResponse": {
+          "type": "string",
+          "description": "JSON string: the simulated conversation (turns, topics, actions, completion reason)."
+        },
+        "testScorerResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scorerName": {
+                "type": "string"
+              },
+              "scorerResponse": {
+                "type": "string"
+              }
+            },
+            "required": ["scorerName"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["testNumber"],
       "additionalProperties": false
     }
   }

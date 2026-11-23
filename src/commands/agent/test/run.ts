@@ -15,8 +15,13 @@
  */
 
 import { SfCommand, Flags, toHelpSection } from '@salesforce/sf-plugins-core';
-import { EnvironmentVariable, Messages, SfError } from '@salesforce/core';
-import { AgentTestStartResponse, AgentforceStudioTestStartResponse } from '@salesforce/agents';
+import { EnvironmentVariable, Messages, Org, SfError } from '@salesforce/core';
+import {
+  AgentTestStartResponse,
+  AgentforceStudioTestStartResponse,
+  ConversationTester,
+  cltSpecToEphemeralInput,
+} from '@salesforce/agents';
 import { colorize } from '@oclif/core/ux';
 import { CLIError } from '@oclif/core/errors';
 import {
@@ -34,6 +39,13 @@ import { AgentTestCache } from '../../../agentTestCache.js';
 import { TestStages } from '../../../testStages.js';
 import { handleTestResults } from '../../../handleTestResults.js';
 import { createTestRunner } from '../../../testRunnerFactory.js';
+import {
+  type ConversationTestRunResult,
+  hasExecutionErrors,
+  readConversationSpec,
+  resolveConversationAgent,
+  toDisplayResults,
+} from '../../../conversationTestRun.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-agent', 'agent.test.run');
@@ -60,7 +72,10 @@ const FLAGGABLE_PROMPTS = {
   },
 } satisfies Record<string, FlaggablePrompt>;
 
-export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
+/** `--api-name` starts (and with `--wait`, polls) a saved test; `--spec` runs a conversation-level spec without saving. */
+export type AgentTestRunCommandResult = AgentTestRunResult | ConversationTestRunResult;
+
+export default class AgentTestRun extends SfCommand<AgentTestRunCommandResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -72,8 +87,9 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
   public static readonly errorCodes = toHelpSection('ERROR CODES', {
     'Succeeded (0)': 'Test started successfully (without --wait), or test completed successfully (with --wait).',
-    'Failed (1)': 'Tests encountered execution errors (test cases with ERROR status when using --wait).',
-    'NotFound (2)': 'Test definition not found or invalid test name.',
+    'Failed (1)':
+      'Tests encountered execution errors (test cases with ERROR status when using --wait), or the --spec file is invalid or was rejected.',
+    'NotFound (2)': 'Test definition not found or invalid test name, or the --spec file or its agent not found.',
     'OperationFailed (4)': 'Failed to start or poll test due to API or network errors.',
   });
 
@@ -81,6 +97,15 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     ...makeFlags(FLAGGABLE_PROMPTS),
+    spec: Flags.file({
+      char: 's',
+      exists: true,
+      summary: messages.getMessage('flags.spec.summary'),
+      description: messages.getMessage('flags.spec.description'),
+      // api-name comes from makeFlags(FLAGGABLE_PROMPTS) above, which this rule can't see.
+      // eslint-disable-next-line sf-plugin/flag-cross-references
+      exclusive: ['api-name', 'wait', 'test-runner'],
+    }),
     // we want to pass `undefined` to the API
     // eslint-disable-next-line sf-plugin/flag-min-max-default
     wait: Flags.duration({
@@ -97,9 +122,13 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
 
   private mso: TestStages | undefined;
 
-  public async run(): Promise<AgentTestRunResult> {
+  public async run(): Promise<AgentTestRunCommandResult> {
     const { flags } = await this.parse(AgentTestRun);
     const connection = flags['target-org'].getConnection(flags['api-version']);
+
+    if (flags.spec) {
+      return this.runConversationSpec(flags.spec, flags);
+    }
 
     if (this.jsonEnabled() && !flags['api-name']) {
       throw messages.createError('error.missingRequiredFlags', ['api-name']);
@@ -223,5 +252,52 @@ export default class AgentTestRun extends SfCommand<AgentTestRunResult> {
   protected catch(error: Error | SfError | CLIError): Promise<never> {
     this.mso?.error();
     return super.catch(error);
+  }
+
+  private async runConversationSpec(
+    specPath: string,
+    flags: {
+      'target-org': Org;
+      'api-version'?: string;
+      'result-format': 'json' | 'human' | 'junit' | 'tap';
+      'output-dir'?: string;
+      verbose: boolean;
+    }
+  ): Promise<ConversationTestRunResult> {
+    const spec = await readConversationSpec(specPath);
+    const org = flags['target-org'];
+    const agent = await resolveConversationAgent(org, spec);
+
+    this.spinner.start(messages.getMessage('progress.conversationRun', [spec.name, spec.testCases.length]));
+    let results;
+    try {
+      results = await new ConversationTester(org.getConnection(flags['api-version'])).runEphemeral(
+        cltSpecToEphemeralInput(spec, agent)
+      );
+    } catch (e) {
+      this.spinner.stop('failed');
+      const wrapped = SfError.wrap(e);
+      if (wrapped.name === 'ConversationTestRejectedError') {
+        throw new SfError(wrapped.message, 'ConversationTestRejected', wrapped.actions, 1, wrapped);
+      }
+      throw new SfError(`Failed to run test: ${wrapped.message}`, 'TestRunFailed', [wrapped.message], 4, wrapped);
+    }
+    this.spinner.stop();
+
+    await handleTestResults({
+      id: spec.name,
+      format: flags['result-format'],
+      results: toDisplayResults(spec, results),
+      jsonEnabled: this.jsonEnabled(),
+      outputDir: flags['output-dir'],
+      verbose: flags.verbose,
+    });
+
+    // Same rule as saved runs: execution errors set exit code 1, scorer FAILs don't.
+    if (hasExecutionErrors(results)) {
+      process.exitCode = 1;
+    }
+
+    return { ...results, status: 'COMPLETED', testScope: 'CONVERSATION_LEVEL', runStatus: results.status };
   }
 }
