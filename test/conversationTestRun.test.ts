@@ -184,6 +184,27 @@ describe('conversationTestRun', () => {
       expect(display.testCases[2].testScorerResults).to.deep.equal([]);
       expect((display.testCases[2] as any).inputs[0].value).to.equal(undefined);
     });
+
+    it('flattens scorer outcomes nested under content and keeps unparseable responses as sent', () => {
+      const results: ConversationTestResultsResponse = {
+        status: 'Completed',
+        testCases: [
+          {
+            testNumber: 1,
+            testScorerResults: [
+              {
+                scorerName: 'task_resolution',
+                scorerResponse: '{"content":{"status":"PASS","score":5.0,"reasoning":"Resolved."},"schema":{}}',
+              },
+              { scorerName: 'acceptance_criteria', scorerResponse: 'not json' },
+            ],
+          },
+        ],
+      };
+      const [scorer, unparsed] = toDisplayResults(spec, results).testCases[0].testScorerResults;
+      expect(JSON.parse(scorer.scorerResponse)).to.deep.equal({ status: 'PASS', score: 5, reasoning: 'Resolved.' });
+      expect(unparsed.scorerResponse).to.equal('not json');
+    });
   });
 
   describe('hasExecutionErrors', () => {

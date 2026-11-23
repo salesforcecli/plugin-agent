@@ -123,10 +123,11 @@ export function toDisplayResults(
     testCases: results.testCases.map((tc): AgentforceStudioTestCaseResult & { inputs: unknown } => ({
       testNumber: tc.testNumber,
       subjectResponse: tc.subjectResponse ?? '',
-      testScorerResults: (tc.testScorerResults ?? []).map((s) => ({
-        scorerName: s.scorerName,
-        scorerResponse: s.scorerResponse ?? '',
-      })),
+      // The formatters read `status` / `reasoning` at the top level; Core may nest them under `content`.
+      testScorerResults: (tc.testScorerResults ?? []).map((s) => {
+        const outcome = parseConversationScorerResponse(s.scorerResponse);
+        return { scorerName: s.scorerName, scorerResponse: outcome ? JSON.stringify(outcome) : s.scorerResponse ?? '' };
+      }),
       inputs: [{ name: 'Conversation Goal', value: spec.testCases[tc.testNumber - 1]?.conversationGoal }],
     })),
   };
