@@ -1,3 +1,9 @@
+## [2.4.1](https://github.com/salesforcecli/plugin-agent/compare/2.4.0...2.4.1) (2026-11-25)
+
+### Bug Fixes
+
+- bump @salesforce/agents to 2.5.4 (W-25031373) ([#521](https://github.com/salesforcecli/plugin-agent/issues/521)) ([62eae9d](https://github.com/salesforcecli/plugin-agent/commit/62eae9d5e1cb024146cb3d145db7e2a3eb813de1)), closes [#510](https://github.com/salesforcecli/plugin-agent/issues/510) [#510](https://github.com/salesforcecli/plugin-agent/issues/510) [#510](https://github.com/salesforcecli/plugin-agent/issues/510) [#522](https://github.com/salesforcecli/plugin-agent/issues/522)
+
 # [2.4.0](https://github.com/salesforcecli/plugin-agent/compare/2.3.0...2.4.0) (2026-11-16)
 
 ### Features

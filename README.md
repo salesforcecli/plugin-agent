@@ -72,6 +72,13 @@ sf plugins
 - [`sf agent adl upload`](#sf-agent-adl-upload)
 - [`sf agent create`](#sf-agent-create)
 - [`sf agent deactivate`](#sf-agent-deactivate)
+- [`sf agent express-context create`](#sf-agent-express-context-create)
+- [`sf agent express-context delete`](#sf-agent-express-context-delete)
+- [`sf agent express-context files`](#sf-agent-express-context-files)
+- [`sf agent express-context get`](#sf-agent-express-context-get)
+- [`sf agent express-context list`](#sf-agent-express-context-list)
+- [`sf agent express-context status`](#sf-agent-express-context-status)
+- [`sf agent express-context upload`](#sf-agent-express-context-upload)
 - [`sf agent generate agent-spec`](#sf-agent-generate-agent-spec)
 - [`sf agent generate authoring-bundle`](#sf-agent-generate-authoring-bundle)
 - [`sf agent generate template`](#sf-agent-generate-template)
@@ -149,7 +156,7 @@ EXAMPLES
     $ sf agent activate --api-name Resort_Manager --version 2 --target-org my-org
 ```
 
-_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/activate.ts)_
+_See code: [src/commands/agent/activate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/activate.ts)_
 
 ## `sf agent adl create`
 
@@ -221,7 +228,7 @@ EXAMPLES
       --source-type retriever --retriever-id 0ppXX0000000001
 ```
 
-_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/create.ts)_
+_See code: [src/commands/agent/adl/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/create.ts)_
 
 ## `sf agent adl delete`
 
@@ -252,7 +259,7 @@ EXAMPLES
     $ sf agent adl delete --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/delete.ts)_
+_See code: [src/commands/agent/adl/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/delete.ts)_
 
 ## `sf agent adl file add`
 
@@ -294,7 +301,7 @@ EXAMPLES
     $ sf agent adl file add -i 1JDSG000007IbWX4A0 --path ./docs/guide.pdf --path ./docs/faq.txt --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/add.ts)_
+_See code: [src/commands/agent/adl/file/add.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/file/add.ts)_
 
 ## `sf agent adl file delete`
 
@@ -327,7 +334,7 @@ EXAMPLES
     $ sf agent adl file delete --library-id 1JDSG000007IbWX4A0 --file-id a1B2C3D4E5F6G7H8I9 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/delete.ts)_
+_See code: [src/commands/agent/adl/file/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/file/delete.ts)_
 
 ## `sf agent adl file list`
 
@@ -367,7 +374,7 @@ EXAMPLES
     $ sf agent adl file list --library-id 1JDSG000007IbWX4A0 --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/file/list.ts)_
+_See code: [src/commands/agent/adl/file/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/file/list.ts)_
 
 ## `sf agent adl get`
 
@@ -398,7 +405,7 @@ EXAMPLES
     $ sf agent adl get --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/get.ts)_
+_See code: [src/commands/agent/adl/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/get.ts)_
 
 ## `sf agent adl list`
 
@@ -435,7 +442,7 @@ EXAMPLES
     $ sf agent adl list --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/list.ts)_
+_See code: [src/commands/agent/adl/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/list.ts)_
 
 ## `sf agent adl status`
 
@@ -470,7 +477,7 @@ EXAMPLES
     $ sf agent adl status --library-id 1JDSG000007IbWX4A0 --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/status.ts)_
+_See code: [src/commands/agent/adl/status.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/status.ts)_
 
 ## `sf agent adl update`
 
@@ -525,7 +532,7 @@ EXAMPLES
     $ sf agent adl update --library-id 1JDSG000007IbWX4A0 --restrict-to-public-articles --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/update.ts)_
+_See code: [src/commands/agent/adl/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/update.ts)_
 
 ## `sf agent adl upload`
 
@@ -572,7 +579,7 @@ EXAMPLES
     $ sf agent adl upload --library-id 1JDSG000007IbWX4A0 --file ./docs/guide.pdf --target-org myOrg
 ```
 
-_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/adl/upload.ts)_
+_See code: [src/commands/agent/adl/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/adl/upload.ts)_
 
 ## `sf agent create`
 
@@ -639,7 +646,7 @@ EXAMPLES
     $ sf agent create --name "Resort Manager" --spec specs/resortManagerAgent.yaml --preview
 ```
 
-_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/create.ts)_
+_See code: [src/commands/agent/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/create.ts)_
 
 ## `sf agent deactivate`
 
@@ -680,7 +687,296 @@ EXAMPLES
     $ sf agent deactivate --api-name Resort_Manager --target-org my-org
 ```
 
-_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/deactivate.ts)_
+_See code: [src/commands/agent/deactivate.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/deactivate.ts)_
+
+## `sf agent express-context create`
+
+Create an Agentforce Express Context library from files and add its retriever action to a subagent of a local authoring bundle.
+
+```
+USAGE
+  $ sf agent express-context create -o <value> -f <value>... [--json] [--flags-dir <value>] [--api-version <value>] [-b <value>]
+    [-s <value>] [--action-label <value>] [--action-description <value>]
+
+FLAGS
+  -b, --authoring-bundle=<value>    API name of the local authoring bundle (draft Agent Script agent) to add the
+                                    retriever action to. If omitted, you're prompted to pick one.
+  -f, --file=<value>...             (required) Path to a file to upload into the new library. Repeat the flag to upload
+                                    multiple files (maximum 50, 100 MB each).
+  -o, --target-org=<value>          (required) Username or alias of the target org. Not required if the `target-org`
+                                    configuration variable is already set.
+  -s, --subagent=<value>            Developer name of the subagent that gets the retriever action; the library is named
+                                    after its display name. If omitted, you're prompted to pick one.
+      --action-description=<value>  Description of the retriever action; the planner uses it to decide when to call the
+                                    action. Also used as the library description.
+      --action-label=<value>        Label of the retriever action added to the subagent.
+      --api-version=<value>         Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Create an Agentforce Express Context library from files and add its retriever action to a subagent of a local
+  authoring bundle.
+
+  Creates an Express Context (AEC) library for one subagent of a local authoring bundle (a draft Agent Script agent that
+  hasn't been published), uploads the files you specify, waits for them to be indexed, and then adds a retriever action
+  for the library to the subagent in the bundle's .agent file.
+
+  You're prompted for the authoring bundle, the subagent, and the label and description of the retriever action before
+  anything is created in the org. The library is named after the subagent's display name followed by "Express" (for
+  example, "Acura Vehicles Express"). The platform creates the library's retriever and a global retriever action; the
+  local action added to the subagent uses that global retriever action as its source.
+
+  Indexing status is checked every 2 seconds for up to 10 minutes. If only some files are indexed, or indexing times
+  out, you can continue with the indexed files, retry once, or abort. If any step fails after the library is created,
+  you're asked to confirm deletion of the library and its retriever action so no half-made library is left behind. With
+  --json, there are no prompts: all of --authoring-bundle, --subagent, --action-label, and --action-description are
+  required, and any failure or partial indexing aborts and cleans up.
+
+  The authoring bundle is only edited locally. Validate, preview, or publish it separately.
+
+EXAMPLES
+  Create a library for a subagent, prompting for the authoring bundle, subagent, and action details:
+
+    $ sf agent express-context create --file ./docs/fact-sheet.pdf --file ./docs/owners-manual.pdf --target-org \
+      myOrg
+
+  Do the same without prompts:
+
+    $ sf agent express-context create --file ./docs/fact-sheet.pdf --authoring-bundle My_Agent --subagent \
+      acura_vehicles --action-label "Acura Management Action" --action-description "Answers questions about Acura \
+      models, pricing, and specifications." --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/create.ts)_
+
+## `sf agent express-context delete`
+
+Delete an Agentforce Express Context library.
+
+```
+USAGE
+  $ sf agent express-context delete -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+  [--no-prompt]
+
+FLAGS
+  -i, --library-id=<value>   (required) Express Context library ID (18-char Salesforce ID with prefix 1JD) or developer
+                             name (including the hash suffix).
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --no-prompt            Skip the confirmation prompt.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Delete an Agentforce Express Context library.
+
+  Permanently deletes an Express Context library, its indexed files, and the org-level retriever action
+  (GenAiFunctionDefinition) that was generated for it. This cannot be undone. You are prompted to confirm unless you
+  pass --no-prompt.
+
+EXAMPLES
+  Delete a library (with confirmation prompt):
+
+    $ sf agent express-context delete --library-id 1JDSG000007IbWX4A0 --target-org myOrg
+
+  Delete without prompting (for scripts and CI):
+
+    $ sf agent express-context delete --library-id 1JDSG000007IbWX4A0 --no-prompt --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/delete.ts)_
+
+## `sf agent express-context files`
+
+List the files indexed into an Agentforce Express Context library.
+
+```
+USAGE
+  $ sf agent express-context files -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [--page-size
+    <value>] [--offset <value>]
+
+FLAGS
+  -i, --library-id=<value>   (required) Express Context library ID (18-char Salesforce ID with prefix 1JD) or developer
+                             name (including the hash suffix).
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --offset=<value>       Number of files to skip before returning results (for pagination).
+      --page-size=<value>    [default: 50] Number of files to return per page (1-200, default 50).
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List the files indexed into an Agentforce Express Context library.
+
+  Returns file metadata only — name, ID, size, and indexing status. The Express Context Connect API has no file-download
+  endpoint; raw file bytes are not retrievable through the CLI.
+
+EXAMPLES
+  List files in a library:
+
+    $ sf agent express-context files --library-id 1JDSG000007IbWX4A0 --target-org myOrg
+
+  List the second page of 50 files:
+
+    $ sf agent express-context files --library-id 1JDSG000007IbWX4A0 --offset 50 --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/files.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/files.ts)_
+
+## `sf agent express-context get`
+
+Get details for a single Agentforce Express Context library.
+
+```
+USAGE
+  $ sf agent express-context get -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --library-id=<value>   (required) Express Context library ID (18-char Salesforce ID with prefix 1JD) or developer
+                             name (including the hash suffix).
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Get details for a single Agentforce Express Context library.
+
+  Returns the full metadata for one Express Context library, including its retriever and retriever-action wiring.
+
+EXAMPLES
+  Get a library by ID:
+
+    $ sf agent express-context get --library-id 1JDSG000007IbWX4A0 --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/get.ts)_
+
+## `sf agent express-context list`
+
+List the Agentforce Express Context libraries in an org.
+
+```
+USAGE
+  $ sf agent express-context list -o <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List the Agentforce Express Context libraries in an org.
+
+  Agentforce Express Context (AEC) libraries are lightweight, realtime retrieval libraries that bypass the Data Cloud
+  pipeline used by Agentforce Data Libraries. This command lists every AEC library in the target org with its ID,
+  developer name, and indexing status.
+
+EXAMPLES
+  List all Express Context libraries in your default org:
+
+    $ sf agent express-context list --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/list.ts)_
+
+## `sf agent express-context status`
+
+Show the indexing status of an Agentforce Express Context library.
+
+```
+USAGE
+  $ sf agent express-context status -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --library-id=<value>   (required) Express Context library ID (18-char Salesforce ID with prefix 1JD) or developer
+                             name (including the hash suffix).
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Show the indexing status of an Agentforce Express Context library.
+
+  Returns richer indexing detail than the file list — the overall status, the retriever and retriever-action wiring,
+  per-run indexed/failed file counts, and the last indexed timestamp.
+
+EXAMPLES
+  Check indexing status for a library:
+
+    $ sf agent express-context status --library-id 1JDSG000007IbWX4A0 --target-org myOrg
+```
+
+_See code: [src/commands/agent/express-context/status.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/status.ts)_
+
+## `sf agent express-context upload`
+
+Upload one or more files to an existing Agentforce Express Context library and wait for them to be indexed.
+
+```
+USAGE
+  $ sf agent express-context upload -o <value> -i <value> -f <value>... [--json] [--flags-dir <value>] [--api-version
+  <value>]
+
+FLAGS
+  -f, --file=<value>...      (required) Path to a file to upload. Repeat the flag to upload multiple files.
+  -i, --library-id=<value>   (required) Express Context library ID (18-char Salesforce ID with prefix 1JD) or developer
+                             name (including the hash suffix).
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Upload one or more files to an existing Agentforce Express Context library and wait for them to be indexed.
+
+  Requests a pre-signed upload URL for each file, uploads the bytes, and registers the files so the Express Context
+  service indexes them. Then checks indexing status every 2 seconds for up to 10 minutes.
+
+  If only some files are indexed, or indexing times out, you can continue with the indexed files, retry once, or abort.
+  If the upload fails or you abort, you're asked to confirm deletion of the files this command uploaded; the library
+  itself is never deleted. With --json, there are no prompts and any failure or partial indexing aborts and deletes this
+  run's files.
+
+  To create a new library and add it to an authoring bundle, use "sf agent express-context create" instead.
+
+  Maximum 50 files per run and 100 MB per file.
+
+EXAMPLES
+  Upload a single file:
+
+    $ sf agent express-context upload --library-id 1JDSG000007IbWX4A0 --file ./docs/faq.pdf --target-org myOrg
+
+  Upload multiple files:
+
+    $ sf agent express-context upload --library-id 1JDSG000007IbWX4A0 --file ./a.pdf --file ./b.pdf --target-org \
+      myOrg
+```
+
+_See code: [src/commands/agent/express-context/upload.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/express-context/upload.ts)_
 
 ## `sf agent generate agent-spec`
 
@@ -787,7 +1083,7 @@ EXAMPLES
     $ sf agent generate agent-spec --tone formal --agent-user resortmanager@myorg.com
 ```
 
-_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/agent-spec.ts)_
+_See code: [src/commands/agent/generate/agent-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/generate/agent-spec.ts)_
 
 ## `sf agent generate authoring-bundle`
 
@@ -864,7 +1160,7 @@ EXAMPLES
       other-package-dir/main/default --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/authoring-bundle.ts)_
+_See code: [src/commands/agent/generate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/generate/authoring-bundle.ts)_
 
 ## `sf agent generate template`
 
@@ -926,7 +1222,7 @@ EXAMPLES
       my-package --source-org my-scratch-org
 ```
 
-_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/template.ts)_
+_See code: [src/commands/agent/generate/template.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/generate/template.ts)_
 
 ## `sf agent generate test-spec`
 
@@ -1015,7 +1311,7 @@ FLAG DESCRIPTIONS
     metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/generate/test-spec.ts)_
+_See code: [src/commands/agent/generate/test-spec.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/generate/test-spec.ts)_
 
 ## `sf agent mcp asset afscript`
 
@@ -1084,7 +1380,7 @@ EXAMPLES
       --authoring-bundle My_Agent --subagent order_status --subagent returns
 ```
 
-_See code: [src/commands/agent/mcp/asset/afscript.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/afscript.ts)_
+_See code: [src/commands/agent/mcp/asset/afscript.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/asset/afscript.ts)_
 
 ## `sf agent mcp asset list`
 
@@ -1120,7 +1416,7 @@ EXAMPLES
     $ sf agent mcp asset list --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/asset/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/list.ts)_
+_See code: [src/commands/agent/mcp/asset/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/asset/list.ts)_
 
 ## `sf agent mcp asset replace`
 
@@ -1169,7 +1465,7 @@ EXAMPLES
   cat assets.json | sf agent mcp asset replace --mcp-server-id 0XSxx0000000001 --assets - --target-org myOrg
 ```
 
-_See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/asset/replace.ts)_
+_See code: [src/commands/agent/mcp/asset/replace.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/asset/replace.ts)_
 
 ## `sf agent mcp create`
 
@@ -1217,7 +1513,7 @@ EXAMPLES
   cat secret.txt | sf agent mcp create --name myServer --server-url https://mcp.example.com --auth-type OAUTH --identity-provider myIdp --client-id abc123 --client-secret - --scope "read write" --target-org myOrg
 ```
 
-_See code: [src/commands/agent/mcp/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/create.ts)_
+_See code: [src/commands/agent/mcp/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/create.ts)_
 
 ## `sf agent mcp delete`
 
@@ -1255,7 +1551,7 @@ EXAMPLES
     $ sf agent mcp delete --mcp-server-id 0XSxx0000000001 --target-org myOrg --no-prompt
 ```
 
-_See code: [src/commands/agent/mcp/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/delete.ts)_
+_See code: [src/commands/agent/mcp/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/delete.ts)_
 
 ## `sf agent mcp fetch`
 
@@ -1292,7 +1588,7 @@ EXAMPLES
     $ sf agent mcp fetch --target-org myOrg --mcp-server-id 0XSxx0000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/fetch.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/fetch.ts)_
+_See code: [src/commands/agent/mcp/fetch.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/fetch.ts)_
 
 ## `sf agent mcp get`
 
@@ -1328,7 +1624,7 @@ EXAMPLES
     $ sf agent mcp get --target-org myOrg --mcp-server-id 0Mx000000000001 --json
 ```
 
-_See code: [src/commands/agent/mcp/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/get.ts)_
+_See code: [src/commands/agent/mcp/get.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/get.ts)_
 
 ## `sf agent mcp list`
 
@@ -1370,7 +1666,7 @@ EXAMPLES
     $ sf agent mcp list --target-org myOrg --type EXTERNAL --status ACTIVE --json
 ```
 
-_See code: [src/commands/agent/mcp/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/list.ts)_
+_See code: [src/commands/agent/mcp/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/list.ts)_
 
 ## `sf agent mcp update`
 
@@ -1421,7 +1717,7 @@ EXAMPLES
   cat secret.txt | sf agent mcp update --mcp-server-id 0XSxx0000000001 --server-url https://mcp.example.com --auth-type OAUTH --identity-provider MyIdp --client-id abc --client-secret - --scope "read write" --target-org myOrg --json
 ```
 
-_See code: [src/commands/agent/mcp/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/mcp/update.ts)_
+_See code: [src/commands/agent/mcp/update.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/mcp/update.ts)_
 
 ## `sf agent preview`
 
@@ -1537,7 +1833,7 @@ FLAG DESCRIPTIONS
     and a bare name for state variables.
 ```
 
-_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview.ts)_
+_See code: [src/commands/agent/preview.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/preview.ts)_
 
 ## `sf agent preview end`
 
@@ -1609,7 +1905,7 @@ EXAMPLES
     $ sf agent preview end --all --target-org <target_org>
 ```
 
-_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/end.ts)_
+_See code: [src/commands/agent/preview/end.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/preview/end.ts)_
 
 ## `sf agent preview send`
 
@@ -1667,7 +1963,7 @@ EXAMPLES
     $ sf agent preview send --utterance "what can you help me with?" --authoring-bundle My_Local_Agent
 ```
 
-_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/send.ts)_
+_See code: [src/commands/agent/preview/send.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/preview/send.ts)_
 
 ## `sf agent preview sessions`
 
@@ -1700,7 +1996,7 @@ EXAMPLES
     $ sf agent preview sessions
 ```
 
-_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/sessions.ts)_
+_See code: [src/commands/agent/preview/sessions.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/preview/sessions.ts)_
 
 ## `sf agent preview start`
 
@@ -1809,7 +2105,7 @@ FLAG DESCRIPTIONS
     and a bare name for state variables.
 ```
 
-_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/preview/start.ts)_
+_See code: [src/commands/agent/preview/start.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/preview/start.ts)_
 
 ## `sf agent publish authoring-bundle`
 
@@ -1872,7 +2168,7 @@ EXAMPLES
     $ sf agent publish authoring-bundle --api-name MyAuthoringbundle --concise
 ```
 
-_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/publish/authoring-bundle.ts)_
+_See code: [src/commands/agent/publish/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/publish/authoring-bundle.ts)_
 
 ## `sf agent test create`
 
@@ -1944,7 +2240,7 @@ FLAG DESCRIPTIONS
     metadata. 'testing-center' uses AiEvaluationDefinition metadata.
 ```
 
-_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/create.ts)_
+_See code: [src/commands/agent/test/create.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/create.ts)_
 
 ## `sf agent test list`
 
@@ -1979,7 +2275,7 @@ EXAMPLES
     $ sf agent test list --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/list.ts)_
+_See code: [src/commands/agent/test/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/list.ts)_
 
 ## `sf agent test results`
 
@@ -2055,7 +2351,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/results.ts)_
+_See code: [src/commands/agent/test/results.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/results.ts)_
 
 ## `sf agent test resume`
 
@@ -2139,7 +2435,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/resume.ts)_
+_See code: [src/commands/agent/test/resume.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/resume.ts)_
 
 ## `sf agent test run`
 
@@ -2223,7 +2519,7 @@ FLAG DESCRIPTIONS
     expression when using custom evaluations.
 ```
 
-_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/run.ts)_
+_See code: [src/commands/agent/test/run.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/run.ts)_
 
 ## `sf agent test run-eval`
 
@@ -2299,7 +2595,7 @@ EXAMPLES
   $ echo '{"tests":[...]}' | sf agent test run-eval --spec --target-org my-org
 ```
 
-_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/test/run-eval.ts)_
+_See code: [src/commands/agent/test/run-eval.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/test/run-eval.ts)_
 
 ## `sf agent trace delete`
 
@@ -2363,7 +2659,7 @@ EXAMPLES
     $ sf agent trace delete --no-prompt
 ```
 
-_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/delete.ts)_
+_See code: [src/commands/agent/trace/delete.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/trace/delete.ts)_
 
 ## `sf agent trace list`
 
@@ -2433,7 +2729,7 @@ FLAG DESCRIPTIONS
     (2026-04-20T14:00:00.000Z). The "Recorded At" values shown in the table output are valid inputs.
 ```
 
-_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/list.ts)_
+_See code: [src/commands/agent/trace/list.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/trace/list.ts)_
 
 ## `sf agent trace read`
 
@@ -2521,7 +2817,7 @@ EXAMPLES
     $ sf agent trace read --session-id <SESSION_ID> --json
 ```
 
-_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/trace/read.ts)_
+_See code: [src/commands/agent/trace/read.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/trace/read.ts)_
 
 ## `sf agent validate authoring-bundle`
 
@@ -2568,6 +2864,6 @@ EXAMPLES
     $ sf agent validate authoring-bundle --api-name MyAuthoringBundle --target-org my-dev-org
 ```
 
-_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.0/src/commands/agent/validate/authoring-bundle.ts)_
+_See code: [src/commands/agent/validate/authoring-bundle.ts](https://github.com/salesforcecli/plugin-agent/blob/2.4.1/src/commands/agent/validate/authoring-bundle.ts)_
 
 <!-- commandsstop -->
