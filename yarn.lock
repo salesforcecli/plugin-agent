@@ -1431,10 +1431,10 @@
     "@pnpm/network.ca-file" "^1.0.1"
     config-chain "^1.1.11"
 
-"@salesforce/agents@^2.5.4":
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-2.5.4.tgz#a9e41880cdefa0821e58fb929afe1f4ae56f3ba7"
-  integrity sha512-zwSmTEXDc6prxvImJ1aycXCnyrJgxuLgp23/hyELzqLI3eyTMblyZNc0+kl8ZaChBYv5xdK47afqboFbmMulFg==
+"@salesforce/agents@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/agents/-/agents-2.6.0.tgz#52c7cede55a3d229bfe50b1a1d5b8cfc22f1a51d"
+  integrity sha512-OXICQWWefTf9ZpzXiY0xvJrQrz6bNdPdZ1yp0W1G1DyPTok8KAdFX00K0bu6V8RMZKZNlGZgpzvWAcU0LUx7Fw==
   dependencies:
     "@salesforce/core" "^9.0.0"
     "@salesforce/kit" "^4.0.0"

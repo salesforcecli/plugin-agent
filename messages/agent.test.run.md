@@ -26,7 +26,7 @@ Path to a conversation-level test spec (YAML) to run without saving it to the or
 
 # flags.spec.description
 
-The spec must set `testScope: CONVERSATION_LEVEL`, and name the agent with `subjectName` (a published agent's API name, plus an optional `subjectVersion` such as v3; the latest version is used if omitted) or `project` (a draft agent's projectId and projectVersionId). Each test case needs a `conversationGoal`. Supported scorers when running without saving: task_resolution (the default), acceptance_criteria, topic_sequence_match and action_sequence_match. A run accepts up to 10 test cases (more if your org has a higher limit) and `maxTurns` from 1 to 30.
+The spec must set `testScope: CONVERSATION_LEVEL`, and name the agent with `subjectName` (a published agent's API name, plus an optional `subjectVersion` such as v3; the latest version is used if omitted) or `project` (a draft agent's projectId and projectVersionId). Each test case needs a `conversationGoal`. Supported scorers when running without saving: task_resolution (the default), acceptance_criteria, topic_sequence_match and action_sequence_match. A run accepts up to 10 test cases (more if your org has a higher limit) and `maxTurns` from 1 to 30. The command checks the spec's structure before calling the org; a scorer, persona or limit it doesn't recognize produces a warning, and the org makes the final check.
 
 # flags.wait.summary
 

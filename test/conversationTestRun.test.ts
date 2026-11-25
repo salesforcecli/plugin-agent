@@ -22,6 +22,7 @@ import { join } from 'node:path';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import esmock from 'esmock';
+import { Lifecycle } from '@salesforce/core';
 import type { CltTestSpec, ConversationTestResultsResponse } from '@salesforce/agents';
 import { hasExecutionErrors, readConversationSpec, toDisplayResults } from '../src/conversationTestRun.js';
 
@@ -93,10 +94,22 @@ describe('conversationTestRun', () => {
     });
 
     it('throws InvalidSpec with the validation message for a spec the ephemeral run rejects', async () => {
-      const err = await expectError(readConversationSpec(writeSpec(CLT_YAML.replace('maxTurns: 5', 'maxTurns: 50'))));
+      const err = await expectError(readConversationSpec(writeSpec(CLT_YAML.replace('maxTurns: 5', 'maxTurns: 0'))));
       expect(err.name).to.equal('InvalidSpecError');
       expect(err.message).to.include('maxTurns');
-      expect(err.message).to.include('Saved suites allow up to 100');
+      expect(err.message).to.include('whole number of at least 1');
+    });
+
+    it('warns, without throwing, for a maxTurns over the limit for a run without saving', async () => {
+      const emitWarning = sinon.stub(Lifecycle.getInstance(), 'emitWarning').resolves();
+      try {
+        const result = await readConversationSpec(writeSpec(CLT_YAML.replace('maxTurns: 5', 'maxTurns: 50')));
+        expect(result.maxTurns).to.equal(50);
+        expect(emitWarning.calledOnce).to.be.true;
+        expect(emitWarning.firstCall.args[0]).to.include('maxTurns').and.include('save the suite');
+      } finally {
+        emitWarning.restore();
+      }
     });
   });
 
