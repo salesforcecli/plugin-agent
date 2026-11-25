@@ -172,7 +172,14 @@ describe('agent express-context read/delete commands', () => {
       destroy.rejects(new Error('in use'));
       const result = await AgentExpressContextDelete.run(['--target-org', testOrg.username, '-i', LIB, '--no-prompt']);
       expect(result).to.deep.equal({ libraryId: LIB, deleted: true });
-      expect(ux.warn.args.flat().join('\n')).to.include('FAQ_RetrieverAction').and.include('in use');
+      expect(
+        ux.warn.args
+          .flat()
+          .map((w) => (typeof w === 'string' ? w : w.message))
+          .join('\n')
+      )
+        .to.include('FAQ_RetrieverAction')
+        .and.include('in use');
     });
 
     it('still deletes the library when the lookup fails', async () => {
