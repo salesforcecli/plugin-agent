@@ -74,3 +74,11 @@ jobs:
     with:
       os: ${{ matrix.os }}
       command: ${{ matrix.command }}
+  # One NUT check for branch protection and the merge queue to require: `nut-tests / passed`.
+  # Fork PRs can't run NUTs, so there it passes without them; the merge queue runs them before merge.
+  nut-tests:
+    needs: nuts
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork) }}
+    uses: ./.github/workflows/requireSuccess.yml
+    with:
+      results: ${{ github.event_name == 'pull_request' && 'success' || needs.nuts.result }}
