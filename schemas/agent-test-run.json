@@ -320,10 +320,6 @@
           "type": "number",
           "description": "The 1-based `number` sent in the request."
         },
-        "testCaseId": {
-          "type": "string",
-          "description": "Saved suites only."
-        },
         "subjectResponse": {
           "type": "string",
           "description": "JSON string: the simulated conversation (turns, topics, actions, completion reason)."
