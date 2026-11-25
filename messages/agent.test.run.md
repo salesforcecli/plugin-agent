@@ -10,6 +10,8 @@ By default, this command starts the agent test in your org, but it doesn't wait 
 
 By default, this command outputs test results in human-readable tables for each test case, if the test completes in time. The tables show whether the test case passed, the expected and actual values, the test score, how long the test took, and more. Use the --result-format to display the test results in JSON or Junit format. Use the --output-dir flag to write the results to a file rather than to the terminal.
 
+To run a conversation-level test without saving it to your org, use the --spec flag instead of --api-name, and specify a YAML test spec that has `testScope: CONVERSATION_LEVEL`. A simulated user holds a multi-turn conversation with the agent for each test case's `conversationGoal`, and the scorers in the spec grade it. The command waits for the run to finish and displays the results; nothing is saved to the org. The --wait and --test-runner flags don't apply to --spec.
+
 # flags.api-name.summary
 
 API name of the agent test to run; corresponds to the name of the AiEvaluationDefinition metadata component that implements the agent test.
@@ -17,6 +19,14 @@ API name of the agent test to run; corresponds to the name of the AiEvaluationDe
 # flags.api-name.prompt
 
 API name of the agent test to run
+
+# flags.spec.summary
+
+Path to a conversation-level test spec (YAML) to run without saving it to the org.
+
+# flags.spec.description
+
+The spec must set `testScope: CONVERSATION_LEVEL`, and name the agent with `subjectName` (a published agent's API name, plus an optional `subjectVersion` such as v3; the latest version is used if omitted) or `project` (a draft agent's projectId and projectVersionId). Each test case needs a `conversationGoal`. Supported scorers when running without saving: task_resolution (the default), acceptance_criteria, topic_sequence_match and action_sequence_match. A run accepts up to 10 test cases (more if your org has a higher limit) and `maxTurns` from 1 to 30. The command checks the spec's structure before calling the org; a scorer, persona or limit it doesn't recognize produces a warning, and the org makes the final check.
 
 # flags.wait.summary
 
@@ -35,6 +45,39 @@ Number of minutes to wait for the command to complete and display results to the
 - Start an agent test and write the JSON-formatted results into a directory called "test-results":
 
   <%= config.bin %> <%= command.id %> --api-name Resort_Manager_Test --wait 10 --output-dir ./test-results --result-format json
+
+- Run the conversation-level test spec in the file specs/order-status-clt.yaml without saving it, using the org with alias "my-org":
+
+  <%= config.bin %> <%= command.id %> --spec specs/order-status-clt.yaml --target-org my-org
+
+- Run a conversation-level test spec and write the JUnit-formatted results into a directory called "test-results":
+
+  <%= config.bin %> <%= command.id %> --spec specs/order-status-clt.yaml --output-dir ./test-results --result-format junit
+
+# progress.conversationRun
+
+Running conversation-level test "%s" (%s test cases) without saving
+
+# error.specFileNotFound
+
+Spec file not found: %s
+
+# error.specNotConversationLevel
+
+The spec %s isn't a conversation-level test spec.
+
+# error.specNotConversationLevel.actions
+
+- Add `testScope: CONVERSATION_LEVEL` to the spec to run it with --spec.
+- To run a saved turn-level test, deploy it and use --api-name instead.
+
+# error.invalidSpec
+
+The spec %s isn't valid: %s
+
+# error.agentVersionNotFound
+
+Version '%s' of agent '%s' not found. Set `subjectVersion` to a BotVersion API name such as v1, or remove it to use the latest version.
 
 # error.missingRequiredFlags
 

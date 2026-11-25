@@ -540,7 +540,7 @@
     "alias": [],
     "command": "agent:test:run",
     "flagAliases": [],
-    "flagChars": ["d", "n", "o", "w"],
+    "flagChars": ["d", "n", "o", "s", "w"],
     "flags": [
       "api-name",
       "api-version",
@@ -548,6 +548,7 @@
       "json",
       "output-dir",
       "result-format",
+      "spec",
       "target-org",
       "test-runner",
       "verbose",
